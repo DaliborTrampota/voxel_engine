@@ -1,12 +1,15 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <iostream>
 #include <fstream>
 
 #include "ShaderPipeline.h"
 #include "Shader.h"
+
 
 
 
@@ -82,6 +85,9 @@ int main() {
 
     // uncomment this call to draw in wireframe polygons.
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    float time = 0.0;// glfwGetTime();
+
+    
 
     while (!glfwWindowShouldClose(window))
     {
@@ -92,7 +98,9 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT);
 
 		pipeline.use();
+        pipeline.setFloat("time", time);
         glDrawArrays(GL_TRIANGLES, 0, 3);
+        time += 0.001;
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -116,4 +124,7 @@ void processInput(GLFWwindow* window)
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
+
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
+
 }
