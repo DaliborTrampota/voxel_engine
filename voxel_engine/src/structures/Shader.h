@@ -9,6 +9,8 @@ public:
 
 	Shader(const char* path, GLenum shaderType);
 	Shader() = default;
-
+	~Shader() {
+		glDeleteShader(ID);
+	}
 };
 

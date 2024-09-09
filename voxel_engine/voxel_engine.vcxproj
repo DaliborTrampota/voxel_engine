@@ -71,7 +71,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>D:\GitHub\CPP\Include;$(IncludePath)</IncludePath>
+    <IncludePath>D:\GitHub\CPP\Include;.\libs;.\src;$(IncludePath)</IncludePath>
     <LibraryPath>D:\GitHub\CPP\Libs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -108,6 +108,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -135,20 +136,31 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="glad.c" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="Shader.cpp" />
-    <ClCompile Include="ShaderPipeline.cpp" />
-    <ClCompile Include="stb_image.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="shaders\PixelShader.glsl" />
     <None Include="shaders\VertexShader.glsl" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="libs\glad.c" />
+    <ClCompile Include="libs\stb_image.cpp" />
+    <ClCompile Include="src\Camera.cpp" />
+    <ClCompile Include="src\Game.cpp" />
+    <ClCompile Include="src\level\Chunk.cpp" />
+    <ClCompile Include="src\level\TerrainGenerator.cpp" />
+    <ClCompile Include="src\level\World.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\structures\Shader.cpp" />
+    <ClCompile Include="src\structures\ShaderPipeline.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="libs\PerlinNoise.h" />
     <ClInclude Include="libs\stb_image.h" />
-    <ClInclude Include="Shader.h" />
-    <ClInclude Include="ShaderPipeline.h" />
+    <ClInclude Include="src\Camera.h" />
+    <ClInclude Include="src\Game.h" />
+    <ClInclude Include="src\level\Chunk.h" />
+    <ClInclude Include="src\level\TerrainGenerator.h" />
+    <ClInclude Include="src\level\World.h" />
+    <ClInclude Include="src\structures\Shader.h" />
+    <ClInclude Include="src\structures\ShaderPipeline.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
