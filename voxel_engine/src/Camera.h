@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <glm/glm.hpp>
 
 enum class ProjectionType
@@ -15,19 +14,21 @@ class Camera
 {
 
 public:
-	Camera() : m_type(ProjectionType::Perspective) {};
 	Camera(ProjectionType type);
+	Camera() : Camera(ProjectionType::Perspective) {};
 
 	void move(int key, float dt);
 	void rotate(float dx, float dy, bool constrainPitch = true);
 	void resize(int width, int height);
+
+	void mouseLock(void* window, bool state);
 
 	glm::mat4 getView() const;
 	glm::mat4 getProjection() const { return m_projection; };
 
 private:
 
-	glm::vec3 m_worldUp{ .0f, 1.0f, .0f };
+	glm::vec3 m_worldUp;
 
 	float m_yaw, m_pitch;
 	glm::vec3 m_position;

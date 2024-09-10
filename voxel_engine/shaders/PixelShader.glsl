@@ -9,6 +9,6 @@ uniform float time;
 
 void main()
 {
-    FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    FragColor = vec4(col, 1.0);
     //FragColor.g = mod(time, 1);
 }

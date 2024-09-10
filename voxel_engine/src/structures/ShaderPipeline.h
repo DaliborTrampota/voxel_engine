@@ -1,6 +1,5 @@
 #pragma once
 
-#include <glad/glad.h>
 #include <glm/glm.hpp>
 
 #include <string>
@@ -9,6 +8,7 @@
 
 
 #include "Shader.h"
+#include "Camera.h"
 
 
 class ShaderPipeline
@@ -24,7 +24,8 @@ public:
 	Shader* getShader(GLenum type) { return &shaders[type]; }
 	bool link();
 
-	void use() { glUseProgram(ID); }
+	void use();
+	void setCamera(Camera* camera);
 
 	void registerAttribute(uint32_t loc, uint32_t size, GLenum type, uint32_t stride, uint32_t offset = 0);
 
@@ -34,5 +35,8 @@ public:
 	void setMat4(const std::string& name, const glm::mat4 &value) const;
 
 	static GLsizei sizeOfType(GLenum type);
+
+private:
+	Camera* m_activeCamera;
 };
 

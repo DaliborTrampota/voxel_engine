@@ -1,10 +1,11 @@
 #include "Camera.h"
-#include <iostream>
+
 #include <GLFW/glfw3.h>
 #include <glm/gtc/matrix_transform.hpp>
-
+#include <iostream>
 Camera::Camera(ProjectionType type) : m_type(type)
 {
+	m_worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
 	m_position = glm::vec3(0.0f, 0.0f, 0.0f);
 	m_front = glm::vec3(0.0f, 0.0f, -1.0f);
 
@@ -35,7 +36,6 @@ void Camera::move(int key, float dt)
 		m_position += m_right * m_speed * dt;
 		break;
 	}
-	std::cout << "moved" << std::endl;
 }
 
 void Camera::rotate(float dx, float dy, bool constrainPitch)
@@ -51,13 +51,18 @@ void Camera::rotate(float dx, float dy, bool constrainPitch)
 		if (m_pitch < -89.0f)
 			m_pitch = -89.0f;
 	}
-	std::cout << "rotated " << m_pitch << std::endl;
+
 	updateVectors();
 }
 
 void Camera::resize(int width, int height)
 {
-	//m_projection = glm::perspective(glm::radians(45.0f), float(width) / float(height), 0.1f, 10000.0f);
+	m_projection = glm::perspective(glm::radians(45.0f), float(width) / float(height), 0.1f, 10000.0f);
+}
+
+void Camera::mouseLock(void* window, bool state)
+{
+	glfwSetInputMode((GLFWwindow*)window, GLFW_CURSOR, state ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
 }
 
 glm::mat4 Camera::getView() const

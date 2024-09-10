@@ -5,7 +5,8 @@
 #include <glm/gtc/type_ptr.hpp>
 
 
-ShaderPipeline::ShaderPipeline(std::string name)
+
+ShaderPipeline::ShaderPipeline(std::string name) : m_activeCamera(nullptr)
 {
     ID = glCreateProgram();
 	this->name = name;
@@ -36,6 +37,17 @@ bool ShaderPipeline::link()
         std::cout << "ERROR::SHADER::PROGRAM\n" << infoLog << std::endl;
     }
     return success;
+}
+
+void ShaderPipeline::use()
+{
+	glUseProgram(ID);
+}
+
+void ShaderPipeline::setCamera(Camera* camera)
+{
+	m_activeCamera = camera;
+	setMat4("projection", camera->getProjection());
 }
 
 void ShaderPipeline::registerAttribute(uint32_t loc, uint32_t size, GLenum type, uint32_t stride, uint32_t offset)

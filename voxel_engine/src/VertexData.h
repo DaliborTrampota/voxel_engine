@@ -4,7 +4,18 @@
 
 #define NORTH glm::vec3(1, 0, 0)
 
+
+
 namespace vert {
+
+	enum class Side {
+		North,
+		West,
+		South,
+		East,
+		Up,
+		Down
+	};
 
 	template <typename T, size_t N, size_t M>
 	using array2d = std::array<std::array<T, M>, N>;
@@ -39,6 +50,15 @@ namespace vert {
 		{ 3, 4, 2, 5, 2, 4 }, // up
 		{ 7, 0, 6, 1, 6, 0 }  // down
 	} };
+
+	constexpr std::array<glm::vec3, 6> normals = {
+		glm::vec3( 1,  0,  0), // north
+		glm::vec3( 0,  0,  0), // west
+		glm::vec3(-1,  0,  0), // south
+		glm::vec3( 0,  0, -1), // east
+		glm::vec3( 0,  1,  0), // up
+		glm::vec3( 0, -1,  0)  // down
+	};
 
 }
 //const faceUVs = [
