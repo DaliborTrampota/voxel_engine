@@ -159,6 +159,7 @@ int main() {
     //glEnable(GL_CULL_FACE);
     //glCullFace(GL_FRONT);
 
+    pipeline.use();
     glm::mat4 projection = game.cam.getProjection();
     pipeline.setMat4("projection", projection);
 	printMat4(projection);
@@ -175,7 +176,6 @@ int main() {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		pipeline.use();
         pipeline.setFloat("time", time);
         glm::mat4 view = game.cam.getView();
         pipeline.setMat4("view", view);

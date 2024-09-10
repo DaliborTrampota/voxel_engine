@@ -14,5 +14,5 @@ void main()
 {
 	col = aCol;
     pos = aPos;
-    gl_Position = view * model * vec4(aPos, 1.0);
+    gl_Position = projection * view * model * vec4(aPos, 1.0);
 }
