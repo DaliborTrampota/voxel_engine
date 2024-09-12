@@ -50,10 +50,11 @@ void ShaderPipeline::setCamera(Camera* camera)
 	setMat4("projection", camera->getProjection());
 }
 
+/* @param stride If tightly packed then = size*/
 void ShaderPipeline::registerAttribute(uint32_t loc, uint32_t size, GLenum type, uint32_t stride, uint32_t offset)
 {
 	auto typeSize = sizeOfType(type);
-    glVertexAttribPointer(loc, size, type, GL_FALSE, stride * typeSize, (void*)(offset * typeSize));
+	glVertexAttribPointer(loc, size, type, GL_FALSE, stride * typeSize, (void*)(offset * typeSize)); // always as floats in the shader (check glVertexAttribIPointer for ints and glVertexAttribLPointer for doubles)
 	glEnableVertexAttribArray(loc);
 }
 

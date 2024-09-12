@@ -24,5 +24,9 @@ public:
 
 protected:
 	siv::BasicPerlinNoise<float> noise;
+
+	float m_scale = 0.1f;
+	float m_minHeight = 5.0f;
+
 };
 

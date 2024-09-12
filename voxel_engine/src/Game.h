@@ -1,12 +1,11 @@
 #pragma once
 
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
-
 #include <unordered_map>
 
 #include "level/World.h"
 #include "Camera.h"
+
+struct GLFWwindow;
 
 struct MouseState
 {
@@ -24,6 +23,8 @@ public:
 	Game(GLFWwindow* window, float w, float h);
 
 	void start();
+
+	lvl::World& getCurrentWorld() { return m_worlds[m_currentWorld]; }
 
 	void update(float dt);
 	void processInput(GLFWwindow* window, float dt);

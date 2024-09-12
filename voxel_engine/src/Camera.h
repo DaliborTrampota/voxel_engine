@@ -2,13 +2,16 @@
 
 #include <glm/glm.hpp>
 
+
+
+struct GLFWwindow;
+
+
 enum class ProjectionType
 {
 	Perspective,
 	Orthographic
 };
-
-
 
 class Camera
 {
@@ -21,7 +24,7 @@ public:
 	void rotate(float dx, float dy, bool constrainPitch = true);
 	void resize(int width, int height);
 
-	void mouseLock(void* window, bool state);
+	void mouseLock(GLFWwindow* window, bool state);
 
 	glm::mat4 getView() const;
 	glm::mat4 getProjection() const { return m_projection; };
@@ -39,7 +42,6 @@ private:
 	glm::mat4 m_projection;
 
 	float m_speed = 3.0f;
-
 
 	ProjectionType m_type;
 

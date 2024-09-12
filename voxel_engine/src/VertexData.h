@@ -17,8 +17,8 @@ namespace vert {
 		Down
 	};
 
-	template <typename T, size_t N, size_t M>
-	using array2d = std::array<std::array<T, M>, N>;
+	template <typename T, size_t row, size_t col>
+	using array2d = std::array<std::array<T, col>, row>;
 
 	constexpr float scale = 1.0f;
 

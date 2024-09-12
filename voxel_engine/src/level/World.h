@@ -33,11 +33,16 @@ namespace lvl {
 		World(TerrainGenerator* gen);
 		~World();
 
-	private:
+		void render(ShaderPipeline* pipeline);
 
-		std::unordered_map<glm::ivec2, Chunk, KeyFuncs, KeyFuncs> chunks;
+	private:
+		unsigned int m_VAO;
+
+		std::unordered_map<glm::ivec2, Chunk*, KeyFuncs, KeyFuncs> chunks;
 		TerrainGenerator* generator;
 
+
+		friend class Chunk;
 	};
 
 }

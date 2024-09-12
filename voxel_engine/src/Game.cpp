@@ -1,5 +1,9 @@
 #include "Game.h"
 
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
+
+
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -77,54 +81,35 @@ void Game::start()
 
 
 
-    float vertices[36 * 3];
-    float colors[36 * 3];
+    /*float vertices[36 * 3];
     int idx = 0;
     for (int i = 0; i < 6; i++) {
         for (int j = 0; j < 6; j++) {
-            colors[idx + 0] = 0.0f;
-            colors[idx + 1] = 1.0f;
-            colors[idx + 2] = 0.5f;
             for (int c = 0; c < 3; c++) {
                 vertices[idx] = vert::vertices[vert::faces[i][j]][c] + 0.5f;
                 idx++;
             }
         }
     }
-
-    unsigned int VBO, VAO, VBO_col;
+    unsigned int VBO, VAO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
-    glGenBuffers(1, &VBO_col);
-
-
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     pipeline.registerAttribute(0, 3, GL_FLOAT, 0);
 
-
-    //pipeline.registerAttribute(0, 3, GL_FLOAT, 6);
-    //pipeline.registerAttribute(1, 3, GL_FLOAT, 6, 3);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO_col);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
-    pipeline.registerAttribute(1, 3, GL_FLOAT, 0);
-
-
     glBindBuffer(GL_ARRAY_BUFFER, 0); //unbind VBO
     glBindVertexArray(0); //unbind VAO
 
-    glBindVertexArray(VAO); //bind VAO back
-
 
     // uncomment this call to draw in wireframe polygons.
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);*/
 
 
     glEnable(GL_CULL_FACE);
-    glCullFace(GL_FRONT);
+    glCullFace(GL_BACK);
 
 
     pipeline.use();
@@ -134,7 +119,7 @@ void Game::start()
     float lastFrame = 0.0f;
     while (!glfwWindowShouldClose(m_window))
     {
-        float currentFrame = glfwGetTime();
+        float currentFrame = (float)glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
@@ -152,13 +137,14 @@ void Game::start()
         glm::mat4 model = glm::mat4(1.0f);
         pipeline.setMat4("model", model);
 
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        getCurrentWorld().render(&pipeline);
+        //glDrawArrays(GL_TRIANGLES, 0, 36);
 
         glfwSwapBuffers(m_window);
         glfwPollEvents();
     }
 
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
+    /*glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);*/
     glDeleteProgram(pipeline.ID);
 }
