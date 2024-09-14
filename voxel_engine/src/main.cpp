@@ -1,6 +1,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-
+#include <glm/glm.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -74,6 +74,10 @@ int main() {
 
 
 
+    GLint max_layers, max_units;
+    glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &max_layers);
+    glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &max_units);
+	printf("Max layers: %d\nMax units: %d", max_layers, max_units);
 
     Game game(window, SCR_WIDTH, SCR_HEIGHT);
     GameWrapper gameWrapper(&game);
