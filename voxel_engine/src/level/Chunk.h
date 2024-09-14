@@ -3,13 +3,15 @@
 #include <vector>
 #include <glm/glm.hpp>
 
-#include "structures/Attribute.h"
-#include "data/Vertex.h"
+#include "structures/Attributes.h"
+
+class ShaderPieline;
+
+
 
 namespace lvl {
 
 	class World;
-	struct ChunkID;
 
 	using T = int;
 	using VoxelData = std::vector<std::vector<std::vector<T>>>;
@@ -50,7 +52,8 @@ namespace lvl {
 
 
 template <>
-struct std::hash<lvl::ChunkID> {
+struct std::hash<lvl::ChunkID>
+{
 	size_t operator()(const glm::ivec3& k)const
 	{
 		return std::hash<int>()(k.x) ^ std::hash<int>()(k.y << 1) ^ std::hash<int>()(k.z << 2);

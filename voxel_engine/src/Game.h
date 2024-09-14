@@ -3,9 +3,10 @@
 #include <unordered_map>
 
 #include "level/World.h"
-#include "Camera.h"
 
 struct GLFWwindow;
+
+class Camera;
 
 struct MouseState
 {
@@ -21,6 +22,7 @@ class Game
 public:
 	Game() = delete;
 	Game(GLFWwindow* window, float w, float h);
+	~Game();
 
 	void start();
 
@@ -28,9 +30,9 @@ public:
 
 	void update(float dt);
 	void processInput(GLFWwindow* window, float dt);
-    void processMouse(GLFWwindow* window, double xposIn, double yposIn);
+	void processMouse(GLFWwindow* window, double xposIn, double yposIn);
 
-	Camera m_cam{ ProjectionType::Perspective };
+	Camera* m_cam;
 
 private:
 

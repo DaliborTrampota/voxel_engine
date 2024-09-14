@@ -1,14 +1,17 @@
 #pragma once
 
 #include <glm/glm.hpp>
-
 #include <unordered_map>
 
 #include "Chunk.h"
-#include "TerrainGenerator.h"
 
+class TerrainGenerator;
+class ShaderPipeline;
 
 namespace lvl {
+
+	class Chunk;
+	struct ChunkID;
 
 	constexpr glm::ivec3 ChunkDim = glm::ivec3(16, 16, 16);
 	int const TERRAIN_HEIGHT = 64;
@@ -24,6 +27,8 @@ namespace lvl {
 
 	private:
 		unsigned int m_VAO;
+
+
 
 		std::unordered_map<ChunkID, Chunk*> chunks;
 		TerrainGenerator* generator;

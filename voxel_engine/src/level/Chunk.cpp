@@ -4,9 +4,14 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "Structures/ShaderPipeline.h"
-#include "World.h";
+#include "structures/Attributes.h"
+#include "structures/ShaderPipeline.h"
+
 #include "data/VertexData.h"
+#include "data/Vertex.h"
+
+#include "World.h";
+#include "TerrainGenerator.h"
 
 using namespace lvl;
 
@@ -90,3 +95,4 @@ bool lvl::ChunkID::operator()(const ChunkID& a, const ChunkID& b) const
 {
 	return a.x == b.x && a.y == b.y && a.z == b.z;
 }
+

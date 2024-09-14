@@ -1,10 +1,9 @@
 #include "ShaderPipeline.h"
 
-#include <iostream>
-
 #include <glm/gtc/type_ptr.hpp>
 
-
+#include "Shader.h"
+#include "Camera.h"
 
 ShaderPipeline::ShaderPipeline(std::string name) : m_activeCamera(nullptr)
 {
@@ -34,7 +33,7 @@ bool ShaderPipeline::link()
     glGetProgramiv(ID, GL_LINK_STATUS, &success);
     if (!success) {
         glGetProgramInfoLog(ID, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::PROGRAM\n" << infoLog << std::endl;
+        printf("ERROR::SHADER::PROGRAM\n%s", infoLog);
     }
     return success;
 }
@@ -50,7 +49,7 @@ void ShaderPipeline::setCamera(Camera* camera)
 	setMat4("projection", camera->getProjection());
 }
 
-/* @param stride If tightly packed then = size*/
+/* @param stride If tightly packed then should be equal to size*/
 void ShaderPipeline::registerAttribute(uint32_t loc, uint32_t size, GLenum type, uint32_t stride, uint32_t offset)
 {
 	auto typeSize = sizeOfType(type);

@@ -1,12 +1,11 @@
 #include "TextureLoader.h"
 
 #include <glad/glad.h>
-
-#include <stb_image.h>
-
 #include <filesystem>
 #include <vector>
 #include <string>
+
+#include <stb_image.h>
 
 namespace fs = std::filesystem;
 

@@ -1,14 +1,14 @@
 #pragma once
 
+#include <glad/glad.h>
 #include <glm/glm.hpp>
 
 #include <string>
 #include <map>
 
+#include "structures/Shader.h"
 
-
-#include "Shader.h"
-#include "Camera.h"
+class Camera;
 
 
 class ShaderPipeline

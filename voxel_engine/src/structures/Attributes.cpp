@@ -1,9 +1,11 @@
-#include "Attribute.h"
+#include "Attributes.h"
 
 #include <glad/glad.h>
 
-#include "data/Vertex.h"
 #include "ShaderPipeline.h"
+
+#include "data/Vertex.h"
+
 
 Attributes::Attributes(GLint drawType = GL_STATIC_DRAW) :
 	m_drawType(drawType),

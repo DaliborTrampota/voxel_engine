@@ -149,7 +149,7 @@
     <ClCompile Include="src\level\TerrainGenerator.cpp" />
     <ClCompile Include="src\level\World.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\structures\Attribute.cpp" />
+    <ClCompile Include="src\structures\Attributes.cpp" />
     <ClCompile Include="src\structures\Shader.cpp" />
     <ClCompile Include="src\structures\ShaderPipeline.cpp" />
     <ClCompile Include="src\TextureLoader.cpp" />
@@ -165,7 +165,7 @@
     <ClInclude Include="src\level\Chunk.h" />
     <ClInclude Include="src\level\TerrainGenerator.h" />
     <ClInclude Include="src\level\World.h" />
-    <ClInclude Include="src\structures\Attribute.h" />
+    <ClInclude Include="src\structures\Attributes.h" />
     <ClInclude Include="src\structures\Shader.h" />
     <ClInclude Include="src\structures\ShaderPipeline.h" />
     <ClInclude Include="src\TextureLoader.h" />

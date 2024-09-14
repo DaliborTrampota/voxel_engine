@@ -2,26 +2,26 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
-#include <iostream>
 #include <fstream>
 
 
 #include "Game.h"
+#include "Camera.h"
 
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
 
 
-void printMat4(glm::mat4 mat) {
-	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < 4; j++) {
-			std::cout << mat[j][i] << " ";
-		}
-		std::cout << std::endl;
-	}
-
-}
+//void printMat4(glm::mat4 mat) {
+//	for (int i = 0; i < 4; i++) {
+//		for (int j = 0; j < 4; j++) {
+//			std::cout << mat[j][i] << " ";
+//		}
+//		std::cout << std::endl;
+//	}
+//
+//}
 
 
 struct GameWrapper {
@@ -41,7 +41,7 @@ struct GameWrapper {
     }
     static void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
         glViewport(0, 0, width, height);
-        game->m_cam.resize(width, height);
+        game->m_cam->resize(width, height);
     }
     static void errorCallback(int errCode, const char* desc) {
         printf("code = %d, message = %s\n", errCode, desc);
@@ -60,7 +60,7 @@ int main() {
     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
     if (window == NULL)
     {
-        std::cout << "Failed to create GLFW window" << std::endl;
+        printf("Failed to create GLFW window");
         glfwTerminate();
         return -1;
     }
@@ -68,7 +68,7 @@ int main() {
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
-        std::cout << "Failed to initialize GLAD" << std::endl;
+        printf("Failed to initialize GLAD");
         return -1;
     }
 
@@ -77,11 +77,11 @@ int main() {
     GLint max_layers, max_units;
     glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &max_layers);
     glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &max_units);
-	printf("Max layers: %d\nMax units: %d", max_layers, max_units);
+	printf("Max layers: %d\nMax units: %d\n", max_layers, max_units);
 
     Game game(window, SCR_WIDTH, SCR_HEIGHT);
     GameWrapper gameWrapper(&game);
-    game.m_cam.mouseLock(window, true);
+    game.m_cam->mouseLock(window, true);
 
     game.start();
   

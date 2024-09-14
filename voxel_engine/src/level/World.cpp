@@ -1,5 +1,7 @@
 #include "World.h"
 
+#include "TerrainGenerator.h"
+
 using namespace lvl;
 
 World::World(TerrainGenerator* gen) : generator(gen)

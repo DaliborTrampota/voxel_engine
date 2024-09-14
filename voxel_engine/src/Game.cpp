@@ -3,21 +3,23 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
-
-
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-
-#include <iostream>
 
 #include "structures/Shader.h"
 #include "structures/ShaderPipeline.h"
 
 #include "data/VertexData.h"
-#include "TextureLoader.h"
 
-Game::Game(GLFWwindow* window, float w, float h) : m_window(window), m_mouseState(w, h)
+#include "Camera.h"
+#include "TextureLoader.h"
+#include "level/TerrainGenerator.h"
+
+Game::Game(GLFWwindow* window, float w, float h) : 
+    m_window(window), 
+    m_mouseState(w, h),
+	m_cam(new Camera(ProjectionType::Perspective))
 {
 	m_worlds[0] = lvl::World(new NoiseGenerator());
 }
@@ -32,13 +34,13 @@ void Game::processInput(GLFWwindow* window, float dt)
         glfwSetWindowShouldClose(window, true);
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        m_cam.move(GLFW_KEY_W, dt);
+        m_cam->move(GLFW_KEY_W, dt);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        m_cam.move(GLFW_KEY_S, dt);
+        m_cam->move(GLFW_KEY_S, dt);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        m_cam.move(GLFW_KEY_A, dt);
+        m_cam->move(GLFW_KEY_A, dt);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        m_cam.move(GLFW_KEY_D, dt);
+        m_cam->move(GLFW_KEY_D, dt);
 }
 
 void Game::processMouse(GLFWwindow* window, double xposIn, double yposIn)
@@ -59,7 +61,12 @@ void Game::processMouse(GLFWwindow* window, double xposIn, double yposIn)
     m_mouseState.lastX = xpos;
     m_mouseState.lastY = ypos;
 
-    m_cam.rotate(xoffset, yoffset);
+    m_cam->rotate(xoffset, yoffset);
+}
+
+Game::~Game()
+{
+	delete m_cam;
 }
 
 void Game::start()
@@ -74,8 +81,8 @@ void Game::start()
         Shader vert("shaders/VertexShader.glsl", GL_VERTEX_SHADER);
         Shader frag("shaders/PixelShader.glsl", GL_FRAGMENT_SHADER);
 
-        if (!pipeline.registerShader(GL_VERTEX_SHADER, vert)) std::cout << "Vert shader not registered" << std::endl;
-        if (!pipeline.registerShader(GL_FRAGMENT_SHADER, frag)) std::cout << "Fragment shader not registered" << std::endl;
+        if (!pipeline.registerShader(GL_VERTEX_SHADER, vert)) printf("Vert shader not registered");
+        if (!pipeline.registerShader(GL_FRAGMENT_SHADER, frag)) printf("Fragment shader not registered");
         if (!pipeline.link()) return;// throw error or something? 1;
     }
 
@@ -117,10 +124,14 @@ void Game::start()
 
 
     pipeline.use();
-    pipeline.setCamera(&m_cam);
+    pipeline.setCamera(m_cam);
 
     loader.bind(0);
     pipeline.setInt("texArray", 0);
+
+    glm::mat4 model = glm::mat4(1.0f);
+    pipeline.setMat4("model", model);
+
     float deltaTime = 0.0f;
     float lastFrame = 0.0f;
     while (!glfwWindowShouldClose(m_window))
@@ -137,11 +148,9 @@ void Game::start()
 
 
         // RENDERING HERE
-        glm::mat4 view = m_cam.getView();
+        glm::mat4 view = m_cam->getView();
         pipeline.setMat4("view", view);
 
-        glm::mat4 model = glm::mat4(1.0f);
-        pipeline.setMat4("model", model);
 
         getCurrentWorld().render(&pipeline);
         //glDrawArrays(GL_TRIANGLES, 0, 36);

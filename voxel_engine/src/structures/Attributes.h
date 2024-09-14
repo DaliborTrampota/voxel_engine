@@ -1,16 +1,11 @@
 #pragma once
 
 #include <glad/glad.h>
-
 #include <vector>
 
+#include "data/Vertex.h"
 
 class ShaderPipeline;
-
-namespace vert {
-	struct AttrInfo;
-	struct Vertex;
-}
 
 struct Attributes {
 	Attributes() = default;
