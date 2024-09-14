@@ -60,6 +60,15 @@ namespace vert {
 		glm::vec3( 0, -1,  0)  // down
 	};
 
+	constexpr std::array<glm::vec2, 6> uvs = {
+		glm::vec2(0, 1),
+		glm::vec2(0, 0),
+		glm::vec2(1, 1),
+		glm::vec2(1, 0),
+		glm::vec2(1, 1),
+		glm::vec2(0, 0)
+	};
+
 }
 //const faceUVs = [
 //    0, 1,
