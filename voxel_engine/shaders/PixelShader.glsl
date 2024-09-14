@@ -1,18 +1,22 @@
 #version 330 core
 
+
 out vec4 FragColor;
-in vec3 col;
 in vec3 pos;
 in vec3 normal;
+in vec2 uv;
+flat in uint texID;
 
+uniform sampler2DArray texArray;
 uniform float time;
 
 vec3 sunDir = normalize(vec3(0.2, 1, 0.2));
 
 void main()
 {
-    vec3 lightCol = col * max(0.2, dot(normal, sunDir));
-	FragColor = vec4(lightCol, 1.0);
-    //FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-    //FragColor.g = mod(time, 1);
+	vec4 col = texture(texArray, vec3(uv, texID));
+    vec3 colData = col.xyz * max(0.5, dot(normal, sunDir));
+    //FragColor = vec4(uv.x, 0, uv.y, 1.0);//col;
+    //FragColor = vec4(lightCol, 1.0);
+    FragColor = vec4(colData, col.a);
 }

@@ -16,6 +16,7 @@
 
 #include "VertexData.h"
 
+#include "TextureLoader.h"
 
 Game::Game(GLFWwindow* window, float w, float h) : m_window(window), m_mouseState(w, h)
 {
@@ -64,6 +65,10 @@ void Game::processMouse(GLFWwindow* window, double xposIn, double yposIn)
 
 void Game::start()
 {
+
+
+    tex::TextureLoader loader;
+    loader.load("resources/textures/blocks/");
 
     ShaderPipeline pipeline;
     {
@@ -115,6 +120,8 @@ void Game::start()
     pipeline.use();
     pipeline.setCamera(&m_cam);
 
+    loader.bind(0);
+    pipeline.setInt("texArray", 0);
     float deltaTime = 0.0f;
     float lastFrame = 0.0f;
     while (!glfwWindowShouldClose(m_window))
@@ -139,6 +146,12 @@ void Game::start()
 
         getCurrentWorld().render(&pipeline);
         //glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        GLenum err;
+        while ((err = glGetError()) != GL_NO_ERROR)
+        {
+			printf("OpenGL error: %d\n", err);
+        }
 
         glfwSwapBuffers(m_window);
         glfwPollEvents();
