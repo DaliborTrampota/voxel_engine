@@ -2,7 +2,7 @@
 
 #include <GLFW/glfw3.h>
 #include <glm/gtc/matrix_transform.hpp>
-#include <iostream>
+
 Camera::Camera(ProjectionType type) : m_type(type)
 {
 	m_worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -14,6 +14,14 @@ Camera::Camera(ProjectionType type) : m_type(type)
 	m_yaw = -90.0f;
 	m_pitch = 0.0f;
 
+	updateVectors();
+}
+
+void Camera::lookAt(const glm::vec3& target)
+{
+	glm::vec3 dir = glm::normalize(target - m_position);
+	m_pitch = glm::degrees(asin(dir.y));
+	m_yaw = glm::degrees(atan2(dir.z, dir.x));
 	updateVectors();
 }
 

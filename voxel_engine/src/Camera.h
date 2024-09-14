@@ -20,6 +20,9 @@ public:
 	Camera(ProjectionType type);
 	Camera() : Camera(ProjectionType::Perspective) {};
 
+	void setPosition(const glm::vec3& pos) { m_position = pos; };
+	void lookAt(const glm::vec3& target);
+
 	void move(int key, float dt);
 	void rotate(float dx, float dy, bool constrainPitch = true);
 	void resize(int width, int height);

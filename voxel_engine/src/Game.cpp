@@ -22,6 +22,8 @@ Game::Game(GLFWwindow* window, float w, float h) :
 	m_cam(new Camera(ProjectionType::Perspective))
 {
 	m_worlds[0] = lvl::World(new NoiseGenerator());
+    m_cam->setPosition(glm::vec3(8, 20, 8));
+	m_cam->lookAt(glm::vec3(0, 0, 0));
 }
 
 void Game::update(float dt)
