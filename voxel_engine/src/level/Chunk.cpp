@@ -1,17 +1,19 @@
 #include "Chunk.h"
 
 #include <glad/glad.h>	
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
-#include "World.h";
-#include "../VertexData.h"
 #include "Structures/ShaderPipeline.h"
+#include "World.h";
+#include "data/VertexData.h"
 
 using namespace lvl;
 
 lvl::Chunk::Chunk(World* world, ChunkID coords) :
 	m_world(world),
 	m_coords(coords),
-	m_vertexData(3, GL_DYNAMIC_DRAW)
+	m_vertexData(GL_DYNAMIC_DRAW)
 {
 	populate();
 	generateMesh();
@@ -19,33 +21,34 @@ lvl::Chunk::Chunk(World* world, ChunkID coords) :
 
 void Chunk::populate()
 {
-	for (int x = 0; x < 16; x++)
+	glm::ivec3 posOffset = m_coords * ChunkDim;
+
+	for (int x = 0; x < ChunkDim.x; x++)
 	{
 		m_data.push_back(std::vector<std::vector<T>>());
-		for (int y = 0; y < 16; y++)
+		for (int y = 0; y < ChunkDim.y; y++)
 		{
 			m_data[x].push_back(std::vector<T>());
-			for (int z = 0; z < 16; z++)
+			for (int z = 0; z < ChunkDim.z; z++)
 			{
 				glm::ivec3 pos(x, y, z);
-				int blockID = m_world->generator->getVoxel(pos);
+				int blockID = m_world->generator->getVoxel(pos + posOffset);
 				m_data[x][y].push_back(blockID);
 			}
 		}
 	}
 }
 
-void lvl::Chunk::generateMesh()
+void Chunk::generateMesh()
 {
 
-	for (int x = 0; x < 16; x++)
+	for (int x = 0; x < ChunkDim.x; x++)
 	{
-		if(m_vertexData.m_data.capacity() - m_vertexData.m_data.size() < 100)
-			m_vertexData.m_data.reserve(16 * 16 * 6);
+		m_vertexData.reserve(ChunkDim.x * ChunkDim.y * ChunkDim.z * 6); // 16x16x6 faces (6 vertices per face
 
-		for (int y = 0; y < 16; y++)
+		for (int y = 0; y < ChunkDim.y; y++)
 		{
-			for (int z = 0; z < 16; z++)
+			for (int z = 0; z < ChunkDim.z; z++)
 			{
 				if(m_data[x][y][z] == 0)
 					continue;
@@ -58,13 +61,11 @@ void lvl::Chunk::generateMesh()
 					for (int i = 0; i < 6; ++i) 
 					{
 						m_vertexData.add(
-							vert::vertices[vert::faces[side][i]][0] + x,
-							vert::vertices[vert::faces[side][i]][1] + y,
-							vert::vertices[vert::faces[side][i]][2] + z,
-
-							vert::normals[side][0],
-							vert::normals[side][1],
-							vert::normals[side][2]
+							vert::vertices[vert::faces[side][i]] + (glm::vec3)pos,
+							vert::normals[side],
+							vert::uvs[i],
+							blockID,
+							0
 						);
 					}
 				}
@@ -75,11 +76,13 @@ void lvl::Chunk::generateMesh()
 	m_vertexData.m_data.shrink_to_fit();
 }
 
-size_t lvl::Chunk::prepareRender(ShaderPipeline* pipeline)
+GLsizei lvl::Chunk::prepareRender(ShaderPipeline* pipeline)
 {
-	m_vertexData.bind(pipeline, 0);
-	pipeline->registerAttribute(0, m_vertexData.size(), GL_FLOAT, 6);
-	pipeline->registerAttribute(1, m_vertexData.size(), GL_FLOAT, 6, 3);
+	m_vertexData.bind(pipeline);
+
+	glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(m_coords * ChunkDim));
+	pipeline->setMat4("model", model);
+
 	return m_vertexData.length();
 }
 

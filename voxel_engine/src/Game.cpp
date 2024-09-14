@@ -14,8 +14,7 @@
 #include "structures/Shader.h"
 #include "structures/ShaderPipeline.h"
 
-#include "VertexData.h"
-
+#include "data/VertexData.h"
 #include "TextureLoader.h"
 
 Game::Game(GLFWwindow* window, float w, float h) : m_window(window), m_mouseState(w, h)

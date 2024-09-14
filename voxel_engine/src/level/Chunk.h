@@ -3,7 +3,8 @@
 #include <vector>
 #include <glm/glm.hpp>
 
-#include "Structures/Attribute.h"
+#include "structures/Attribute.h"
+#include "data/Vertex.h"
 
 namespace lvl {
 
@@ -33,7 +34,7 @@ namespace lvl {
 		void generateMesh();
 
 		/* @returns number of triangles to render */
-		size_t prepareRender(ShaderPipeline* pipeline);
+		GLsizei prepareRender(ShaderPipeline* pipeline);
 
 	private:
 
@@ -41,8 +42,7 @@ namespace lvl {
 		VoxelData m_data;
 		World* m_world;
 
-		Attribute m_vertexData;
-
+		Attributes m_vertexData;
 	};
 
 

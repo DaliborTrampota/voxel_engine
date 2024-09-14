@@ -13,7 +13,6 @@ World::World(TerrainGenerator* gen) : generator(gen)
 
 lvl::World::~World()
 {
-	delete generator;
 }
 
 void lvl::World::render(ShaderPipeline* pipeline)

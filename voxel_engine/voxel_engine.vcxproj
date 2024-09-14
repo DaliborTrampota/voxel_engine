@@ -143,6 +143,7 @@
     <ClCompile Include="libs\glad.c" />
     <ClCompile Include="libs\stb_image.cpp" />
     <ClCompile Include="src\Camera.cpp" />
+    <ClCompile Include="src\data\Vertex.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\level\Chunk.cpp" />
     <ClCompile Include="src\level\TerrainGenerator.cpp" />
@@ -151,11 +152,15 @@
     <ClCompile Include="src\structures\Attribute.cpp" />
     <ClCompile Include="src\structures\Shader.cpp" />
     <ClCompile Include="src\structures\ShaderPipeline.cpp" />
+    <ClCompile Include="src\TextureLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="libs\PerlinNoise.h" />
     <ClInclude Include="libs\stb_image.h" />
     <ClInclude Include="src\Camera.h" />
+    <ClInclude Include="src\data\Vertex.h" />
+    <ClInclude Include="src\data\VertexData.h" />
+    <ClInclude Include="src\data\WorldData.h" />
     <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\level\Chunk.h" />
     <ClInclude Include="src\level\TerrainGenerator.h" />
@@ -163,7 +168,7 @@
     <ClInclude Include="src\structures\Attribute.h" />
     <ClInclude Include="src\structures\Shader.h" />
     <ClInclude Include="src\structures\ShaderPipeline.h" />
-    <ClInclude Include="src\VertexData.h" />
+    <ClInclude Include="src\TextureLoader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

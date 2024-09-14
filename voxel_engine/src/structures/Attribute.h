@@ -7,26 +7,30 @@
 
 class ShaderPipeline;
 
-struct Attribute {
-	Attribute() = default;
-	Attribute(int size, GLint drawType);
+namespace vert {
+	struct AttrInfo;
+	struct Vertex;
+}
 
-	void bind(ShaderPipeline* pipeline, int location);
+struct Attributes {
+	Attributes() = default;
+	Attributes(GLint drawType);
+
+	void bind(ShaderPipeline* pipeline);
+	void reserve(int size) { m_data.reserve(size); }
+
 	template <typename... Vals>
-	void add(Vals... data) {
-		(m_data.push_back(data), ...);
+	inline void add(Vals&&... data) {
+		m_data.emplace_back(data...);
 		m_elements++;
 	}
 
 	size_t length() const { return m_elements; }
-	int size() const { return m_size; }
 
-	std::vector<float> m_data;
+	std::vector<vert::Vertex> m_data;
 
 private:
 	unsigned int m_buffer;
-	int m_size;
 	GLint m_drawType;
-
 	int m_elements;
 };

@@ -3,6 +3,7 @@
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aUV;
+layout (location = 3) in float aData;
 
 uniform mat4 projection;
 uniform mat4 view;
@@ -13,10 +14,12 @@ out vec3 normal;
 out vec2 uv;
 
 flat out uint texID;
+out float ao;
 
 void main()
 {
-    texID = 1u;
+    texID = uint(aData) & 1023u;
+    ao = 1.0 - ((uint(aData) >> 10) & 3u) / 5.0;
 
     uv = aUV;
     pos = aPos;

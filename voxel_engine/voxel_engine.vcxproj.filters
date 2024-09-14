@@ -65,6 +65,12 @@
     <ClCompile Include="src\structures\Attribute.cpp">
       <Filter>Source Files\glAbstraction</Filter>
     </ClCompile>
+    <ClCompile Include="src\data\Vertex.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TextureLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="libs\PerlinNoise.h">
@@ -94,10 +100,19 @@
     <ClInclude Include="src\Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\VertexData.h">
+    <ClInclude Include="src\structures\Attribute.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\structures\Attribute.h">
+    <ClInclude Include="src\data\Vertex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\TextureLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\data\WorldData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\data\VertexData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,28 +2,24 @@
 
 #include <glad/glad.h>
 
-
+#include "data/Vertex.h"
 #include "ShaderPipeline.h"
 
-Attribute::Attribute(int size, GLint drawType = GL_STATIC_DRAW) :
-    m_size(size),
+Attributes::Attributes(GLint drawType = GL_STATIC_DRAW) :
 	m_drawType(drawType),
 	m_elements(0)
 {
     glGenBuffers(1, &m_buffer);
 }
 
-void Attribute::bind(ShaderPipeline* pipeline, int location)
+void Attributes::bind(ShaderPipeline* pipeline)
 {
     glBindBuffer(GL_ARRAY_BUFFER, m_buffer);
-    glBufferData(GL_ARRAY_BUFFER, m_data.size() * sizeof(float), m_data.data(), m_drawType);
-	pipeline->registerAttribute(location, m_size, GL_FLOAT, 0);
+    glBufferData(GL_ARRAY_BUFFER, m_data.size() * sizeof(vert::Vertex), m_data.data(), m_drawType);
+
+	pipeline->registerAttribute(0, 3, GL_FLOAT, 9, 0);// offsetof(vert::Vertex, m_pos));
+	pipeline->registerAttribute(1, 3, GL_FLOAT, 9, 3);// offsetof(vert::Vertex, m_normal));
+	pipeline->registerAttribute(2, 2, GL_FLOAT, 9, 6);// offsetof(vert::Vertex, m_uv));
+	pipeline->registerAttribute(3, 1, GL_INT, 9, 8);// offsetof(vert::Vertex, m_data));
 }
-
-//void Attribute::add(float... data)
-//{
-//	m_data.push_back(data);
-//	m_elements++;
-//}
-
 

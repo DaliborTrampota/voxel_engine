@@ -6,6 +6,7 @@ in vec3 pos;
 in vec3 normal;
 in vec2 uv;
 flat in uint texID;
+in int ao;
 
 uniform sampler2DArray texArray;
 uniform float time;
