@@ -4,8 +4,8 @@ using namespace lvl;
 
 World::World(TerrainGenerator* gen) : generator(gen)
 {
-	Chunk* chunk = new Chunk(this, glm::ivec2(0, 0));
-	chunks[glm::ivec2(0, 0)] = chunk;
+	Chunk* chunk = new Chunk(this, ChunkID(0, 0, 0));
+	chunks[ChunkID(0, 0, 0)] = chunk;
 
 	glGenVertexArrays(1, &m_VAO);
 	glBindVertexArray(m_VAO);

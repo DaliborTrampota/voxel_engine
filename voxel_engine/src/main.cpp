@@ -31,6 +31,7 @@ struct GameWrapper {
 
         glfwSetCursorPosCallback(game->m_window, GameWrapper::mouseCallback);
         glfwSetFramebufferSizeCallback(game->m_window, GameWrapper::framebufferSizeCallback);
+        glfwSetErrorCallback(GameWrapper::errorCallback);
     }
 
     static inline Game* game;
@@ -41,6 +42,9 @@ struct GameWrapper {
     static void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
         glViewport(0, 0, width, height);
         game->m_cam.resize(width, height);
+    }
+    static void errorCallback(int errCode, const char* desc) {
+        printf("code = %d, message = %s\n", errCode, desc);
     }
 };
 

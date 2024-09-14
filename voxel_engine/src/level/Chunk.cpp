@@ -8,7 +8,7 @@
 
 using namespace lvl;
 
-lvl::Chunk::Chunk(World* world, glm::ivec2 coords) :
+lvl::Chunk::Chunk(World* world, ChunkID coords) :
 	m_world(world),
 	m_coords(coords),
 	m_vertexData(3, GL_DYNAMIC_DRAW)
@@ -81,4 +81,9 @@ size_t lvl::Chunk::prepareRender(ShaderPipeline* pipeline)
 	pipeline->registerAttribute(0, m_vertexData.size(), GL_FLOAT, 6);
 	pipeline->registerAttribute(1, m_vertexData.size(), GL_FLOAT, 6, 3);
 	return m_vertexData.length();
+}
+
+bool lvl::ChunkID::operator()(const ChunkID& a, const ChunkID& b) const
+{
+	return a.x == b.x && a.y == b.y && a.z == b.z;
 }

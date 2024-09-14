@@ -7,23 +7,10 @@
 #include "Chunk.h"
 #include "TerrainGenerator.h"
 
-struct KeyFuncs
-{
-	size_t operator()(const glm::ivec2& k)const
-	{
-		return std::hash<int>()(k.x) ^ std::hash<int>()(k.y << 1);
-	}
-
-	bool operator()(const glm::ivec2& a, const glm::ivec2& b)const
-	{
-		return a.x == b.x && a.y == b.y;
-	}
-};
-
 
 namespace lvl {
 
-	int const CHUNK_SIZE = 16;
+	constexpr glm::ivec3 ChunkDim = glm::ivec3(16, 16, 16);
 	int const TERRAIN_HEIGHT = 64;
 
 	class World
@@ -38,7 +25,7 @@ namespace lvl {
 	private:
 		unsigned int m_VAO;
 
-		std::unordered_map<glm::ivec2, Chunk*, KeyFuncs, KeyFuncs> chunks;
+		std::unordered_map<ChunkID, Chunk*> chunks;
 		TerrainGenerator* generator;
 
 

@@ -8,15 +8,25 @@
 namespace lvl {
 
 	class World;
+	struct ChunkID;
 
 	using T = int;
 	using VoxelData = std::vector<std::vector<std::vector<T>>>;
 
+
+	struct ChunkID : glm::ivec3
+	{
+		ChunkID(int x, int y, int z) : glm::ivec3(x, y, z) {}
+
+		bool operator()(const ChunkID& a, const ChunkID& b) const;
+	};
+
+
 	class Chunk
 	{
-
 	public:
-		Chunk(World* world, glm::ivec2 coords);
+
+		Chunk(World* world, ChunkID coords);
 		//~Chunk();
 
 		void populate();
@@ -27,7 +37,7 @@ namespace lvl {
 
 	private:
 
-		glm::ivec2 m_coords;
+		ChunkID m_coords;
 		VoxelData m_data;
 		World* m_world;
 
@@ -35,4 +45,14 @@ namespace lvl {
 
 	};
 
+
 }
+
+
+template <>
+struct std::hash<lvl::ChunkID> {
+	size_t operator()(const glm::ivec3& k)const
+	{
+		return std::hash<int>()(k.x) ^ std::hash<int>()(k.y << 1) ^ std::hash<int>()(k.z << 2);
+	}
+};
