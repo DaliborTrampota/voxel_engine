@@ -75,7 +75,7 @@ void Game::start()
 {
 
 
-    tex::TextureLoader loader;
+    asset::TextureLoader loader;
     loader.load("resources/textures/blocks/");
 
     ShaderPipeline pipeline;
@@ -134,6 +134,9 @@ void Game::start()
     glm::mat4 model = glm::mat4(1.0f);
     pipeline.setMat4("model", model);
 
+	float fpsCounter = 5.0f;
+    int samples = 0;
+
     float deltaTime = 0.0f;
     float lastFrame = 0.0f;
     while (!glfwWindowShouldClose(m_window))
@@ -144,6 +147,14 @@ void Game::start()
 
         processInput(m_window, deltaTime);
         update(deltaTime);
+
+		samples++;
+		fpsCounter -= deltaTime;
+        if (fpsCounter <= 0) {
+            printf("FPS: %f\n", samples / 5.0f);
+			fpsCounter = 5.0f;
+            samples = 0;
+        }
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -165,6 +176,7 @@ void Game::start()
 
         glfwSwapBuffers(m_window);
         glfwPollEvents();
+
     }
 
     /*glDeleteVertexArrays(1, &VAO);

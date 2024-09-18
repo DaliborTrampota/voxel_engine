@@ -65,6 +65,7 @@ int main() {
         return -1;
     }
     glfwMakeContextCurrent(window);
+    glfwSwapInterval(0); // disable vsync
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -72,7 +73,7 @@ int main() {
         return -1;
     }
 
-
+	glfwSetWindowPos(window, 500, 200);
 
     GLint max_layers, max_units;
     glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &max_layers);

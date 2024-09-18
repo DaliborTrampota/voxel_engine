@@ -1,8 +1,7 @@
 #pragma once
 
-namespace tex 
+namespace asset 
 {
-
 
 	class TextureLoader
 	{

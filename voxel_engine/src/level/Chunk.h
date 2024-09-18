@@ -1,9 +1,11 @@
 #pragma once
 
 #include <vector>
+#include <unordered_map>
 #include <glm/glm.hpp>
 
 #include "structures/Attributes.h"
+#include "block/BlockData.h"
 
 class ShaderPieline;
 
@@ -40,9 +42,11 @@ namespace lvl {
 
 	private:
 
-		ChunkID m_coords;
-		VoxelData m_data;
 		World* m_world;
+		ChunkID m_coords;
+
+		VoxelData m_data;
+		//std::unordered_map<lvl::ChunkID, data::BlockData> m_metadata;
 
 		Attributes m_vertexData;
 	};

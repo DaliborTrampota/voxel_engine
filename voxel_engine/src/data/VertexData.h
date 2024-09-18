@@ -2,11 +2,14 @@
 
 #include <array>
 
+#include "block/builder/Face.h"
+
 #define NORTH glm::vec3(1, 0, 0)
+#define WEST glm::vec3(0, 0, 1)
 
 
 
-namespace vert {
+namespace data {
 
 	enum class Side {
 		North,
@@ -51,6 +54,15 @@ namespace vert {
 		{ 7, 0, 6, 1, 6, 0 }  // down
 	} };
 
+	const std::array<builder::Face, 6> f_faces = {
+		builder::Face::SquareFace(vertices[1], vertices[5], NORTH, glm::vec2(0, 0), glm::vec2(1, 1)), // North
+		builder::Face::SquareFace(vertices[6], vertices[4], WEST, glm::vec2(0, 0), glm::vec2(1, 1)), // West
+		builder::Face::SquareFace(vertices[7], vertices[3], -NORTH, glm::vec2(0, 0), glm::vec2(1, 1)), // South
+		builder::Face::SquareFace(vertices[0], vertices[2], -WEST, glm::vec2(0, 0), glm::vec2(1, 1)), // East
+		builder::Face::SquareFace(vertices[2], vertices[4], glm::vec3(0, 1, 0), glm::vec2(0, 0), glm::vec2(1, 1)), // Up
+		builder::Face::SquareFace(vertices[0], vertices[6], glm::vec3(0, -1, 0), glm::vec2(0, 0), glm::vec2(1, 1)) // Down
+	};
+
 	constexpr std::array<glm::vec3, 6> normals = {
 		glm::vec3( 1,  0,  0), // north
 		glm::vec3( 0,  0,  0), // west
@@ -67,6 +79,15 @@ namespace vert {
 		glm::vec2(1, 0),
 		glm::vec2(1, 1),
 		glm::vec2(0, 0)
+	};
+
+	constexpr std::array<glm::ivec2, 6> axisForSide = {
+		glm::ivec2(2, 1), // north
+		glm::ivec2(0, 1), // west
+		glm::ivec2(2, 1), // south
+		glm::ivec2(0, 1), // east
+		glm::ivec2(2, 0), // up
+		glm::ivec2(0, 2)  // down
 	};
 
 }

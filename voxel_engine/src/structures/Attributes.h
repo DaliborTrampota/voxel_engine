@@ -7,6 +7,12 @@
 
 class ShaderPipeline;
 
+namespace builder {
+	struct Face;
+}
+
+struct Tag;
+
 struct Attributes {
 	Attributes() = default;
 	Attributes(GLint drawType);
@@ -20,9 +26,12 @@ struct Attributes {
 		m_elements++;
 	}
 
+	void addFace(builder::Face& f);
+	void move(data::Vertex&& vert);
+
 	size_t length() const { return m_elements; }
 
-	std::vector<vert::Vertex> m_data;
+	std::vector<data::Vertex> m_data;
 
 private:
 	unsigned int m_buffer;

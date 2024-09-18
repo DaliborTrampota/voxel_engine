@@ -13,6 +13,10 @@
 #include "World.h";
 #include "TerrainGenerator.h"
 
+#include "block/Block.h"
+#include "block/builder/CubeGeometry.h"
+#include "block/builder/CulledGeometry.h"
+
 using namespace lvl;
 
 lvl::Chunk::Chunk(World* world, ChunkID coords) :
@@ -60,18 +64,24 @@ void Chunk::generateMesh()
 
 				glm::ivec3 pos(x, y, z);
 				int blockID = m_data[x][y][z];
+				
+				data::Block block(1, "Dirt", new builder::CubeGeometry(1));
 
-				for (int side = 0; side < 6; ++side) 
-				{
-					for (int i = 0; i < 6; ++i) 
+				if (block.geometry()->sideSpecific()) {
+					builder::CubeGeometry* geo = static_cast<builder::CubeGeometry*>(block.geometry());
+					for (int side = 0; side < 6; ++side) 
 					{
-						m_vertexData.add(
-							vert::vertices[vert::faces[side][i]] + (glm::vec3)pos,
-							vert::normals[side],
-							vert::uvs[i],
-							blockID,
-							0
-						);
+
+						builder::Face f = geo->getFace(side);
+						f.translate(pos);
+						f.setData(geo->getTexture(side), 0);
+						m_vertexData.addFace(f);
+					}
+				}
+				else {
+					builder::CulledGeometry* geo = static_cast<builder::CulledGeometry*>(block.geometry());
+					for (const auto& f : *geo) {
+
 					}
 				}
 			}

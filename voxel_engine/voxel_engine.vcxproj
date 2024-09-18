@@ -142,6 +142,11 @@
   <ItemGroup>
     <ClCompile Include="libs\glad.c" />
     <ClCompile Include="libs\stb_image.cpp" />
+    <ClCompile Include="src\block\Block.cpp" />
+    <ClCompile Include="src\block\BlockData.cpp" />
+    <ClCompile Include="src\block\builder\CubeGeometry.cpp" />
+    <ClCompile Include="src\block\builder\Face.cpp" />
+    <ClCompile Include="src\block\builder\Geometry.cpp" />
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\data\Vertex.cpp" />
     <ClCompile Include="src\Game.cpp" />
@@ -157,10 +162,14 @@
   <ItemGroup>
     <ClInclude Include="libs\PerlinNoise.h" />
     <ClInclude Include="libs\stb_image.h" />
+    <ClInclude Include="src\block\Block.h" />
+    <ClInclude Include="src\block\BlockData.h" />
+    <ClInclude Include="src\block\builder\CubeGeometry.h" />
+    <ClInclude Include="src\block\builder\Face.h" />
+    <ClInclude Include="src\block\builder\Geometry.h" />
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\data\Vertex.h" />
     <ClInclude Include="src\data\VertexData.h" />
-    <ClInclude Include="src\data\WorldData.h" />
     <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\level\Chunk.h" />
     <ClInclude Include="src\level\TerrainGenerator.h" />

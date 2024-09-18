@@ -9,7 +9,7 @@
 
 namespace fs = std::filesystem;
 
-namespace tex {
+namespace asset {
 
 	TextureLoader::TextureLoader()
 	{

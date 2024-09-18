@@ -5,6 +5,7 @@
 #include "ShaderPipeline.h"
 
 #include "data/Vertex.h"
+#include "block/builder/Face.h"
 
 
 Attributes::Attributes(GLint drawType = GL_STATIC_DRAW) :
@@ -17,7 +18,7 @@ Attributes::Attributes(GLint drawType = GL_STATIC_DRAW) :
 void Attributes::bind(ShaderPipeline* pipeline)
 {
     glBindBuffer(GL_ARRAY_BUFFER, m_buffer);
-    glBufferData(GL_ARRAY_BUFFER, m_data.size() * sizeof(vert::Vertex), m_data.data(), m_drawType);
+    glBufferData(GL_ARRAY_BUFFER, m_data.size() * sizeof(data::Vertex), m_data.data(), m_drawType);
 
 	pipeline->registerAttribute(0, 3, GL_FLOAT, 9, 0);// offsetof(vert::Vertex, m_pos));
 	pipeline->registerAttribute(1, 3, GL_FLOAT, 9, 3);// offsetof(vert::Vertex, m_normal));
@@ -25,3 +26,15 @@ void Attributes::bind(ShaderPipeline* pipeline)
 	pipeline->registerAttribute(3, 1, GL_INT, 9, 8);// offsetof(vert::Vertex, m_data));
 }
 
+void Attributes::addFace(builder::Face& f)
+{
+	m_elements += f.m_vertices.size();
+	m_data.insert(m_data.end(), f.m_vertices.begin(), f.m_vertices.end());
+}
+
+
+void Attributes::move(data::Vertex&& vert)
+{
+	m_data.push_back(std::move(vert));
+	m_elements++;
+}

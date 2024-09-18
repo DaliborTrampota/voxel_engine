@@ -21,7 +21,7 @@ void lvl::World::render(ShaderPipeline* pipeline)
 {
 	for (auto& [pos, chunk] : chunks)
 	{
-		size_t triangles = chunk->prepareRender(pipeline);
-		glDrawArrays(GL_TRIANGLES, 0, triangles);
+		size_t vertices = chunk->prepareRender(pipeline);
+		glDrawArrays(GL_TRIANGLES, 0, vertices);
 	}
 }
