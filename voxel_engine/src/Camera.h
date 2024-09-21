@@ -44,7 +44,7 @@ private:
 
 	glm::mat4 m_projection;
 
-	float m_speed = 3.0f;
+	float m_speed = 10.0f;
 
 	ProjectionType m_type;
 

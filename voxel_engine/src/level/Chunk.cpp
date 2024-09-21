@@ -14,8 +14,16 @@
 #include "TerrainGenerator.h"
 
 #include "block/Block.h"
-#include "block/builder/CubeGeometry.h"
-#include "block/builder/CulledGeometry.h"
+//#include "block/builder/CulledGeometry.h"
+//#include "block/builder/CubeGeometry.h"
+
+#include "data/registry/Registry.h"
+
+namespace data {
+	extern Registry<data::Block> Blocks;
+
+}
+
 
 using namespace lvl;
 
@@ -25,35 +33,39 @@ lvl::Chunk::Chunk(World* world, ChunkID coords) :
 	m_vertexData(GL_DYNAMIC_DRAW)
 {
 	populate();
-	generateMesh();
 }
 
 void Chunk::populate()
 {
 	glm::ivec3 posOffset = m_coords * ChunkDim;
+	m_data = VoxelData(ChunkDim.x, std::vector<std::vector<T>>(ChunkDim.y, std::vector<T>(ChunkDim.z, 0)));
+	m_world->generator->populate(m_data, posOffset);
 
-	for (int x = 0; x < ChunkDim.x; x++)
+	/*for (int x = 0; x < ChunkDim.x; x++)
 	{
+
 		m_data.push_back(std::vector<std::vector<T>>());
-		for (int y = 0; y < ChunkDim.y; y++)
+		for (int z = 0; z < ChunkDim.z; z++)
 		{
 			m_data[x].push_back(std::vector<T>());
-			for (int z = 0; z < ChunkDim.z; z++)
+			int height = m_world->generator->getHeight(glm::vec2(x + posOffset.x, z + posOffset.z));
+
+			for (int y = 0; y < ChunkDim.y; y++)
 			{
 				glm::ivec3 pos(x, y, z);
 				int blockID = m_world->generator->getVoxel(pos + posOffset);
 				m_data[x][y].push_back(blockID);
 			}
 		}
-	}
+	}*/
 }
 
 void Chunk::generateMesh()
 {
-
+	glm::ivec3 chunkBlockCoords = m_coords * ChunkDim;
 	for (int x = 0; x < ChunkDim.x; x++)
 	{
-		m_vertexData.reserve(ChunkDim.x * ChunkDim.y * ChunkDim.z * 6); // 16x16x6 faces (6 vertices per face
+		m_vertexData.reserve(ChunkDim.x * ChunkDim.y * ChunkDim.z * 6); // 16x16x6 faces (6 vertices per face)
 
 		for (int y = 0; y < ChunkDim.y; y++)
 		{
@@ -64,31 +76,28 @@ void Chunk::generateMesh()
 
 				glm::ivec3 pos(x, y, z);
 				int blockID = m_data[x][y][z];
-				
-				data::Block block(1, "Dirt", new builder::CubeGeometry(1));
 
-				if (block.geometry()->sideSpecific()) {
-					builder::CubeGeometry* geo = static_cast<builder::CubeGeometry*>(block.geometry());
-					for (int side = 0; side < 6; ++side) 
-					{
+				data::Block block = data::Blocks.get(blockID);
 
-						builder::Face f = geo->getFace(side);
-						f.translate(pos);
-						f.setData(geo->getTexture(side), 0);
-						m_vertexData.addFace(f);
-					}
-				}
-				else {
-					builder::CulledGeometry* geo = static_cast<builder::CulledGeometry*>(block.geometry());
-					for (const auto& f : *geo) {
+				for (auto f : block.geometry()->m_faces) {
 
-					}
+					if (f.m_cull && m_world->checkBlock(pos + f.m_cullDir + chunkBlockCoords, block, f.m_cullDir))
+						continue;
+
+					f.translate(pos);
+					m_vertexData.addFace(f);
 				}
 			}
 		}
 	}		
 
 	m_vertexData.m_data.shrink_to_fit();
+}
+
+data::Block lvl::Chunk::getBlock(glm::ivec3 pos) const
+{
+	T blockID = m_data[pos.x][pos.y][pos.z];
+	return data::Blocks.get(blockID);
 }
 
 GLsizei lvl::Chunk::prepareRender(ShaderPipeline* pipeline)

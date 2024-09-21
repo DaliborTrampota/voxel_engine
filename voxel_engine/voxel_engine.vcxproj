@@ -144,9 +144,11 @@
     <ClCompile Include="libs\stb_image.cpp" />
     <ClCompile Include="src\block\Block.cpp" />
     <ClCompile Include="src\block\BlockData.cpp" />
+    <ClCompile Include="src\block\builder\BlockTextures.cpp" />
     <ClCompile Include="src\block\builder\Face.cpp" />
     <ClCompile Include="src\block\builder\Geometry.cpp" />
     <ClCompile Include="src\Camera.cpp" />
+    <ClCompile Include="src\CoordUtils.cpp" />
     <ClCompile Include="src\data\registry\Registry.cpp" />
     <ClCompile Include="src\data\TextureManager.cpp" />
     <ClCompile Include="src\data\Vertex.cpp" />
@@ -165,9 +167,11 @@
     <ClInclude Include="libs\stb_image.h" />
     <ClInclude Include="src\block\Block.h" />
     <ClInclude Include="src\block\BlockData.h" />
+    <ClInclude Include="src\block\builder\BlockTextures.h" />
     <ClInclude Include="src\block\builder\Face.h" />
     <ClInclude Include="src\block\builder\Geometry.h" />
     <ClInclude Include="src\Camera.h" />
+    <ClInclude Include="src\CoordUtils.h" />
     <ClInclude Include="src\data\registry\Registry.h" />
     <ClInclude Include="src\data\TextureManager.h" />
     <ClInclude Include="src\data\Vertex.h" />

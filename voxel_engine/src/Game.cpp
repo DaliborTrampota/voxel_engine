@@ -94,8 +94,6 @@ void Game::start()
 {
 
 
-    asset::TextureLoader loader;
-    loader.load("resources/textures/blocks/");
 
     ShaderPipeline pipeline;
     {
@@ -109,45 +107,21 @@ void Game::start()
 
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
 
-
-
-
-    /*float vertices[36 * 3];
-    int idx = 0;
-    for (int i = 0; i < 6; i++) {
-        for (int j = 0; j < 6; j++) {
-            for (int c = 0; c < 3; c++) {
-                vertices[idx] = vert::vertices[vert::faces[i][j]][c] + 0.5f;
-                idx++;
-            }
-        }
-    }
-    unsigned int VBO, VAO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    pipeline.registerAttribute(0, 3, GL_FLOAT, 0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0); //unbind VBO
-    glBindVertexArray(0); //unbind VAO
 
 
     // uncomment this call to draw in wireframe polygons.
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);*/
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
 
 
     pipeline.use();
     pipeline.setCamera(m_cam);
 
-    loader.bind(0);
+    //loader.bind(0);
     pipeline.setInt("texArray", 0);
 
     glm::mat4 model = glm::mat4(1.0f);

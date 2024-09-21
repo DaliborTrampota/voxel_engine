@@ -67,6 +67,7 @@
     <ClCompile Include="src\TextureLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\CoordUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\level\World.cpp">
@@ -99,6 +100,9 @@
     <ClCompile Include="src\structures\Attributes.cpp">
       <Filter>Source Files\data</Filter>
     </ClCompile>
+    <ClCompile Include="src\block\builder\BlockTextures.cpp">
+      <Filter>Source Files\block\builder</Filter>
+    </ClCompile>
     <ClCompile Include="src\data\TextureManager.cpp">
       <Filter>Source Files\data</Filter>
     </ClCompile>
@@ -115,6 +119,9 @@
     </ClInclude>
     <ClInclude Include="src\block\builder\Face.h">
       <Filter>Source Files\block\builder</Filter>
+    </ClInclude>
+    <ClInclude Include="src\block\BlockData.h">
+      <Filter>Source Files\block</Filter>
     </ClInclude>
     <ClInclude Include="src\block\Block.h">
       <Filter>Source Files\block</Filter>
@@ -157,6 +164,9 @@
     </ClInclude>
     <ClInclude Include="src\structures\Attributes.h">
       <Filter>Source Files\data</Filter>
+    </ClInclude>
+    <ClInclude Include="src\block\builder\BlockTextures.h">
+      <Filter>Source Files\block\builder</Filter>
     </ClInclude>
     <ClInclude Include="src\data\TextureManager.h">
       <Filter>Source Files\data</Filter>

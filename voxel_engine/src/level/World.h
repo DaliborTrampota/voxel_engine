@@ -23,6 +23,10 @@ namespace lvl {
 		World(TerrainGenerator* gen);
 		~World();
 
+
+		bool checkBlock(glm::vec3 pos, data::Block &curBlock, glm::ivec3 dir) const;
+
+
 		void render(ShaderPipeline* pipeline);
 
 	private:

@@ -6,6 +6,7 @@
 
 #include "structures/Attributes.h"
 #include "block/BlockData.h"
+#include "block/Block.h"
 
 class ShaderPieline;
 
@@ -15,7 +16,7 @@ namespace lvl {
 
 	class World;
 
-	using T = int;
+	using T = unsigned int;
 	using VoxelData = std::vector<std::vector<std::vector<T>>>;
 
 
@@ -36,6 +37,8 @@ namespace lvl {
 
 		void populate();
 		void generateMesh();
+
+		data::Block getBlock(glm::ivec3 pos) const;
 
 		/* @returns number of triangles to render */
 		GLsizei prepareRender(ShaderPipeline* pipeline);
