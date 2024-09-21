@@ -16,11 +16,30 @@
 #include "TextureLoader.h"
 #include "level/TerrainGenerator.h"
 
+#include "data/registry/Registry.h"
+#include "data/TextureManager.h"
+
+namespace data {
+    extern TextureManager textureManager;
+}
+
+
+
 Game::Game(GLFWwindow* window, float w, float h) : 
     m_window(window), 
     m_mouseState(w, h),
 	m_cam(new Camera(ProjectionType::Perspective))
 {
+
+
+
+    asset::TextureLoader loader;
+    loader.load("resources/textures/blocks/", &data::textureManager);
+
+    registry::Init();
+
+
+
 	m_worlds[0] = lvl::World(new NoiseGenerator());
     m_cam->setPosition(glm::vec3(8, 20, 8));
 	m_cam->lookAt(glm::vec3(0, 0, 0));

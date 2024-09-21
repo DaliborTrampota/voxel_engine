@@ -7,6 +7,8 @@
 
 #include <stb_image.h>
 
+#include "data/TextureManager.h"
+
 namespace fs = std::filesystem;
 
 namespace asset {
@@ -24,7 +26,7 @@ namespace asset {
 	}
 
 
-	void TextureLoader::load(const char* path) {
+	void TextureLoader::load(const char* path, data::TextureManager *manager) {
 
 		glBindTexture(GL_TEXTURE_2D_ARRAY, m_texture);
 
@@ -73,6 +75,8 @@ namespace asset {
 			glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, layer, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
 			//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 			printf("Layer %d: %s\n", layer, p.c_str());
+			manager->add(getTextureName(&p), layer);
+
 			stbi_image_free(data);
 			++layer;
 		}
@@ -82,6 +86,13 @@ namespace asset {
 	{
 		glActiveTexture(GL_TEXTURE0 + 0);
 		glBindTexture(GL_TEXTURE_2D_ARRAY, m_texture);
+	}
+
+	std::string TextureLoader::getTextureName(const std::string *path) const
+	{
+		int idx = path->find_last_of("/") + 1;
+		int count = path->find_last_of(".") - idx;
+		return path->substr(idx, count).c_str();
 	}
 
 

@@ -108,7 +108,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -144,10 +144,11 @@
     <ClCompile Include="libs\stb_image.cpp" />
     <ClCompile Include="src\block\Block.cpp" />
     <ClCompile Include="src\block\BlockData.cpp" />
-    <ClCompile Include="src\block\builder\CubeGeometry.cpp" />
     <ClCompile Include="src\block\builder\Face.cpp" />
     <ClCompile Include="src\block\builder\Geometry.cpp" />
     <ClCompile Include="src\Camera.cpp" />
+    <ClCompile Include="src\data\registry\Registry.cpp" />
+    <ClCompile Include="src\data\TextureManager.cpp" />
     <ClCompile Include="src\data\Vertex.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\level\Chunk.cpp" />
@@ -164,10 +165,11 @@
     <ClInclude Include="libs\stb_image.h" />
     <ClInclude Include="src\block\Block.h" />
     <ClInclude Include="src\block\BlockData.h" />
-    <ClInclude Include="src\block\builder\CubeGeometry.h" />
     <ClInclude Include="src\block\builder\Face.h" />
     <ClInclude Include="src\block\builder\Geometry.h" />
     <ClInclude Include="src\Camera.h" />
+    <ClInclude Include="src\data\registry\Registry.h" />
+    <ClInclude Include="src\data\TextureManager.h" />
     <ClInclude Include="src\data\Vertex.h" />
     <ClInclude Include="src\data\VertexData.h" />
     <ClInclude Include="src\Game.h" />

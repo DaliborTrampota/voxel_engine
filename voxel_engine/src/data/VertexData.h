@@ -55,17 +55,17 @@ namespace data {
 	} };
 
 	const std::array<builder::Face, 6> f_faces = {
-		builder::Face::SquareFace(vertices[1], vertices[5], NORTH, glm::vec2(0, 0), glm::vec2(1, 1)), // North
-		builder::Face::SquareFace(vertices[6], vertices[4], WEST, glm::vec2(0, 0), glm::vec2(1, 1)), // West
-		builder::Face::SquareFace(vertices[7], vertices[3], -NORTH, glm::vec2(0, 0), glm::vec2(1, 1)), // South
-		builder::Face::SquareFace(vertices[0], vertices[2], -WEST, glm::vec2(0, 0), glm::vec2(1, 1)), // East
-		builder::Face::SquareFace(vertices[2], vertices[4], glm::vec3(0, 1, 0), glm::vec2(0, 0), glm::vec2(1, 1)), // Up
-		builder::Face::SquareFace(vertices[0], vertices[6], glm::vec3(0, -1, 0), glm::vec2(0, 0), glm::vec2(1, 1)) // Down
+		builder::Face::SquareFace(vertices[1], vertices[5], NORTH, glm::vec2(0, 0), glm::vec2(1, 1), 0), // North
+		builder::Face::SquareFace(vertices[6], vertices[4], WEST, glm::vec2(0, 0), glm::vec2(1, 1), 0), // West
+		builder::Face::SquareFace(vertices[7], vertices[3], -NORTH, glm::vec2(0, 0), glm::vec2(1, 1), 0), // South
+		builder::Face::SquareFace(vertices[0], vertices[2], -WEST, glm::vec2(0, 0), glm::vec2(1, 1), 0), // East
+		builder::Face::SquareFace(vertices[2], vertices[4], glm::vec3(0, 1, 0), glm::vec2(0, 0), glm::vec2(1, 1), 0), // Up
+		builder::Face::SquareFace(vertices[0], vertices[6], glm::vec3(0, -1, 0), glm::vec2(0, 0), glm::vec2(1, 1), 0) // Down
 	};
 
 	constexpr std::array<glm::vec3, 6> normals = {
 		glm::vec3( 1,  0,  0), // north
-		glm::vec3( 0,  0,  0), // west
+		glm::vec3( 0,  0,  1), // west
 		glm::vec3(-1,  0,  0), // south
 		glm::vec3( 0,  0, -1), // east
 		glm::vec3( 0,  1,  0), // up
