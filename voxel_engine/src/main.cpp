@@ -41,7 +41,7 @@ struct GameWrapper {
     }
     static void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
         glViewport(0, 0, width, height);
-        game->m_cam->resize(width, height);
+        game->m_player.getCamera()->resize(width, height);
     }
     static void errorCallback(int errCode, const char* desc) {
         printf("code = %d, message = %s\n", errCode, desc);
@@ -57,6 +57,7 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); for apple
 
+    const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
     if (window == NULL)
     {
@@ -80,9 +81,14 @@ int main() {
     glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &max_units);
 	printf("Max layers: %d\nMax units: %d\n", max_layers, max_units);
 
+
+
+
+
+
     Game game(window, SCR_WIDTH, SCR_HEIGHT);
     GameWrapper gameWrapper(&game);
-    game.m_cam->mouseLock(window, true);
+    game.mouseLock(window, true);
 
     game.start();
   

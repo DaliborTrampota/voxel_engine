@@ -29,6 +29,8 @@ public:
 
 	void registerAttribute(uint32_t loc, uint32_t size, GLenum type, uint32_t stride, uint32_t offset = 0);
 
+	void setViewMatrix() const;
+
     void setBool(const std::string& name, bool value) const;
 	void setInt(const std::string& name, int value) const;
 	void setFloat(const std::string& name, float value) const;

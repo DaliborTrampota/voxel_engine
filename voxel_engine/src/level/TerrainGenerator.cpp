@@ -8,24 +8,33 @@ namespace data {
 	extern Registry<Block> Blocks;
 }
 
-int NoiseGenerator::getVoxel(glm::ivec3 pos)
+int NoiseGenerator::getVoxel(glm::ivec3 pos) const
 {
 	int height = getHeight(glm::ivec2(pos.x, pos.z));
-
-	//if (pos.y == 10 && pos.x == 10 && pos.z == 10)
-	//	return 1;
-	//return 0;
-	if (pos.y == height)
-		return 1;
-	if (pos.y < height)
-		return 2;
-	return 0;
+	return getVoxel(pos, height);
 
 }
 
-int NoiseGenerator::getHeight(glm::ivec2 pos)
+int NoiseGenerator::getHeight(glm::ivec2 pos) const
 {
 	return static_cast<int>(noise.noise2D_01(pos.x * m_scale, pos.y * m_scale) * 5) + m_minHeight;
+}
+
+int NoiseGenerator::getVoxel(glm::ivec3 pos, int height) const
+{
+	int dirtHeight = static_cast<int>(noise.noise2D_01(pos.x * m_scale, pos.y * m_scale) * 2) + 3;
+	if (pos.y == height + 1 && glm::linearRand(.0f, 1.0f) < 0.4f)
+		return data::Blocks.get("pyramid").getID();
+
+	if (pos.y > height)
+		return 0;
+
+	unsigned int blockID;
+	if (pos.y == height) blockID = data::Blocks.get("grass").getID();
+	else if (pos.y > dirtHeight) blockID = data::Blocks.get("dirt").getID();
+	else blockID = data::Blocks.get("stone").getID();
+
+	return blockID;
 }
 
 
@@ -37,22 +46,9 @@ void NoiseGenerator::populate(std::vector<std::vector<std::vector<T>>> &data, gl
 		for (int z = 0; z < dims.z; z++)
 		{
 			int height = getHeight(glm::vec2(x + posOffset.x, z + posOffset.z));
-			int dirtHeight = height - glm::linearRand(3, 5);
-
 			for (int y = 0; y < dims.y; y++)
 			{
-				if (y == height + 1 && glm::linearRand(.0f, 1.0f) < 0.4f)
-					data[x][y][z] = data::Blocks.get("pyramid").getID();
-
-				if (y > height)
-					continue;
-
-				unsigned int blockID;
-				if(y == height) blockID = data::Blocks.get("grass").getID();
-				else if (y > dirtHeight) blockID = data::Blocks.get("dirt").getID();
-				else blockID = data::Blocks.get("stone").getID();
-					
-				data[x][y][z] = blockID;
+				data[x][y][z] = getVoxel(glm::ivec3(x, y, z) + posOffset, height);
 			}
 		}
 	}

@@ -7,16 +7,17 @@
 struct GLFWwindow;
 
 
-enum class ProjectionType
-{
-	Perspective,
-	Orthographic
-};
 
 class Camera
 {
-
 public:
+
+	enum class ProjectionType
+	{
+		Perspective,
+		Orthographic
+	};
+
 	Camera(ProjectionType type);
 	Camera() : Camera(ProjectionType::Perspective) {};
 
@@ -27,10 +28,9 @@ public:
 	void rotate(float dx, float dy, bool constrainPitch = true);
 	void resize(int width, int height);
 
-	void mouseLock(GLFWwindow* window, bool state);
-
 	glm::mat4 getView() const;
 	glm::mat4 getProjection() const { return m_projection; };
+
 
 private:
 
@@ -50,5 +50,6 @@ private:
 
 	void updateVectors();
 
+	friend class Player;
 };
 

@@ -32,32 +32,27 @@ lvl::Chunk::Chunk(World* world, ChunkID coords) :
 	m_coords(coords),
 	m_vertexData(GL_DYNAMIC_DRAW)
 {
-	populate();
+	//populate();
+}
+
+lvl::Chunk::~Chunk()
+{
+	if (m_genThread.joinable())
+		m_genThread.join();
+}
+
+void Chunk::generate()
+{
+	m_genThread = std::thread(&Chunk::populate, this);
+	//m_genThread.join();
 }
 
 void Chunk::populate()
 {
 	glm::ivec3 posOffset = m_coords * ChunkDim;
 	m_data = VoxelData(ChunkDim.x, std::vector<std::vector<T>>(ChunkDim.y, std::vector<T>(ChunkDim.z, 0)));
-	m_world->generator->populate(m_data, posOffset);
-
-	/*for (int x = 0; x < ChunkDim.x; x++)
-	{
-
-		m_data.push_back(std::vector<std::vector<T>>());
-		for (int z = 0; z < ChunkDim.z; z++)
-		{
-			m_data[x].push_back(std::vector<T>());
-			int height = m_world->generator->getHeight(glm::vec2(x + posOffset.x, z + posOffset.z));
-
-			for (int y = 0; y < ChunkDim.y; y++)
-			{
-				glm::ivec3 pos(x, y, z);
-				int blockID = m_world->generator->getVoxel(pos + posOffset);
-				m_data[x][y].push_back(blockID);
-			}
-		}
-	}*/
+	m_world->m_generator->populate(m_data, posOffset);
+	generateMesh();
 }
 
 void Chunk::generateMesh()
@@ -92,16 +87,22 @@ void Chunk::generateMesh()
 	}		
 
 	m_vertexData.m_data.shrink_to_fit();
+	m_generated = true;
 }
 
 data::Block lvl::Chunk::getBlock(glm::ivec3 pos) const
 {
-	T blockID = m_data[pos.x][pos.y][pos.z];
+	T blockID = m_data.size() == 0 
+		? m_world->m_generator->getVoxel(pos + m_coords * ChunkDim) 
+		: m_data[pos.x][pos.y][pos.z];
 	return data::Blocks.get(blockID);
 }
 
 GLsizei lvl::Chunk::prepareRender(ShaderPipeline* pipeline)
 {
+	if(m_vertexData.length() == 0 || !m_generated)
+		return 0;
+
 	m_vertexData.bind(pipeline);
 
 	glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(m_coords * ChunkDim));

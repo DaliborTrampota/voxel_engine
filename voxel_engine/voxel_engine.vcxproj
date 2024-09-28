@@ -157,6 +157,7 @@
     <ClCompile Include="src\level\TerrainGenerator.cpp" />
     <ClCompile Include="src\level\World.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\structures\Attributes.cpp" />
     <ClCompile Include="src\structures\Shader.cpp" />
     <ClCompile Include="src\structures\ShaderPipeline.cpp" />
@@ -165,6 +166,7 @@
   <ItemGroup>
     <ClInclude Include="libs\PerlinNoise.h" />
     <ClInclude Include="libs\stb_image.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="src\block\Block.h" />
     <ClInclude Include="src\block\BlockData.h" />
     <ClInclude Include="src\block\builder\BlockTextures.h" />
@@ -180,6 +182,7 @@
     <ClInclude Include="src\level\Chunk.h" />
     <ClInclude Include="src\level\TerrainGenerator.h" />
     <ClInclude Include="src\level\World.h" />
+    <ClInclude Include="src\Player.h" />
     <ClInclude Include="src\structures\Attributes.h" />
     <ClInclude Include="src\structures\Shader.h" />
     <ClInclude Include="src\structures\ShaderPipeline.h" />

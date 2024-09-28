@@ -24,6 +24,7 @@ void Attributes::bind(ShaderPipeline* pipeline)
 	pipeline->registerAttribute(1, 3, GL_FLOAT, 9, 3);// offsetof(vert::Vertex, m_normal));
 	pipeline->registerAttribute(2, 2, GL_FLOAT, 9, 6);// offsetof(vert::Vertex, m_uv));
 	pipeline->registerAttribute(3, 1, GL_INT, 9, 8);// offsetof(vert::Vertex, m_data));
+
 }
 
 void Attributes::addFace(builder::Face& f)

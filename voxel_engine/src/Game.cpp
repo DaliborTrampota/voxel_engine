@@ -27,8 +27,7 @@ namespace data {
 
 Game::Game(GLFWwindow* window, float w, float h) : 
     m_window(window), 
-    m_mouseState(w, h),
-	m_cam(new Camera(ProjectionType::Perspective))
+    m_mouseState(w, h)
 {
 
 
@@ -41,12 +40,7 @@ Game::Game(GLFWwindow* window, float w, float h) :
 
 
 	m_worlds[0] = lvl::World(new NoiseGenerator());
-    m_cam->setPosition(glm::vec3(8, 20, 8));
-	m_cam->lookAt(glm::vec3(0, 0, 0));
-}
-
-void Game::update(float dt)
-{
+	m_player.spawn(&m_worlds[0]);
 }
 
 void Game::processInput(GLFWwindow* window, float dt)
@@ -55,13 +49,13 @@ void Game::processInput(GLFWwindow* window, float dt)
         glfwSetWindowShouldClose(window, true);
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        m_cam->move(GLFW_KEY_W, dt);
+        m_player.move(GLFW_KEY_W, dt);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        m_cam->move(GLFW_KEY_S, dt);
+        m_player.move(GLFW_KEY_S, dt);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        m_cam->move(GLFW_KEY_A, dt);
+        m_player.move(GLFW_KEY_A, dt);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        m_cam->move(GLFW_KEY_D, dt);
+        m_player.move(GLFW_KEY_D, dt);
 }
 
 void Game::processMouse(GLFWwindow* window, double xposIn, double yposIn)
@@ -82,12 +76,15 @@ void Game::processMouse(GLFWwindow* window, double xposIn, double yposIn)
     m_mouseState.lastX = xpos;
     m_mouseState.lastY = ypos;
 
-    m_cam->rotate(xoffset, yoffset);
+    m_player.rotate(xoffset, yoffset);
 }
 
 Game::~Game()
 {
-	delete m_cam;
+}
+
+void Game::update(float dt)
+{
 }
 
 void Game::start()
@@ -113,13 +110,13 @@ void Game::start()
 
 
     // uncomment this call to draw in wireframe polygons.
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 
 
 
     pipeline.use();
-    pipeline.setCamera(m_cam);
+    pipeline.setCamera(m_player.getCamera());
 
     //loader.bind(0);
     pipeline.setInt("texArray", 0);
@@ -154,12 +151,8 @@ void Game::start()
 
 
         // RENDERING HERE
-        glm::mat4 view = m_cam->getView();
-        pipeline.setMat4("view", view);
-
-
+        pipeline.setViewMatrix();
         getCurrentWorld().render(&pipeline);
-        //glDrawArrays(GL_TRIANGLES, 0, 36);
 
         GLenum err;
         while ((err = glGetError()) != GL_NO_ERROR)
@@ -175,4 +168,9 @@ void Game::start()
     /*glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);*/
     glDeleteProgram(pipeline.ID);
+}
+
+void Game::mouseLock(GLFWwindow* window, bool state) const
+{
+    glfwSetInputMode(window, GLFW_CURSOR, state ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
 }

@@ -8,6 +8,8 @@
 #include "block/BlockData.h"
 #include "block/Block.h"
 
+#include <thread>
+
 class ShaderPieline;
 
 
@@ -33,10 +35,14 @@ namespace lvl {
 	public:
 
 		Chunk(World* world, ChunkID coords);
-		//~Chunk();
+		Chunk(Chunk&) = delete;
+		Chunk(Chunk&&) = delete;
+		~Chunk();
 
 		void populate();
 		void generateMesh();
+		void generate();
+		bool generated() const { return m_generated; }
 
 		data::Block getBlock(glm::ivec3 pos) const;
 
@@ -52,6 +58,9 @@ namespace lvl {
 		//std::unordered_map<lvl::ChunkID, data::BlockData> m_metadata;
 
 		Attributes m_vertexData;
+
+		std::thread m_genThread;
+		bool m_generated = false;
 	};
 
 

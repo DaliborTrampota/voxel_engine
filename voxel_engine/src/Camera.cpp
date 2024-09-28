@@ -68,11 +68,6 @@ void Camera::resize(int width, int height)
 	m_projection = glm::perspective(glm::radians(45.0f), float(width) / float(height), 0.1f, 10000.0f);
 }
 
-void Camera::mouseLock(GLFWwindow* window, bool state)
-{
-	glfwSetInputMode(window, GLFW_CURSOR, state ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
-}
-
 glm::mat4 Camera::getView() const
 {
 	return glm::lookAt(m_position, m_position + m_front, m_up);

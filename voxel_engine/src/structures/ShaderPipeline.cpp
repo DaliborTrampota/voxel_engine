@@ -57,6 +57,12 @@ void ShaderPipeline::registerAttribute(uint32_t loc, uint32_t size, GLenum type,
 	glEnableVertexAttribArray(loc);
 }
 
+void ShaderPipeline::setViewMatrix() const
+{
+	glm::mat4 view = m_activeCamera->getView();
+	setMat4("view", view);
+}
+
 void ShaderPipeline::setBool(const std::string& name, bool value) const
 {
     glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value);
