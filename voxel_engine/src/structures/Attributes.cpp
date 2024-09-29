@@ -17,6 +17,8 @@ Attributes::Attributes(GLint drawType = GL_STATIC_DRAW) :
 
 void Attributes::bind(ShaderPipeline* pipeline)
 {
+	if(!m_buffer)
+		glGenBuffers(1, &m_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, m_buffer);
     glBufferData(GL_ARRAY_BUFFER, m_data.size() * sizeof(data::Vertex), m_data.data(), m_drawType);
 

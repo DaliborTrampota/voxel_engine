@@ -1,6 +1,7 @@
 #include "Player.h"
 
 #include <thread>
+#include <functional>
 
 #include "Camera.h"
 #include "level/World.h"
@@ -15,6 +16,7 @@ Player::Player() :
 
 Player::~Player()
 {
+	m_viewDistThread.join();
 	delete m_camera;
 }
 
@@ -24,8 +26,7 @@ void Player::spawn(lvl::World* world)
 	m_camera->setPosition(m_position);
 	m_camera->lookAt(glm::vec3(lvl::ChunkDim.x / 2, 0, lvl::ChunkDim.z / 2));
 
-	world->updateViewDistance(m_position);
-	//m_viewDistThread = std::thread(&lvl::World::updateViewDistance, world, m_position);
+	m_viewDistThread = std::thread(&lvl::World::updateViewDistance, world, m_position);
 }
 
 void Player::move(int key, float dt)

@@ -43,8 +43,9 @@ lvl::Chunk::~Chunk()
 
 void Chunk::generate()
 {
-	m_genThread = std::thread(&Chunk::populate, this);
+	//m_genThread = std::thread(&Chunk::populate, this);
 	//m_genThread.join();
+
 }
 
 void Chunk::populate()

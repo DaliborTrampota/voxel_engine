@@ -4,6 +4,9 @@
 #include "CoordUtils.h"
 #include "block/Block.h"
 
+#include <mutex>
+#include <queue>
+
 
 using namespace lvl;
 
@@ -50,6 +53,8 @@ bool lvl::World::checkBlock(glm::vec3 pos, data::Block& curBlock, glm::ivec3 dir
 
 void lvl::World::updateViewDistance(glm::vec3 pos)
 {
+	std::queue<Chunk*> toLoad;
+
 	ChunkID chunkCoords = util::extractChunkCoords(pos);
 	int viewDistance = 5;
 	int yViewDistance = 3;
@@ -67,19 +72,44 @@ void lvl::World::updateViewDistance(glm::vec3 pos)
 				{
 					Chunk* chunk = new Chunk(this, newCoords);
 					m_chunks[newCoords] = chunk;
-					chunk->generate();
-					m_loadedChunks.insert(newCoords);
+					toLoad.push(chunk);
 				}
 			}
 		}
 	}
+
+	std::mutex genMutex;
+	auto generateChunk = [this, &toLoad, &genMutex]() {
+
+		while (true)
+		{
+			Chunk* chunk = nullptr;
+			{
+				std::lock_guard<std::mutex> lock(genMutex);
+				if (toLoad.empty()) return;
+				chunk = toLoad.front();
+				toLoad.pop();
+			}
+			if (chunk) {
+				chunk->populate();
+				m_loadedChunks.insert(chunk->getID());
+			}
+		}
+	};
+
+	std::thread gen1(generateChunk);
+	std::thread gen2(generateChunk);
+
+	gen1.join();
+	gen2.join();
 }
 
 void lvl::World::render(ShaderPipeline* pipeline)
 {
-	for (auto& [pos, chunk] : m_chunks)
+	//for (auto& [pos, chunk] : m_chunks)
+	for (auto& pos : m_loadedChunks)
 	{
-		size_t vertices = chunk->prepareRender(pipeline);
+		size_t vertices = m_chunks[pos]->prepareRender(pipeline);
 		if (!vertices)
 			continue;
 		glDrawArrays(GL_TRIANGLES, 0, vertices);

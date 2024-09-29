@@ -39,6 +39,7 @@ namespace lvl {
 		Chunk(Chunk&&) = delete;
 		~Chunk();
 
+		ChunkID getID() const { return m_coords; }
 		void populate();
 		void generateMesh();
 		void generate();
