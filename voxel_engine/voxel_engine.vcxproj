@@ -144,7 +144,6 @@
     <ClCompile Include="libs\stb_image.cpp" />
     <ClCompile Include="src\block\Block.cpp" />
     <ClCompile Include="src\block\BlockData.cpp" />
-    <ClCompile Include="src\block\builder\BlockTextures.cpp" />
     <ClCompile Include="src\block\builder\Face.cpp" />
     <ClCompile Include="src\block\builder\Geometry.cpp" />
     <ClCompile Include="src\Camera.cpp" />
@@ -169,7 +168,6 @@
     <ClInclude Include="Player.h" />
     <ClInclude Include="src\block\Block.h" />
     <ClInclude Include="src\block\BlockData.h" />
-    <ClInclude Include="src\block\builder\BlockTextures.h" />
     <ClInclude Include="src\block\builder\Face.h" />
     <ClInclude Include="src\block\builder\Geometry.h" />
     <ClInclude Include="src\Camera.h" />

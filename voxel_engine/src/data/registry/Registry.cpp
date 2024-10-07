@@ -2,7 +2,6 @@
 
 #include "block/Block.h"
 #include "block/builder/Geometry.h"
-#include "block/builder/BlockTextures.h"
 #include "data/TextureManager.h"
 
 namespace data {

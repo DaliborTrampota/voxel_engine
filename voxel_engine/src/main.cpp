@@ -8,9 +8,6 @@
 #include "Game.h"
 #include "Camera.h"
 
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
-
 
 
 //void printMat4(glm::mat4 mat) {
@@ -57,8 +54,16 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); for apple
 
-    const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+    GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+
+    int w, h;
+    glfwGetMonitorWorkarea(monitor, nullptr, nullptr, &w, &h);
+
+    w *= 0.6;
+    h *= 0.6;
+
+    const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+    GLFWwindow* window = glfwCreateWindow(w, h, "LearnOpenGL", NULL, NULL);
     if (window == NULL)
     {
         printf("Failed to create GLFW window");
@@ -82,11 +87,7 @@ int main() {
 	printf("Max layers: %d\nMax units: %d\n", max_layers, max_units);
 
 
-
-
-
-
-    Game game(window, SCR_WIDTH, SCR_HEIGHT);
+    Game game(window, w, h);
     GameWrapper gameWrapper(&game);
     game.mouseLock(window, true);
 

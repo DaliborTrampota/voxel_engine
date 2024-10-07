@@ -100,9 +100,6 @@
     <ClCompile Include="src\structures\Attributes.cpp">
       <Filter>Source Files\data</Filter>
     </ClCompile>
-    <ClCompile Include="src\block\builder\BlockTextures.cpp">
-      <Filter>Source Files\block\builder</Filter>
-    </ClCompile>
     <ClCompile Include="src\data\TextureManager.cpp">
       <Filter>Source Files\data</Filter>
     </ClCompile>
@@ -167,9 +164,6 @@
     </ClInclude>
     <ClInclude Include="src\structures\Attributes.h">
       <Filter>Source Files\data</Filter>
-    </ClInclude>
-    <ClInclude Include="src\block\builder\BlockTextures.h">
-      <Filter>Source Files\block\builder</Filter>
     </ClInclude>
     <ClInclude Include="src\data\TextureManager.h">
       <Filter>Source Files\data</Filter>
