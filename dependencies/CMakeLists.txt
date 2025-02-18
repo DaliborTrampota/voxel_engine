@@ -7,6 +7,7 @@ project(Dependencies)
 
 add_library(glad STATIC glad.c)
 add_subdirectory(include/glm)
+add_subdirectory(glfw)
 
 target_include_directories(glad PUBLIC include/)
 target_include_directories(glm INTERFACE include/)
