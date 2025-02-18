@@ -18,6 +18,6 @@ add_executable(voxel_engine ./src/main.cpp)
 
 target_link_libraries(voxel_engine PRIVATE glad)
 target_link_libraries(voxel_engine PRIVATE glfw)
-#target_link_libraries(voxel_engine PRIVATE glm)
+target_link_libraries(voxel_engine PRIVATE glm)
 
 target_include_directories(voxel_engine PUBLIC "${PROJECT_BINARY_DIR}") 
