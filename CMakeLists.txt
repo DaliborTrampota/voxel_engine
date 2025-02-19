@@ -13,11 +13,19 @@ project(voxel_engine VERSION 1.0)
 
 add_subdirectory(dependencies)
 
-add_executable(voxel_engine ./src/main.cpp)
+source_group(TREE ./src)
 
+add_executable(Game WIN32 src/main.cpp)
 
-target_link_libraries(voxel_engine PRIVATE glad)
-target_link_libraries(voxel_engine PRIVATE glfw)
-target_link_libraries(voxel_engine PRIVATE glm)
+file(GLOB_RECURSE SHADER_FILES shaders/*.glsl)
+# target_sources(Game PRIVATE ${SHADER_FILES})
+add_custom_target(Shaders SOURCES ${SHADER_FILES})
+source_group("Shaders" FILES ${SHADER_FILES})
 
-target_include_directories(voxel_engine PUBLIC "${PROJECT_BINARY_DIR}") 
+target_link_libraries(Game PRIVATE glad)
+target_link_libraries(Game PRIVATE glfw)
+target_link_libraries(Game PRIVATE glm)
+target_link_libraries(Game PRIVATE tools)
+
+# target_include_directories(Game PRIVATE dependencies/include)
+target_include_directories(Game PUBLIC "${PROJECT_BINARY_DIR}") 
