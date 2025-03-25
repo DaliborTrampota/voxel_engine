@@ -122,6 +122,7 @@ void Game::start()
 
     glm::mat4 model = glm::mat4(1.0f);
     pipeline.setMat4("model", model);
+    pipeline.setMat4("projection", plrCamera->getProjection());
 
 	float fpsCounter = 5.0f;
     int samples = 0;
