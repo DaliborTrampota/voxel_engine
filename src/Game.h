@@ -2,27 +2,30 @@
 
 #include <unordered_map>
 
+#include <structures/GLEventSite.h>
+
 #include "level/World.h"
 #include "Player.h"
 
 struct GLFWwindow;
-
+class GraphicsAPI;
 class Camera;
+class Event;
 
 struct MouseState
 {
 	MouseState() = delete;
-	MouseState(float width, float height) : lastX(width / 2.0f), lastY(height / 2.0f), firstMouse(true) {}
+	MouseState(glm::ivec2 dims) : lastX(dims.x / 2.0f), lastY(dims.y / 2.0f), firstMouse(true) {}
 	float lastX, lastY;
 	bool firstMouse;
 };
 
-class Game
+class Game : public GLEventSite
 {
 
 public:
 	Game() = delete;
-	Game(GLFWwindow* window, float w, float h);
+	Game(std::unique_ptr<GraphicsAPI> gAPI, glm::ivec2 dims);
 	~Game();
 
 	void start();
@@ -35,10 +38,13 @@ public:
 	void processMouse(GLFWwindow* window, double xposIn, double yposIn);
 	void mouseLock(GLFWwindow* window, bool state) const;
 
+protected:    
+    void windowResizeEvent(ResizeEvent* pEvent) override;
+    void mouseMoveEvent(MouseEvent* pEvent) override;;
 	//data::TextureManager* getTextureManager() { return &m_textureManager; 
 
 private:
-
+	std::unique_ptr<GraphicsAPI> m_api;
 	GLFWwindow* m_window;
 	MouseState m_mouseState;
 

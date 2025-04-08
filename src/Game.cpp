@@ -9,6 +9,8 @@
 
 #include "structures/Shader.h"
 #include "structures/ShaderPipeline.h"
+#include <structures/GraphicsAPI.h>
+#include <structures/GLEvents.h>
 
 #include "data/VertexData.h"
 
@@ -25,20 +27,18 @@ namespace data {
 
 
 
-Game::Game(GLFWwindow* window, float w, float h) : 
-    m_window(window), 
-    m_mouseState(w, h)
+Game::Game(std::unique_ptr<GraphicsAPI> gAPI, glm::ivec2 dims) :
+    m_api(std::move(gAPI)),
+    m_mouseState(dims),
+    m_window(m_api.get()->window())
 {
-
-
-
     asset::TextureLoader loader;
     loader.load("resources/textures/blocks/", &data::textureManager);
     //loader.bind();
     registry::Init();
 
-
-
+    m_api->subscribe(this);
+    
 	m_worlds[0] = lvl::World(new NoiseGenerator());
 	m_player.spawn(&m_worlds[0]);
 }
@@ -89,7 +89,6 @@ void Game::update(float dt)
 
 void Game::start()
 {
-
 
 
     ShaderPipeline pipeline;
@@ -149,16 +148,15 @@ void Game::start()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
         // RENDERING HERE
         pipeline.setViewMatrix(plrCamera->getView());
         getCurrentWorld().render(&pipeline);
 
-        /*GLenum err;
+        GLenum err;
         while ((err = glGetError()) != GL_NO_ERROR)
         {
 			printf("OpenGL error: %d\n", err);
-        }*/
+        }
 
         glfwSwapBuffers(m_window);
         glfwPollEvents();
@@ -173,4 +171,16 @@ void Game::start()
 void Game::mouseLock(GLFWwindow* window, bool state) const
 {
     glfwSetInputMode(window, GLFW_CURSOR, state ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+}
+
+void Game::windowResizeEvent(ResizeEvent* pEvent)
+{
+    glViewport(0, 0, pEvent->width, pEvent->height);
+    m_player.getCamera()->resize(pEvent->width, pEvent->height);
+    printf("resize\n");
+}
+
+void Game::mouseMoveEvent(MouseEvent* pEvent)
+{
+    processMouse(m_window, pEvent->x, pEvent->y);
 }

@@ -1,6 +1,7 @@
 #include "TextureLoader.h"
 
 #include <glad/glad.h>
+
 #include <filesystem>
 #include <vector>
 #include <string>

@@ -22,7 +22,7 @@ add_executable(Game WIN32 src/main.cpp)
 
 
 set(CORE
-    src/main.cpp    
+    src/main.cpp src/Globals.h 
     src/Camera.cpp src/Camera.h
     src/Game.cpp src/Game.h
     src/CoordUtils.cpp src/CoordUtils.h
