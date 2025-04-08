@@ -42,7 +42,7 @@ int main() {
 
     gAPI.get()->init();
 
-    gAPI.get()->mouseLock(true);
+    //gAPI.get()->mouseLock(true);
     Game game(std::move(gAPI), gAPI.get()->getWindowSize());
 
     game.start();

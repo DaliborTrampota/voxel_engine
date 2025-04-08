@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include <structures/ThreadPool.h>
 #include "Chunk.h"
 
 class TerrainGenerator;
@@ -40,6 +41,8 @@ namespace lvl {
 		std::unordered_map<ChunkID, Chunk*> m_chunks;
 		std::unordered_set<ChunkID> m_loadedChunks;
 		TerrainGenerator* m_generator;
+
+		ThreadPool<>* m_genPool = nullptr;
 
 		friend class Chunk;
 	};

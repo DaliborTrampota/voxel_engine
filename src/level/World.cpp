@@ -14,10 +14,14 @@ World::World(TerrainGenerator* gen) : m_generator(gen)
 {
 	glGenVertexArrays(1, &m_VAO);
 	glBindVertexArray(m_VAO);
+	m_genPool = new ThreadPool<>(8);
 }
 
 lvl::World::~World()
 {
+	printf("Term %d\n", !!m_genPool);
+	/*if(m_genPool)
+		m_genPool->stop();*/
 	for (auto& [pos, chunk] : m_chunks)
 	{
 		delete chunk;
@@ -58,6 +62,7 @@ void lvl::World::updateViewDistance(glm::vec3 pos)
 	ChunkID chunkCoords = util::extractChunkCoords(pos);
 	int viewDistance = 5;
 	int yViewDistance = 3;
+
 	for (int x = chunkCoords.x - viewDistance; x <= chunkCoords.x + viewDistance; ++x)
 	{
 		for (int y = chunkCoords.y - yViewDistance; y <= chunkCoords.y + yViewDistance; ++y)
@@ -70,38 +75,45 @@ void lvl::World::updateViewDistance(glm::vec3 pos)
 					//chunk->setRender(true)
 				} else if (!m_chunks.contains(newCoords))
 				{
-					Chunk* chunk = new Chunk(this, newCoords);
-					m_chunks[newCoords] = chunk;
-					toLoad.push(chunk);
+
+					m_genPool->add([this, newCoords] {
+						Chunk* chunk = new Chunk(this, newCoords);
+						m_chunks[newCoords] = chunk;
+						//toLoad.push(chunk);
+						chunk->populate();
+						printf("Populating chunk\n");
+						m_loadedChunks.insert(chunk->getID());
+						});
 				}
 			}
 		}
 	}
 
-	std::mutex genMutex;
-	auto generateChunk = [this, &toLoad, &genMutex]() {
+	//std::mutex genMutex;
+	//auto generateChunk = [this, &toLoad, &genMutex]() {
 
-		while (true)
-		{
-			Chunk* chunk = nullptr;
-			{
-				std::lock_guard<std::mutex> lock(genMutex);
-				if (toLoad.empty()) return;
-				chunk = toLoad.front();
-				toLoad.pop();
-			}
-			if (chunk) {
-				chunk->populate();
-				m_loadedChunks.insert(chunk->getID());
-			}
-		}
-	};
+	//	while (true)
+	//	{
+	//		Chunk* chunk = nullptr;
+	//		{
+	//			std::lock_guard<std::mutex> lock(genMutex);
+	//			if (toLoad.empty()) return;
+	//			chunk = toLoad.front();
+	//			toLoad.pop();
+	//		}
+	//		if (chunk) {
+	//			chunk->populate();
+	//			m_loadedChunks.insert(chunk->getID());
+	//		}
+	//	}
+	//};
 
-	std::thread gen1(generateChunk);
-	std::thread gen2(generateChunk);
+	//
+	//std::thread gen1(generateChunk);
+	//std::thread gen2(generateChunk);
 
-	gen1.join();
-	gen2.join();
+	//gen1.join();
+	//gen2.join();
 }
 
 void lvl::World::render(ShaderPipeline* pipeline)
