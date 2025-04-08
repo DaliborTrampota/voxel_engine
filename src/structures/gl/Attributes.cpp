@@ -1,8 +1,8 @@
 #include "Attributes.h"
 
-#include <glad/glad.h>
-
 #include "ShaderPipeline.h"
+
+#include "Globals.h"
 
 #include "data/Vertex.h"
 #include "block/builder/Face.h"
@@ -12,11 +12,14 @@ Attributes::Attributes(GLint drawType = GL_STATIC_DRAW) :
 	m_drawType(drawType),
 	m_elements(0)
 {
-    glGenBuffers(1, &m_buffer);
+    //glGenBuffers(1, &m_buffer); fails as its from different thread
+	//GLenum err = glGetError();
+	//assert(err == GL_NO_ERROR);
 }
 
 void Attributes::bind(ShaderPipeline* pipeline)
 {
+	GL_GUARD
 	if(!m_buffer)
 		glGenBuffers(1, &m_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, m_buffer);

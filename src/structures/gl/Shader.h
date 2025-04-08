@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glad/glad.h>
+#include "../Globals.h"
 
 class Shader
 {
@@ -10,6 +11,7 @@ public:
 	Shader(const char* path, GLenum shaderType);
 	Shader() = default;
 	~Shader() {
+		GL_GUARD
 		glDeleteShader(ID);
 	}
 };

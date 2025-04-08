@@ -2,16 +2,19 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
+#include "../Globals.h"
 #include "Shader.h"
 
 ShaderPipeline::ShaderPipeline(std::string name)
 {
+	GL_GUARD
     ID = glCreateProgram();
 	this->name = name;
 }
 
 bool ShaderPipeline::registerShader(GLenum type, Shader shader)
 {
+	GL_GUARD
 	glAttachShader(ID, shader.ID);
 	if (shaders.find(type) != shaders.end()) return false;
 	shaders[type] = shader;
@@ -20,6 +23,7 @@ bool ShaderPipeline::registerShader(GLenum type, Shader shader)
 
 bool ShaderPipeline::link()
 {
+	GL_GUARD
     glLinkProgram(ID);
 
 	for (auto& shader : shaders)
@@ -39,12 +43,14 @@ bool ShaderPipeline::link()
 
 void ShaderPipeline::use()
 {
+	GL_GUARD
 	glUseProgram(ID);
 }
 
 /* @param stride If tightly packed then should be equal to size*/
 void ShaderPipeline::registerAttribute(uint32_t loc, uint32_t size, GLenum type, uint32_t stride, uint32_t offset)
 {
+	GL_GUARD
 	auto typeSize = sizeOfType(type);
 	glVertexAttribPointer(loc, size, type, GL_FALSE, stride * typeSize, (void*)(offset * typeSize)); // always as floats in the shader (check glVertexAttribIPointer for ints and glVertexAttribLPointer for doubles)
 	glEnableVertexAttribArray(loc);

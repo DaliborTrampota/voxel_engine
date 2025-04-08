@@ -6,6 +6,7 @@
 #include <structures/GLEvents.h>
 
 
+std::thread::id glContextID;
 
 void GraphicsAPI::init() {
 

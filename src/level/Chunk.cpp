@@ -3,8 +3,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "structures/Attributes.h"
-#include "structures/ShaderPipeline.h"
+#include "structures/gl/Attributes.h"
+#include "structures/gl/ShaderPipeline.h"
 
 #include "data/VertexData.h"
 #include "data/Vertex.h"

@@ -7,8 +7,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "structures/Shader.h"
-#include "structures/ShaderPipeline.h"
+#include "structures/gl/Shader.h"
+#include "structures/gl/ShaderPipeline.h"
 #include <structures/GraphicsAPI.h>
 #include <structures/GLEvents.h>
 
@@ -152,11 +152,11 @@ void Game::start()
         pipeline.setViewMatrix(plrCamera->getView());
         getCurrentWorld().render(&pipeline);
 
-        GLenum err;
-        while ((err = glGetError()) != GL_NO_ERROR)
-        {
-			printf("OpenGL error: %d\n", err);
-        }
+   //     GLenum err;
+   //     while ((err = glGetError()) != GL_NO_ERROR)
+   //     {
+			//printf("OpenGL error: %d\n", err);
+   //     }
 
         glfwSwapBuffers(m_window);
         glfwPollEvents();

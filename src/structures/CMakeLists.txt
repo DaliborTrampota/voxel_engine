@@ -1,9 +1,6 @@
 
 
-add_library(Structures
-    Attributes.cpp Attributes.h
-    Shader.cpp Shader.h
-    ShaderPipeline.cpp ShaderPipeline.h
+add_library(Structures STATIC
     Globals.h
     GraphicsAPI.cpp GraphicsAPI.h CallbackWrapper.h
 
@@ -13,6 +10,10 @@ add_library(Structures
     GLEventSite.h GLEvents.h
     GLEventSource.h GLEventSource.cpp
 
+    gl/Attributes.cpp gl/Attributes.h
+    gl/Shader.cpp gl/Shader.h
+    gl/ShaderPipeline.cpp gl/ShaderPipeline.h
+    ThreadPool.h
 )
 
 target_link_libraries(Structures PRIVATE glfw)

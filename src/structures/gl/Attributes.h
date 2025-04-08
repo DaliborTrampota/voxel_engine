@@ -1,8 +1,8 @@
 #pragma once
 
-#include <glad/glad.h>
 #include <vector>
 
+#include <glad/glad.h>
 #include <data/Vertex.h>
 
 class ShaderPipeline;
@@ -34,7 +34,7 @@ struct Attributes {
 	std::vector<data::Vertex> m_data;
 
 private:
-	unsigned int m_buffer;
+	unsigned int m_buffer = 0;
 	GLint m_drawType;
 	int m_elements;
 };

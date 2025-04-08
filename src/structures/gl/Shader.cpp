@@ -5,6 +5,7 @@
 
 Shader::Shader(const char* path, GLenum shaderType)
 {
+	GL_GUARD
 	ID = glCreateShader(shaderType);
 
 	std::ifstream R(path);

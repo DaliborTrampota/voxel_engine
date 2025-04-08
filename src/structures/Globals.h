@@ -2,7 +2,7 @@
 
 #include <thread>
 
-static std::thread::id glContextID;
+extern std::thread::id glContextID;
 
 #define NO_THREAD_LOG
 

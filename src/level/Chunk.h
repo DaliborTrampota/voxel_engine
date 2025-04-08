@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <glm/glm.hpp>
 
-#include "structures/Attributes.h"
+#include "structures/gl/Attributes.h"
 #include "block/BlockData.h"
 #include "block/Block.h"
 
