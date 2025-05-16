@@ -3,6 +3,8 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
+#include <stdexcept>
+
 #include "Globals.h"
 #include "gl/CallbackWrapper.h"
 #include "gl/GLEvents.h"
@@ -11,13 +13,53 @@ using namespace gl;
 
 std::thread::id glContextID;
 
+
+namespace {
+    const char* getDebugSource(GLenum source) {
+        switch (source) {
+        case GL_DEBUG_SOURCE_API:             return "API";
+        case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   return "Window System";
+        case GL_DEBUG_SOURCE_SHADER_COMPILER: return "Shader Compiler";
+        case GL_DEBUG_SOURCE_THIRD_PARTY:     return "Third Party";
+        case GL_DEBUG_SOURCE_APPLICATION:     return "Application";
+        case GL_DEBUG_SOURCE_OTHER:           return "Other";
+        default:                             return "Unknown";
+        }
+    }
+
+    const char* getDebugType(GLenum type) {
+        switch (type) {
+        case GL_DEBUG_TYPE_ERROR:               return "Error";
+        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: return "Deprecated Behavior";
+        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  return "Undefined Behavior";
+        case GL_DEBUG_TYPE_PORTABILITY:         return "Portability";
+        case GL_DEBUG_TYPE_PERFORMANCE:         return "Performance";
+        case GL_DEBUG_TYPE_MARKER:              return "Marker";
+        case GL_DEBUG_TYPE_PUSH_GROUP:          return "Push Group";
+        case GL_DEBUG_TYPE_POP_GROUP:           return "Pop Group";
+        case GL_DEBUG_TYPE_OTHER:               return "Other";
+        default:                             return "Unknown";
+        }
+    }
+
+    const char* getDebugSeverity(GLenum severity) {
+        switch (severity) {
+        case GL_DEBUG_SEVERITY_HIGH:         return "High";
+        case GL_DEBUG_SEVERITY_MEDIUM:       return "Medium";
+        case GL_DEBUG_SEVERITY_LOW:           return "Low";
+        case GL_DEBUG_SEVERITY_NOTIFICATION: return "Notification";
+        default:                           return "Unknown";
+        }
+    }
+}
+
 void GraphicsAPI::init() {
 
     INIT_GL_THREAD
 
     glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
@@ -80,8 +122,18 @@ void GraphicsAPI::registerCallbacks()
         ResizeEvent e{ width, height };
         fireWindowResizeEvent(&e);
     };
-
     glfwSetFramebufferSizeCallback(m_window, CallbackWrapper<ResizeCB>::call);
+
+    using DebugCB = void(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
+    CallbackWrapper<DebugCB>::callback = [this](GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) -> void {
+        printf("GL DEBUG: source=%s, type=%s, id=%u, severity=%s\nMessage: %s\n", getDebugSource(source), getDebugType(type), id, getDebugSeverity(severity), message);
+        throw std::runtime_error("GL Error");
+    };
+
+    glEnable(GL_DEBUG_OUTPUT);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageCallback(CallbackWrapper<DebugCB>::call, nullptr);
+
 }
 
 void GraphicsAPI::setRenderFlags()
