@@ -10,6 +10,8 @@ target_link_libraries(VoxelEngine PUBLIC glm)
 target_link_libraries(VoxelEngine PUBLIC tools)
 target_link_libraries(VoxelEngine PUBLIC Base)
 
+target_link_libraries(VoxelEngine PUBLIC Tracy::TracyClient)
+
 
 target_include_directories(VoxelEngine SYSTEM PUBLIC "${PROJECT_SOURCE_DIR}/engine/base/src")
 target_include_directories(VoxelEngine SYSTEM PUBLIC "${PROJECT_SOURCE_DIR}/engine/voxel_engine/src")

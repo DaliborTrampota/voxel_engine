@@ -19,6 +19,7 @@
 #include "data/RegistryManager.h"
 
 #include <Globals.h>
+#include <tracy/Tracy.hpp>
 
 
 using namespace engine;
@@ -48,6 +49,7 @@ void Chunk::generate()
 
 void Chunk::populate()
 {
+	ZoneScoped;
 	glm::ivec3 posOffset = m_coords * ChunkDim;
 	m_data = VoxelData(ChunkDim.x, std::vector<std::vector<T>>(ChunkDim.y, std::vector<T>(ChunkDim.z, 0)));
 	m_world->m_generator->populate(m_data, posOffset);
@@ -56,6 +58,7 @@ void Chunk::populate()
 
 void Chunk::generateMesh()
 {
+	ZoneScoped;
 	glm::ivec3 chunkBlockCoords = m_coords * ChunkDim;
 	for (int x = 0; x < ChunkDim.x; x++)
 	{

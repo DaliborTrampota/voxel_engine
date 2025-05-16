@@ -4,6 +4,8 @@
 #include "gl/CallbackWrapper.h"
 #include "gl/GLEvents.h"
 
+#include <tracy/TracyOpenGL.hpp>
+
 using namespace gl;
 
 std::thread::id glContextID;
@@ -54,6 +56,7 @@ void GraphicsAPI::init() {
 	printf("Max layers: %d\nMax units: %d\n", max_layers, max_units);
 
     registerCallbacks();
+    TracyGpuContext
 }
 
 void GraphicsAPI::destroy() {
