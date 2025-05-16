@@ -1,5 +1,8 @@
 #include "GraphicsAPI.h"
 
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
+
 #include "Globals.h"
 #include "gl/CallbackWrapper.h"
 #include "gl/GLEvents.h"
@@ -94,11 +97,6 @@ void GraphicsAPI::clearScreen()
 {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
-
-GLFWwindow* GraphicsAPI::window() const
-{
-    return m_window;
 }
 
 void GraphicsAPI::mouseLock(bool state)

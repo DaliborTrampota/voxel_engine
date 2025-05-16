@@ -6,6 +6,34 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
+
+namespace {
+    constexpr Key fromGLFW(int key) {
+        switch (key) {
+            case GLFW_KEY_ESCAPE: return Key::Esc;
+            case GLFW_KEY_SPACE: return Key::Space;
+            case GLFW_KEY_W: return Key::W;
+            case GLFW_KEY_A: return Key::A;
+            case GLFW_KEY_S: return Key::S;
+            case GLFW_KEY_D: return Key::D;
+        }
+        return Key::Esc;
+    }
+
+    constexpr int toGLFW(Key key) {
+        switch (key) {
+            case Key::Esc: return GLFW_KEY_ESCAPE;
+            case Key::Space: return GLFW_KEY_SPACE;
+            case Key::W: return GLFW_KEY_W;
+            case Key::A: return GLFW_KEY_A;
+            case Key::S: return GLFW_KEY_S;
+            case Key::D: return GLFW_KEY_D;
+        }
+        return GLFW_KEY_ESCAPE;
+    }
+}
+
+
 gl::Window::Window(GraphicsAPI* api) : m_api(api) {
     m_size = api->getWindowSize();
     m_api->subscribe(this);
@@ -27,8 +55,8 @@ void gl::Window::mouseMoveEvent(MouseEvent* pEvent) {
 
 KeyState gl::Window::getKeyState(Key k) const
 {
-    GLFWwindow* window = m_api->window();
-    int state = glfwGetKey(window, static_cast<int>(k));
+    GLFWwindow* window = m_api->m_window;
+    int state = glfwGetKey(window, static_cast<int>(toGLFW(k)));
     switch(state) {
         case GLFW_RELEASE:
             return KeyState::Released;
@@ -41,12 +69,12 @@ KeyState gl::Window::getKeyState(Key k) const
 }
 
 void gl::Window::close() {
-    glfwSetWindowShouldClose(m_api->window(), true);
+    glfwSetWindowShouldClose(m_api->m_window, true);
 }
 
 bool gl::Window::shouldClose() const
 {
-    return glfwWindowShouldClose(m_api->window());
+    return glfwWindowShouldClose(m_api->m_window);
 }
 
 void gl::Window::gameloop()
@@ -72,7 +100,7 @@ void gl::Window::gameloop()
         while ((err = glGetError()) != GL_NO_ERROR)
             printf("OpenGL error: %d\n", err);
 
-        glfwSwapBuffers(m_api->window());
+        glfwSwapBuffers(m_api->m_window);
         glfwPollEvents();
     }
 }

@@ -31,7 +31,6 @@ namespace gl {
             virtual void afterRender() {};
             void gameloop();
 
-
         private:
             GraphicsAPI* m_api;
             glm::ivec2 m_size;

@@ -1,13 +1,13 @@
 #pragma once
 
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
 #include <memory>
 
 #include "gl/GLEventSource.h"
+
+struct GLFWwindow;
 
 namespace gl {
     enum class GraphicsAPIType
@@ -32,12 +32,14 @@ namespace gl {
         void clearScreen();
     
     
-        GLFWwindow* window() const;
         void mouseLock(bool value);
         void setWindowSize(int x, int y) const;
         glm::ivec2 getWindowSize() const;
     
     private:
         GLFWwindow* m_window;
+
+        friend class Window;
+
     };
 }
