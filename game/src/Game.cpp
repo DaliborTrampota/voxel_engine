@@ -31,8 +31,6 @@ Game::Game(gl::GraphicsAPI* gAPI, glm::ivec2 dims) :
     loader.load("resources/textures/blocks/");
     //loader.bind();
     RegisterBlocks();
-    
-	m_player.spawn(activeWorld());
 }
 
 void Game::processInput(float dt)
@@ -90,6 +88,8 @@ void Game::render(double dt)
 
 void Game::start()
 {
+	m_player.spawn(activeWorld());
+
     {
         gl::Shader vert("shaders/VertexShader.glsl", GL_VERTEX_SHADER);
         gl::Shader frag("shaders/PixelShader.glsl", GL_FRAGMENT_SHADER);
