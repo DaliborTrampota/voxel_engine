@@ -52,14 +52,14 @@ void Chunk::populate()
 
 void Chunk::generateMesh()
 {
-	glm::ivec3 chunkBlockCoords = m_coords * ChunkDim;
-	for (int x = 0; x < ChunkDim.x; x++)
+	glm::ivec3 chunkBlockCoords = m_coords * Chunk::Dims;
+	for (int x = 0; x < Chunk::Dims.x; x++)
 	{
-		m_vertexData.reserve(ChunkDim.x * ChunkDim.y * ChunkDim.z * 6); // 16x16x6 faces (6 vertices per face)
+		m_vertexData.reserve(Chunk::Dims.x * Chunk::Dims.y * Chunk::Dims.z * 6); // 16x16x6 faces (6 vertices per face)
 
-		for (int y = 0; y < ChunkDim.y; y++)
+		for (int y = 0; y < Chunk::Dims.y; y++)
 		{
-			for (int z = 0; z < ChunkDim.z; z++)
+			for (int z = 0; z < Chunk::Dims.z; z++)
 			{
 				if(m_data[x][y][z] == 0)
 					continue;
@@ -91,7 +91,7 @@ void Chunk::generateMesh()
 Block Chunk::getBlock(glm::ivec3 pos) const
 {
 	T blockID = m_data.size() == 0 
-		? m_world->m_generator->voxelAt(pos + m_coords * ChunkDim) 
+		? m_world->m_generator->voxelAt(pos + m_coords * Chunk::Dims)
 		: m_data[pos.x][pos.y][pos.z];
 	return RegistryManager::Blocks().get(blockID);
 }

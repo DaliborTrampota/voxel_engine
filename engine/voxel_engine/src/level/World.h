@@ -20,9 +20,6 @@ namespace engine {
 	class Chunk;
 	struct ChunkID;
 
-	constexpr glm::ivec3 ChunkDim = glm::ivec3(16, 16, 16);
-	int const TERRAIN_HEIGHT = 64;
-
 	class World
 	{
 	public:
