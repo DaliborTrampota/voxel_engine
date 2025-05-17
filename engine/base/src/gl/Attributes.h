@@ -58,14 +58,9 @@ namespace gl {
         Attributes(GLint drawType = GL_STATIC_DRAW) :
             m_drawType(drawType),
             m_elements(0)
-        {
-            //glGenBuffers(1, &m_buffer); fails as its from different thread
-            //GLenum err = glGetError();
-            //assert(err == GL_NO_ERROR);
-        }
+        {}
 
         ~Attributes() {
-            //printf("Deleting attributes\n");
             GL_GUARD
             if (m_VBO)
                 glDeleteBuffers(1, &m_VBO);
@@ -74,7 +69,6 @@ namespace gl {
         }
 
         void create() {
-            //printf("Creating attributes\n");
             GL_GUARD
             glGenVertexArrays(1, &m_VAO);
             glBindVertexArray(m_VAO);
@@ -130,7 +124,10 @@ namespace gl {
             GL_GUARD
             auto typeSize = sizeOfType(type);
             // always as floats in the shader (check glVertexAttribIPointer for ints and glVertexAttribLPointer for doubles)
-            glVertexAttribPointer(loc, size, type, GL_FALSE, stride * typeSize, (void*)(offset * typeSize)); 
+            if (type == GL_FLOAT)
+                glVertexAttribPointer(loc, size, type, GL_FALSE, stride, (void*)(uintptr_t(offset)));
+            else if(type == GL_INT || type == GL_UNSIGNED_INT)
+                glVertexAttribIPointer(loc, size, type, stride, (void*)(uintptr_t(offset)));
             glEnableVertexAttribArray(loc);
         }
     };

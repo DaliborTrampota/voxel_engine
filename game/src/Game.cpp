@@ -93,8 +93,8 @@ void Game::start()
 	m_player.spawn(activeWorld());
 
     {
-        gl::Shader vert("shaders/VertexShader.glsl", GL_VERTEX_SHADER);
-        gl::Shader frag("shaders/PixelShader.glsl", GL_FRAGMENT_SHADER);
+        gl::Shader vert("../../../game/shaders/VertexShader.glsl", GL_VERTEX_SHADER);
+        gl::Shader frag("../../../game/shaders/PixelShader.glsl", GL_FRAGMENT_SHADER);
 
         if (!m_pipeline.registerShader(GL_VERTEX_SHADER, vert)) printf("Vert shader not registered");
         if (!m_pipeline.registerShader(GL_FRAGMENT_SHADER, frag)) printf("Fragment shader not registered");
@@ -111,7 +111,6 @@ void Game::start()
     m_pipeline.use();
 
     m_plrCamera->lookAt(glm::vec3(0, 0, 0));
-    //loader.bind(0);
     m_pipeline.setInt("texArray", texSlot);
 
     glm::mat4 model = glm::mat4(1.0f);

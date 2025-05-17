@@ -21,8 +21,10 @@ namespace gl
         
     };
 
+    /// Layout of attributes in shaders
     struct VertexLayout
     {
+        /// Should be sizeof(VertexType)
         size_t stride;
         std::vector<VertexAttribute> attributes;
     };

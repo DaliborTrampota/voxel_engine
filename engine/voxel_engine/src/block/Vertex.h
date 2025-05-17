@@ -14,16 +14,17 @@ namespace engine {
 
 		glm::vec3 m_pos, m_normal;
 		glm::vec2 m_uv;
-		int m_data;
+		/// Holds TextureID (0-10bits) and AO (11-12)
+		unsigned int m_data;
 
         static gl::VertexLayout layout() {
             return {
-                9, // stride
+                sizeof(Vertex), // stride
                 {
                     { 0, gl::VertexAttribute::Float, 3, offsetof(Vertex, m_pos) },
                     { 1, gl::VertexAttribute::Float, 3, offsetof(Vertex, m_normal) },
                     { 2, gl::VertexAttribute::Float, 2, offsetof(Vertex, m_uv) },
-                    { 3, gl::VertexAttribute::Int, 1, offsetof(Vertex, m_data) }
+                    { 3, gl::VertexAttribute::UInt, 1, offsetof(Vertex, m_data) }
                 }
             };
         }

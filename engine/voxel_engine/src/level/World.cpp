@@ -19,8 +19,6 @@ World::World(TerrainGenerator* gen) : m_generator(gen)
 
 World::~World()
 {
-	printf("Term world %d\n", !!m_genPool);
-
 	if (m_genPool)
 		m_genPool->stop();
 
@@ -28,7 +26,6 @@ World::~World()
 	{
 		delete chunk;
 	}
-	//glDeleteVertexArrays(1, &m_VAO);
 }
 
 bool World::checkBlock(glm::vec3 pos, Block& curBlock, glm::ivec3 dir) const
@@ -85,7 +82,6 @@ void World::updateViewDistance(glm::vec3 pos)
 
 					m_genPool->add([this, chunk] {
 						chunk->populate();
-						printf("Populating chunk\n");
 						m_loadedChunks.insert(chunk->getID());
 					});
 				}
