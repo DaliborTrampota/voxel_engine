@@ -1,6 +1,6 @@
 #include "World.h"
 
-#include "TerrainGenerator.h"
+#include "ITerrainGenerator.h"
 #include "CoordUtils.h"
 #include "block/Block.h"
 #include "block/Geometry.h"
@@ -13,6 +13,8 @@
 using namespace engine;
 
 World::World(TerrainGenerator* gen) : m_generator(gen)
+World::World(std::unique_ptr<ITerrainGenerator> gen) :
+    m_generator(std::move(gen)),
 {
 	m_genPool = new ThreadPool<>(8);
 }
@@ -26,6 +28,11 @@ World::~World()
 	{
 		delete chunk;
 	}
+}
+
+void World::generator(std::unique_ptr<ITerrainGenerator> gen)
+{
+	m_generator = std::move(gen);
 }
 
 bool World::checkBlock(glm::vec3 pos, Block& curBlock, glm::ivec3 dir) const

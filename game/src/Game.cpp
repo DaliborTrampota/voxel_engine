@@ -14,10 +14,9 @@
 
 #include <Camera.h>
 #include <TextureLoader.h>
-#include <level/TerrainGenerator.h>
+#include <level/World.h>
 
 #include "registry/Blocks.h"
-#include <level/World.h>
 
 //#include <tracy/Tracy.hpp>
 using namespace engine;
