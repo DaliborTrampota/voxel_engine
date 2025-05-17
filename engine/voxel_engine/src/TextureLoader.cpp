@@ -1,13 +1,12 @@
 #include "TextureLoader.h"
 
-#include <glad/glad.h>
-
 #include <filesystem>
 #include <vector>
 #include <string>
-#include <Windows.h>
+
 #define STB_IMAGE_IMPLEMENTATION
 #include <tools/stb_image.h>
+#include <glad/glad.h>
 
 #include "data/TextureManager.h"
 
@@ -15,28 +14,14 @@ namespace fs = std::filesystem;
 
 using namespace engine;
 
-TextureLoader::TextureLoader()
+TextureLoader::TextureLoader(int slot, gl::TextureSettings settings)
+    : m_texArray(slot, settings)
 {
-    glGenTextures(1, &m_texture);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, m_texture);
-
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 }
-
-std::string getExecutablePath() {
-    char buffer[1024];
-    GetModuleFileNameA(nullptr, buffer, sizeof(buffer));
-    return std::filesystem::path(buffer).parent_path().string();
-}
-
 
 void TextureLoader::load(const char* path) {
 
-    glBindTexture(GL_TEXTURE_2D_ARRAY, m_texture);
+    m_texArray.bind();
 
     
     std::vector<std::string> paths;
@@ -73,38 +58,24 @@ void TextureLoader::load(const char* path) {
         printf("No valid images found in %s\n", path);
         return;
     }
-    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, width, height, paths.size(), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-
+    
+    m_texArray.create(width, height, paths.size());
     TextureManager& texMgr = TextureManager::Get();
-    int layer = 0;
     for (const auto& p : paths)
     {
-        int cWidth, cHeight, cChannels;
-        stbi_uc* data = stbi_load(p.c_str(), &cWidth, &cHeight, &cChannels, 0);
-        if (!data || cWidth != width || cHeight != height) {
-            printf("%s is not the size of (%d, %d)", p.c_str(), width, height);
-            continue;
-        }
-
-        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, layer, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        printf("Layer %d: %s\n", layer, p.c_str());
-        texMgr.add(getTextureName(&p), layer);
-
-        stbi_image_free(data);
-        ++layer;
+        int layer = m_texArray.load(p.c_str());
+        texMgr.add(getTextureName(p), layer);
     }
 }
 
-void TextureLoader::bind(int slot) const
+void TextureLoader::bind() const
 {
-    glActiveTexture(GL_TEXTURE0 + 0);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, m_texture);
+    m_texArray.bind();
 }
 
-std::string TextureLoader::getTextureName(const std::string *path) const
+std::string TextureLoader::getTextureName(const std::string& path)
 {
-    int idx = path->find_last_of("/") + 1;
-    int count = path->find_last_of(".") - idx;
-    return path->substr(idx, count).c_str();
+    int idx = path.find_last_of("/") + 1;
+    int count = path.find_last_of(".") - idx;
+    return path.substr(idx, count);
 }

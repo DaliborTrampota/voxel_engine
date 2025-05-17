@@ -27,10 +27,6 @@ Game::Game(gl::GraphicsAPI* gAPI, glm::ivec2 dims) :
     gl::Window(gAPI),
     m_mouseState(dims)
 {
-    TextureLoader loader;
-    loader.load("resources/textures/blocks/");
-    //loader.bind();
-    RegisterBlocks();
 }
 
 void Game::processInput(float dt)
@@ -88,6 +84,12 @@ void Game::render(double dt)
 
 void Game::start()
 {
+    uint32_t texSlot = 0;
+    TextureLoader loader(texSlot);
+    loader.load("resources/textures/blocks/");
+    //loader.bind();
+    RegisterBlocks();
+
 	m_player.spawn(activeWorld());
 
     {
@@ -110,7 +112,7 @@ void Game::start()
 
     m_plrCamera->lookAt(glm::vec3(0, 0, 0));
     //loader.bind(0);
-    m_pipeline.setInt("texArray", 0);
+    m_pipeline.setInt("texArray", texSlot);
 
     glm::mat4 model = glm::mat4(1.0f);
     m_pipeline.setMat4("model", model);
