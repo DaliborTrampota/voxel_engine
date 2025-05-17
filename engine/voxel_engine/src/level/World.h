@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <unordered_map>
 #include <unordered_set>
+#include <memory>
 
 #include "ThreadPool.h"
 #include "Chunk.h"
@@ -25,8 +26,8 @@ namespace engine {
 	class World
 	{
 	public:
-		World() = default;
-		World(std::unique_ptr<ITerrainGenerator> gen);
+		World(uint32_t genThreads = 8);
+		World(std::unique_ptr<ITerrainGenerator> gen, uint32_t genThreads = 8);
 		~World();
 
         void generator(std::unique_ptr<ITerrainGenerator> gen);
@@ -41,7 +42,7 @@ namespace engine {
 		std::unordered_set<ChunkID> m_loadedChunks;
 		std::unique_ptr<ITerrainGenerator> m_generator = nullptr;
 
-		ThreadPool<>* m_genPool = nullptr;
+		ThreadPool m_genPool;
 
 		friend class Chunk;
         friend class Engine;

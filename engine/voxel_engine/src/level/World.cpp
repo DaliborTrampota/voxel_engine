@@ -12,17 +12,19 @@
 
 using namespace engine;
 
-World::World(TerrainGenerator* gen) : m_generator(gen)
-World::World(std::unique_ptr<ITerrainGenerator> gen) :
-    m_generator(std::move(gen)),
+World::World(uint32_t genThreads) : m_genPool(genThreads)
 {
-	m_genPool = new ThreadPool<>(8);
+}
+
+World::World(std::unique_ptr<ITerrainGenerator> gen, uint32_t genThreads) :
+    m_generator(std::move(gen)),
+    m_genPool(genThreads)
+{
 }
 
 World::~World()
 {
-	if (m_genPool)
-		m_genPool->stop();
+	m_genPool.stop();
 
 	for (auto& [pos, chunk] : m_chunks)
 	{
@@ -69,7 +71,7 @@ void World::updateViewDistance(glm::vec3 pos)
 	int viewDistance = 4;
 	int yViewDistance = 3;
 
-	m_genPool->pause();
+	m_genPool.pause();
 
 	for (int x = chunkCoords.x - viewDistance; x <= chunkCoords.x + viewDistance; ++x)
 	{
@@ -87,7 +89,7 @@ void World::updateViewDistance(glm::vec3 pos)
 					Chunk* chunk = new Chunk(this, newCoords);
 					m_chunks[newCoords] = chunk;
 
-					m_genPool->add([this, chunk] {
+					m_genPool.add([this, chunk] {
 						chunk->populate();
 						m_loadedChunks.insert(chunk->getID());
 					});
@@ -96,5 +98,5 @@ void World::updateViewDistance(glm::vec3 pos)
 		}
 	}
 
-	m_genPool->resume();
+	m_genPool.resume();
 }
