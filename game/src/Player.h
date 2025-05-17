@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 #include <thread>
+#include <memory>
 
 #include <gl/Controls.h>
 

@@ -1,6 +1,5 @@
 #include "Player.h"
 
-#include <thread>
 #include <functional>
 
 #include <Camera.h>

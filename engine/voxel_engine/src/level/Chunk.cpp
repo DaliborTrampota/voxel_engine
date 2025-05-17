@@ -9,7 +9,7 @@
 #include "data/VertexData.h"
 #include "block/Vertex.h"
 
-#include "World.h";
+#include "World.h"
 #include "TerrainGenerator.h"
 
 #include "block/Block.h"
