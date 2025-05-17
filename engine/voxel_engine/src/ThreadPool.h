@@ -69,7 +69,6 @@ private:
 					});
 
 				if (m_terminate) {
-					printf("Terminate\n");
 					break;
 				}
 				job = m_jobs.front();
@@ -77,7 +76,6 @@ private:
 			}
 			job();
 		}
-		printf("Threadpool ended\n");
 	}
 	bool m_terminate = false;
 	bool m_pause = false;

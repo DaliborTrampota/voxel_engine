@@ -28,7 +28,7 @@ file(GLOB_RECURSE RESOURCE_FILES CONFIGURE_DEPENDS resources/*)
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/shaders" PREFIX "Shaders" FILES ${SHADER_FILES})
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/resources" PREFIX "Resources" FILES ${RESOURCE_FILES})
 
-target_sources(Game PRIVATE ${SHADER_FILES} ${RESOURCE_FILES})
+target_sources(Game PRIVATE ${RESOURCE_FILES})
 
 # Shaders
 # file(GLOB_RECURSE SHADER_FILES shaders/*.glsl)

@@ -57,7 +57,7 @@ TextureArray::TextureArray(unsigned int unit, TextureSettings setting)
 
 TextureArray::~TextureArray()
 {
-
+    glDeleteTextures(1, &m_ID);
 }
 
 void TextureArray::create(unsigned int width, unsigned int height, unsigned int layers)
