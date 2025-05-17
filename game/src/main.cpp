@@ -1,18 +1,27 @@
-#include <fstream>
+#include <GraphicsAPI.h>
 
 #include "Globals.h"
 #include "Game.h"
-#include "Camera.h"
-#include <GraphicsAPI.h>
 
-int main() {
-    
-
+int gameEntry() {
     gl::GraphicsAPI* gAPI = new gl::GraphicsAPI();
     gAPI->init();
-    
+
     Game game(gAPI, gAPI->getWindowSize());
     game.start();
-  
+
     return 0;
+}
+
+#if defined(_WIN32)
+#include "Windows.h"
+
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) {
+    return gameEntry();
+}
+
+#endif
+
+int main(int argc, char* argv[]) {
+    return gameEntry();
 }
