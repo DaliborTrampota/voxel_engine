@@ -40,6 +40,7 @@ gl::Window::Window(GraphicsAPI* api) : m_api(api) {
 }
 
 gl::Window::~Window() {
+    glfwSetWindowShouldClose(m_api->m_window, true);
     delete m_api;
 }
 
@@ -69,12 +70,13 @@ KeyState gl::Window::getKeyState(Key k) const
 }
 
 void gl::Window::close() {
-    glfwSetWindowShouldClose(m_api->m_window, true);
+    m_close = true;
+    //glfwSetWindowShouldClose(m_api->m_window, true);
 }
 
 bool gl::Window::shouldClose() const
 {
-    return glfwWindowShouldClose(m_api->m_window);
+    return m_close;// glfwWindowShouldClose(m_api->m_window);
 }
 
 void gl::Window::gameloop()
@@ -83,7 +85,7 @@ void gl::Window::gameloop()
 
     float deltaTime = 0.0f;
     float lastFrame = 0.0f;
-    while(!shouldClose())
+    while(!m_close)
     {
         float currentFrame = (float)glfwGetTime();
         deltaTime = currentFrame - lastFrame;

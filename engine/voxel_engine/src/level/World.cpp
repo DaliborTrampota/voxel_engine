@@ -19,9 +19,11 @@ World::World(TerrainGenerator* gen) : m_generator(gen)
 
 World::~World()
 {
-	printf("Term %d\n", !!m_genPool);
-	/*if(m_genPool)
-		m_genPool->stop();*/
+	printf("Term world %d\n", !!m_genPool);
+
+	if (m_genPool)
+		m_genPool->stop();
+
 	for (auto& [pos, chunk] : m_chunks)
 	{
 		delete chunk;

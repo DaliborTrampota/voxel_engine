@@ -34,5 +34,6 @@ namespace gl {
         private:
             GraphicsAPI* m_api;
             glm::ivec2 m_size;
+            bool m_close = false;
     };
 }
