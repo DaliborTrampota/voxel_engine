@@ -17,7 +17,8 @@ Player::Player() :
 
 Player::~Player()
 {
-	m_viewDistThread.join();
+	if (m_viewDistThread.joinable())
+		m_viewDistThread.join();
 	delete m_camera;
 }
 
