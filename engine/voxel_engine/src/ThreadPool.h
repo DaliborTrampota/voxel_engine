@@ -10,16 +10,7 @@
 #include <mutex>
 #include <thread>
 
-//template <typename T>
-//concept Job = std::is_function<T>::value;
-
-//requires(T t) {
-//	{ std::is_function<t>}
-//};
-
 using Job = std::function<void()>;
-
-// template <typename T = std::function<void()>>
 class ThreadPool {
   public:
     ThreadPool(int n) {
@@ -32,11 +23,14 @@ class ThreadPool {
     ~ThreadPool() { stop(); }
 
     void add(Job job) {
+        // clang-format off
         {
             std::unique_lock lock(m_mutex);
             m_jobs.push(job);
         }
-        m_cv.notify_one();  // Notifying only one because only one job is added so only one thread can be working on it?
+        m_cv.notify_one();  // Notifying only one because only one job is added so
+                            // only one thread can be working on it?
+        // clang-format on
     }
 
     void stop() {
