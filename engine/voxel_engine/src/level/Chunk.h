@@ -34,6 +34,7 @@ namespace engine {
 	class Chunk
 	{
 	public:
+        static inline glm::ivec3 Dims { 16, 16, 16 };
 
 		Chunk(World* world, ChunkID coords);
 		Chunk(Chunk&) = delete;
@@ -47,6 +48,10 @@ namespace engine {
 		bool generated() const { return m_generated; }
 
 		Block getBlock(glm::ivec3 pos) const;
+
+        ChunkID coords() const { return m_coords; }
+        VoxelData& data() { return m_data; }
+
 	private:
 
 		World* m_world;

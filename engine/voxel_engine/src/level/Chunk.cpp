@@ -10,13 +10,10 @@
 #include "block/Vertex.h"
 
 #include "World.h"
-#include "TerrainGenerator.h"
-
 #include "block/Block.h"
+#include "data/RegistryManager.h"
 //#include "block/builder/CulledGeometry.h"
 //#include "block/builder/CubeGeometry.h"
-
-#include "data/RegistryManager.h"
 
 #include <Globals.h>
 
@@ -48,22 +45,21 @@ void Chunk::generate()
 
 void Chunk::populate()
 {
-	glm::ivec3 posOffset = m_coords * ChunkDim;
-	m_data = VoxelData(ChunkDim.x, std::vector<std::vector<T>>(ChunkDim.y, std::vector<T>(ChunkDim.z, 0)));
-	m_world->m_generator->populate(m_data, posOffset);
+	m_data = VoxelData(Dims.x, std::vector<std::vector<T>>(Dims.y, std::vector<T>(Dims.z, 0)));
+	m_world->m_generator->populate(*this);
 	generateMesh();
 }
 
 void Chunk::generateMesh()
 {
-	glm::ivec3 chunkBlockCoords = m_coords * ChunkDim;
-	for (int x = 0; x < ChunkDim.x; x++)
+	glm::ivec3 chunkBlockCoords = m_coords * Chunk::Dims;
+	for (int x = 0; x < Chunk::Dims.x; x++)
 	{
-		m_vertexData.reserve(ChunkDim.x * ChunkDim.y * ChunkDim.z * 6); // 16x16x6 faces (6 vertices per face)
+		m_vertexData.reserve(Chunk::Dims.x * Chunk::Dims.y * Chunk::Dims.z * 6); // 16x16x6 faces (6 vertices per face)
 
-		for (int y = 0; y < ChunkDim.y; y++)
+		for (int y = 0; y < Chunk::Dims.y; y++)
 		{
-			for (int z = 0; z < ChunkDim.z; z++)
+			for (int z = 0; z < Chunk::Dims.z; z++)
 			{
 				if(m_data[x][y][z] == 0)
 					continue;
@@ -95,7 +91,7 @@ void Chunk::generateMesh()
 Block Chunk::getBlock(glm::ivec3 pos) const
 {
 	T blockID = m_data.size() == 0 
-		? m_world->m_generator->getVoxel(pos + m_coords * ChunkDim) 
+		? m_world->m_generator->voxelAt(pos + m_coords * Chunk::Dims)
 		: m_data[pos.x][pos.y][pos.z];
 	return RegistryManager::Blocks().get(blockID);
 }

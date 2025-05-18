@@ -1,12 +1,12 @@
 #include "WorldManager.h"
 
 #include <level/World.h>
-#include <level/TerrainGenerator.h>
+#include <level/PerlinTerrainGenerator.h>
 
 WorldManager::WorldManager()
 {
 	m_currentWorld = 0;
-	m_worlds[0] = std::make_unique<engine::World>(new engine::NoiseGenerator());
+	m_worlds[0] = std::make_unique<engine::World>(std::make_unique<engine::PerlinTerrainGenerator>(100));
 }
 
 WorldManager::~WorldManager()

@@ -24,9 +24,9 @@ Player::~Player()
 
 void Player::spawn(std::shared_ptr<World> world)
 {
-	m_position = glm::vec3(ChunkDim.x / 2, 50, ChunkDim.z / 2);
+	m_position = glm::vec3(Chunk::Dims.x / 2, 50, Chunk::Dims.z / 2);
 	m_camera->setPosition(m_position);
-	m_camera->lookAt(glm::vec3(ChunkDim.x / 2, 0, ChunkDim.z / 2));
+	m_camera->lookAt(glm::vec3(Chunk::Dims.x / 2, 0, Chunk::Dims.z / 2));
 
 
     world->updateViewDistance(m_position);

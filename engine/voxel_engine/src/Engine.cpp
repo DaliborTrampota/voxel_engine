@@ -19,7 +19,7 @@ void Engine::render(gl::ShaderPipeline* pipeline, Chunk *chunk)
 
 	chunk->m_vertexData.bind();
 
-	glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(chunk->m_coords * ChunkDim));
+	glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(chunk->m_coords * Chunk::Dims));
 	pipeline->setMat4("model", model);
     glDrawArrays(GL_TRIANGLES, 0, verts);
 }

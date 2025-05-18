@@ -10,17 +10,22 @@
 #include <thread>
 #include <condition_variable>
 
-template <typename T>
-concept Job = std::is_function<T>::value;
+//template <typename T>
+//concept Job = std::is_function<T>::value;
 
 //requires(T t) {
 //	{ std::is_function<t>}
 //};
 
-template <typename T = std::function<void()>>
+using Job = std::function<void()>;
+
+// template <typename T = std::function<void()>>
 class ThreadPool {
 public:
 	ThreadPool(int n) {
+		if (n == 0)
+			throw std::runtime_error("Thread pool thread count is 0!");
+
 		for(int i = 0; i < n; ++i)
 			m_threads.emplace_back(std::thread(&ThreadPool::loop, this));
 	}
@@ -28,7 +33,7 @@ public:
 		stop();
 	}
 
-	void add(T job) {
+	void add(Job job) {
 		{
 			std::unique_lock lock(m_mutex);
 			m_jobs.push(job);
@@ -61,7 +66,7 @@ public:
 private:
 	void loop() {
 		while (true) {
-			T job;
+			Job job;
 			{
 				std::unique_lock lock(m_mutex);
 				m_cv.wait(lock, [this] {
@@ -83,5 +88,5 @@ private:
 	std::mutex m_mutex;
 
 	std::vector<std::thread> m_threads;
-	std::queue<T> m_jobs;
+	std::queue<Job> m_jobs;
 };
