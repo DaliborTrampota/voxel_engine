@@ -4,7 +4,7 @@
 #include <thread>
 #include <memory>
 
-#include <gl/Controls.h>
+#include <core/gl/Controls.h>
 
 namespace engine {
 	class World;

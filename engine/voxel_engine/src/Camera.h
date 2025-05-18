@@ -2,7 +2,7 @@
 
 #include <glm/glm.hpp>
 
-#include <gl/Controls.h>
+#include <core/gl/Controls.h>
 
 
 namespace engine {

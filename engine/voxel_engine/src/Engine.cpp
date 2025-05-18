@@ -3,7 +3,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <gl/ShaderPipeline.h>
+#include <core/gl/ShaderPipeline.h>
 #include <level/Chunk.h>
 #include <level/World.h>
 #include <Camera.h>

@@ -2,9 +2,9 @@
 
 #include <unordered_map>
 
-#include <gl/GLEventSite.h>
-#include <gl/Window.h>
-#include <gl/ShaderPipeline.h>
+#include <core/gl/GLEventSite.h>
+#include <core/gl/Window.h>
+#include <core/gl/ShaderPipeline.h>
 
 #include <Engine.h>
 

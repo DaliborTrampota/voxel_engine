@@ -3,8 +3,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <gl/Attributes.h>
-#include <gl/ShaderPipeline.h>
+#include <core/gl/Attributes.h>
+#include <core/gl/ShaderPipeline.h>
 
 #include "data/VertexData.h"
 #include "block/Vertex.h"
@@ -15,8 +15,6 @@
 //#include "block/builder/CulledGeometry.h"
 //#include "block/builder/CubeGeometry.h"
 
-#include <Globals.h>
-
 
 using namespace engine;
 
@@ -25,7 +23,6 @@ Chunk::Chunk(World* world, ChunkID coords) :
 	m_coords(coords),
 	m_vertexData(GL_DYNAMIC_DRAW)
 {
-	GL_GUARD;
 	m_vertexData.create();
 	//populate();
 }

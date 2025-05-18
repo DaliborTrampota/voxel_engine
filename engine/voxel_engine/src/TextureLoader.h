@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include <gl/TextureArray.h>
+#include <core/gl/TextureArray.h>
 
 namespace engine 
 {

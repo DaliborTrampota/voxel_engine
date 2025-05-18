@@ -10,6 +10,10 @@ struct CallbackWrapper<TRet(TArgs...)> {
     static TRet call(TArgs ... args) {
         callback(std::forward<TArgs>(args)...);
     }
+
+    static TRet __stdcall stdCall(TArgs ... args) {
+        callback(std::forward<TArgs>(args)...);
+    }
 };
 //template <typename TRet, typename... TArgs>
 //std::function<TRet(TArgs...)> CallbackWrapper<TRet(TArgs...)>::callback;
