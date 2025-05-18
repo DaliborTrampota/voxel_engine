@@ -4,17 +4,13 @@
 
 using namespace engine;
 
-Block::Block(BlockID id, const Geometry* geo) :
-    m_id(id),
-    m_isOpaque(false),
-    m_isSolid(false),
-    m_isVoxel(false),
-    m_geometry(geo)
-{
-}
+Block::Block(BlockID id, const Geometry* geo)
+    : m_id(id),
+      m_isOpaque(false),
+      m_isSolid(false),
+      m_isVoxel(false),
+      m_geometry(geo) {}
 
-engine::Block::Block(BlockID id, const Geometry *geo, const Material &mat) :
-    Block(id, geo)
-{
+engine::Block::Block(BlockID id, const Geometry* geo, const Material& mat) : Block(id, geo) {
     m_material = mat;
 }

@@ -1,14 +1,14 @@
 #include "Game.h"
 
 #include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
+#include <core/GraphicsAPI.h>
+#include <core/gl/GLEvents.h>
 #include <core/gl/Shader.h>
 #include <core/gl/ShaderPipeline.h>
 #include <core/gl/Window.h>
-#include <core/GraphicsAPI.h>
-#include <core/gl/GLEvents.h>
 
 #include <data/VertexData.h>
 
@@ -22,15 +22,9 @@
 using namespace engine;
 
 
-Game::Game(gl::GraphicsAPI* gAPI, glm::ivec2 dims) :
-    gl::Window(gAPI),
-    m_mouseState(dims)
-{
-}
+Game::Game(gl::GraphicsAPI* gAPI, glm::ivec2 dims) : gl::Window(gAPI), m_mouseState(dims) {}
 
-void Game::processInput(float dt)
-{
-    
+void Game::processInput(float dt) {
     if (getKeyState(Key::Esc) == KeyState::Pressed)
         close();
 
@@ -44,20 +38,19 @@ void Game::processInput(float dt)
         m_player.move(Key::D, dt);
 }
 
-void Game::processMouse(double xposIn, double yposIn)
-{
+void Game::processMouse(double xposIn, double yposIn) {
     float xpos = static_cast<float>(xposIn);
     float ypos = static_cast<float>(yposIn);
 
-    if (m_mouseState.firstMouse)
-    {
+    if (m_mouseState.firstMouse) {
         m_mouseState.lastX = xpos;
         m_mouseState.lastY = ypos;
         m_mouseState.firstMouse = false;
     }
 
     float xoffset = xpos - m_mouseState.lastX;
-    float yoffset = m_mouseState.lastY - ypos; // reversed since y-coordinates go from bottom to top
+    float yoffset =
+        m_mouseState.lastY - ypos;  // reversed since y-coordinates go from bottom to top
 
     m_mouseState.lastX = xpos;
     m_mouseState.lastY = ypos;
@@ -65,45 +58,41 @@ void Game::processMouse(double xposIn, double yposIn)
     m_player.rotate(xoffset, yoffset);
 }
 
-Game::~Game()
-{
-}
+Game::~Game() {}
 
-void Game::update(float dt)
-{
-}
+void Game::update(float dt) {}
 
-void Game::render(double dt)
-{
+void Game::render(double dt) {
     processInput(dt);
     update(dt);
 
     Engine::render(&m_pipeline, m_plrCamera, activeWorld());
 }
 
-void Game::start()
-{
+void Game::start() {
     uint32_t texSlot = 0;
     TextureLoader loader(texSlot);
     loader.load("resources/textures/blocks/");
     //loader.bind();
     RegisterBlocks();
 
-	m_player.spawn(activeWorld());
+    m_player.spawn(activeWorld());
 
     {
         gl::Shader vert("../../../game/shaders/VertexShader.glsl", GL_VERTEX_SHADER);
         gl::Shader frag("../../../game/shaders/PixelShader.glsl", GL_FRAGMENT_SHADER);
 
-        if (!m_pipeline.registerShader(GL_VERTEX_SHADER, vert)) printf("Vert shader not registered");
-        if (!m_pipeline.registerShader(GL_FRAGMENT_SHADER, frag)) printf("Fragment shader not registered");
-        if (!m_pipeline.link()) return;// throw error or something? 1;
+        if (!m_pipeline.registerShader(GL_VERTEX_SHADER, vert))
+            printf("Vert shader not registered");
+        if (!m_pipeline.registerShader(GL_FRAGMENT_SHADER, frag))
+            printf("Fragment shader not registered");
+        if (!m_pipeline.link())
+            return;  // throw error or something? 1;
     }
 
 
     // uncomment this call to draw in wireframe polygons.
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
 
 
     m_plrCamera = m_player.getCamera();
@@ -117,7 +106,6 @@ void Game::start()
     m_pipeline.setMat4("projection", m_plrCamera->getProjection());
 
 
-    
     mouseLock(true);
     gameloop();
 }

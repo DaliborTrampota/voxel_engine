@@ -1,8 +1,8 @@
 #pragma once
 
-#include <data/TextureManager.h>
-#include <data/RegistryManager.h>
 #include <data/Registry.h>
+#include <data/RegistryManager.h>
+#include <data/TextureManager.h>
 
 #include <block/Block.h>
 #include <block/Geometry.h>
@@ -12,8 +12,8 @@ using namespace engine;
 
 Geometry Pyramid();
 
-void RegisterBlocks()
-{
+void RegisterBlocks() {
+    // clang-format off
     Registry<Geometry>& geometries = RegistryManager::Geometries();
 
     geometries.add(Geometry(), "empty");
@@ -76,21 +76,70 @@ void RegisterBlocks()
     blocks.add(SAND, "sand");
     blocks.add(CYLINDER, "cylinder");
     blocks.add(PYRAMID, "pyramid");
+    // clang-format on
 }
 
 /*Blocks->add(Block(2, "grass_block", Geometry::CubeT("grass_top", "dirt")));
 Blocks->add(Block(3, "stone", Geometry::CubeA("stone")));
 Blocks->add(Block(3, "oak_log", Geometry::CubeC("oak_log_top", "oak_log")));
 Blocks->add(Block(3, "oak_stairs", Geometry::Stair("oak_log_top", "oak_log")));
-Blocks->add(Block(3, "table", table))*/;
+Blocks->add(Block(3, "table", table));*/
 
-Geometry Pyramid()
-{
+Geometry Pyramid() {
     std::vector<Face> faces;
-    faces.push_back(Face::SquareFace(FaceTag::Bottom, glm::vec3(0, 0, 0), glm::vec3(1, 0, 1), glm::vec3(0, -1, 0), glm::vec2(0, 0), glm::vec2(1, 1)));
-    faces.push_back(Face::TriangleFace(FaceTag::Side, glm::vec3(0, 0, 0), glm::vec3(0, 0, 1), glm::vec3(0.5f, 1, 0.5f), glm::vec2(0, 0), glm::vec2(1, 0), glm::vec2(0.5f, 1)));
-    faces.push_back(Face::TriangleFace(FaceTag::Side, glm::vec3(0, 0, 1), glm::vec3(1, 0, 1), glm::vec3(0.5f, 1, 0.5f), glm::vec2(0, 0), glm::vec2(1, 0), glm::vec2(0.5f, 1)));
-    faces.push_back(Face::TriangleFace(FaceTag::Side, glm::vec3(1, 0, 0), glm::vec3(0, 0, 0), glm::vec3(0.5f, 1, 0.5f), glm::vec2(0, 0), glm::vec2(1, 0), glm::vec2(0.5f, 1)));
-    faces.push_back(Face::TriangleFace(FaceTag::Side, glm::vec3(1, 0, 1), glm::vec3(1, 0, 0), glm::vec3(0.5f, 1, 0.5f), glm::vec2(0, 0), glm::vec2(1, 0), glm::vec2(0.5f, 1)));
+    faces.push_back(
+        Face::SquareFace(
+            FaceTag::Bottom,
+            glm::vec3(0, 0, 0),
+            glm::vec3(1, 0, 1),
+            glm::vec3(0, -1, 0),
+            glm::vec2(0, 0),
+            glm::vec2(1, 1)
+        )
+    );
+    faces.push_back(
+        Face::TriangleFace(
+            FaceTag::Side,
+            glm::vec3(0, 0, 0),
+            glm::vec3(0, 0, 1),
+            glm::vec3(0.5f, 1, 0.5f),
+            glm::vec2(0, 0),
+            glm::vec2(1, 0),
+            glm::vec2(0.5f, 1)
+        )
+    );
+    faces.push_back(
+        Face::TriangleFace(
+            FaceTag::Side,
+            glm::vec3(0, 0, 1),
+            glm::vec3(1, 0, 1),
+            glm::vec3(0.5f, 1, 0.5f),
+            glm::vec2(0, 0),
+            glm::vec2(1, 0),
+            glm::vec2(0.5f, 1)
+        )
+    );
+    faces.push_back(
+        Face::TriangleFace(
+            FaceTag::Side,
+            glm::vec3(1, 0, 0),
+            glm::vec3(0, 0, 0),
+            glm::vec3(0.5f, 1, 0.5f),
+            glm::vec2(0, 0),
+            glm::vec2(1, 0),
+            glm::vec2(0.5f, 1)
+        )
+    );
+    faces.push_back(
+        Face::TriangleFace(
+            FaceTag::Side,
+            glm::vec3(1, 0, 1),
+            glm::vec3(1, 0, 0),
+            glm::vec3(0.5f, 1, 0.5f),
+            glm::vec2(0, 0),
+            glm::vec2(1, 0),
+            glm::vec2(0.5f, 1)
+        )
+    );
     return Geometry(faces);
 }

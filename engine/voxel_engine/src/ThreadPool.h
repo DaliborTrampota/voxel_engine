@@ -1,92 +1,77 @@
 #pragma once
 
+#include <concepts>
 #include <queue>
 #include <vector>
-#include <concepts>
 
 #include <functional>
 
+#include <condition_variable>
 #include <mutex>
 #include <thread>
-#include <condition_variable>
-
-//template <typename T>
-//concept Job = std::is_function<T>::value;
-
-//requires(T t) {
-//	{ std::is_function<t>}
-//};
 
 using Job = std::function<void()>;
-
-// template <typename T = std::function<void()>>
 class ThreadPool {
-public:
-	ThreadPool(int n) {
-		if (n == 0)
-			throw std::runtime_error("Thread pool thread count is 0!");
+  public:
+    ThreadPool(int n) {
+        if (n == 0)
+            throw std::runtime_error("Thread pool thread count is 0!");
 
-		for(int i = 0; i < n; ++i)
-			m_threads.emplace_back(std::thread(&ThreadPool::loop, this));
-	}
-	~ThreadPool() {
-		stop();
-	}
+        for (int i = 0; i < n; ++i)
+            m_threads.emplace_back(std::thread(&ThreadPool::loop, this));
+    }
+    ~ThreadPool() { stop(); }
 
-	void add(Job job) {
-		{
-			std::unique_lock lock(m_mutex);
-			m_jobs.push(job);
-		}
-		m_cv.notify_one(); // Notifying only one because only one job is added so only one thread can be working on it?
-	}
+    void add(Job job) {
+        // clang-format off
+        {
+            std::unique_lock lock(m_mutex);
+            m_jobs.push(job);
+        }
+        m_cv.notify_one();  // Notifying only one because only one job is added so
+                            // only one thread can be working on it?
+        // clang-format on
+    }
 
-	void stop()
-	{
-		{
-			std::unique_lock lock(m_mutex);
-			m_terminate = true;
-		}
-		m_cv.notify_all();
+    void stop() {
+        {
+            std::unique_lock lock(m_mutex);
+            m_terminate = true;
+        }
+        m_cv.notify_all();
 
-		for (auto& t : m_threads) {
-			t.join();
-		}
-		m_threads.clear();
-	}
+        for (auto& t : m_threads) {
+            t.join();
+        }
+        m_threads.clear();
+    }
 
-	void resume() {
-		m_pause = false;
-	}
+    void resume() { m_pause = false; }
 
-	void pause() {
-		m_pause = true;
-	}
+    void pause() { m_pause = true; }
 
-private:
-	void loop() {
-		while (true) {
-			Job job;
-			{
-				std::unique_lock lock(m_mutex);
-				m_cv.wait(lock, [this] {
-					return !m_jobs.empty() || m_terminate || m_pause;
-					});
+  private:
+    void loop() {
+        while (true) {
+            Job job;
+            {
+                std::unique_lock lock(m_mutex);
+                m_cv.wait(lock, [this] { return !m_jobs.empty() || m_terminate || m_pause; });
 
-				if (m_terminate) {
-					break;
-				}
-				job = m_jobs.front();
-				m_jobs.pop();
-			}
-			job();
-		}
-	}
-	bool m_terminate = false;
-	bool m_pause = false;
-	std::condition_variable m_cv;
-	std::mutex m_mutex;
+                if (m_terminate) {
+                    break;
+                }
+                job = m_jobs.front();
+                m_jobs.pop();
+            }
+            job();
+        }
+    }
+    bool m_terminate = false;
+    bool m_pause = false;
+    std::condition_variable m_cv;
+    std::mutex m_mutex;
 
-	std::vector<std::thread> m_threads;
-	std::queue<Job> m_jobs;
+    std::vector<std::thread> m_threads;
+    std::queue<Job> m_jobs;
 };

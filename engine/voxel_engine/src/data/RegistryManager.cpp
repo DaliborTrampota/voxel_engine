@@ -5,8 +5,7 @@
 #include "block/Geometry.h"
 
 
-namespace engine
-{
+namespace engine {
     Registry<Block>& RegistryManager::Blocks() {
         static Registry<Block> s_instance;
         return s_instance;
@@ -16,4 +15,4 @@ namespace engine
         static Registry<Geometry> s_instance;
         return s_instance;
     }
-}
+}  // namespace engine

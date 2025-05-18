@@ -2,13 +2,10 @@
 
 #include <vector>
 
-namespace gl
-{
+namespace gl {
 
-    struct VertexAttribute
-    {
-        enum Type
-        {
+    struct VertexAttribute {
+        enum Type {
             Float,
             Int,
             UInt,
@@ -18,14 +15,12 @@ namespace gl
         Type type;
         size_t size;
         size_t offset;
-        
     };
 
     /// Layout of attributes in shaders
-    struct VertexLayout
-    {
+    struct VertexLayout {
         /// Should be sizeof(VertexType)
         size_t stride;
         std::vector<VertexAttribute> attributes;
     };
-}
+}  // namespace gl

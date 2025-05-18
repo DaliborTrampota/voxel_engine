@@ -1,7 +1,7 @@
 #include <core/GraphicsAPI.h>
 
-#include "Globals.h"
 #include "Game.h"
+#include "Globals.h"
 
 int gameEntry() {
     gl::GraphicsAPI* gAPI = new gl::GraphicsAPI();

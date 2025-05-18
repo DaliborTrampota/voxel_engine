@@ -1,7 +1,6 @@
 #pragma once
 
 
-
 namespace engine {
 
     enum KeyState {
@@ -19,4 +18,4 @@ namespace engine {
         S,
         D,
     };
-}
+}  // namespace engine

@@ -6,8 +6,8 @@
 #include <core/gl/Attributes.h>
 #include <core/gl/ShaderPipeline.h>
 
-#include "data/VertexData.h"
 #include "block/Vertex.h"
+#include "data/VertexData.h"
 
 #include "World.h"
 #include "block/Block.h"
@@ -18,88 +18,78 @@
 
 using namespace engine;
 
-Chunk::Chunk(World* world, ChunkID coords) :
-	m_world(world),
-	m_coords(coords),
-	m_vertexData(GL_DYNAMIC_DRAW)
-{
-	m_vertexData.create();
-	//populate();
+Chunk::Chunk(World* world, ChunkID coords)
+    : m_world(world),
+      m_coords(coords),
+      m_vertexData(GL_DYNAMIC_DRAW) {
+    m_vertexData.create();
+    //populate();
 }
 
-Chunk::~Chunk()
-{
-	if (m_genThread.joinable())
-		m_genThread.join();
+Chunk::~Chunk() {
+    if (m_genThread.joinable())
+        m_genThread.join();
 }
 
-void Chunk::generate()
-{
-	//m_genThread = std::thread(&Chunk::populate, this);
-	//m_genThread.join();
-
+void Chunk::generate() {
+    //m_genThread = std::thread(&Chunk::populate, this);
+    //m_genThread.join();
 }
 
-void Chunk::populate()
-{
-	m_data = VoxelData(Dims.x, std::vector<std::vector<T>>(Dims.y, std::vector<T>(Dims.z, 0)));
-	m_world->m_generator->populate(*this);
-	generateMesh();
+void Chunk::populate() {
+    m_data = VoxelData(Dims.x, std::vector<std::vector<T>>(Dims.y, std::vector<T>(Dims.z, 0)));
+    m_world->m_generator->populate(*this);
+    generateMesh();
 }
 
-void Chunk::generateMesh()
-{
-	glm::ivec3 chunkBlockCoords = m_coords * Chunk::Dims;
-	for (int x = 0; x < Chunk::Dims.x; x++)
-	{
-		m_vertexData.reserve(Chunk::Dims.x * Chunk::Dims.y * Chunk::Dims.z * 6); // 16x16x6 faces (6 vertices per face)
+void Chunk::generateMesh() {
+    glm::ivec3 chunkBlockCoords = m_coords * Chunk::Dims;
+    for (int x = 0; x < Chunk::Dims.x; x++) {
+        m_vertexData.reserve(
+            Chunk::Dims.x * Chunk::Dims.y * Chunk::Dims.z * 6
+        );  // 16x16x6 faces (6 vertices per face)
 
-		for (int y = 0; y < Chunk::Dims.y; y++)
-		{
-			for (int z = 0; z < Chunk::Dims.z; z++)
-			{
-				if(m_data[x][y][z] == 0)
-					continue;
+        for (int y = 0; y < Chunk::Dims.y; y++) {
+            for (int z = 0; z < Chunk::Dims.z; z++) {
+                if (m_data[x][y][z] == 0)
+                    continue;
 
-				glm::ivec3 pos(x, y, z);
-				int blockID = m_data[x][y][z];
+                glm::ivec3 pos(x, y, z);
+                int blockID = m_data[x][y][z];
 
-				Block block = RegistryManager::Blocks().get(blockID);
+                Block block = RegistryManager::Blocks().get(blockID);
 
-				for (auto f : block.geometry()->faces()) {
-					if (f.m_cull && m_world->checkBlock(pos + f.m_cullDir + chunkBlockCoords, block, f.m_cullDir))
-						continue;
+                for (auto f : block.geometry()->faces()) {
+                    if (f.m_cull && m_world->checkBlock(
+                                        pos + f.m_cullDir + chunkBlockCoords, block, f.m_cullDir
+                                    ))
+                        continue;
 
-					f.translate(pos);
+                    f.translate(pos);
 
-					for (Vertex v : f.m_vertices) {
+                    for (Vertex v : f.m_vertices) {
                         v.setData(block.material().forTag(f.tag), 0);
-						m_vertexData.add(v);
-					}
-				}
-			}
-		}
-	}		
+                        m_vertexData.add(v);
+                    }
+                }
+            }
+        }
+    }
 
-	m_vertexData.m_data.shrink_to_fit();
-	m_generated = true;
+    m_vertexData.m_data.shrink_to_fit();
+    m_generated = true;
 }
 
-Block Chunk::getBlock(glm::ivec3 pos) const
-{
-	T blockID = m_data.size() == 0 
-		? m_world->m_generator->voxelAt(pos + m_coords * Chunk::Dims)
-		: m_data[pos.x][pos.y][pos.z];
-	return RegistryManager::Blocks().get(blockID);
+Block Chunk::getBlock(glm::ivec3 pos) const {
+    T blockID = m_data.size() == 0 ? m_world->m_generator->voxelAt(pos + m_coords * Chunk::Dims)
+                                   : m_data[pos.x][pos.y][pos.z];
+    return RegistryManager::Blocks().get(blockID);
 }
 
-bool ChunkID::operator()(const ChunkID& a, const ChunkID& b) const
-{
-	return a.x == b.x && a.y == b.y && a.z == b.z;
+bool ChunkID::operator()(const ChunkID& a, const ChunkID& b) const {
+    return a.x == b.x && a.y == b.y && a.z == b.z;
 }
 
-bool ChunkID::operator==(const ChunkID& other) const
-{
-	return x == other.x && y == other.y && z == other.z;
+bool ChunkID::operator==(const ChunkID& other) const {
+    return x == other.x && y == other.y && z == other.z;
 }
-

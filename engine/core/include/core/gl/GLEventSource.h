@@ -5,11 +5,10 @@
 class ResizeEvent;
 class MouseEvent;
 
-class GLEventSource : public engine::EventSource
-{
+class GLEventSource : public engine::EventSource {
     friend class GLEventSite;
-protected:
 
+  protected:
     void fireWindowResizeEvent(ResizeEvent* pEvent);
     void fireMouseMoveEvent(MouseEvent* pEvent);
 };

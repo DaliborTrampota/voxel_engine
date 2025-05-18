@@ -2,17 +2,14 @@
 
 using namespace engine;
 
-bool CulledGeometry::sideSpecific()
-{
+bool CulledGeometry::sideSpecific() {
     return false;
 }
 
-FaceIterator CulledGeometry::begin() const
-{
+FaceIterator CulledGeometry::begin() const {
     return FaceIterator((Face*)&m_faces.at(0));
 }
 
-FaceIterator CulledGeometry::end() const
-{
+FaceIterator CulledGeometry::end() const {
     return FaceIterator((Face*)&m_faces.at(0));
 }
