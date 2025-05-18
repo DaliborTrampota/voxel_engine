@@ -132,7 +132,7 @@ void GraphicsAPI::registerCallbacks()
 
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-    glDebugMessageCallback(CallbackWrapper<DebugCB>::stdCall, nullptr); //randomly broke? requires now __stdcall
+    glDebugMessageCallback(CallbackWrapper<DebugCB>::call, nullptr);
 
 }
 
