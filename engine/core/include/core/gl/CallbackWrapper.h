@@ -11,7 +11,7 @@ struct CallbackWrapper<TRet(TArgs...)> {
         callback(std::forward<TArgs>(args)...);
     }
 
-    static TRet __stdcall stdCall(TArgs ... args) {
+    static TRet APIENTRY apiCall(TArgs ... args) {
         callback(std::forward<TArgs>(args)...);
     }
 };
