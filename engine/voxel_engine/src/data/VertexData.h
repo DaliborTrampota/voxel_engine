@@ -36,25 +36,24 @@ namespace engine::data {
         glm::vec3(1, 0, 1),  // x z down
         glm::vec3(0, 0, 1)   // z down
     };
-    // clang-format off
-	constexpr array2d<int, 6, 4> faces_indexed = { {
-		{ 0, 3, 4, 3 }, // north
-		{ 3, 2, 5, 4 }, // west
-		{ 4, 5, 6, 7 }, // south
-		{ 7, 6, 1, 0 }, // east
-		{ 6, 5, 2, 1 }, // up
-		{ 7, 0, 3, 4 }  // down
-	} };
 
-	constexpr array2d<int, 6, 6> faces = { {
-		{ 5, 6, 2, 1, 2, 6 }, // north
-		{ 4, 7, 5, 6, 5, 7 }, // west
-		{ 3, 0, 4, 7, 4, 0 }, // south
-		{ 0, 3, 1, 2, 1, 3 }, // east
-		{ 3, 4, 2, 5, 2, 4 }, // up
-		{ 7, 0, 6, 1, 6, 0 }  // down
-	} };
-    // clang-format on
+    constexpr array2d<int, 6, 4> faces_indexed = {{
+        {0, 3, 4, 3},  // north
+        {3, 2, 5, 4},  // west
+        {4, 5, 6, 7},  // south
+        {7, 6, 1, 0},  // east
+        {6, 5, 2, 1},  // up
+        {7, 0, 3, 4}   // down
+    }};
+
+    constexpr array2d<int, 6, 6> faces = {{
+        {5, 6, 2, 1, 2, 6},  // north
+        {4, 7, 5, 6, 5, 7},  // west
+        {3, 0, 4, 7, 4, 0},  // south
+        {0, 3, 1, 2, 1, 3},  // east
+        {3, 4, 2, 5, 2, 4},  // up
+        {7, 0, 6, 1, 6, 0}   // down
+    }};
 
     const std::array<Face, 6> f_faces = {
         Face::SquareFace(

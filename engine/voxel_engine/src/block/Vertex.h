@@ -16,18 +16,16 @@ namespace engine {
         /// Holds TextureID (0-10bits) and AO (11-12)
         unsigned int m_data;
 
-        // clang-format off
         static gl::VertexLayout layout() {
             return {
-                sizeof(Vertex), // stride
+                sizeof(Vertex),  // stride
                 {
-                    { 0, gl::VertexAttribute::Float, 3, offsetof(Vertex, m_pos) },
-                    { 1, gl::VertexAttribute::Float, 3, offsetof(Vertex, m_normal) },
-                    { 2, gl::VertexAttribute::Float, 2, offsetof(Vertex, m_uv) },
-                    { 3, gl::VertexAttribute::UInt, 1, offsetof(Vertex, m_data) }
-                }
+                    {0, gl::VertexAttribute::Float, 3, offsetof(Vertex, m_pos)},
+                    {1, gl::VertexAttribute::Float, 3, offsetof(Vertex, m_normal)},
+                    {2, gl::VertexAttribute::Float, 2, offsetof(Vertex, m_uv)},
+                    {3, gl::VertexAttribute::UInt, 1, offsetof(Vertex, m_data)},
+                },
             };
         }
-        // clang-format on
     };
 }  // namespace engine
