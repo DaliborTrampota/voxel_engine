@@ -7,25 +7,19 @@
 
 namespace engine {
 
-	class TextureManager
-	{
-	public:
+    class TextureManager {
+      public:
+        void add(std::string&& name, unsigned int id) { m_textures.emplace(name, id); }
 
-		void add(std::string &&name, unsigned int id) {
-			m_textures.emplace(name, id);
-		}
-
-		unsigned int texture(std::string name) {
-			return m_textures.at(name);
-		}
+        unsigned int texture(std::string name) { return m_textures.at(name); }
 
         static TextureManager& Get() {
             static TextureManager instance;
             return instance;
         }
 
-	private:
+      private:
         TextureManager() = default;
-		std::unordered_map<std::string, unsigned int> m_textures;
-	};
-}
+        std::unordered_map<std::string, unsigned int> m_textures;
+    };
+}  // namespace engine

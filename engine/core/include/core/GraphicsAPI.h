@@ -10,36 +10,31 @@
 struct GLFWwindow;
 
 namespace gl {
-    enum class GraphicsAPIType
-    {
+    enum class GraphicsAPIType {
         None = 0,
         OpenGL,
     };
-    
-    class GraphicsAPI : public GLEventSource
-    {
-    public:
+
+    class GraphicsAPI : public GLEventSource {
+      public:
         GraphicsAPI() = default;
-        ~GraphicsAPI() {
-            destroy();
-        };
-    
+        ~GraphicsAPI() { destroy(); };
+
         void init();
         void destroy();
         void registerCallbacks();
-    
+
         void setRenderFlags();
         void clearScreen();
-    
-    
+
+
         void mouseLock(bool value);
         void setWindowSize(int x, int y) const;
         glm::ivec2 getWindowSize() const;
-    
-    private:
+
+      private:
         GLFWwindow* m_window;
 
         friend class Window;
-
     };
-}
+}  // namespace gl

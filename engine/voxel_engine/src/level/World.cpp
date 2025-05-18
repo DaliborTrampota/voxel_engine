@@ -1,7 +1,7 @@
 #include "World.h"
 
-#include "ITerrainGenerator.h"
 #include "CoordUtils.h"
+#include "ITerrainGenerator.h"
 #include "block/Block.h"
 #include "block/Geometry.h"
 
@@ -12,87 +12,71 @@
 
 using namespace engine;
 
-World::World(std::unique_ptr<ITerrainGenerator> gen, uint32_t genThreads) :
-    m_generator(std::move(gen)),
-    m_genPool(genThreads)
-{
+World::World(std::unique_ptr<ITerrainGenerator> gen, uint32_t genThreads)
+    : m_generator(std::move(gen)),
+      m_genPool(genThreads) {}
+
+World::~World() {
+    m_genPool.stop();
+
+    for (auto& [pos, chunk] : m_chunks) {
+        delete chunk;
+    }
 }
 
-World::~World()
-{
-	m_genPool.stop();
-
-	for (auto& [pos, chunk] : m_chunks)
-	{
-		delete chunk;
-	}
+void World::generator(std::unique_ptr<ITerrainGenerator> gen) {
+    m_generator = std::move(gen);
 }
 
-void World::generator(std::unique_ptr<ITerrainGenerator> gen)
-{
-	m_generator = std::move(gen);
+bool World::checkBlock(glm::vec3 pos, Block& curBlock, glm::ivec3 dir) const {
+    ChunkID chunkCoords = engine::extractChunkCoords(pos);
+    // std::cout << "chunkCoords = " << chunkCoords.x << ", " << chunkCoords.y << ", " << chunkCoords.z << "\n";
+    if (!m_chunks.contains(chunkCoords))
+        return false;
+
+    Chunk* chunk = m_chunks.at(chunkCoords);
+    if (!chunk)
+        return false;
+    Block block = chunk->getBlock(pos);
+
+
+    if (!curBlock.isVoxel() && block.isVoxel() || curBlock.isVoxel() && !block.isVoxel()) {
+        dir = -dir;
+        for (const auto& f : block.geometry()->faces()) {
+            if (f.m_cullDir == dir)
+                return true;
+        }
+        return false;
+    }
+
+    return block.getID() == curBlock.getID() || block.isSolid() && curBlock.isSolid();
 }
 
-bool World::checkBlock(glm::vec3 pos, Block& curBlock, glm::ivec3 dir) const
-{
-	ChunkID chunkCoords = engine::extractChunkCoords(pos);
-	// std::cout << "chunkCoords = " << chunkCoords.x << ", " << chunkCoords.y << ", " << chunkCoords.z << "\n";
-	if (!m_chunks.contains(chunkCoords))
-		return false;
-	
-	Chunk* chunk = m_chunks.at(chunkCoords);
-	if (!chunk)
-		return false;
-	Block block = chunk->getBlock(pos);
+void World::updateViewDistance(glm::vec3 pos) {
+    ChunkID chunkCoords = engine::extractChunkCoords(pos);
+    int viewDistance = 4;
+    int yViewDistance = 3;
 
+    m_genPool.pause();
 
+    for (int x = chunkCoords.x - viewDistance; x <= chunkCoords.x + viewDistance; ++x) {
+        for (int y = chunkCoords.y - yViewDistance; y <= chunkCoords.y + yViewDistance; ++y) {
+            for (int z = chunkCoords.z - viewDistance; z <= chunkCoords.z + viewDistance; ++z) {
+                ChunkID newCoords = ChunkID(x, y, z);
+                if (m_loadedChunks.contains(newCoords)) {
+                    //chunk->setRender(true)
+                } else if (!m_chunks.contains(newCoords)) {
+                    Chunk* chunk = new Chunk(this, newCoords);
+                    m_chunks[newCoords] = chunk;
 
-	if (!curBlock.isVoxel() && block.isVoxel() || curBlock.isVoxel() && !block.isVoxel()) {
-		dir = -dir;
-		for (const auto& f : block.geometry()->faces()) {
-			if (f.m_cullDir == dir)
-				return true;
-		}
-		return false;
-	}
+                    m_genPool.add([this, chunk] {
+                        chunk->populate();
+                        m_loadedChunks.insert(chunk->getID());
+                    });
+                }
+            }
+        }
+    }
 
-	return block.getID() == curBlock.getID() || 
-		block.isSolid() && curBlock.isSolid();
-}
-
-void World::updateViewDistance(glm::vec3 pos)
-{
-
-	ChunkID chunkCoords = engine::extractChunkCoords(pos);
-	int viewDistance = 4;
-	int yViewDistance = 3;
-
-	m_genPool.pause();
-
-	for (int x = chunkCoords.x - viewDistance; x <= chunkCoords.x + viewDistance; ++x)
-	{
-		for (int y = chunkCoords.y - yViewDistance; y <= chunkCoords.y + yViewDistance; ++y)
-		{
-			for (int z = chunkCoords.z - viewDistance; z <= chunkCoords.z + viewDistance; ++z)
-			{
-				ChunkID newCoords = ChunkID(x, y, z);
-				if (m_loadedChunks.contains(newCoords))
-				{
-					//chunk->setRender(true)
-				} 
-                else if (!m_chunks.contains(newCoords)) {
-
-					Chunk* chunk = new Chunk(this, newCoords);
-					m_chunks[newCoords] = chunk;
-
-					m_genPool.add([this, chunk] {
-						chunk->populate();
-						m_loadedChunks.insert(chunk->getID());
-					});
-				}
-			}
-		}
-	}
-
-	m_genPool.resume();
+    m_genPool.resume();
 }

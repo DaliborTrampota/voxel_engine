@@ -1,12 +1,12 @@
 #include "TextureLoader.h"
 
 #include <filesystem>
-#include <vector>
 #include <string>
+#include <vector>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include <tools/stb_image.h>
 #include <glad/glad.h>
+#include <tools/stb_image.h>
 
 #include "data/TextureManager.h"
 
@@ -14,24 +14,19 @@ namespace fs = std::filesystem;
 
 using namespace engine;
 
-TextureLoader::TextureLoader(int slot, gl::TextureSettings settings)
-    : m_texArray(slot, settings)
-{
-}
+TextureLoader::TextureLoader(int slot, gl::TextureSettings settings) : m_texArray(slot, settings) {}
 
 void TextureLoader::load(const char* path) {
-
     m_texArray.bind();
 
-    
+
     std::vector<std::string> paths;
     int width = 0;
     int height = 0;
     bool query = true;
 
     try {
-        for (const fs::directory_entry entry : fs::directory_iterator(path))
-        {
+        for (const fs::directory_entry entry : fs::directory_iterator(path)) {
             if (!entry.is_regular_file()) {
                 printf("%s is not a regular file\n", entry.path().string().c_str());
                 continue;
@@ -44,13 +39,11 @@ void TextureLoader::load(const char* path) {
                 paths.push_back(p);
                 width = w;
                 height = h;
-            }
-            else {
+            } else {
                 printf("Could not load %s\n", entry.path().string().c_str());
             }
         }
-    }
-    catch (std::filesystem::filesystem_error& e) {
+    } catch (std::filesystem::filesystem_error& e) {
         printf("Error loading texutes: %s\n", e.what());
         exit(0);
     }
@@ -58,23 +51,20 @@ void TextureLoader::load(const char* path) {
         printf("No valid images found in %s\n", path);
         return;
     }
-    
+
     m_texArray.create(width, height, paths.size());
     TextureManager& texMgr = TextureManager::Get();
-    for (const auto& p : paths)
-    {
+    for (const auto& p : paths) {
         int layer = m_texArray.load(p.c_str());
         texMgr.add(getTextureName(p), layer);
     }
 }
 
-void TextureLoader::bind() const
-{
+void TextureLoader::bind() const {
     m_texArray.bind();
 }
 
-std::string TextureLoader::getTextureName(const std::string& path)
-{
+std::string TextureLoader::getTextureName(const std::string& path) {
     int idx = path.find_last_of("/") + 1;
     int count = path.find_last_of(".") - idx;
     return path.substr(idx, count);

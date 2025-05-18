@@ -4,8 +4,7 @@
 
 #include <core/gl/TextureArray.h>
 
-namespace engine 
-{
+namespace engine {
 
     inline constexpr gl::TextureSettings pixelFormat = {
         gl::TextureSettings::MirroredRepeat,
@@ -14,20 +13,17 @@ namespace engine
         gl::TextureSettings::Nearest
     };
 
-	class TextureLoader
-	{
-	public:
-		TextureLoader(int slot, gl::TextureSettings settings = pixelFormat);
+    class TextureLoader {
+      public:
+        TextureLoader(int slot, gl::TextureSettings settings = pixelFormat);
 
-		void load(const char* dirPath);
-		void bind() const;
+        void load(const char* dirPath);
+        void bind() const;
 
-	private:
+      private:
         gl::TextureArray m_texArray;
 
-		static std::string getTextureName(const std::string& path);
+        static std::string getTextureName(const std::string& path);
+    };
 
-	};
-
-}
-
+}  // namespace engine

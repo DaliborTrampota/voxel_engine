@@ -1,5 +1,5 @@
-#include "Geometry.h"
 #include "CubeGeometry.h"
+#include "Geometry.h"
 
 #include <cassert>
 #include <vector>
@@ -9,42 +9,35 @@
 
 using namespace engine;
 
-CubeGeometry::CubeGeometry(TexID texture) :
-    m_textures{ texture, texture, texture, texture, texture, texture }
-{
+CubeGeometry::CubeGeometry(TexID texture)
+    : m_textures{texture, texture, texture, texture, texture, texture} {
     //std::copy(data::f_faces.begin(), data::f_faces.end(), m_faces.begin());
     m_faces = data::f_faces;
 }
 
-CubeGeometry::CubeGeometry(TexID textures[6]) :
-    m_textures{ textures[0], textures[1], textures[2], textures[3], textures[4], textures[5] }
-{
+CubeGeometry::CubeGeometry(TexID textures[6])
+    : m_textures{textures[0], textures[1], textures[2], textures[3], textures[4], textures[5]} {
     m_faces = data::f_faces;
     //std::copy(data::f_faces.begin(), data::f_faces.end(), &m_faces);
 }
 
-bool CubeGeometry::sideSpecific()
-{
+bool CubeGeometry::sideSpecific() {
     return true;
 }
 
-TexID CubeGeometry::getTexture(int side) const
-{
-    assert(side < 6);// , "Side must be less than 6");
+TexID CubeGeometry::getTexture(int side) const {
+    assert(side < 6);  // , "Side must be less than 6");
     return m_textures[side];
 }
 
-Face CubeGeometry::getFace(int side) const
-{
-    assert(side < 6);// , "Side must be less than 6");
+Face CubeGeometry::getFace(int side) const {
+    assert(side < 6);  // , "Side must be less than 6");
     return m_faces[side];
 }
 
-        
 
-void CubeGeometry::build(float scale, glm::vec3 offset, bool scaleUVs)
-{
-/*	float uvScale = scaleUVs ? scale : 1.0f;
+void CubeGeometry::build(float scale, glm::vec3 offset, bool scaleUVs) {
+    /*	float uvScale = scaleUVs ? scale : 1.0f;
     for (int side = 0; side < 6; ++side)
     {
         float vertices[18]{}, uvs[12]{};

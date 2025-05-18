@@ -2,13 +2,11 @@
 
 namespace engine {
 
-	class BlockData
-	{
-	public:
-		BlockData();
-		~BlockData();
+    class BlockData {
+      public:
+        BlockData();
+        ~BlockData();
 
-	private:
-
-	};
-}
+      private:
+    };
+}  // namespace engine

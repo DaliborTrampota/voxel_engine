@@ -1,22 +1,22 @@
 #pragma once
 
-#include <glm/glm.hpp>
 #include <core/gl/VertexLayout.h>
+#include <glm/glm.hpp>
 
 namespace engine {
-	struct Vertex
-	{
-		Vertex(glm::vec3 pos, glm::vec3 n, glm::vec2 uv, int textureID, int ao);
-		Vertex(glm::vec3 pos, glm::vec3 n, glm::vec2 uv);
+    struct Vertex {
+        Vertex(glm::vec3 pos, glm::vec3 n, glm::vec2 uv, int textureID, int ao);
+        Vertex(glm::vec3 pos, glm::vec3 n, glm::vec2 uv);
 
-		void translate(glm::vec3 t);
-		void setData(int textureID, int ao);
+        void translate(glm::vec3 t);
+        void setData(int textureID, int ao);
 
-		glm::vec3 m_pos, m_normal;
-		glm::vec2 m_uv;
-		/// Holds TextureID (0-10bits) and AO (11-12)
-		unsigned int m_data;
+        glm::vec3 m_pos, m_normal;
+        glm::vec2 m_uv;
+        /// Holds TextureID (0-10bits) and AO (11-12)
+        unsigned int m_data;
 
+        // clang-format off
         static gl::VertexLayout layout() {
             return {
                 sizeof(Vertex), // stride
@@ -28,5 +28,6 @@ namespace engine {
                 }
             };
         }
-	};
-}
+        // clang-format on
+    };
+}  // namespace engine

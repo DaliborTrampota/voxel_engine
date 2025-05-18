@@ -1,47 +1,47 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <memory>
 #include <unordered_map>
 #include <unordered_set>
-#include <memory>
 
-#include "ThreadPool.h"
 #include "Chunk.h"
 #include "ITerrainGenerator.h"
+#include "ThreadPool.h"
 
 #include <shared_mutex>
 
 namespace gl {
-	class ShaderPipeline;
+    class ShaderPipeline;
 }
 
 namespace engine {
 
-	class Chunk;
-	struct ChunkID;
+    class Chunk;
+    struct ChunkID;
 
-	class World
-	{
-	public:
-		World(std::unique_ptr<ITerrainGenerator> gen, uint32_t genThreads = 8);
-		~World();
+    class World {
+      public:
+        World(std::unique_ptr<ITerrainGenerator> gen, uint32_t genThreads = 8);
+        ~World();
 
         void generator(std::unique_ptr<ITerrainGenerator> gen);
 
-		bool checkBlock(glm::vec3 pos, Block &curBlock, glm::ivec3 dir) const;
+        bool checkBlock(glm::vec3 pos, Block& curBlock, glm::ivec3 dir) const;
 
-		void updateViewDistance(glm::vec3 pos);
+        void updateViewDistance(glm::vec3 pos);
 
         const std::unordered_set<ChunkID>& loadedChunks() const { return m_loadedChunks; }
-	private:
-		std::unordered_map<ChunkID, Chunk*> m_chunks;
-		std::unordered_set<ChunkID> m_loadedChunks;
-		std::unique_ptr<ITerrainGenerator> m_generator = nullptr;
 
-		ThreadPool m_genPool;
+      private:
+        std::unordered_map<ChunkID, Chunk*> m_chunks;
+        std::unordered_set<ChunkID> m_loadedChunks;
+        std::unique_ptr<ITerrainGenerator> m_generator = nullptr;
 
-		friend class Chunk;
+        ThreadPool m_genPool;
+
+        friend class Chunk;
         friend class Engine;
-	};
+    };
 
-}
+}  // namespace engine

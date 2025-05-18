@@ -1,7 +1,7 @@
 
 namespace engine {
     class Event {
-        public:
+      public:
         Event() = default;
     };
-}
+}  // namespace engine

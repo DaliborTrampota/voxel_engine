@@ -31,7 +31,7 @@ namespace {
         }
         return GLFW_KEY_ESCAPE;
     }
-}
+}  // namespace
 
 
 gl::Window::Window(GraphicsAPI* api) : m_api(api) {
@@ -54,17 +54,13 @@ void gl::Window::mouseMoveEvent(MouseEvent* pEvent) {
     processMouse(pEvent->x, pEvent->y);
 }
 
-KeyState gl::Window::getKeyState(Key k) const
-{
+KeyState gl::Window::getKeyState(Key k) const {
     GLFWwindow* window = m_api->m_window;
     int state = glfwGetKey(window, static_cast<int>(toGLFW(k)));
-    switch(state) {
-        case GLFW_RELEASE:
-            return KeyState::Released;
-        case GLFW_PRESS:
-            return KeyState::Pressed;
-        case GLFW_REPEAT:
-            return KeyState::Held;
+    switch (state) {
+        case GLFW_RELEASE: return KeyState::Released;
+        case GLFW_PRESS: return KeyState::Pressed;
+        case GLFW_REPEAT: return KeyState::Held;
     }
     return KeyState::None;
 }
@@ -74,19 +70,16 @@ void gl::Window::close() {
     //glfwSetWindowShouldClose(m_api->m_window, true);
 }
 
-bool gl::Window::shouldClose() const
-{
-    return m_close;// glfwWindowShouldClose(m_api->m_window);
+bool gl::Window::shouldClose() const {
+    return m_close;  // glfwWindowShouldClose(m_api->m_window);
 }
 
-void gl::Window::gameloop()
-{
+void gl::Window::gameloop() {
     m_api->setRenderFlags();
 
     float deltaTime = 0.0f;
     float lastFrame = 0.0f;
-    while(!m_close)
-    {
+    while (!m_close) {
         float currentFrame = (float)glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
@@ -108,7 +101,6 @@ void gl::Window::gameloop()
 }
 
 
-void gl::Window::mouseLock(bool state) const
-{
+void gl::Window::mouseLock(bool state) const {
     m_api->mouseLock(state);
 }
