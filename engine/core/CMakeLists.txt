@@ -3,7 +3,8 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/src" PREFIX "Source Files" FILES 
 file(GLOB_RECURSE INC_FILES CONFIGURE_DEPENDS include/core/*.h)
 # source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/include/core" PREFIX "Include" FILES ${INC_FILES})
 
-add_library(Core STATIC ${SRC_FILES} ${INC_FILES})
+add_library(Core STATIC ${SRC_FILES})
+target_sources(Core PRIVATE ${INC_FILES})
 
 target_link_libraries(Core PRIVATE glfw)
 target_link_libraries(Core PRIVATE glad)
