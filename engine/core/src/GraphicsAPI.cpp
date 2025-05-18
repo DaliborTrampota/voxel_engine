@@ -124,7 +124,7 @@ void GraphicsAPI::registerCallbacks()
     };
     glfwSetFramebufferSizeCallback(m_window, CallbackWrapper<ResizeCB>::call);
 
-    using DebugCB = void(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
+    using DebugCB = void(GLenum, GLenum, GLuint, GLenum, GLsizei, const GLchar*, const void*);
     CallbackWrapper<DebugCB>::callback = [this](GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) -> void {
         printf("GL DEBUG: source=%s, type=%s, id=%u, severity=%s\nMessage: %s\n", getDebugSource(source), getDebugType(type), id, getDebugSeverity(severity), message);
         throw std::runtime_error("GL Error");

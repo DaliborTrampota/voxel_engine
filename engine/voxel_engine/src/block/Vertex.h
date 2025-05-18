@@ -1,7 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include <gl/VertexLayout.h>
+#include <core/gl/VertexLayout.h>
 
 namespace engine {
 	struct Vertex

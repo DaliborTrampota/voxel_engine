@@ -4,11 +4,11 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <gl/Shader.h>
-#include <gl/ShaderPipeline.h>
-#include <gl/Window.h>
-#include <GraphicsAPI.h>
-#include <gl/GLEvents.h>
+#include <core/gl/Shader.h>
+#include <core/gl/ShaderPipeline.h>
+#include <core/gl/Window.h>
+#include <core/GraphicsAPI.h>
+#include <core/gl/GLEvents.h>
 
 #include <data/VertexData.h>
 

@@ -1,10 +1,10 @@
-#include "ShaderPipeline.h"
+#include "core/gl/ShaderPipeline.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
+#include "core/gl/Shader.h"
+#include "core/gl/VertexLayout.h"
 #include "../Globals.h"
-#include "Shader.h"
-#include "VertexLayout.h"
 
 using namespace gl;
 

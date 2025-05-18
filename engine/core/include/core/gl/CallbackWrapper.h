@@ -8,7 +8,7 @@ struct CallbackWrapper<TRet(TArgs...)> {
     static inline std::function<TRet(TArgs...)> callback;
 
     static TRet call(TArgs ... args) {
-        callback(std::forward<TArgs>(args)...);
+        return callback(std::forward<TArgs>(args)...);
     }
 };
 //template <typename TRet, typename... TArgs>
