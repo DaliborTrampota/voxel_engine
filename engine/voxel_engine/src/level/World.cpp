@@ -12,10 +12,6 @@
 
 using namespace engine;
 
-World::World(uint32_t genThreads) : m_genPool(genThreads)
-{
-}
-
 World::World(std::unique_ptr<ITerrainGenerator> gen, uint32_t genThreads) :
     m_generator(std::move(gen)),
     m_genPool(genThreads)

@@ -23,7 +23,6 @@ namespace engine {
 	class World
 	{
 	public:
-		World(uint32_t genThreads = 8);
 		World(std::unique_ptr<ITerrainGenerator> gen, uint32_t genThreads = 8);
 		~World();
 
