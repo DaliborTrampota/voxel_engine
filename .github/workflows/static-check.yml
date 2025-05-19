@@ -11,6 +11,8 @@ jobs:
     name: Static analysis Check
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v4  # ⬅️ This is what you're missing
+    
     - name: Install cppcheck
       run: sudo apt-get install cppcheck
 
