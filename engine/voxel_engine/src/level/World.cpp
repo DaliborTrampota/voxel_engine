@@ -5,6 +5,7 @@
 #include "block/Block.h"
 #include "block/Geometry.h"
 
+#include <algorithm>
 #include <mutex>
 #include <queue>
 
