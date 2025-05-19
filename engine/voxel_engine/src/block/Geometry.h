@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "Face.h"
+#include "physics/AABB.h"
 //#include "BlockTextures.h"
 
 
@@ -26,5 +27,6 @@ namespace engine {
         unsigned int m_id;
 
         std::vector<Face> m_faces;
+        AABB m_aabb;
     };
 }  // namespace engine
