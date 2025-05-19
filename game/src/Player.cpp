@@ -3,6 +3,7 @@
 #include <functional>
 
 #include <Camera.h>
+#include <CoordUtils.h>
 #include <level/Chunk.h>
 #include <level/World.h>
 
@@ -20,12 +21,16 @@ Player::~Player() {
 }
 
 void Player::spawn(std::shared_ptr<World> world) {
-    m_position = glm::vec3(Chunk::Dims.x / 2, 50, Chunk::Dims.z / 2);
+    m_position = glm::vec3(Chunk::Dims.x / 2, 20, Chunk::Dims.z / 2);
     m_camera->setPosition(m_position);
     m_camera->lookAt(glm::vec3(Chunk::Dims.x / 2, 0, Chunk::Dims.z / 2));
 
 
-    world->updateViewDistance(m_position);
+    glm::vec3 pos = m_position;
+    ChunkID coords = extractChunkCoords(pos);
+    glm::ivec3 from = coords - ViewDistance;
+    glm::ivec3 to = coords + ViewDistance;
+    world->loadChunks(from, to);
     //m_viewDistThread = std::thread(&World::updateViewDistance, world, m_position);
 }
 
