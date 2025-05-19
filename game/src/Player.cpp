@@ -3,9 +3,9 @@
 #include <functional>
 
 #include <Camera.h>
+#include <CoordUtils.h>
 #include <level/Chunk.h>
 #include <level/World.h>
-#include <CoordUtils.h>
 
 using namespace engine;
 

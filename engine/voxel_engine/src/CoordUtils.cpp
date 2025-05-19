@@ -3,7 +3,7 @@
 namespace engine {
 
     /// @brief Returns the chunk coordinates of the given position and modifies the position to be relative to the chunk.
-    /// @return Chunk coordinate containing the position 
+    /// @return Chunk coordinate containing the position
     ChunkID extractChunkCoords(glm::vec3& pos) {
         ChunkID chunkCoords = ChunkID(
             (int)floor(pos.x / Chunk::Dims.x),

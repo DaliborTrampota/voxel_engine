@@ -28,7 +28,7 @@ namespace engine {
         /// @brief Loads chunks in the given range.
         /// @param unloadRest If true, all chunks outside the view distance will be unloaded.
         void loadChunks(const glm::vec3& from, const glm::vec3& to, bool unloadRest = false);
-        
+
         /// @brief Unloads chunks in the given range.
         void unloadChunks(const glm::vec3& from, const glm::vec3& to);
 
@@ -50,7 +50,7 @@ namespace engine {
         friend class Chunk;
         friend class Engine;
 
-        void createChunk(ChunkID id, bool load); 
+        void createChunk(ChunkID id, bool load);
     };
 
 }  // namespace engine

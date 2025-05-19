@@ -50,11 +50,11 @@ namespace engine {
         /// @return true if the mesh was generated, false if it was already generating.
         /// @note This function is thread-safe.
         bool generateMesh();
-        
+
 
         Block getBlock(glm::ivec3 pos) const;
 
-        /// @return 3D vector of the block data. 
+        /// @return 3D vector of the block data.
         VoxelData& data() { return m_data; }
 
       private:

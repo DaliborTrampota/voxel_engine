@@ -21,13 +21,11 @@ using namespace engine;
 Chunk::Chunk(World* world, ChunkID coords)
     : m_world(world),
       m_coords(coords),
-      m_vertexData(GL_DYNAMIC_DRAW)  {
-
+      m_vertexData(GL_DYNAMIC_DRAW) {
     m_vertexData.create();
 }
 
-Chunk::~Chunk() {
-}
+Chunk::~Chunk() {}
 
 void Chunk::generate() {
     if (m_generated)
@@ -39,9 +37,9 @@ void Chunk::generate() {
 
 bool Chunk::generateMesh() {
     bool expected = false;
-    if(!m_generatingMesh.compare_exchange_strong(expected, true))
+    if (!m_generatingMesh.compare_exchange_strong(expected, true))
         return false;
-    
+
     glm::ivec3 chunkBlockCoords = m_coords * Chunk::Dims;
     for (int x = 0; x < Chunk::Dims.x; x++) {
         m_vertexData.reserve(
