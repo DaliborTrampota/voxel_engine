@@ -14,6 +14,8 @@ namespace engine {
 
 class Player {
   public:
+    static constexpr glm::ivec3 ViewDistance{3, 4, 3};
+
     Player();
     ~Player();
 
