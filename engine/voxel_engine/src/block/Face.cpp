@@ -7,13 +7,13 @@
 namespace engine {
 
     void Face::translate(glm::vec3 t) {
-        for (auto& v : m_vertices)
-            v.m_pos += t;
+        for (auto& v : vertices)
+            v.pos += t;
     }
 
-    void Face::setData(int textureID, int ao) {
-        for (auto& v : m_vertices)
-            v.setData(textureID, ao);
+    void Face::data(int textureID, int ao) {
+        for (auto& v : vertices)
+            v.data(textureID, ao);
     }
 
     const Face Face::TriangleFace(
@@ -29,13 +29,13 @@ namespace engine {
 
         glm::vec3 n = glm::normalize(glm::cross(p2 - p1, p3 - p1));
 
-        face.m_vertices.emplace_back(p1, n, uv1);
+        face.vertices.emplace_back(p1, n, uv1);
 
-        face.m_vertices.emplace_back(p2, n, uv2);
+        face.vertices.emplace_back(p2, n, uv2);
 
-        face.m_vertices.emplace_back(p3, n, uv3);
+        face.vertices.emplace_back(p3, n, uv3);
 
-        // face.setData(texID, 0);
+        // face.data(texID, 0);
 
         return face;
     }
@@ -60,12 +60,12 @@ namespace engine {
         Face face{tag};
 
         for (int i = 0; i < 6; ++i) {
-            face.m_vertices.emplace_back(corners[indices[i]], n, uvs[indices[i]]);
+            face.vertices.emplace_back(corners[indices[i]], n, uvs[indices[i]]);
         }
 
 
         face.setCull(n);
-        // face.setData(texID, 0);
+        // face.data(texID, 0);
 
         return face;
     }
@@ -100,13 +100,13 @@ namespace engine {
             glm::vec3 end =
                 center + r * axis1 * glm::cos(nextAngle) + r * axis2 * glm::sin(nextAngle);
 
-            face.m_vertices.emplace_back(center, n, glm::vec2(0.5f, 0.5f));
+            face.vertices.emplace_back(center, n, glm::vec2(0.5f, 0.5f));
 
-            face.m_vertices.emplace_back(
+            face.vertices.emplace_back(
                 start, n, glm::vec2(0.5f + glm::cos(angle) / 2.0f, 0.5f + glm::sin(angle) / 2.0f)
             );
 
-            face.m_vertices.emplace_back(
+            face.vertices.emplace_back(
                 end,
                 n,
                 glm::vec2(0.5f + glm::cos(nextAngle) / 2.0f, 0.5f + glm::sin(nextAngle) / 2.0f)
@@ -116,7 +116,7 @@ namespace engine {
         }
 
         face.setCull(n);
-        // face.setData(texID, 0);
+        // face.data(texID, 0);
 
 
         return face;
@@ -166,25 +166,25 @@ namespace engine {
                 glm::vec2(uRange * u0 + uRange, uvEnd.y)
             };
 
-            face.m_vertices.emplace_back(start, normal, uvs[0]);
+            face.vertices.emplace_back(start, normal, uvs[0]);
 
-            face.m_vertices.emplace_back(end + n * h, normal, uvs[2]);
+            face.vertices.emplace_back(end + n * h, normal, uvs[2]);
 
-            face.m_vertices.emplace_back(start + n * h, normal, uvs[3]);
+            face.vertices.emplace_back(start + n * h, normal, uvs[3]);
 
 
-            face.m_vertices.emplace_back(end + n * h, normal, uvs[2]);
+            face.vertices.emplace_back(end + n * h, normal, uvs[2]);
 
-            face.m_vertices.emplace_back(start, normal, uvs[0]);
+            face.vertices.emplace_back(start, normal, uvs[0]);
 
-            face.m_vertices.emplace_back(end, normal, uvs[1]);
+            face.vertices.emplace_back(end, normal, uvs[1]);
 
 
             angle += angleStep;
         }
 
 
-        // face.setData(texID, 0);
+        // face.data(texID, 0);
 
         return face;
     }

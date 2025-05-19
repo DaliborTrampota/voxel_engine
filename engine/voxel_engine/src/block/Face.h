@@ -33,16 +33,16 @@ namespace engine {
 
     struct Face {
         FaceTag tag;
-        glm::ivec3 m_cullDir;
-        bool m_cull = false;
-        std::vector<Vertex> m_vertices;
+        glm::ivec3 cullDir;
+        bool cull = false;
+        std::vector<Vertex> vertices;
 
         void translate(glm::vec3 t);
-        void setData(int textureID, int ao);
+        void data(int textureID, int ao);
 
         void setCull(glm::ivec3 dir) {
-            m_cull = true;
-            m_cullDir = dir;
+            cull = true;
+            cullDir = dir;
         }
 
         static const Face TriangleFace(

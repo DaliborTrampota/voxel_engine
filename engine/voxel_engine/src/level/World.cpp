@@ -96,7 +96,7 @@ bool World::checkBlock(glm::vec3 pos, Block& curBlock, glm::ivec3 dir) const {
     if (!curBlock.isVoxel() && block.isVoxel() || curBlock.isVoxel() && !block.isVoxel()) {
         dir = -dir;
         for (const auto& f : block.geometry()->faces()) {
-            if (f.m_cullDir == dir)
+            if (f.cullDir == dir)
                 return true;
         }
         return false;
