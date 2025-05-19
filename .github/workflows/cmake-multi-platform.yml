@@ -104,10 +104,19 @@ jobs:
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
     #  run: ctest --build-config ${{ matrix.build_type }}
 
+    - name: Determine file suffix
+      id: file-suffix
+      run: |
+        if [[ "${{ matrix.build_type }}" == "Release" && "${{ matrix.os }}" == "windows-latest" ]]; then
+          echo "suffix=.exe" >> "$GITHUB_OUTPUT"
+        else
+          echo "suffix=" >> "$GITHUB_OUTPUT"
+        fi
+
     - name: Upload release asset
       uses: softprops/action-gh-release@v2
       if: github.ref_type == 'tag'
       with:
-        files: ${{ steps.strings.outputs.build-output-dir }}/VoxelGame_${{ matrix.build_type == 'Release' && matrix.os == 'windows-latest' && '.exe' || '' }}
+        files: ${{ steps.strings.outputs.build-output-dir }}/VoxelGame_${{ steps.file-suffix.outputs.suffix }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
