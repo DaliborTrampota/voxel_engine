@@ -18,8 +18,8 @@ jobs:
     - name: Checkout source
       uses: actions/checkout@v4
 
-    - name: Install Doxygen
-      run: sudo apt-get update && sudo apt-get install -y doxygen
+    # - name: Install Doxygen
+    #   run: sudo apt-get update && sudo apt-get install -y doxygen
 
     - name: Generate Doxygen documentation
       run: doxygen Doxyfile
