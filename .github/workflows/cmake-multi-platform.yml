@@ -106,6 +106,7 @@ jobs:
 
     - name: Determine file suffix
       id: file-suffix
+      shell: bash
       run: |
         if [[ "${{ matrix.build_type }}" == "Release" && "${{ matrix.os }}" == "windows-latest" ]]; then
           echo "suffix=.exe" >> "$GITHUB_OUTPUT"
