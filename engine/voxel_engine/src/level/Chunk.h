@@ -39,15 +39,22 @@ namespace engine {
         Chunk(Chunk&&) = delete;
         ~Chunk();
 
-        ChunkID getID() const { return m_coords; }
-        void populate();
-        void generateMesh();
+        /// @return ID or coordinates of the chunk in the world.
+        const ChunkID& id() const { return m_coords; }
+
+        /// @brief Generates the chunk data per TerrainGenerator if not generated yet.
         void generate();
         bool generated() const { return m_generated; }
 
+        /// @brief Generates the mesh data for the chunk.
+        /// @return true if the mesh was generated, false if it was already generating.
+        /// @note This function is thread-safe.
+        bool generateMesh();
+        
+
         Block getBlock(glm::ivec3 pos) const;
 
-        ChunkID coords() const { return m_coords; }
+        /// @return 3D vector of the block data. 
         VoxelData& data() { return m_data; }
 
       private:
@@ -55,12 +62,10 @@ namespace engine {
         ChunkID m_coords;
 
         VoxelData m_data;
-        //std::unordered_map<ChunkID, BlockData> m_metadata;
-
         gl::Attributes<Vertex> m_vertexData;
 
-        std::thread m_genThread;
         bool m_generated = false;
+        std::atomic_bool m_generatingMesh = false;
 
         friend class Engine;
     };

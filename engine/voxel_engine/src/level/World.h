@@ -25,11 +25,18 @@ namespace engine {
         World(std::unique_ptr<ITerrainGenerator> gen, uint32_t genThreads = 8);
         ~World();
 
-        void generator(std::unique_ptr<ITerrainGenerator> gen);
+        /// @brief Loads chunks in the given range.
+        /// @param unloadRest If true, all chunks outside the view distance will be unloaded.
+        void loadChunks(const glm::vec3& from, const glm::vec3& to, bool unloadRest = false);
+        
+        /// @brief Unloads chunks in the given range.
+        void unloadChunks(const glm::vec3& from, const glm::vec3& to);
+
+        /// @brief Unloads all chunks except the given ones.
+        /// @param except Chunks to keep loaded.
+        void unloadAllChunks(const std::vector<ChunkID>& except = {});
 
         bool checkBlock(glm::vec3 pos, Block& curBlock, glm::ivec3 dir) const;
-
-        void updateViewDistance(glm::vec3 pos);
 
         const std::unordered_set<ChunkID>& loadedChunks() const { return m_loadedChunks; }
 
@@ -42,6 +49,8 @@ namespace engine {
 
         friend class Chunk;
         friend class Engine;
+
+        void createChunk(ChunkID id, bool load); 
     };
 
 }  // namespace engine

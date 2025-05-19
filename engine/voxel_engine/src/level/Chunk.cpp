@@ -21,28 +21,27 @@ using namespace engine;
 Chunk::Chunk(World* world, ChunkID coords)
     : m_world(world),
       m_coords(coords),
-      m_vertexData(GL_DYNAMIC_DRAW) {
+      m_vertexData(GL_DYNAMIC_DRAW)  {
+
     m_vertexData.create();
-    //populate();
 }
 
 Chunk::~Chunk() {
-    if (m_genThread.joinable())
-        m_genThread.join();
 }
 
 void Chunk::generate() {
-    //m_genThread = std::thread(&Chunk::populate, this);
-    //m_genThread.join();
-}
+    if (m_generated)
+        return;
 
-void Chunk::populate() {
     m_data = VoxelData(Dims.x, std::vector<std::vector<T>>(Dims.y, std::vector<T>(Dims.z, 0)));
     m_world->m_generator->populate(*this);
-    generateMesh();
 }
 
-void Chunk::generateMesh() {
+bool Chunk::generateMesh() {
+    bool expected = false;
+    if(!m_generatingMesh.compare_exchange_strong(expected, true))
+        return false;
+    
     glm::ivec3 chunkBlockCoords = m_coords * Chunk::Dims;
     for (int x = 0; x < Chunk::Dims.x; x++) {
         m_vertexData.reserve(
@@ -75,9 +74,10 @@ void Chunk::generateMesh() {
             }
         }
     }
-
+    m_generatingMesh = false;
     m_vertexData.m_data.shrink_to_fit();
     m_generated = true;
+    return true;
 }
 
 Block Chunk::getBlock(glm::ivec3 pos) const {
