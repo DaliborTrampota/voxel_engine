@@ -17,7 +17,7 @@ jobs:
     
     
     - name: Configure CMake
-      run: cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -B build -S .
+      run: cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DENABLE_GLFW=OFF -B build -S .
 
     - name: Install cppcheck
       run: sudo apt-get install -y cppcheck
