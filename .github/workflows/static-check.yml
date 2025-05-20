@@ -1,5 +1,9 @@
 name: Static analysis
 
+permissions:
+  pull-requests: write
+
+
 on:
   push:
     branches: [ "master" ]
@@ -23,4 +27,29 @@ jobs:
       run: sudo apt-get install -y cppcheck
       
     - name: Run cppcheck
-      run: cppcheck --enable=all --inconclusive --std=c++20 --quiet --project=build/compile_commands.json
+      run: |
+        cppcheck --enable=all \
+                --inconclusive \
+                --std=c++20 q
+                --quiet \
+                --suppress=missingIncludeSystem \
+                --project=build/compile_commands.json 2> cppcheck_result.txt
+        cat cppcheck_result.txt
+
+    - name: Post comment on PR
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const fs = require('fs');
+          const result = fs.readFileSync('cppcheck_result.txt', 'utf8');
+          if (result.trim().length === 0) {
+              return; // Don't post empty messages
+          }
+          github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `### 🧪 Cppcheck Analysis Result\n\`\`\`\n${result.slice(0, 6000)}\n\`\`\``
+          });
