@@ -38,19 +38,8 @@ jobs:
         cat cppcheck_result.txt
 
     - name: Post comment on PR
-      if: github.event_name == 'pull_request'
-      uses: actions/github-script@v7
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          const fs = require('fs');
-          const result = fs.readFileSync('cppcheck_result.txt', 'utf8');
-          if (result.trim().length === 0) {
-              return; // Don't post empty messages
-          }
-          github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `### 🧪 Cppcheck Analysis Result\n\`\`\`\n${result.slice(0, 6000)}\n\`\`\``
-          });
+      if: github.event_name == 'pull_request' && contains(github.event.head_commit.message, 'cppcheck')
+      run: node .github/scripts/postCPPCheck.js
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        OUTPUT: cppcheck_result.txt
