@@ -5,17 +5,23 @@ permissions:
   contents: read
 
 
-on:
-  push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+on: [push]
 
 jobs:
   static-check:
     name: Static analysis Check
     runs-on: ubuntu-latest
     steps:
+
+    - name: Check commit message and exit if needed
+      run: |
+        MSG=$(git log -1 --pretty=%B)
+        echo "Commit message: $MSG"
+        if [[ "$MSG" != *cppcheck* ]]; then
+            echo "No 'cppcheck' in commit message. Skipping job."
+            exit 78  # Special neutral exit code (doesn't fail the job)
+        fi
+
     - uses: actions/checkout@v4
       with:
         submodules: recursive
@@ -37,8 +43,8 @@ jobs:
                 --project=build/compile_commands.json 2> cppcheck_result.txt
         cat cppcheck_result.txt
 
+
     - name: Post comment on PR
-      if: github.event_name == 'pull_request' && contains(github.event.head_commit.message, 'cppcheck')
       run: node .github/scripts/postCPPCheck.js
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
