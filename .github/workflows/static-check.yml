@@ -12,7 +12,10 @@ jobs:
     name: Static analysis Check
     runs-on: ubuntu-latest
     steps:
-
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    
     - name: Check commit message and exit if needed
       run: |
         MSG=$(git log -1 --pretty=%B)
@@ -22,11 +25,6 @@ jobs:
             exit 78  # Special neutral exit code (doesn't fail the job)
         fi
 
-    - uses: actions/checkout@v4
-      with:
-        submodules: recursive
-    
-    
     - name: Configure CMake
       run: cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DUSE_DEPENDENCIES=OFF -B build -S .
 
