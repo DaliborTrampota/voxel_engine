@@ -38,31 +38,8 @@ function format(result) {
     return outputStr
 }
 
+const file = process.env.OUTPUT;
+if (!file) throw new Error("Missing OUTPUT env variable");
 
-async function main() {
-    const token = process.env.GITHUB_TOKEN;
-    if (!token) throw new Error("Missing GITHUB_TOKEN env variable");
-
-    const octokit = github.getOctokit(token);
-    const context = github.context;
-
-    const cppOutput = fs.readFileSync(process.env.OUTPUT, 'utf8');
-    const result = format(parse(cppOutput));
-
-    if (!context.payload.pull_request) {
-        console.log("Not a pull request — skipping comment");
-        return;
-    }
-
-    await octokit.rest.issues.createComment({
-        issue_number: context.issue.number,
-        owner: context.repo.owner,
-        repo: context.repo.repo,
-        body: result.slice(0, 6000)
-    });
-}
-
-main().catch(err => {
-    console.error(err);
-    process.exit(1);
-});
+const cppOutput = fs.readFileSync(file, 'utf8');
+console.log(format(parse(cppOutput)))

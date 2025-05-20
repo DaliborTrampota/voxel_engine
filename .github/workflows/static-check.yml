@@ -41,9 +41,23 @@ jobs:
                 --project=build/compile_commands.json 2> cppcheck_result.txt
         cat cppcheck_result.txt
 
+    - name: Parse cppcheck result
+      run: node .github/scripts/postCPPCheck.js > cppcheck_comment.txt
+      env:
+        OUTPUT: cppcheck_result.txt
 
     - name: Post comment on PR
-      run: node .github/scripts/postCPPCheck.js
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        OUTPUT: cppcheck_result.txt
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+            const fs = require('fs');
+            const comment = fs.readFileSync('cppcheck_comment.txt', 'utf8').trim();
+            if (!comment) return;
+            await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment.slice(0, 6000),
+            });
