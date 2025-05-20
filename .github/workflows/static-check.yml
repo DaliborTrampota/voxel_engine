@@ -21,6 +21,9 @@ jobs:
 
     - name: Install cppcheck
       run: sudo apt-get install -y cppcheck
-
+    - name: Generate filtered file list
+      run: |
+        find engine game -name '*.cpp' > filelist.txt
+        
     - name: Run cppcheck
-      run: cppcheck --enable=all --inconclusive --std=c++20 --quiet --project=build/compile_commands.json --exclude=dependencies
+      run: cppcheck --enable=all --inconclusive --std=c++20 --quiet --project=build/compile_commands.json --file-list=filelist.txt
