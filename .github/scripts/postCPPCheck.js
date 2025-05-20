@@ -1,5 +1,4 @@
 const fs = require('fs');
-const github = require('@actions/github');
 
 function parse(input) {
     const result = []
