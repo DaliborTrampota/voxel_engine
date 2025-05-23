@@ -57,9 +57,8 @@ bool Chunk::generateMesh() {
                 Block block = RegistryManager::Blocks().get(blockID);
 
                 for (auto f : block.geometry()->faces()) {
-                    if (f.cull && m_world->checkBlock(
-                                        pos + f.cullDir + chunkBlockCoords, block, f.cullDir
-                                    ))
+                    if (f.cull &&
+                        m_world->checkBlock(pos + f.cullDir + chunkBlockCoords, block, f.cullDir))
                         continue;
 
                     f.translate(pos);

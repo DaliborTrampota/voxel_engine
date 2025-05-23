@@ -3,10 +3,10 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <Camera.h>
 #include <core/gl/ShaderPipeline.h>
 #include <level/Chunk.h>
 #include <level/World.h>
+#include <scene/Camera.h>
 
 
 using namespace engine;

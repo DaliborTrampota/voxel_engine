@@ -18,11 +18,10 @@ glm::vec3 AABB::center() const {
     return (min + max) / 2.0f;
 }
 
-AABB AABB::transform(const glm::mat4& matrix) const {
-    return {
-        glm::vec3(matrix * glm::vec4(min, 1.0f)),
-        glm::vec3(matrix * glm::vec4(max, 1.0f))
-    };
+AABB& AABB::transform(const glm::mat4& matrix) {
+    min = glm::vec3(matrix * glm::vec4(min, 1.0f));
+    max = glm::vec3(matrix * glm::vec4(max, 1.0f));
+    return *this;
 }
 
 AABB AABB::fromGeometry(const Geometry& geo) {

@@ -12,9 +12,9 @@
 
 #include <data/VertexData.h>
 
-#include <Camera.h>
-#include <TextureLoader.h>
+#include <data/TextureLoader.h>
 #include <level/World.h>
+#include <scene/Camera.h>
 
 #include "registry/Blocks.h"
 

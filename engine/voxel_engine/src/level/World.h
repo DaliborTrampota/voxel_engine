@@ -16,6 +16,7 @@ namespace gl {
 }
 
 namespace engine {
+    static inline constexpr BlockID INVALID_BLOCK = -1;
 
     class Chunk;
     struct ChunkID;
@@ -24,6 +25,8 @@ namespace engine {
       public:
         World(std::unique_ptr<ITerrainGenerator> gen, uint32_t genThreads = 8);
         ~World();
+
+        /// @section Chunk management
 
         /// @brief Loads chunks in the given range.
         /// @param unloadRest If true, all chunks outside the view distance will be unloaded.
@@ -36,7 +39,17 @@ namespace engine {
         /// @param except Chunks to keep loaded.
         void unloadAllChunks(const std::vector<ChunkID>& except = {});
 
+
+        /// @section Block management
+
+        /// @brief Gets the block ID at the given position.
+        /// @return the block ID or engine::INVALID_BLOCK if:
+        ///         - The position is out of bounds (eg less than or greater than Chunk::Dims)
+        ///         - The chunk is not generated
+        BlockID getBlockID(const ChunkID& chID, const glm::ivec3& pos);
+
         bool checkBlock(glm::vec3 pos, Block& curBlock, glm::ivec3 dir) const;
+
 
         const std::unordered_set<ChunkID>& loadedChunks() const { return m_loadedChunks; }
 

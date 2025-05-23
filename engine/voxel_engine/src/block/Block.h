@@ -13,9 +13,12 @@ namespace engine {
         Block(BlockID id, const Geometry* geo);
         Block(BlockID id, const Geometry* geo, const Material& mat);
 
+        static Block& air();
+
         BlockID getID() const { return m_id; }
 
         const Geometry* geometry() const { return m_geometry; }
+
         bool isSolid() const { return m_isSolid; }
         bool isOpaque() const { return m_isOpaque; }
         bool isVoxel() const { return m_isVoxel; }

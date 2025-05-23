@@ -104,6 +104,9 @@ void GraphicsAPI::destroy() {
 
 
 void GraphicsAPI::registerCallbacks() {
+    if (!m_window)
+        throw std::runtime_error("Calling registerCallbacks before calling init!");
+
     using MouseCB = void(GLFWwindow*, double, double);
     CallbackWrapper<MouseCB>::callback = [this](GLFWwindow* w, double x, double y) -> void {
         MouseEvent e{x, y};

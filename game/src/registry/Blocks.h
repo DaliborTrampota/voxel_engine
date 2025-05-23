@@ -16,7 +16,6 @@ void RegisterBlocks() {
     // clang-format off
     Registry<Geometry>& geometries = RegistryManager::Geometries();
 
-    geometries.add(Geometry(), "empty");
     geometries.add(Geometry::Cube(), "cube");
     geometries.add(Geometry::Cylinder(), "cylinder");
     geometries.add(Pyramid(), "pyramid");
@@ -25,10 +24,6 @@ void RegisterBlocks() {
 
     Registry<Block>& blocks = RegistryManager::Blocks();
     TextureManager& texMgr = TextureManager::Get();
-
-    auto AIR = Block(0, &geometries.get("empty"))
-        .isSolid(false)
-        .isOpaque(false);
     
     auto DIRT = Block(1, &geometries.get("cube"))
         .isSolid(true)
@@ -69,7 +64,7 @@ void RegisterBlocks() {
             .add(FaceTag::All, texMgr.texture("stone"))
         );
     
-    blocks.add(AIR, "air");
+    blocks.add(Block::air(), "air");
     blocks.add(DIRT, "dirt");
     blocks.add(GRASS, "grass");
     blocks.add(STONE, "stone");

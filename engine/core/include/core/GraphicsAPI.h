@@ -28,12 +28,12 @@ namespace gl {
         void clearScreen();
 
 
-        void mouseLock(bool value);
+        void mouseLock(bool state);
         void setWindowSize(int x, int y) const;
         glm::ivec2 getWindowSize() const;
 
       private:
-        GLFWwindow* m_window;
+        GLFWwindow* m_window = nullptr;
 
         friend class Window;
     };

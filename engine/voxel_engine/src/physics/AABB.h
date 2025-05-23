@@ -15,9 +15,9 @@ namespace engine {
         bool intersects(const AABB& other) const;
         glm::vec3 center() const;
 
-        AABB transform(const glm::mat4& matrix) const;
+        AABB& transform(const glm::mat4& matrix);
 
-        static AABB fromGeometry(const Geometry& geo); 
+        static AABB fromGeometry(const Geometry& geo);
     };
 
-}
+}  // namespace engine

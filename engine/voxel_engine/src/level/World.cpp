@@ -4,11 +4,14 @@
 #include "ITerrainGenerator.h"
 #include "block/Block.h"
 #include "block/Geometry.h"
+#include "data/RegistryManager.h"
 
 #include <algorithm>
 #include <mutex>
 #include <queue>
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/component_wise.hpp>
 #include <iostream>
 
 using namespace engine;
@@ -79,6 +82,21 @@ void World::unloadAllChunks(const std::vector<ChunkID>& except) {
             }
         }
     }
+}
+
+BlockID World::getBlockID(const ChunkID& chID, const glm::ivec3& pos) {
+    if (glm::any(glm::lessThan(pos, glm::ivec3(0))) ||
+        glm::any(glm::greaterThan(pos, Chunk::Dims))) {
+        std::cerr << "Position out of bounds\n";  // TODO add debug macros
+        return INVALID_BLOCK;
+    }
+    Chunk* chunk = m_chunks.at(chID);
+    if (!chunk) {
+        std::cerr << "Chunk not found\n";
+        return INVALID_BLOCK;
+    }
+
+    return chunk->m_data[pos.x][pos.y][pos.z];
 }
 
 bool World::checkBlock(glm::vec3 pos, Block& curBlock, glm::ivec3 dir) const {

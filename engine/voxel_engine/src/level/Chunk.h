@@ -24,6 +24,7 @@ namespace engine {
 
     struct ChunkID : glm::ivec3 {
         ChunkID(int x, int y, int z) : glm::ivec3(x, y, z) {}
+        ChunkID(const glm::ivec3& vec) : glm::ivec3(vec) {}
 
         bool operator()(const ChunkID& a, const ChunkID& b) const;
         bool operator==(const ChunkID& other) const;
@@ -68,6 +69,7 @@ namespace engine {
         std::atomic_bool m_generatingMesh = false;
 
         friend class Engine;
+        friend class World;
     };
 
 

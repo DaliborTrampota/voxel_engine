@@ -2,20 +2,83 @@
 
 namespace engine {
 
-    /// @brief Returns the chunk coordinates of the given position and modifies the position to be relative to the chunk.
-    /// @return Chunk coordinate containing the position
     ChunkID extractChunkCoords(glm::vec3& pos) {
-        ChunkID chunkCoords = ChunkID(
-            (int)floor(pos.x / Chunk::Dims.x),
-            (int)floor(pos.y / Chunk::Dims.y),
-            (int)floor(pos.z / Chunk::Dims.z)
-        );
-
-        pos.x -= chunkCoords.x * Chunk::Dims.x;
-        pos.y -= chunkCoords.y * Chunk::Dims.y;
-        pos.z -= chunkCoords.z * Chunk::Dims.z;
-
+        ChunkID chunkCoords =
+            ChunkID(static_cast<glm::ivec3>(glm::floor(pos / glm::vec3(Chunk::Dims))));
+        pos -= chunkCoords * Chunk::Dims;
         return chunkCoords;
+    }
+
+    ChunkID extractChunkCoords(glm::ivec3& pos) {
+        ChunkID chunkCoords = ChunkID(
+            floorDiv(pos.x, Chunk::Dims.x),
+            floorDiv(pos.y, Chunk::Dims.y),
+            floorDiv(pos.z, Chunk::Dims.z)
+        );
+        pos -= chunkCoords * Chunk::Dims;
+        return chunkCoords;
+    }
+
+    glm::ivec3 floorToInt(const glm::vec3& vec) {
+        return static_cast<glm::ivec3>(vec);
+    }
+
+    std::vector<glm::ivec3> traceLine(glm::vec3 start, glm::vec3 end) {
+        std::vector<glm::ivec3> visited;
+
+        glm::vec3 dir = glm::normalize(end - start);
+        glm::ivec3 currentBlock = glm::floor(start);
+
+        glm::vec3 tMax;
+        glm::vec3 tDelta;
+        glm::ivec3 step;
+
+        for (int i = 0; i < 3; ++i) {
+            if (dir[i] > 0) {
+                step[i] = 1;
+                tMax[i] = ((currentBlock[i] + 1) - start[i]) / dir[i];
+                tDelta[i] = 1.0f / dir[i];
+            } else if (dir[i] < 0) {
+                step[i] = -1;
+                tMax[i] = (start[i] - currentBlock[i]) / -dir[i];
+                tDelta[i] = 1.0f / -dir[i];
+            } else {
+                step[i] = 0;
+                tMax[i] = std::numeric_limits<float>::infinity();
+                tDelta[i] = std::numeric_limits<float>::infinity();
+            }
+        }
+
+        float maxDist = glm::length(end - start);
+        float travelled = 0.0f;
+
+        while (travelled <= maxDist) {
+            visited.push_back(currentBlock);
+
+            if (tMax.x < tMax.y) {
+                if (tMax.x < tMax.z) {
+                    currentBlock.x += step.x;
+                    travelled = tMax.x;
+                    tMax.x += tDelta.x;
+                } else {
+                    currentBlock.z += step.z;
+                    travelled = tMax.z;
+                    tMax.z += tDelta.z;
+                }
+            } else {
+                if (tMax.y < tMax.z) {
+                    currentBlock.y += step.y;
+                    travelled = tMax.y;
+                    tMax.y += tDelta.y;
+                } else {
+                    currentBlock.z += step.z;
+                    travelled = tMax.z;
+                    tMax.z += tDelta.z;
+                }
+            }
+        }
+
+        return visited;
     }
 
 }  // namespace engine

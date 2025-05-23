@@ -5,6 +5,8 @@
 #include <thread>
 
 #include <core/gl/Controls.h>
+#include <physics/AABB.h>
+#include <physics/AABBCollider.h>
 
 namespace engine {
     class World;
@@ -32,4 +34,10 @@ class Player {
     engine::Camera* m_camera;
     glm::vec3 m_position;
     engine::Chunk* m_currentChunk;
+
+    engine::AABB m_aabb{
+        glm::vec3(-0.5f, 0.0f, -0.5f),
+        glm::vec3(0.5f, 1.8f, 0.5f),
+    };
+    engine::AABBCollider m_collider;
 };
