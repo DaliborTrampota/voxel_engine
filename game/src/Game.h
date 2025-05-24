@@ -7,6 +7,7 @@
 #include <core/gl/ShaderPipeline.h>
 
 #include <Engine.h>
+#include <InputSystem.h>
 
 #include "Player.h"
 #include "WorldManager.h"
@@ -33,7 +34,7 @@ struct MouseState {
 class Game : public engine::Engine {
   public:
     Game() = delete;
-    Game(std::unique_ptr<gl::Window> window, glm::ivec2 dims);
+    Game(std::unique_ptr<gl::Window> window,  glm::ivec2 dims);
     ~Game();
 
     void start();
@@ -41,12 +42,11 @@ class Game : public engine::Engine {
     const Player* getPlayer() const { return m_player; }
     std::shared_ptr<World> activeWorld() { return m_worldManager.activeWorld(); }
 
-    void processInput(float dt);
-    void processMouse(double xposIn, double yposIn) override;
-
+    void processInput();
     void render(double dt) override;
 
   private:
+    std::unique_ptr<InputSystem> m_inputSystem;
     MouseState m_mouseState;
     gl::ShaderPipeline m_pipeline;
 

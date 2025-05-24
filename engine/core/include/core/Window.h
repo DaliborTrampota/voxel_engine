@@ -3,7 +3,6 @@
 #include <glm/glm.hpp>
 #include <memory>
 
-#include "gl/Controls.h"
 #include "gl/GLEventSite.h"
 
 using namespace engine;
@@ -18,12 +17,8 @@ namespace gl {
         ~Window();
 
         void windowResizeEvent(ResizeEvent* pEvent) override;
-        void mouseMoveEvent(MouseEvent* pEvent) override;
 
-        virtual void processMouse(double x, double y) = 0;
         void mouseLock(bool state) const;
-        KeyState getKeyState(Key k) const;
-
         float time() const;
         void close();
         bool shouldClose() const;

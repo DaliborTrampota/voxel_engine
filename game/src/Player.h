@@ -24,6 +24,8 @@ class Player : public engine::MovingEntity {
 
     void spawn(std::shared_ptr<engine::World> world);
 
+    void update(float dt) override;
+
     void move(engine::Key key, float dt);
     void rotate(float dx, float dy, bool constrainPitch = true);
 

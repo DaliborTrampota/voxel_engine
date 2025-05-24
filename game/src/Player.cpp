@@ -5,7 +5,10 @@
 #include <Camera.h>
 #include <CoordUtils.h>
 #include <level/Chunk.h>
-#include <level/World.h>
+#include <level/World.h>´
+#include <InputSystem.h>
+
+#include "GameServices.h"
 
 using namespace engine;
 
@@ -30,6 +33,23 @@ void Player::spawn(std::shared_ptr<World> world) {
     glm::ivec3 to = coords + ViewDistance;
     world->loadChunks(from, to);
     //m_viewDistThread = std::thread(&World::updateViewDistance, world, m_position);
+}
+
+void Player::update(float dt) {
+    auto input = GameServices::getInputSystem();
+    float mouseX = input->getAxis(Axis::MouseX);
+    float mouseY = input->getAxis(Axis::MouseY);
+    rotate(mouseX, mouseY, true);
+
+    if (input->getKeyState(Key::W) == KeyState::Pressed)
+        move(Key::W, dt);
+    if (input->getKeyState(Key::S) == KeyState::Pressed)
+        move(Key::S, dt);
+    if (input->getKeyState(Key::A) == KeyState::Pressed)
+        move(Key::A, dt);
+    if (input->getKeyState(Key::D) == KeyState::Pressed)
+        move(Key::D, dt);
+
 }
 
 void Player::move(Key key, float dt) {

@@ -17,5 +17,7 @@ namespace engine {
         A,
         S,
         D,
+        Home,
+        End, // This should be last
     };
 }  // namespace engine

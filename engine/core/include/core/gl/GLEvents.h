@@ -16,3 +16,14 @@ class MouseEvent : public engine::Event {
 
     double x, y;
 };
+
+class KeyboardEvent : public engine::Event {
+    public:
+    KeyboardEvent(int key, int scancode, int action, int mods)
+        : key(key), scancode(scancode), action(action), mods(mods) {}
+
+    int key;
+    int scancode;
+    int action;
+    int mods;
+};

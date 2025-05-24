@@ -25,6 +25,7 @@ namespace engine {
         void render(gl::ShaderPipeline* pipeline, Camera* cam, std::shared_ptr<World> world);
 
         void subscribeUpdate(std::shared_ptr<Updateable> updateable);
+        // void subscribeInputSystem(engine::InputSystem* inputSystem);
 
         void fireUpdate(float dt);        
 

@@ -9,8 +9,6 @@
 #include <core/gl/Shader.h>
 #include <core/gl/ShaderPipeline.h>
 
-#include <data/VertexData.h>
-
 #include <Camera.h>
 #include <TextureLoader.h>
 #include <level/World.h>
@@ -23,49 +21,25 @@
 using namespace engine;
 
 
-Game::Game(gl::GraphicsAPI* gAPI, glm::ivec2 dims) : Engine(gAPI), m_mouseState(dims) {
+Game::Game(std::unique_ptr<gl::Window> window, glm::ivec2 dims) : Engine(std::move(window)), m_mouseState(dims) {
+    m_inputSystem = std::make_unique<engine::InputSystem>();
+
+    window()->graphicsAPI()->subscribe(m_inputSystem.get());
+
     GameServices::setGame(this);
+    GameServices::setGameInputSystem(m_inputSystem.get());
 }
 
-void Game::processInput(float dt) {
-    if (getKeyState(Key::Esc) == KeyState::Pressed)
-        close();
-
-    if (getKeyState(Key::W) == KeyState::Pressed)
-        m_player->move(Key::W, dt);
-    if (getKeyState(Key::S) == KeyState::Pressed)
-        m_player->move(Key::S, dt);
-    if (getKeyState(Key::A) == KeyState::Pressed)
-        m_player->move(Key::A, dt);
-    if (getKeyState(Key::D) == KeyState::Pressed)
-        m_player->move(Key::D, dt);
-}
-
-void Game::processMouse(double xposIn, double yposIn) {
-    float xpos = static_cast<float>(xposIn);
-    float ypos = static_cast<float>(yposIn);
-
-    if (m_mouseState.firstMouse) {
-        m_mouseState.lastX = xpos;
-        m_mouseState.lastY = ypos;
-        m_mouseState.firstMouse = false;
-    }
-
-    float xoffset = xpos - m_mouseState.lastX;
-    float yoffset =
-        m_mouseState.lastY - ypos;  // reversed since y-coordinates go from bottom to top
-
-    m_mouseState.lastX = xpos;
-    m_mouseState.lastY = ypos;
-
-    m_player->rotate(xoffset, yoffset);
+void Game::processInput() {
+    if (m_inputSystem->getKeyState(Key::Esc) == KeyState::Pressed)
+        window()->close();
 }
 
 Game::~Game() {}
 
 
 void Game::render(double dt) {
-    processInput(dt);
+    processInput();
     fireUpdate(dt);
 
     Engine::render(&m_pipeline, m_plrCamera, activeWorld());

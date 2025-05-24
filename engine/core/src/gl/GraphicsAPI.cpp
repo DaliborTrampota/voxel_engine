@@ -122,6 +122,13 @@ void GraphicsAPI::registerCallbacks() {
     };
     glfwSetFramebufferSizeCallback(m_window, CallbackWrapper<ResizeCB>::call);
 
+    using KeyCB = void(GLFWwindow*, int, int, int, int);
+    CallbackWrapper<KeyCB>::callback = [this](GLFWwindow* window, int key, int scancode, int action, int mods) {
+        KeyboardEvent e{key, scancode, action, mods};
+        fireKeyboardEvent(&e);
+    };
+    glfwSetKeyCallback(m_window, CallbackWrapper<KeyCB>::call);
+
     using DebugCB = void(GLenum, GLenum, GLuint, GLenum, GLsizei, const GLchar*, const void*);
     CallbackWrapper<DebugCB>::callback = [this](
                                              GLenum source,
