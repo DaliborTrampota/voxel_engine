@@ -1,6 +1,6 @@
 #include "Window.h"
 
-#include "core/GraphicsAPI.h"
+#include "core/gl/GraphicsAPI.h"
 #include "core/gl/GLEvents.h"
 
 #define GLFW_INCLUDE_NONE
@@ -34,14 +34,13 @@ namespace {
 }  // namespace
 
 
-gl::Window::Window(GraphicsAPI* api) : m_api(api) {
+gl::Window::Window(std::unique_ptr<GraphicsAPI> api) : m_api(std::move(api)) {
     m_size = api->getWindowSize();
     m_api->subscribe(this);
 }
 
 gl::Window::~Window() {
     glfwSetWindowShouldClose(m_api->m_window, true);
-    delete m_api;
 }
 
 void gl::Window::windowResizeEvent(ResizeEvent* pEvent) {
@@ -74,33 +73,27 @@ bool gl::Window::shouldClose() const {
     return m_close;  // glfwWindowShouldClose(m_api->m_window);
 }
 
-void gl::Window::gameloop() {
-    m_api->setRenderFlags();
-
-    float deltaTime = 0.0f;
-    float lastFrame = 0.0f;
-    while (!m_close) {
-        float currentFrame = (float)glfwGetTime();
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
-
-
-        m_api->clearScreen();
-
-        beforeRender();
-        render(deltaTime);
-        afterRender();
-
-        GLenum err;
-        while ((err = glGetError()) != GL_NO_ERROR)
-            printf("OpenGL error: %d\n", err);
-
-        glfwSwapBuffers(m_api->m_window);
-        glfwPollEvents();
-    }
+void gl::Window::beginFrame() const {
+    m_api->clearScreen();
 }
 
+void gl::Window::endFrame() const {
+    m_api->swapBuffers();
+    glfwPollEvents();
+}
+
+void gl::Window::setRenderFlags() const {
+    m_api->setRenderFlags();
+}
+
+float gl::Window::time() const {
+    return (float)glfwGetTime();
+}
 
 void gl::Window::mouseLock(bool state) const {
     m_api->mouseLock(state);
+}
+
+const glm::ivec2& gl::Window::size() const {
+    return m_size;
 }

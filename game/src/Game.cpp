@@ -4,11 +4,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <core/GraphicsAPI.h>
+#include <core/gl/GraphicsAPI.h>
 #include <core/gl/GLEvents.h>
 #include <core/gl/Shader.h>
 #include <core/gl/ShaderPipeline.h>
-#include <core/gl/Window.h>
 
 #include <data/VertexData.h>
 
@@ -17,25 +16,29 @@
 #include <level/World.h>
 
 #include "registry/Blocks.h"
+#include "Updateable.h"
+#include "GameServices.h"
 
 //#include <tracy/Tracy.hpp>
 using namespace engine;
 
 
-Game::Game(gl::GraphicsAPI* gAPI, glm::ivec2 dims) : gl::Window(gAPI), m_mouseState(dims) {}
+Game::Game(gl::GraphicsAPI* gAPI, glm::ivec2 dims) : Engine(gAPI), m_mouseState(dims) {
+    GameServices::setGame(this);
+}
 
 void Game::processInput(float dt) {
     if (getKeyState(Key::Esc) == KeyState::Pressed)
         close();
 
     if (getKeyState(Key::W) == KeyState::Pressed)
-        m_player.move(Key::W, dt);
+        m_player->move(Key::W, dt);
     if (getKeyState(Key::S) == KeyState::Pressed)
-        m_player.move(Key::S, dt);
+        m_player->move(Key::S, dt);
     if (getKeyState(Key::A) == KeyState::Pressed)
-        m_player.move(Key::A, dt);
+        m_player->move(Key::A, dt);
     if (getKeyState(Key::D) == KeyState::Pressed)
-        m_player.move(Key::D, dt);
+        m_player->move(Key::D, dt);
 }
 
 void Game::processMouse(double xposIn, double yposIn) {
@@ -55,16 +58,15 @@ void Game::processMouse(double xposIn, double yposIn) {
     m_mouseState.lastX = xpos;
     m_mouseState.lastY = ypos;
 
-    m_player.rotate(xoffset, yoffset);
+    m_player->rotate(xoffset, yoffset);
 }
 
 Game::~Game() {}
 
-void Game::update(float dt) {}
 
 void Game::render(double dt) {
     processInput(dt);
-    update(dt);
+    fireUpdate(dt);
 
     Engine::render(&m_pipeline, m_plrCamera, activeWorld());
 }
@@ -76,7 +78,7 @@ void Game::start() {
     //loader.bind();
     RegisterBlocks();
 
-    m_player.spawn(activeWorld());
+    m_player->spawn(activeWorld());
 
     {
         gl::Shader vert("../../../game/shaders/VertexShader.glsl", GL_VERTEX_SHADER);
@@ -95,7 +97,7 @@ void Game::start() {
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 
-    m_plrCamera = m_player.getCamera();
+    m_plrCamera = m_player->getCamera();
     m_pipeline.use();
 
     m_plrCamera->lookAt(glm::vec3(0, 0, 0));

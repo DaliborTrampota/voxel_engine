@@ -10,14 +10,12 @@
 using namespace engine;
 
 Player::Player()
-    : m_camera(new Camera(Camera::ProjectionType::Perspective)),
-      m_currentChunk(nullptr),
-      m_position(0, 0, 0) {}
+    : m_camera(std::make_unique<Camera>(Camera::ProjectionType::Perspective)),
+      m_currentChunk(nullptr){}
 
 Player::~Player() {
     if (m_viewDistThread.joinable())
         m_viewDistThread.join();
-    delete m_camera;
 }
 
 void Player::spawn(std::shared_ptr<World> world) {

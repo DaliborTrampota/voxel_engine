@@ -53,6 +53,10 @@ namespace {
     }
 }  // namespace
 
+GraphicsAPI::GraphicsAPI() {
+    init();
+}
+
 void GraphicsAPI::init() {
     INIT_GL_THREAD
 
@@ -144,7 +148,7 @@ void GraphicsAPI::registerCallbacks() {
     glDebugMessageCallback(CallbackWrapper<DebugCB>::call, nullptr);
 }
 
-void GraphicsAPI::setRenderFlags() {
+void GraphicsAPI::setRenderFlags() const {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     //glDisable(GL_CULL_FACE);
@@ -152,9 +156,14 @@ void GraphicsAPI::setRenderFlags() {
     glCullFace(GL_BACK);
 }
 
-void GraphicsAPI::clearScreen() {
+void GraphicsAPI::clearScreen() const {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void GraphicsAPI::swapBuffers() const {
+    glfwSwapBuffers(m_window);
+    glfwPollEvents();
 }
 
 void GraphicsAPI::mouseLock(bool state) {

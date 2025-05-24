@@ -5,6 +5,9 @@
 #include <thread>
 
 #include <core/gl/Controls.h>
+#include <entity/MovingEntity.h>
+
+#include "Updateable.h"
 
 namespace engine {
     class World;
@@ -12,7 +15,7 @@ namespace engine {
     class Camera;
 }  // namespace engine
 
-class Player {
+class Player : public engine::MovingEntity {
   public:
     static constexpr glm::ivec3 ViewDistance{3, 4, 3};
 
@@ -24,12 +27,10 @@ class Player {
     void move(engine::Key key, float dt);
     void rotate(float dx, float dy, bool constrainPitch = true);
 
-    engine::Camera* getCamera() { return m_camera; }
+    engine::Camera* getCamera() { return m_camera.get(); }
 
   private:
     std::thread m_viewDistThread;
-
-    engine::Camera* m_camera;
-    glm::vec3 m_position;
     engine::Chunk* m_currentChunk;
+    std::unique_ptr<engine::Camera> m_camera;
 };
