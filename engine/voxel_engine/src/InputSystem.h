@@ -20,7 +20,8 @@ namespace engine {
             InputSystem() = default;
 
             KeyState getKeyState(Key k);
-            float getAxis(Axis axis) const;
+            bool isKey(KeyState state, Key k) const;
+            float getAxis(Axis axis);
 
             void keyboardEvent(KeyboardEvent* pEvent) override;
             void mouseMoveEvent(MouseEvent* pEvent) override;

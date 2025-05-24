@@ -3,7 +3,7 @@
 class Game;
 
 namespace engine {
-    class InputSystem
+    class InputSystem;
 }
 
 class GameServices {

@@ -53,10 +53,6 @@ namespace {
     }
 }  // namespace
 
-GraphicsAPI::GraphicsAPI() {
-    init();
-}
-
 void GraphicsAPI::init() {
     INIT_GL_THREAD
 
@@ -170,7 +166,6 @@ void GraphicsAPI::clearScreen() const {
 
 void GraphicsAPI::swapBuffers() const {
     glfwSwapBuffers(m_window);
-    glfwPollEvents();
 }
 
 void GraphicsAPI::mouseLock(bool state) {

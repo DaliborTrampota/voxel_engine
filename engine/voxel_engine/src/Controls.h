@@ -3,11 +3,12 @@
 
 namespace engine {
 
-    enum KeyState {
+    enum KeyState { // : uint8_t
         None = 0,
         Pressed = 1,
         Released = 2,
-        Held = 3,
+        Held = 4,
+        Down = Pressed | Held,
     };
 
     enum Key {

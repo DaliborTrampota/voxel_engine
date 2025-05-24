@@ -12,9 +12,9 @@
 #include <Camera.h>
 #include <TextureLoader.h>
 #include <level/World.h>
+#include <Updateable.h>
 
 #include "registry/Blocks.h"
-#include "Updateable.h"
 #include "GameServices.h"
 
 //#include <tracy/Tracy.hpp>
@@ -24,10 +24,10 @@ using namespace engine;
 Game::Game(std::unique_ptr<gl::Window> window, glm::ivec2 dims) : Engine(std::move(window)), m_mouseState(dims) {
     m_inputSystem = std::make_unique<engine::InputSystem>();
 
-    window()->graphicsAPI()->subscribe(m_inputSystem.get());
+    this->window()->graphicsAPI()->subscribe(m_inputSystem.get());
 
     GameServices::setGame(this);
-    GameServices::setGameInputSystem(m_inputSystem.get());
+    GameServices::setInputSystem(m_inputSystem.get());
 }
 
 void Game::processInput() {
@@ -52,7 +52,10 @@ void Game::start() {
     //loader.bind();
     RegisterBlocks();
 
+    m_player = std::make_shared<Player>();
     m_player->spawn(activeWorld());
+
+    subscribeUpdate(m_player);
 
     {
         gl::Shader vert("../../../game/shaders/VertexShader.glsl", GL_VERTEX_SHADER);
@@ -82,6 +85,6 @@ void Game::start() {
     m_pipeline.setMat4("projection", m_plrCamera->getProjection());
 
 
-    mouseLock(true);
+    window()->mouseLock(true);
     gameloop();
 }

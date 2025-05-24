@@ -22,8 +22,6 @@ namespace engine {
     class Camera;
 }
 
-class Updateable;
-
 struct MouseState {
     MouseState() = delete;
     MouseState(glm::ivec2 dims) : lastX(dims.x / 2.0f), lastY(dims.y / 2.0f), firstMouse(true) {}
@@ -39,7 +37,7 @@ class Game : public engine::Engine {
 
     void start();
 
-    const Player* getPlayer() const { return m_player; }
+    const std::weak_ptr<Player> getPlayer() const { return m_player; }
     std::shared_ptr<World> activeWorld() { return m_worldManager.activeWorld(); }
 
     void processInput();
@@ -50,7 +48,7 @@ class Game : public engine::Engine {
     MouseState m_mouseState;
     gl::ShaderPipeline m_pipeline;
 
-    Player* m_player;
+    std::shared_ptr<Player> m_player;
     Camera* m_plrCamera;
     WorldManager m_worldManager;
 };

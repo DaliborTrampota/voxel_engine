@@ -3,6 +3,7 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
+#include <iostream>
 #include <core/gl/GLEvents.h>
 
 using namespace engine;
@@ -40,8 +41,17 @@ KeyState InputSystem::getKeyState(Key k) {
     return m_keyStates[static_cast<size_t>(k)];
 }
 
-float InputSystem::getAxis(Axis axis) const {
-    return m_axisStates[static_cast<size_t>(axis)];
+bool engine::InputSystem::isKey(KeyState state, Key k) const {
+    return m_keyStates[static_cast<size_t>(k)] & state;
+}
+
+float InputSystem::getAxis(Axis axis) {
+    float value = m_axisStates[static_cast<size_t>(axis)];
+    if (axis == Axis::MouseX || axis == Axis::MouseY) {
+        // Reset mouse axis after reading
+        m_axisStates[static_cast<size_t>(axis)] = 0.0f;
+    }
+    return value;
 }
 
 void InputSystem::setAxis(Axis axis, float value) {
@@ -69,7 +79,7 @@ void InputSystem::keyboardEvent(KeyboardEvent* pEvent) {
     float sideways = getAxis(Axis::Sideways);
     float forward = getAxis(Axis::Forward);
 
-    int multiplier = state == Released ? -1 : 1;
+    int multiplier = state == Released ? -1 : state & Down ? 1 : 0;
     
     if (key == Key::A) {
         sideways -= 1.0f * multiplier;
@@ -90,13 +100,15 @@ void InputSystem::keyboardEvent(KeyboardEvent* pEvent) {
 }
 
 void InputSystem::mouseMoveEvent(MouseEvent* pEvent) {
-    float dx = pEvent->x - m_mouseX;
-    float dy = m_mouseY - pEvent->y;  // reversed since y-coordinates go from bottom to top
+    float dx = !pEvent->still * (pEvent->x - m_mouseX);
+    float dy = !pEvent->still * (m_mouseY - pEvent->y);  // reversed since y-coordinates go from bottom to top
+    
+    setAxis(Axis::MouseX, dx);
+    setAxis(Axis::MouseY, dy);
+
+    if (pEvent->still) 
+        return;
 
     m_mouseX = pEvent->x;
     m_mouseY = pEvent->y;
-
-    setAxis(Axis::MouseX, dx);
-    setAxis(Axis::MouseY, dy);
-    // m_player->rotate(dx, dy);
 }

@@ -6,54 +6,60 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
+using namespace gl;
 
 
-
-gl::Window::Window(std::unique_ptr<GraphicsAPI> api) : m_api(std::move(api)) {
-    m_size = api->getWindowSize();
+Window::Window(std::unique_ptr<GraphicsAPI> api) : m_api(std::move(api)) {
+    m_api->init();
     m_api->subscribe(this);
+    m_size = m_api->getWindowSize();
 }
 
-gl::Window::~Window() {
+Window::~Window() {
     glfwSetWindowShouldClose(m_api->m_window, true);
 }
 
-void gl::Window::windowResizeEvent(ResizeEvent* pEvent) {
+void Window::windowResizeEvent(ResizeEvent* pEvent) {
     m_size.x = pEvent->width;
     m_size.y = pEvent->height;
     m_api->setWindowSize(m_size.x, m_size.y);
 }
 
-void gl::Window::close() {
+void Window::close() {
     m_close = true;
     //glfwSetWindowShouldClose(m_api->m_window, true);
 }
 
-bool gl::Window::shouldClose() const {
+bool Window::shouldClose() const {
     return m_close;  // glfwWindowShouldClose(m_api->m_window);
 }
 
-void gl::Window::beginFrame() const {
+void Window::beginFrame() const {
     m_api->clearScreen();
+
 }
 
-void gl::Window::endFrame() const {
+void Window::endFrame() const {
     m_api->swapBuffers();
+
+    MouseEvent event(true);
+    m_api->fireMouseMoveEvent(&event);
+
     glfwPollEvents();
 }
 
-void gl::Window::setRenderFlags() const {
+void Window::setRenderFlags() const {
     m_api->setRenderFlags();
 }
 
-float gl::Window::time() const {
+float Window::time() const {
     return (float)glfwGetTime();
 }
 
-void gl::Window::mouseLock(bool state) const {
+void Window::mouseLock(bool state) const {
     m_api->mouseLock(state);
 }
 
-const glm::ivec2& gl::Window::size() const {
+const glm::ivec2& Window::size() const {
     return m_size;
 }

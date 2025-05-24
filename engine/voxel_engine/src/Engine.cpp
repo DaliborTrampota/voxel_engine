@@ -10,15 +10,12 @@
 #include <level/Chunk.h>
 #include <level/World.h>
 
-#include "InputSystem.h"
 #include "Updateable.h"
 
 
 using namespace engine;
 
 Engine::Engine(std::unique_ptr<gl::Window> window) : m_window(std::move(window)) {
-    InputSystem::s_instance = new InputSystem();
-    m_window->graphicsAPI()->subscribe(InputSystem::s_instance);
 }
 
 void Engine::render(gl::ShaderPipeline* pipeline, Chunk* chunk) {

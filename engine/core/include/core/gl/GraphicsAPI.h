@@ -17,7 +17,7 @@ namespace gl {
 
     class GraphicsAPI : public GLEventSource {
       public:
-        GraphicsAPI();
+        GraphicsAPI() = default;
         ~GraphicsAPI() { destroy(); };
 
         void init();

@@ -39,15 +39,16 @@ void Player::update(float dt) {
     auto input = GameServices::getInputSystem();
     float mouseX = input->getAxis(Axis::MouseX);
     float mouseY = input->getAxis(Axis::MouseY);
+    
     rotate(mouseX, mouseY, true);
 
-    if (input->getKeyState(Key::W) == KeyState::Pressed)
+    if (input->isKey(KeyState::Down, Key::W))
         move(Key::W, dt);
-    if (input->getKeyState(Key::S) == KeyState::Pressed)
+    if (input->isKey(KeyState::Down, Key::S))
         move(Key::S, dt);
-    if (input->getKeyState(Key::A) == KeyState::Pressed)
+    if (input->isKey(KeyState::Down, Key::A))
         move(Key::A, dt);
-    if (input->getKeyState(Key::D) == KeyState::Pressed)
+    if (input->isKey(KeyState::Down, Key::D))
         move(Key::D, dt);
 
 }

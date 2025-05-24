@@ -4,7 +4,7 @@
 #include <memory>
 #include <thread>
 
-#include <core/gl/Controls.h>
+#include <Controls.h>
 #include <entity/MovingEntity.h>
 
 #include "Updateable.h"
@@ -15,7 +15,7 @@ namespace engine {
     class Camera;
 }  // namespace engine
 
-class Player : public engine::MovingEntity {
+class Player : public engine::MovingEntity, public engine::Updateable {
   public:
     static constexpr glm::ivec3 ViewDistance{3, 4, 3};
 
