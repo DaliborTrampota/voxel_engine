@@ -1,11 +1,13 @@
 #include "Player.h"
 
 #include <functional>
+#include <memory>
 
 #include <CoordUtils.h>
 #include <level/Chunk.h>
 #include <level/World.h>
 #include <scene/Camera.h>
+#include <physics/AABB.h>
 
 using namespace engine;
 
@@ -13,6 +15,10 @@ Player::Player()
     : m_camera(new Camera(Camera::ProjectionType::Perspective)),
       m_currentChunk(nullptr),
       m_position(0, 0, 0),
+      m_aabb(std::make_shared<AABB>(AABB({
+        glm::vec3(-0.5f, 0.0f, -0.5f),
+        glm::vec3(0.5f, 1.8f, 0.5f),
+      }))),
       m_collider(m_aabb, 0.5f) {}
 
 Player::~Player() {

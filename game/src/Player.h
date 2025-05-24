@@ -5,13 +5,13 @@
 #include <thread>
 
 #include <core/gl/Controls.h>
-#include <physics/AABB.h>
 #include <physics/AABBCollider.h>
 
 namespace engine {
     class World;
     class Chunk;
     class Camera;
+    struct AABB;
 }  // namespace engine
 
 class Player {
@@ -35,9 +35,6 @@ class Player {
     glm::vec3 m_position;
     engine::Chunk* m_currentChunk;
 
-    engine::AABB m_aabb{
-        glm::vec3(-0.5f, 0.0f, -0.5f),
-        glm::vec3(0.5f, 1.8f, 0.5f),
-    };
+    std::shared_ptr<engine::AABB> m_aabb;
     engine::AABBCollider m_collider;
 };

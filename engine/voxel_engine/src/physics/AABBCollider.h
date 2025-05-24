@@ -2,21 +2,21 @@
 
 #include <glm/glm.hpp>
 #include <memory>
-#include "AABB.h"
 
 namespace engine {
 
     class World;
+    struct AABB;
 
     class AABBCollider {
       public:
-        AABBCollider(const AABB& aabb, float stepHeight = 0.0f);
+        AABBCollider(std::shared_ptr<AABB> aabb, float stepHeight = 0.0f);
 
         /// @brief Sets the world for this collider.
         void setWorld(std::shared_ptr<World> world);
 
         /// @brief Sets the AABB that will be checked for collisions against the world.
-        void setAABB(const AABB& aabb);
+        void setAABB(std::shared_ptr<AABB> aabb);
 
         /// @brief Checks if the AABB collides with any blocks in the world.
         /// @param velocity The velocity of the AABB. After the function call, this will be modified to
@@ -33,7 +33,7 @@ namespace engine {
         static constexpr glm::ivec3 s_checkBox{1, 1, 1};
 
         std::shared_ptr<World> m_world = nullptr;
-        AABB m_aabb;
+        std::shared_ptr<AABB> m_aabb;
         float m_stepHeight;
         float m_height;
 
