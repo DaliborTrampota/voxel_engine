@@ -20,9 +20,12 @@ class MouseEvent : public engine::Event {
 };
 
 class KeyboardEvent : public engine::Event {
-    public:
+  public:
     KeyboardEvent(int key, int scancode, int action, int mods)
-        : key(key), scancode(scancode), action(action), mods(mods) {}
+        : key(key),
+          scancode(scancode),
+          action(action),
+          mods(mods) {}
 
     int key;
     int scancode;

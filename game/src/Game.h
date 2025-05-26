@@ -1,7 +1,7 @@
 #pragma once
 
-#include <unordered_map>
 #include <deque>
+#include <unordered_map>
 
 #include <core/gl/GLEventSite.h>
 #include <core/gl/ShaderPipeline.h>
@@ -32,7 +32,7 @@ struct MouseState {
 class Game : public engine::Engine {
   public:
     Game() = delete;
-    Game(std::unique_ptr<gl::Window> window,  glm::ivec2 dims);
+    Game(std::unique_ptr<gl::Window> window, glm::ivec2 dims);
     ~Game();
 
     void start();

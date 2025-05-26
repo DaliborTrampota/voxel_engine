@@ -1,14 +1,14 @@
 #pragma once
 
-#include <memory>
 #include <deque>
+#include <memory>
 
 #include <core/Window.h>
 
 namespace gl {
     class ShaderPipeline;
     class GraphicsAPI;
-}
+}  // namespace gl
 
 namespace engine {
     class Chunk;
@@ -27,7 +27,7 @@ namespace engine {
         void subscribeUpdate(std::shared_ptr<Updateable> updateable);
         // void subscribeInputSystem(engine::InputSystem* inputSystem);
 
-        void fireUpdate(float dt);        
+        void fireUpdate(float dt);
 
         virtual void beforeRender() {};
         virtual void render(double dt) = 0;
@@ -38,6 +38,7 @@ namespace engine {
 
       private:
         std::unique_ptr<gl::Window> m_window;
-        std::deque<std::weak_ptr<Updateable>> m_updateSubscribers; // Possibly revisit this to use a vector
+        std::deque<std::weak_ptr<Updateable>>
+            m_updateSubscribers;  // Possibly revisit this to use a vector
     };
 }  // namespace engine

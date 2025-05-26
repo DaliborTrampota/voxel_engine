@@ -1,7 +1,7 @@
 #include "Window.h"
 
-#include "core/gl/GraphicsAPI.h"
 #include "core/gl/GLEvents.h"
+#include "core/gl/GraphicsAPI.h"
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -36,7 +36,6 @@ bool Window::shouldClose() const {
 
 void Window::beginFrame() const {
     m_api->clearScreen();
-
 }
 
 void Window::endFrame() const {

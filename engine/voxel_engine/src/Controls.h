@@ -3,7 +3,7 @@
 
 namespace engine {
 
-    enum KeyState { // : uint8_t
+    enum KeyState {  // : uint8_t
         None = 0,
         Pressed = 1,
         Released = 2,
@@ -19,6 +19,6 @@ namespace engine {
         S,
         D,
         Home,
-        End, // This should be last
+        End,  // This should be last
     };
 }  // namespace engine

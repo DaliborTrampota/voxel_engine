@@ -1,11 +1,11 @@
-#include <core/gl/GraphicsAPI.h>
 #include <core/Window.h>
+#include <core/gl/GraphicsAPI.h>
 
 #include "Game.h"
 
 int gameEntry() {
-
-    std::unique_ptr<gl::Window> window = std::make_unique<gl::Window>(std::make_unique<gl::GraphicsAPI>());
+    std::unique_ptr<gl::Window> window =
+        std::make_unique<gl::Window>(std::make_unique<gl::GraphicsAPI>());
     Game game(std::move(window), window->size());
     game.start();
 

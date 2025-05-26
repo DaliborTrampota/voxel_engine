@@ -3,13 +3,10 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
-#include <iostream>
 #include <core/gl/GLEvents.h>
+#include <iostream>
 
 using namespace engine;
-
-
-InputSystem* s_instance = new InputSystem();;
 
 namespace {
     constexpr Key fromGLFW(int key) {
@@ -41,7 +38,7 @@ KeyState InputSystem::getKeyState(Key k) {
     return m_keyStates[static_cast<size_t>(k)];
 }
 
-bool engine::InputSystem::isKey(KeyState state, Key k) const {
+bool InputSystem::isKey(KeyState state, Key k) const {
     return m_keyStates[static_cast<size_t>(k)] & state;
 }
 
@@ -60,18 +57,10 @@ void InputSystem::setAxis(Axis axis, float value) {
 
 void InputSystem::keyboardEvent(KeyboardEvent* pEvent) {
     KeyState state = KeyState::None;
-    switch(pEvent->action) {
-        case GLFW_PRESS:
-            state = KeyState::Pressed;
-            break;
-
-        case GLFW_RELEASE:
-            state = KeyState::Released;
-            break;
-            
-        case GLFW_REPEAT:
-            state = KeyState::Held;
-            break;
+    switch (pEvent->action) {
+        case GLFW_PRESS: state = KeyState::Pressed; break;
+        case GLFW_RELEASE: state = KeyState::Released; break;
+        case GLFW_REPEAT: state = KeyState::Held; break;
     }
     Key key = fromGLFW(pEvent->key);
     m_keyStates[key] = state;
@@ -80,7 +69,7 @@ void InputSystem::keyboardEvent(KeyboardEvent* pEvent) {
     float forward = getAxis(Axis::Forward);
 
     int multiplier = state == Released ? -1 : state & Down ? 1 : 0;
-    
+
     if (key == Key::A) {
         sideways -= 1.0f * multiplier;
     }
@@ -101,12 +90,13 @@ void InputSystem::keyboardEvent(KeyboardEvent* pEvent) {
 
 void InputSystem::mouseMoveEvent(MouseEvent* pEvent) {
     float dx = !pEvent->still * (pEvent->x - m_mouseX);
-    float dy = !pEvent->still * (m_mouseY - pEvent->y);  // reversed since y-coordinates go from bottom to top
-    
+    float dy = !pEvent->still *
+               (m_mouseY - pEvent->y);  // reversed since y-coordinates go from bottom to top
+
     setAxis(Axis::MouseX, dx);
     setAxis(Axis::MouseY, dy);
 
-    if (pEvent->still) 
+    if (pEvent->still)
         return;
 
     m_mouseX = pEvent->x;

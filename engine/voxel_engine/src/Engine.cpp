@@ -15,8 +15,7 @@
 
 using namespace engine;
 
-Engine::Engine(std::unique_ptr<gl::Window> window) : m_window(std::move(window)) {
-}
+Engine::Engine(std::unique_ptr<gl::Window> window) : m_window(std::move(window)) {}
 
 void Engine::render(gl::ShaderPipeline* pipeline, Chunk* chunk) {
     size_t verts = chunk->m_vertexData.length();
@@ -48,7 +47,7 @@ void Engine::gameloop() {
         lastFrame = currentFrame;
 
         m_window->beginFrame();
-        
+
         beforeRender();
         render(deltaTime);
         afterRender();
@@ -67,7 +66,7 @@ void Engine::fireUpdate(float dt) {
             subscriber->update(dt);
             ++it;
         } else {
-            it = m_updateSubscribers.erase(it); // clean up expired
+            it = m_updateSubscribers.erase(it);  // clean up expired
         }
     }
 }

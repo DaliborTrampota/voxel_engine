@@ -4,24 +4,26 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <core/gl/GraphicsAPI.h>
 #include <core/gl/GLEvents.h>
+#include <core/gl/GraphicsAPI.h>
 #include <core/gl/Shader.h>
 #include <core/gl/ShaderPipeline.h>
 
 #include <Camera.h>
 #include <TextureLoader.h>
-#include <level/World.h>
 #include <Updateable.h>
+#include <level/World.h>
 
-#include "registry/Blocks.h"
 #include "GameServices.h"
+#include "registry/Blocks.h"
 
 //#include <tracy/Tracy.hpp>
 using namespace engine;
 
 
-Game::Game(std::unique_ptr<gl::Window> window, glm::ivec2 dims) : Engine(std::move(window)), m_mouseState(dims) {
+Game::Game(std::unique_ptr<gl::Window> window, glm::ivec2 dims)
+    : Engine(std::move(window)),
+      m_mouseState(dims) {
     m_inputSystem = std::make_unique<engine::InputSystem>();
 
     this->window()->graphicsAPI()->subscribe(m_inputSystem.get());

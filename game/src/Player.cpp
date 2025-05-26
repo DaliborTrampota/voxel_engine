@@ -4,9 +4,9 @@
 
 #include <Camera.h>
 #include <CoordUtils.h>
+#include <InputSystem.h>
 #include <level/Chunk.h>
 #include <level/World.h>´
-#include <InputSystem.h>
 
 #include "GameServices.h"
 
@@ -14,7 +14,7 @@ using namespace engine;
 
 Player::Player()
     : m_camera(std::make_unique<Camera>(Camera::ProjectionType::Perspective)),
-      m_currentChunk(nullptr){}
+      m_currentChunk(nullptr) {}
 
 Player::~Player() {
     if (m_viewDistThread.joinable())
@@ -39,7 +39,7 @@ void Player::update(float dt) {
     auto input = GameServices::getInputSystem();
     float mouseX = input->getAxis(Axis::MouseX);
     float mouseY = input->getAxis(Axis::MouseY);
-    
+
     rotate(mouseX, mouseY, true);
 
     if (input->isKey(KeyState::Down, Key::W))
@@ -50,7 +50,6 @@ void Player::update(float dt) {
         move(Key::A, dt);
     if (input->isKey(KeyState::Down, Key::D))
         move(Key::D, dt);
-
 }
 
 void Player::move(Key key, float dt) {
