@@ -5,7 +5,6 @@
 #include <thread>
 
 #include <Controls.h>
-#include <entity/MovingEntity.h>
 
 #include "Updateable.h"
 
@@ -15,7 +14,7 @@ namespace engine {
     class Camera;
 }  // namespace engine
 
-class Player : public engine::MovingEntity, public engine::Updateable {
+class Player : public engine::Updateable {
   public:
     static constexpr glm::ivec3 ViewDistance{3, 4, 3};
 
@@ -32,6 +31,7 @@ class Player : public engine::MovingEntity, public engine::Updateable {
     engine::Camera* getCamera() { return m_camera.get(); }
 
   private:
+    glm::vec3 m_position;
     std::thread m_viewDistThread;
     engine::Chunk* m_currentChunk;
     std::unique_ptr<engine::Camera> m_camera;
