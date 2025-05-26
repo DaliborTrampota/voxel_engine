@@ -1,13 +1,12 @@
-#include <core/GraphicsAPI.h>
+#include <core/Window.h>
+#include <core/gl/GraphicsAPI.h>
 
 #include "Game.h"
-#include "Globals.h"
 
 int gameEntry() {
-    gl::GraphicsAPI* gAPI = new gl::GraphicsAPI();
-    gAPI->init();
-
-    Game game(gAPI, gAPI->getWindowSize());
+    std::unique_ptr<gl::Window> window =
+        std::make_unique<gl::Window>(std::make_unique<gl::GraphicsAPI>());
+    Game game(std::move(window), window->size());
     game.start();
 
     return 0;

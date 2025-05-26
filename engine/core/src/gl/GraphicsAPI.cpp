@@ -118,6 +118,14 @@ void GraphicsAPI::registerCallbacks() {
     };
     glfwSetFramebufferSizeCallback(m_window, CallbackWrapper<ResizeCB>::call);
 
+    using KeyCB = void(GLFWwindow*, int, int, int, int);
+    CallbackWrapper<KeyCB>::callback =
+        [this](GLFWwindow* window, int key, int scancode, int action, int mods) {
+            KeyboardEvent e{key, scancode, action, mods};
+            fireKeyboardEvent(&e);
+        };
+    glfwSetKeyCallback(m_window, CallbackWrapper<KeyCB>::call);
+
     using DebugCB = void(GLenum, GLenum, GLuint, GLenum, GLsizei, const GLchar*, const void*);
     CallbackWrapper<DebugCB>::callback = [this](
                                              GLenum source,
@@ -144,7 +152,7 @@ void GraphicsAPI::registerCallbacks() {
     glDebugMessageCallback(CallbackWrapper<DebugCB>::call, nullptr);
 }
 
-void GraphicsAPI::setRenderFlags() {
+void GraphicsAPI::setRenderFlags() const {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     //glDisable(GL_CULL_FACE);
@@ -152,9 +160,13 @@ void GraphicsAPI::setRenderFlags() {
     glCullFace(GL_BACK);
 }
 
-void GraphicsAPI::clearScreen() {
+void GraphicsAPI::clearScreen() const {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void GraphicsAPI::swapBuffers() const {
+    glfwSwapBuffers(m_window);
 }
 
 void GraphicsAPI::mouseLock(bool state) {

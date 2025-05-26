@@ -4,7 +4,9 @@
 #include <memory>
 #include <thread>
 
-#include <core/gl/Controls.h>
+#include <Controls.h>
+
+#include "Updateable.h"
 
 namespace engine {
     class World;
@@ -12,7 +14,7 @@ namespace engine {
     class Camera;
 }  // namespace engine
 
-class Player {
+class Player : public engine::Updateable {
   public:
     static constexpr glm::ivec3 ViewDistance{3, 4, 3};
 
@@ -21,15 +23,16 @@ class Player {
 
     void spawn(std::shared_ptr<engine::World> world);
 
+    void update(float dt) override;
+
     void move(engine::Key key, float dt);
     void rotate(float dx, float dy, bool constrainPitch = true);
 
-    engine::Camera* getCamera() { return m_camera; }
+    engine::Camera* getCamera() { return m_camera.get(); }
 
   private:
-    std::thread m_viewDistThread;
-
-    engine::Camera* m_camera;
     glm::vec3 m_position;
+    std::thread m_viewDistThread;
     engine::Chunk* m_currentChunk;
+    std::unique_ptr<engine::Camera> m_camera;
 };
