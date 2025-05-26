@@ -8,8 +8,12 @@
 #include <level/World.h>
 #include <scene/Camera.h>
 
+#include "Updateable.h"
+
 
 using namespace engine;
+
+Engine::Engine(std::unique_ptr<gl::Window> window) : m_window(std::move(window)) {}
 
 void Engine::render(gl::ShaderPipeline* pipeline, Chunk* chunk) {
     size_t verts = chunk->m_vertexData.length();
@@ -29,3 +33,46 @@ void Engine::render(gl::ShaderPipeline* pipeline, Camera* cam, std::shared_ptr<W
         render(pipeline, world->m_chunks[pos]);
     }
 }
+
+void Engine::gameloop() {
+    m_window->setRenderFlags();
+
+    float deltaTime = 0.0f;
+    float lastFrame = 0.0f;
+    while (!m_window->shouldClose()) {
+        float currentFrame = m_window->time();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+
+        m_window->beginFrame();
+
+        beforeRender();
+        render(deltaTime);
+        afterRender();
+
+        GLenum err;
+        while ((err = glGetError()) != GL_NO_ERROR)
+            printf("OpenGL error: %d\n", err);
+
+        m_window->endFrame();
+    }
+}
+
+void Engine::fireUpdate(float dt) {
+    for (auto it = m_updateSubscribers.begin(); it != m_updateSubscribers.end();) {
+        if (auto subscriber = it->lock()) {
+            subscriber->update(dt);
+            ++it;
+        } else {
+            it = m_updateSubscribers.erase(it);  // clean up expired
+        }
+    }
+}
+
+void Engine::subscribeUpdate(std::shared_ptr<Updateable> updateable) {
+    m_updateSubscribers.push_back(updateable);
+}
+
+// void Engine::subscribeInputSystem(engine::InputSystem* inputSystem) {
+//     m_window->graphicsAPI()->subscribe(inputSystem);
+// }

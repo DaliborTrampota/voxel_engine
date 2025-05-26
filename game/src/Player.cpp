@@ -4,15 +4,18 @@
 #include <memory>
 
 #include <CoordUtils.h>
+#include <InputSystem.h>
 #include <level/Chunk.h>
 #include <level/World.h>
 #include <scene/Camera.h>
 #include <physics/AABB.h>
 
+#include "GameServices.h"
+
 using namespace engine;
 
 Player::Player()
-    : m_camera(new Camera(Camera::ProjectionType::Perspective)),
+    : m_camera(std::make_unique<Camera>(Camera::ProjectionType::Perspective)),
       m_currentChunk(nullptr),
       m_position(0, 0, 0),
       m_aabb(std::make_shared<AABB>(AABB({
@@ -24,7 +27,6 @@ Player::Player()
 Player::~Player() {
     if (m_viewDistThread.joinable())
         m_viewDistThread.join();
-    delete m_camera;
 }
 
 void Player::spawn(std::shared_ptr<World> world) {
@@ -40,6 +42,23 @@ void Player::spawn(std::shared_ptr<World> world) {
     glm::ivec3 to = coords + ViewDistance;
     world->loadChunks(from, to);
     //m_viewDistThread = std::thread(&World::updateViewDistance, world, m_position);
+}
+
+void Player::update(float dt) {
+    auto input = GameServices::getInputSystem();
+    float mouseX = input->getAxis(Axis::MouseX);
+    float mouseY = input->getAxis(Axis::MouseY);
+
+    rotate(mouseX, mouseY, true);
+
+    if (input->isKey(KeyState::Down, Key::W))
+        move(Key::W, dt);
+    if (input->isKey(KeyState::Down, Key::S))
+        move(Key::S, dt);
+    if (input->isKey(KeyState::Down, Key::A))
+        move(Key::A, dt);
+    if (input->isKey(KeyState::Down, Key::D))
+        move(Key::D, dt);
 }
 
 void Player::move(Key key, float dt) {

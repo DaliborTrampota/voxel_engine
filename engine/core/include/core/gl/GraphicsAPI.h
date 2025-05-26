@@ -5,7 +5,7 @@
 
 #include <memory>
 
-#include "gl/GLEventSource.h"
+#include "GLEventSource.h"
 
 struct GLFWwindow;
 
@@ -24,8 +24,9 @@ namespace gl {
         void destroy();
         void registerCallbacks();
 
-        void setRenderFlags();
-        void clearScreen();
+        void setRenderFlags() const;
+        void clearScreen() const;
+        void swapBuffers() const;
 
 
         void mouseLock(bool state);

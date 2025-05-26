@@ -4,67 +4,45 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <core/GraphicsAPI.h>
 #include <core/gl/GLEvents.h>
+#include <core/gl/GraphicsAPI.h>
 #include <core/gl/Shader.h>
 #include <core/gl/ShaderPipeline.h>
-#include <core/gl/Window.h>
-
-#include <data/VertexData.h>
 
 #include <data/TextureLoader.h>
 #include <level/World.h>
 #include <scene/Camera.h>
+#include <Updateable.h>
 
+#include "GameServices.h"
 #include "registry/Blocks.h"
 
 //#include <tracy/Tracy.hpp>
 using namespace engine;
 
 
-Game::Game(gl::GraphicsAPI* gAPI, glm::ivec2 dims) : gl::Window(gAPI), m_mouseState(dims) {}
+Game::Game(std::unique_ptr<gl::Window> window, glm::ivec2 dims)
+    : Engine(std::move(window)),
+      m_mouseState(dims) {
+    m_inputSystem = std::make_unique<engine::InputSystem>();
 
-void Game::processInput(float dt) {
-    if (getKeyState(Key::Esc) == KeyState::Pressed)
-        close();
+    this->window()->graphicsAPI()->subscribe(m_inputSystem.get());
 
-    if (getKeyState(Key::W) == KeyState::Pressed)
-        m_player.move(Key::W, dt);
-    if (getKeyState(Key::S) == KeyState::Pressed)
-        m_player.move(Key::S, dt);
-    if (getKeyState(Key::A) == KeyState::Pressed)
-        m_player.move(Key::A, dt);
-    if (getKeyState(Key::D) == KeyState::Pressed)
-        m_player.move(Key::D, dt);
+    GameServices::setGame(this);
+    GameServices::setInputSystem(m_inputSystem.get());
 }
 
-void Game::processMouse(double xposIn, double yposIn) {
-    float xpos = static_cast<float>(xposIn);
-    float ypos = static_cast<float>(yposIn);
-
-    if (m_mouseState.firstMouse) {
-        m_mouseState.lastX = xpos;
-        m_mouseState.lastY = ypos;
-        m_mouseState.firstMouse = false;
-    }
-
-    float xoffset = xpos - m_mouseState.lastX;
-    float yoffset =
-        m_mouseState.lastY - ypos;  // reversed since y-coordinates go from bottom to top
-
-    m_mouseState.lastX = xpos;
-    m_mouseState.lastY = ypos;
-
-    m_player.rotate(xoffset, yoffset);
+void Game::processInput() {
+    if (m_inputSystem->getKeyState(Key::Esc) == KeyState::Pressed)
+        window()->close();
 }
 
 Game::~Game() {}
 
-void Game::update(float dt) {}
 
 void Game::render(double dt) {
-    processInput(dt);
-    update(dt);
+    processInput();
+    fireUpdate(dt);
 
     Engine::render(&m_pipeline, m_plrCamera, activeWorld());
 }
@@ -76,7 +54,10 @@ void Game::start() {
     //loader.bind();
     RegisterBlocks();
 
-    m_player.spawn(activeWorld());
+    m_player = std::make_shared<Player>();
+    m_player->spawn(activeWorld());
+
+    subscribeUpdate(m_player);
 
     {
         gl::Shader vert("../../../game/shaders/VertexShader.glsl", GL_VERTEX_SHADER);
@@ -95,7 +76,7 @@ void Game::start() {
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 
-    m_plrCamera = m_player.getCamera();
+    m_plrCamera = m_player->getCamera();
     m_pipeline.use();
 
     m_plrCamera->lookAt(glm::vec3(0, 0, 0));
@@ -106,6 +87,6 @@ void Game::start() {
     m_pipeline.setMat4("projection", m_plrCamera->getProjection());
 
 
-    mouseLock(true);
+    window()->mouseLock(true);
     gameloop();
 }

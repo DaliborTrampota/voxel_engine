@@ -4,6 +4,7 @@
 
 class MouseEvent;
 class ResizeEvent;
+class KeyboardEvent;
 
 class GLEventSite : public engine::EventSite {
     friend class GLEventSource;
@@ -11,4 +12,5 @@ class GLEventSite : public engine::EventSite {
   protected:
     virtual void windowResizeEvent(ResizeEvent* pEvent) {};
     virtual void mouseMoveEvent(MouseEvent* pEvent) {};
+    virtual void keyboardEvent(KeyboardEvent* pEvent) {};
 };
