@@ -10,6 +10,8 @@
 #include <scene/Camera.h>
 #include <physics/AABB.h>
 
+#include <glm/gtc/matrix_transform.hpp>
+
 #include "GameServices.h"
 
 using namespace engine;
@@ -34,6 +36,8 @@ void Player::spawn(std::shared_ptr<World> world) {
     m_camera->setPosition(m_position);
     m_camera->lookAt(glm::vec3(Chunk::Dims.x / 2, 0, Chunk::Dims.z / 2));
 
+    m_aabb->transform(glm::translate(glm::mat4(1.0f), glm::vec3(m_position)));
+
 
     m_collider.setWorld(world);
     glm::vec3 pos = m_position;
@@ -51,21 +55,40 @@ void Player::update(float dt) {
 
     rotate(mouseX, mouseY, true);
 
-    if (input->isKey(KeyState::Down, Key::W))
-        move(Key::W, dt);
-    if (input->isKey(KeyState::Down, Key::S))
-        move(Key::S, dt);
-    if (input->isKey(KeyState::Down, Key::A))
-        move(Key::A, dt);
-    if (input->isKey(KeyState::Down, Key::D))
-        move(Key::D, dt);
+    float forward = input->getAxis(Axis::Forward);
+    float sideways = input->getAxis(Axis::Sideways);
+    float upDown = input->isKey(Down, Key::Space) ? 1 : input->isKey(Down, Key::LShift) ? -1 : 0;
+
+    if (!(forward == 0 && sideways == 0 && upDown == 0))
+        move(glm::normalize(glm::vec3(forward, upDown, sideways)), dt);
+    else
+        move(glm::vec3(0), dt);
 }
 
-void Player::move(Key key, float dt) {
-    glm::vec3 velocity{1, 1, 1};
-    m_collider.collide(velocity, m_camera->m_position);
-    if (!glm::any(glm::notEqual(velocity, glm::vec3(1.0f))))
-        m_camera->move(key, dt);
+void Player::move(glm::vec3 dir, float dt) {
+    const float friction = 10.f;
+
+    glm::vec3 acceleration = dir * m_speed;
+    m_velocity += acceleration * dt;
+
+    for (int i = 0; i < 3; ++i) {
+        if (acceleration[i] == 0.0f) {
+            if (m_velocity[i] > 0.0f) {
+                m_velocity[i] = std::max(0.0f, m_velocity[i] - friction * dt);
+            } else if (m_velocity[i] < 0.0f) {
+                m_velocity[i] = std::min(0.0f, m_velocity[i] + friction * dt);
+            }
+        }
+    }
+
+
+    m_collider.collide(m_velocity, m_position);
+
+    m_position += m_velocity * dt;
+    m_aabb->move(m_velocity * dt);
+    m_camera->setPosition(m_position);
+
+    //printf("%.2f %.2f %.2f\n", m_velocity.x, m_velocity.y, m_velocity.z);
 }
 
 void Player::rotate(float dx, float dy, bool constrainPitch) {

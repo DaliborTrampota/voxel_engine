@@ -91,8 +91,8 @@ BlockID World::getBlockID(const ChunkID& chID, const glm::ivec3& pos) {
         return INVALID_BLOCK;
     }
     Chunk* chunk = m_chunks.at(chID);
-    if (!chunk) {
-        std::cerr << "Chunk not found\n";
+    if (!chunk || !chunk->generated()) {
+        std::cerr << "Chunk not found or not generated\n";
         return INVALID_BLOCK;
     }
 

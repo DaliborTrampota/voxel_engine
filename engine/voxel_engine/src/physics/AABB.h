@@ -16,6 +16,7 @@ namespace engine {
         glm::vec3 center() const;
 
         AABB& transform(const glm::mat4& matrix);
+        AABB& move(const glm::vec3& offset);
 
         static AABB fromGeometry(const Geometry& geo);
     };

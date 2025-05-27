@@ -4,8 +4,8 @@
 #include "CoordUtils.h"
 #include "data/RegistryManager.h"
 #include "level/World.h"
-#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtc/matrix_transform.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/component_wise.hpp>
 #include <glm/gtx/norm.hpp>
 

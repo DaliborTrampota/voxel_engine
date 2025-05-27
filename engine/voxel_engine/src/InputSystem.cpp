@@ -17,6 +17,7 @@ namespace {
             case GLFW_KEY_A: return Key::A;
             case GLFW_KEY_S: return Key::S;
             case GLFW_KEY_D: return Key::D;
+            case GLFW_KEY_LEFT_SHIFT: return Key::LShift;
         }
         return Key::Esc;
     }
@@ -29,6 +30,7 @@ namespace {
             case Key::A: return GLFW_KEY_A;
             case Key::S: return GLFW_KEY_S;
             case Key::D: return GLFW_KEY_D;
+            case Key::LShift: return GLFW_KEY_LEFT_SHIFT;
         }
         return GLFW_KEY_ESCAPE;
     }
@@ -68,7 +70,7 @@ void InputSystem::keyboardEvent(KeyboardEvent* pEvent) {
     float sideways = getAxis(Axis::Sideways);
     float forward = getAxis(Axis::Forward);
 
-    int multiplier = state == Released ? -1 : state & Down ? 1 : 0;
+    int multiplier = state == Released ? -1 : state & Pressed ? 1 : 0;
 
     if (key == Key::A) {
         sideways -= 1.0f * multiplier;

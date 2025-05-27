@@ -24,6 +24,12 @@ AABB& AABB::transform(const glm::mat4& matrix) {
     return *this;
 }
 
+AABB& AABB::move(const glm::vec3& offset) {
+    min += offset;
+    max += offset;
+    return *this;
+}
+
 AABB AABB::fromGeometry(const Geometry& geo) {
     AABB aabb;
     aabb.min = glm::vec3(geo.faces()[0].vertices[0].pos);
