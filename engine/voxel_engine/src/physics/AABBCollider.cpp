@@ -1,10 +1,10 @@
 #include "AABBCollider.h"
 
+#include <glm/gtc/matrix_transform.hpp>
 #include "AABB.h"
 #include "CoordUtils.h"
 #include "data/RegistryManager.h"
 #include "level/World.h"
-#include <glm/gtc/matrix_transform.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/component_wise.hpp>
 #include <glm/gtx/norm.hpp>
@@ -28,20 +28,36 @@ void AABBCollider::setAABB(std::shared_ptr<AABB> aabb) {
 }
 
 bool AABBCollider::collide(glm::vec3& velocity, glm::vec3& position) {
-    // AABB original = m_aabb; //TODO figure this out
-    // m_aabb->transform(glm::translate(glm::mat4(1.0f), glm::vec3(position)));
     updateAABBCache(velocity, position);
     bool collided = false;
-    for (const AABB& bb : m_aabbCache) {
-        for (int i = 0; i < 3; ++i) {
-            SweptResult res = swept(velocity, bb);
+    glm::vec3 displacement{0};
+    for (int i = 0; i < 3; ++i) {
+        float bestTime = 1.f;
 
-            if (res.time != 1.0f) {
-                collided = true;
-                velocity[res.axis] *= res.time;
+        for (const AABB& bb : m_aabbCache) {
+            glm::vec3 axisVel{0, 0, 0};
+            axisVel[i] = velocity[i];
+
+            SweptResult res = swept(axisVel, bb);
+            if (res.time < bestTime) {
+                bestTime = res.time;
             }
+            //float time = swept1D(i, velocity[i], bb);
+            //if (time < bestTime) {
+            //    bestTime = time;
+            //}
+        }
+
+        if (bestTime != 1.0f) {
+            //printf("Swept result: time = %.2f, axis = %d, vel: %d\n", res.time, res.axis, velocity[res.axis]);
+            collided = true;
+            static const float eps = 0.0001f;
+
+            position[i] -= glm::sign(velocity[i]) * eps;
+            velocity[i] *= bestTime;
         }
     }
+    // position += displacement;
     return collided;
 }
 
@@ -87,7 +103,7 @@ void AABBCollider::updateAABBCache(const glm::vec3& velocity, const glm::vec3& p
                 if (!block.isSolid())
                     continue;
                 AABB aabb = block.geometry()->aabb();
-                aabb.transform(glm::translate(glm::mat4(1.0f), glm::vec3(pos)));
+                aabb.transform(glm::translate(glm::mat4(1.0f), glm::vec3(i, j, k)));
                 m_aabbCache.push_back(aabb);
             }
         }
@@ -95,14 +111,16 @@ void AABBCollider::updateAABBCache(const glm::vec3& velocity, const glm::vec3& p
     printf("Cache size: %d\n", m_aabbCache.size());
 }
 
+AABB broadphaseRect(const glm::vec3 velocity, const AABB& bb) {
+    AABB rect;
+    rect.min = glm::min(bb.min, bb.min + velocity);
+    rect.max = glm::max(bb.max, bb.max + velocity);
+    return rect;
+}
+
 AABBCollider::SweptResult AABBCollider::swept(glm::vec3& velocity, const AABB& other) {
     // Broadphase check
-    bool positive = glm::all(glm::greaterThan(velocity, glm::vec3(0.0f)));
-    AABB rect{
-        positive ? m_aabb->min : m_aabb->min + velocity,
-        positive ? m_aabb->max + velocity : m_aabb->max,
-    };
-    if (!rect.intersects(other))
+    if (!broadphaseRect(velocity, *m_aabb).intersects(other))
         return {1.0f, -1};
 
     float dxEntry, dyEntry, dzEntry;
@@ -168,4 +186,39 @@ AABBCollider::SweptResult AABBCollider::swept(glm::vec3& velocity, const AABB& o
     }
 
     return {entryTime, (entryTime == txEntry) ? 0 : (entryTime == tyEntry) ? 1 : 2};
+}
+
+float engine::AABBCollider::swept1D(int axis, float velocity, const AABB& other) {
+    // Broadphase check
+    //if (!broadphaseRect(velocity, *m_aabb).intersects(other))
+    //    return 1.0f;
+
+    float dEntry;
+    float dExit;
+
+    if (velocity > 0.0f) {
+        dEntry = other.min[axis] - m_aabb->max[axis];
+        dExit = other.max[axis] - m_aabb->min[axis];
+    } else {
+        dEntry = other.max[axis] - m_aabb->min[axis];
+        dExit = other.min[axis] - m_aabb->max[axis];
+    }
+
+    float entryTime;
+    float exitTime;
+
+
+    if (std::abs(velocity) <= std::numeric_limits<float>::epsilon()) {
+        entryTime = -std::numeric_limits<float>::infinity();
+        exitTime = std::numeric_limits<float>::infinity();
+    } else {
+        entryTime = dEntry / velocity;
+        exitTime = dExit / velocity;
+    }
+
+    if (entryTime > exitTime || entryTime < 0.0f || entryTime > 1.0f) {
+        return 1.0f;  // No collision
+    }
+
+    return entryTime;
 }

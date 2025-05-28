@@ -4,9 +4,9 @@
 #include <memory>
 #include <thread>
 
-#include <physics/AABBCollider.h>
 #include <Controls.h>
 #include <Updateable.h>
+#include <physics/AABBCollider.h>
 
 namespace engine {
     class World;
@@ -35,7 +35,7 @@ class Player : public engine::Updateable {
     glm::vec3 m_velocity{0, 0, 0};
     glm::vec3 m_position;
     float m_speed = 10;
- 
+
 
     std::thread m_viewDistThread;
     engine::Chunk* m_currentChunk;

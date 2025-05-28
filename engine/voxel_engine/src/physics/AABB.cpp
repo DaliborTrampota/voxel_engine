@@ -18,16 +18,21 @@ glm::vec3 AABB::center() const {
     return (min + max) / 2.0f;
 }
 
-AABB& AABB::transform(const glm::mat4& matrix) {
+void AABB::transform(const glm::mat4& matrix) {
     min = glm::vec3(matrix * glm::vec4(min, 1.0f));
     max = glm::vec3(matrix * glm::vec4(max, 1.0f));
-    return *this;
 }
 
-AABB& AABB::move(const glm::vec3& offset) {
+void AABB::move(const glm::vec3& offset) {
     min += offset;
     max += offset;
-    return *this;
+}
+
+void AABB::position(const glm::vec3& pos) {
+    glm::vec3 center = this->center();
+    center.y = max.y;
+    glm::vec3 offset = pos - center;
+    move(offset);
 }
 
 AABB AABB::fromGeometry(const Geometry& geo) {
