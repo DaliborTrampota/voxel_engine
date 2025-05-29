@@ -1,7 +1,9 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 
+#include "../Globals.h"
 #include "Controls.h"
 
 
@@ -14,22 +16,27 @@ namespace engine {
             Orthographic
         };
 
+        Camera();
         Camera(ProjectionType type);
-        Camera() : Camera(ProjectionType::Perspective) {};
 
-        void setPosition(const glm::vec3& pos) { m_position = pos; };
+        void position(const glm::vec3& pos) { m_position = pos; }
+        const glm::vec3& position() const { return m_position; }
+        const glm::vec3& lookDirection() const { return m_front; }
+
+        /// @brief Returns the camera's rotation as a quaternion.
+        /// @param ignorePitch If true, the pitch (up/down rotation) is ignored. Good if you want to move on XZ plane only.
+        /// @return Quaternion representing the camera's rotation.
+        glm::quat rotation(bool ignorePitch) const;
+
         void lookAt(const glm::vec3& target);
-
-        void move(Key key, float dt);
         void rotate(float dx, float dy, bool constrainPitch = true);
         void resize(int width, int height);
 
         glm::mat4 getView() const;
         glm::mat4 getProjection() const { return m_projection; };
 
-
-      private:
-        glm::vec3 m_worldUp;
+      protected:
+        glm::vec3 m_worldUp = UP;
 
         float m_yaw, m_pitch;
         glm::vec3 m_position;
@@ -38,13 +45,8 @@ namespace engine {
         glm::vec3 m_right;
 
         glm::mat4 m_projection;
-
-        float m_speed = 10.0f;
-
         ProjectionType m_type;
 
         void updateVectors();
-
-        friend class Player;
     };
 }  // namespace engine

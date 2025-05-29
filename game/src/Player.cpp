@@ -39,11 +39,21 @@ Player::~Player() {
 
 void Player::spawn(std::shared_ptr<World> world) {
     m_position = glm::vec3(Chunk::Dims.x / 2, 20, Chunk::Dims.z / 2);
-    m_camera->setPosition(m_position);
+    m_camera->position(m_position);
     m_camera->lookAt(glm::vec3(Chunk::Dims.x / 2, 0, Chunk::Dims.z / 2));
 
     m_aabb->transform(glm::translate(glm::mat4(1.0f), glm::vec3(m_position)));
 
+    printf("Spawning player at %.2f %.2f %.2f\n", m_position.x, m_position.y, m_position.z);
+    printf(
+        "AABB: %.2f %.2f %.2f - %.2f %.2f %.2f\n",
+        m_aabb->min.x,
+        m_aabb->min.y,
+        m_aabb->min.z,
+        m_aabb->max.x,
+        m_aabb->max.y,
+        m_aabb->max.z
+    );
 
     m_collider.setWorld(world);
     glm::vec3 pos = m_position;
@@ -63,74 +73,85 @@ void Player::update(float dt) {
 
     float forward = input->getAxis(Axis::Forward);
     float sideways = input->getAxis(Axis::Sideways);
-    float upDown = input->isKey(Down, Key::Space) ? 1 : input->isKey(Down, Key::LShift) ? -1 : 0;
+
+    if (m_onGround && input->isKey(Pressed, Key::Space)) {
+        m_velocity.y += 5.f;
+    }
+    float upDown = 0;
+    //input->isKey(Down, Key::Space) ? 1 : input->isKey(Down, Key::LShift) ? -1 : 0;
 
     if (!(forward == 0 && sideways == 0 && upDown == 0))
-        move(glm::normalize(glm::vec3(forward, upDown, sideways)), dt);
+        move(glm::normalize(glm::vec3(sideways, upDown, forward)), dt);
     else
         move(glm::vec3(0), dt);
 
     if (input->isKey(Down, Key::P)) {
         m_position = glm::vec3(Chunk::Dims.x / 2, 20, Chunk::Dims.z / 2);
-        m_camera->setPosition(m_position);
+        m_camera->position(m_position);
         m_camera->lookAt(glm::vec3(Chunk::Dims.x / 2, 0, Chunk::Dims.z / 2));
 
         m_aabb->position(m_position);
     }
 }
-glm::quat safeRotation(glm::vec3 from, glm::vec3 to) {
-    from = glm::normalize(from);
-    to = glm::normalize(to);
 
-    float dot = glm::dot(from, to);
+// w prefixed variables are world space
+// l prefixed variables are local space
+void Player::move(glm::vec3 lDir, float dt) {
+    glm::quat rotation = m_camera->rotation(true);
+    glm::vec3 wAccel = rotation * lDir * m_speed;
 
-    if (dot > 0.9999f) {
-        // Vectors are almost identical
-        return glm::quat(1, 0, 0, 0);  // identity
-    } else if (dot < -0.9999f) {
-        // Vectors are nearly opposite
-        // Find an arbitrary axis perpendicular to 'from'
-        glm::vec3 orthogonal = glm::abs(from.x) < 0.1f ? glm::vec3(1, 0, 0) : glm::vec3(0, 1, 0);
-        glm::vec3 axis = glm::normalize(glm::cross(from, orthogonal));
-        return glm::angleAxis(glm::pi<float>(), axis);
-    } else {
-        return glm::rotation(from, to);
-    }
-}
-void Player::move(glm::vec3 dir, float dt) {
-    const float friction = 10.f;
+    float acceleration = m_onGround ? 20.f : 1.f; // This is like friction.
 
-    glm::vec3 acceleration = dir * m_speed;
-    m_velocity += acceleration * dt + glm::vec3(0, -2.81f, 0) * dt;
+    float y = m_velocity.y;
+    m_velocity.y = 0;
 
-    if (glm::length2(m_velocity) > m_speed * m_speed) {
+    glm::vec3 blended = glm::mix(m_velocity, wAccel, acceleration * dt);
+    m_velocity.x = blended.x;
+    m_velocity.z = blended.z;
+
+    if (glm::length2(glm::vec2{m_velocity.x, m_velocity.z}) > m_speed * m_speed) {
         m_velocity = glm::normalize(m_velocity) * m_speed;
     }
 
-    for (int i = 0; i < 3; ++i) {
-        if (acceleration[i] == 0.0f) {
-            if (m_velocity[i] > 0.0f) {
-                m_velocity[i] = std::max(0.0f, m_velocity[i] - friction * dt);
-            } else if (m_velocity[i] < 0.0f) {
-                m_velocity[i] = std::min(0.0f, m_velocity[i] + friction * dt);
-            }
-        }
+
+    m_velocity.y = y - 9.81f * dt;
+    if (m_velocity.y < -20.f) {
+        m_velocity.y = -20.f;
     }
 
 
-    glm::vec3 lookDir = m_camera->m_front;
-    lookDir.y = 0;
+    // glm::vec3 fric = rotation * (glm::vec3(glm::equal(lDir, glm::vec3(0))) * friction);
+    // m_velocity += glm::sign(m_velocity) * -fric * dt;
+    // m_velocity.x *= friction * dt;
+    // m_velocity.z *= friction * dt;
+    // for (int i = 0; i < 3; i+=2) {
+    //     if (wAccel[i] == 0.0f) {
+    //         if (m_velocity[i] > 0.0f) {
+    //             m_velocity[i] = std::max(0.0f, m_velocity[i] - friction * dt);
+    //         } else if (m_velocity[i] < 0.0f) {
+    //             m_velocity[i] = std::min(0.0f, m_velocity[i] + friction * dt);
+    //         }
+    //     }
+    // }
+    glm::vec3 displacement = m_velocity * dt;
+    CollisionInfo col = m_collider.collide(displacement, m_position);
+    m_velocity = displacement / dt;
+    // for (int i = 0; i < 3; ++i) {
+    //     if (displacement[i] == 0.0f) {
+    //         m_velocity[i] = 0.0f;
+    //     }
+    // }
 
-    glm::quat rot = safeRotation(FRONT, lookDir);
-    glm::vec3 velocity = rot * m_velocity * dt;
+    if (col.axis & 2) {
+        m_onGround = true;
+        m_velocity.y = .0f;
+    } else {
+        m_onGround = false;
+    }
 
-    m_collider.collide(velocity, m_position);
-
-    m_velocity = glm::inverse(rot) * (velocity / dt);
-
-    m_position += velocity;
+    m_position += displacement;
     m_aabb->position(m_position);
-    m_camera->setPosition(m_position);
+    m_camera->position(m_position);
 }
 
 void Player::rotate(float dx, float dy, bool constrainPitch) {

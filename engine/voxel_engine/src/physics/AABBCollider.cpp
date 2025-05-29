@@ -16,7 +16,6 @@ AABBCollider::AABBCollider(std::shared_ptr<AABB> aabb, float stepHeight)
       m_height(aabb->max.y - aabb->min.y),
       m_stepHeight(stepHeight) {
     m_aabbCache.reserve(3 * 3 * 6);  // TODO: should take into account the aabb size
-    printf("Cache size: %d\n", m_aabbCache.size());
 }
 
 void AABBCollider::setWorld(std::shared_ptr<World> world) {
@@ -27,9 +26,9 @@ void AABBCollider::setAABB(std::shared_ptr<AABB> aabb) {
     m_aabb = aabb;
 }
 
-bool AABBCollider::collide(glm::vec3& velocity, glm::vec3& position) {
+CollisionInfo AABBCollider::collide(glm::vec3& velocity, glm::vec3& position) {
     updateAABBCache(velocity, position);
-    bool collided = false;
+    CollisionInfo info;
     glm::vec3 displacement{0};
     for (int i = 0; i < 3; ++i) {
         float bestTime = 1.f;
@@ -38,9 +37,9 @@ bool AABBCollider::collide(glm::vec3& velocity, glm::vec3& position) {
             glm::vec3 axisVel{0, 0, 0};
             axisVel[i] = velocity[i];
 
-            SweptResult res = swept(axisVel, bb);
-            if (res.time < bestTime) {
-                bestTime = res.time;
+            float t = swept(axisVel, bb).time;
+            if (t < bestTime) {
+                bestTime = t;
             }
             //float time = swept1D(i, velocity[i], bb);
             //if (time < bestTime) {
@@ -49,16 +48,16 @@ bool AABBCollider::collide(glm::vec3& velocity, glm::vec3& position) {
         }
 
         if (bestTime != 1.0f) {
-            //printf("Swept result: time = %.2f, axis = %d, vel: %d\n", res.time, res.axis, velocity[res.axis]);
-            collided = true;
             static const float eps = 0.0001f;
+            
+            info.axis ^= i + 1;
+            info.correction[i] = glm::sign(velocity[i]) * eps;
 
-            position[i] -= glm::sign(velocity[i]) * eps;
+            position[i] -= info.correction[i];
             velocity[i] *= bestTime;
         }
     }
-    // position += displacement;
-    return collided;
+    return info;
 }
 
 void AABBCollider::updateAABBCache(const glm::vec3& velocity, const glm::vec3& position) {
@@ -108,14 +107,13 @@ void AABBCollider::updateAABBCache(const glm::vec3& velocity, const glm::vec3& p
             }
         }
     }
-    printf("Cache size: %d\n", m_aabbCache.size());
 }
 
 AABB broadphaseRect(const glm::vec3 velocity, const AABB& bb) {
-    AABB rect;
-    rect.min = glm::min(bb.min, bb.min + velocity);
-    rect.max = glm::max(bb.max, bb.max + velocity);
-    return rect;
+    return {
+        glm::min(bb.min, bb.min + velocity),
+        glm::max(bb.max, bb.max + velocity),
+    };
 }
 
 AABBCollider::SweptResult AABBCollider::swept(glm::vec3& velocity, const AABB& other) {

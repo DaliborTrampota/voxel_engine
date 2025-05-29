@@ -35,6 +35,7 @@ class Player : public engine::Updateable {
     glm::vec3 m_velocity{0, 0, 0};
     glm::vec3 m_position;
     float m_speed = 10;
+    bool m_onGround = false;
 
 
     std::thread m_viewDistThread;

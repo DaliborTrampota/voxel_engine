@@ -11,9 +11,9 @@ namespace engine {
     struct AABB;
 
     struct CollisionInfo {
-        float time;
         std::vector<BlockID> touchingBlocks;
-        glm::vec3 displacement;
+        glm::vec3 correction;
+        unsigned int axis : 3;
     };
 
     class AABBCollider {
@@ -33,7 +33,7 @@ namespace engine {
         ///                reflect the collision response. (eg. stepping up)
         /// @note This function should be called for each axis, so 3 times for x, y and z.
         /// @note The position should be the feet position of the AABB, eg the bottom of the AABB.
-        bool collide(glm::vec3& velocity, glm::vec3& position);
+        CollisionInfo collide(glm::vec3& velocity, glm::vec3& position);
 
       protected:
         /// @brief The box around the AABB that will be generated, thus checked for collisions against the world.
