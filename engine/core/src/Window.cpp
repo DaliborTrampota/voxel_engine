@@ -41,8 +41,12 @@ void Window::beginFrame() const {
 void Window::endFrame() const {
     m_api->swapBuffers();
 
-    MouseEvent event(true);
-    m_api->fireMouseMoveEvent(&event);
+    MouseEvent mEvent;
+    m_api->fireMouseMoveEvent(&mEvent);
+
+    KeyboardEvent kbEvent;
+    m_api->fireKeyboardEvent(&kbEvent);
+
 
     glfwPollEvents();
 }
