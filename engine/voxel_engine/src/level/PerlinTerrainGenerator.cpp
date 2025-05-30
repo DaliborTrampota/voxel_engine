@@ -43,9 +43,9 @@ BlockID PerlinTerrainGenerator::voxelAt(const glm::ivec3& pos, int height) {
 
 void PerlinTerrainGenerator::populate(Chunk& chunk) {
     auto& data = chunk.data();
+    glm::ivec3 chunkCoords = chunk.id() * Chunk::Dims;
     for (int x = 0; x < Chunk::Dims.x; x++) {
         for (int z = 0; z < Chunk::Dims.z; z++) {
-            glm::ivec3 chunkCoords = chunk.id() * Chunk::Dims;
             int h = height(x + chunkCoords.x, z + chunkCoords.z);
             for (int y = 0; y < Chunk::Dims.y; y++) {
                 data[x][y][z] = voxelAt(glm::ivec3(x, y, z) + chunkCoords, h);
