@@ -90,9 +90,9 @@ void AABBCollider::updateAABBCache(const glm::vec3& velocity, const glm::vec3& p
     //     }
     // }
     m_aabbCache.clear();
-    for (int i = m_aabb->min.x - s_checkBox.x; i <= m_aabb->max.x + s_checkBox.x; ++i) {
-        for (int j = m_aabb->min.y - s_checkBox.y; j <= m_aabb->max.y + s_checkBox.y; ++j) {
-            for (int k = m_aabb->min.z - s_checkBox.z; k <= m_aabb->max.z + s_checkBox.z; ++k) {
+    for (int i = glm::floor(m_aabb->min.x - s_checkBox.x); i <= glm::ceil(m_aabb->max.x + s_checkBox.x); ++i) {
+        for (int j = glm::floor(m_aabb->min.y - s_checkBox.y); j <= glm::ceil(m_aabb->max.y + s_checkBox.y); ++j) {
+            for (int k = glm::floor(m_aabb->min.z - s_checkBox.z); k <= glm::ceil(m_aabb->max.z + s_checkBox.z); ++k) {
                 glm::ivec3 pos(i, j, k);
                 BlockID blockID = m_world->getBlockID(extractChunkCoords(pos), pos);
                 if (blockID == INVALID_BLOCK || blockID == Block::air().getID())
