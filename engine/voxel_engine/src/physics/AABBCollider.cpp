@@ -54,7 +54,7 @@ CollisionInfo AABBCollider::collide(glm::vec3& velocity, glm::vec3& position) {
             info.correction[i] = glm::sign(velocity[i]) * eps;
 
             position[i] -= info.correction[i];
-            velocity[i] *= bestTime;
+            velocity[i] *= glm::min(bestTime, 1.0f - std::numeric_limits<float>::epsilon());
         }
     }
     return info;

@@ -26,8 +26,8 @@ Player::Player()
       m_position(0, 0, 0),
       m_aabb(
           std::make_shared<AABB>(AABB({
-              glm::vec3(-0.5f, 0.0f, -0.5f),
-              glm::vec3(0.5f, 1.8f, 0.5f),
+              glm::vec3(-0.4f, 0.0f, -0.4f),
+              glm::vec3(0.4f, 1.8f, 0.4f),
           }))
       ),
       m_collider(m_aabb, 0.5f) {}
@@ -98,49 +98,36 @@ void Player::update(float dt) {
 // l prefixed variables are local space
 void Player::move(glm::vec3 lDir, float dt) {
     glm::quat rotation = m_camera->rotation(true);
-    glm::vec3 wAccel = rotation * lDir * m_speed;
+    glm::vec3 targetVelocity = rotation * lDir * m_speed;
 
     float acceleration = m_onGround ? 20.f : 1.f; // This is like friction.
 
     float y = m_velocity.y;
     m_velocity.y = 0;
 
-    glm::vec3 blended = glm::mix(m_velocity, wAccel, acceleration * dt);
+    glm::vec3 blended = glm::mix(m_velocity, targetVelocity, glm::clamp(acceleration * dt, 0.0f, 1.0f));
     m_velocity.x = blended.x;
     m_velocity.z = blended.z;
 
-    if (glm::length2(glm::vec2{m_velocity.x, m_velocity.z}) > m_speed * m_speed) {
-        m_velocity = glm::normalize(m_velocity) * m_speed;
+    glm::vec2 horizontalVelocity{m_velocity.x, m_velocity.z};
+    if (glm::length2(horizontalVelocity) > m_speed * m_speed) {
+        horizontalVelocity = glm::normalize(horizontalVelocity) * m_speed;
+        m_velocity.x = horizontalVelocity.x;
+        m_velocity.z = horizontalVelocity.y;
     }
-
 
     m_velocity.y = y - 9.81f * dt;
-    if (m_velocity.y < -20.f) {
-        m_velocity.y = -20.f;
-    }
 
 
-    // glm::vec3 fric = rotation * (glm::vec3(glm::equal(lDir, glm::vec3(0))) * friction);
-    // m_velocity += glm::sign(m_velocity) * -fric * dt;
-    // m_velocity.x *= friction * dt;
-    // m_velocity.z *= friction * dt;
-    // for (int i = 0; i < 3; i+=2) {
-    //     if (wAccel[i] == 0.0f) {
-    //         if (m_velocity[i] > 0.0f) {
-    //             m_velocity[i] = std::max(0.0f, m_velocity[i] - friction * dt);
-    //         } else if (m_velocity[i] < 0.0f) {
-    //             m_velocity[i] = std::min(0.0f, m_velocity[i] + friction * dt);
-    //         }
-    //     }
-    // }
+
     glm::vec3 displacement = m_velocity * dt;
     CollisionInfo col = m_collider.collide(displacement, m_position);
     m_velocity = displacement / dt;
-    // for (int i = 0; i < 3; ++i) {
-    //     if (displacement[i] == 0.0f) {
-    //         m_velocity[i] = 0.0f;
-    //     }
-    // }
+    
+    if (m_velocity.y < -20.f)
+        m_velocity.y = -20.f;
+
+    //printf("Speed: %.1f\n", glm::length(glm::vec2{m_velocity.x, m_velocity.z}));
 
     if (col.axis & 2) {
         m_onGround = true;
