@@ -136,7 +136,7 @@ void Player::move(glm::vec3 lDir, float dt) {
         m_onGround = false;
     }
 
-    m_position += displacement;
+    m_position += displacement - col.correction;
     m_aabb->position(m_position);
     m_camera->position(m_position);
 }

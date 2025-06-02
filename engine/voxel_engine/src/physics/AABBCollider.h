@@ -2,6 +2,8 @@
 
 #include <glm/glm.hpp>
 #include <memory>
+#include <array>
+#include <vector>
 
 #include "../Globals.h"
 
@@ -11,8 +13,9 @@ namespace engine {
     struct AABB;
 
     struct CollisionInfo {
-        std::vector<BlockID> touchingBlocks;
-        glm::vec3 correction;
+        glm::vec3 correction{0.f};
+        std::vector<BlockID> touchingBlocks{};
+        std::array<std::vector<glm::vec3>, 3> hitPositions{};
         unsigned int axis : 3;
     };
 

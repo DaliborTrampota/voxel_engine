@@ -1,13 +1,14 @@
 #include "AABBCollider.h"
 
-#include <glm/gtc/matrix_transform.hpp>
 #include "AABB.h"
 #include "CoordUtils.h"
 #include "data/RegistryManager.h"
 #include "level/World.h"
+
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/component_wise.hpp>
 #include <glm/gtx/norm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 using namespace engine;
 
@@ -29,7 +30,9 @@ void AABBCollider::setAABB(std::shared_ptr<AABB> aabb) {
 CollisionInfo AABBCollider::collide(glm::vec3& velocity, glm::vec3& position) {
     updateAABBCache(velocity, position);
     CollisionInfo info;
+    std::vector<const AABB*> hitBBs{};
     glm::vec3 displacement{0};
+
     for (int i = 0; i < 3; ++i) {
         float bestTime = 1.f;
 
@@ -38,13 +41,10 @@ CollisionInfo AABBCollider::collide(glm::vec3& velocity, glm::vec3& position) {
             axisVel[i] = velocity[i];
 
             float t = swept(axisVel, bb).time;
-            if (t < bestTime) {
+            if (t != 1.0f && t <= bestTime) {
                 bestTime = t;
+                hitBBs.push_back(&bb);
             }
-            //float time = swept1D(i, velocity[i], bb);
-            //if (time < bestTime) {
-            //    bestTime = time;
-            //}
         }
 
         if (bestTime != 1.0f) {
@@ -53,8 +53,17 @@ CollisionInfo AABBCollider::collide(glm::vec3& velocity, glm::vec3& position) {
             info.axis ^= i + 1;
             info.correction[i] = glm::sign(velocity[i]) * eps;
 
-            position[i] -= info.correction[i];
+            info.hitPositions[i].reserve(hitBBs.size());
+            for (const AABB* bb : hitBBs) {
+                glm::vec3 blockPos = bb->center();
+                info.hitPositions[i].push_back(blockPos);
+
+                auto id = extractChunkCoords(blockPos);
+                info.touchingBlocks.push_back(m_world->getBlockID(id, blockPos));
+            }
+
             velocity[i] *= glm::min(bestTime, 1.0f - std::numeric_limits<float>::epsilon());
+            hitBBs.clear();
         }
     }
     return info;
@@ -94,7 +103,8 @@ void AABBCollider::updateAABBCache(const glm::vec3& velocity, const glm::vec3& p
         for (int j = glm::floor(m_aabb->min.y - s_checkBox.y); j <= glm::ceil(m_aabb->max.y + s_checkBox.y); ++j) {
             for (int k = glm::floor(m_aabb->min.z - s_checkBox.z); k <= glm::ceil(m_aabb->max.z + s_checkBox.z); ++k) {
                 glm::ivec3 pos(i, j, k);
-                BlockID blockID = m_world->getBlockID(extractChunkCoords(pos), pos);
+                auto chID = extractChunkCoords(pos);
+                BlockID blockID = m_world->getBlockID(chID, pos);
                 if (blockID == INVALID_BLOCK || blockID == Block::air().getID())
                     continue;
 

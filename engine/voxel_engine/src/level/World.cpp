@@ -90,13 +90,13 @@ BlockID World::getBlockID(const ChunkID& chID, const glm::ivec3& pos) {
         std::cerr << "Position out of bounds\n";  // TODO add debug macros
         return INVALID_BLOCK;
     }
-    Chunk* chunk = m_chunks.at(chID);
-    if (!chunk || !chunk->generated()) {
         std::cerr << "Chunk not found or not generated\n";
+    auto chunk = m_chunks.find(chID);
+    if (chunk == m_chunks.end() || !chunk->second->generated()) {
         return INVALID_BLOCK;
     }
 
-    return chunk->m_data[pos.x][pos.y][pos.z];
+    return chunk->second->m_data[pos.x][pos.y][pos.z];
 }
 
 bool World::checkBlock(glm::vec3 pos, Block& curBlock, glm::ivec3 dir) const {
