@@ -41,8 +41,13 @@ CollisionInfo AABBCollider::collide(glm::vec3& velocity, glm::vec3& position) {
             axisVel[i] = velocity[i];
 
             float t = swept(axisVel, bb).time;
-            if (t != 1.0f && t <= bestTime) {
+            if (t == 1.0f) {
+                continue;
+            } else if (t == bestTime) {
+                hitBBs.push_back(&bb);
+            } else if(t < bestTime) {
                 bestTime = t;
+                hitBBs.clear();
                 hitBBs.push_back(&bb);
             }
         }
@@ -57,6 +62,8 @@ CollisionInfo AABBCollider::collide(glm::vec3& velocity, glm::vec3& position) {
             for (const AABB* bb : hitBBs) {
                 glm::vec3 blockPos = bb->center();
                 info.hitPositions[i].push_back(blockPos);
+
+                printf("Colliding with %d bbs\n", hitBBs.size());
 
                 auto id = extractChunkCoords(blockPos);
                 info.touchingBlocks.push_back(m_world->getBlockID(id, blockPos));
