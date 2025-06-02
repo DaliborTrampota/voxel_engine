@@ -13,15 +13,30 @@ namespace engine {
     struct AABB;
 
     struct CollisionInfo {
+        /// @brief The position correction that should be applied after the collision, so the AABB stops touching any AABB.
         glm::vec3 correction{0.f};
-        std::vector<BlockID> touchingBlocks{};
-        std::array<std::vector<glm::vec3>, 3> hitPositions{};
-        unsigned int axis : 3;
+
+        /// @brief The time till the collision happens for all axis with the provided move step.
+        /// @note If this is 1.0f for some axis, then there is no collision on that axis.
+        ///       If this is < 1.0f The move step should be multiplied by this value to reflect 
+        ///       the collision response. (eg. stopping movement in a obscured direction)
+        glm::vec3 t{1.f};
+
+        /// @brief The positions of the AABBs that will be hit after the move step is applied. (for each axis)
+        std::array<std::vector<glm::vec3>, 3> hitPositions;
+
+        /// @brief Bitfield indicating which axis has a collision data (0bxyz)
+        /// @note You can 'and' this with the axis index + 1 to check if there is a collision on that axis.
+        ///       For example, if axisInfo[1].t is smaller than 1, then axis & 2 will be true. (will check axis y)
+        unsigned int axis : 3 = 0b000;
+
+        /// @brief If the AABB is grounded, meaning it is touching the ground.
+        bool grounded : 1 = false;
     };
 
     class AABBCollider {
       public:
-        AABBCollider(std::shared_ptr<AABB> aabb, float stepHeight = 0.0f);
+        AABBCollider(std::shared_ptr<AABB> aabb, float stepHeight = 0.0f, float groundedHeight = 0.1f);
 
         /// @brief Sets the world for this collider.
         void setWorld(std::shared_ptr<World> world);
@@ -30,13 +45,9 @@ namespace engine {
         void setAABB(std::shared_ptr<AABB> aabb);
 
         /// @brief Checks if the AABB collides with any blocks in the world.
-        /// @param velocity The velocity of the AABB. After the function call, this will be modified to
-        ///                reflect the collision response. (eg. stopping movement in a obscured direction)
-        /// @param position The position of the AABB feet. After the function call, this will be modified to
-        ///                reflect the collision response. (eg. stepping up)
-        /// @note This function should be called for each axis, so 3 times for x, y and z.
-        /// @note The position should be the feet position of the AABB, eg the bottom of the AABB.
-        CollisionInfo collide(glm::vec3& velocity, glm::vec3& position);
+        /// @param moveStep The move delta or velocity of the AABB.
+        /// @param position The position of the AABB feet. Based on this surrounding AABBs will be generated.
+        CollisionInfo collide(glm::vec3& moveStep, const glm::vec3& position);
 
       protected:
         /// @brief The box around the AABB that will be generated, thus checked for collisions against the world.
@@ -47,10 +58,10 @@ namespace engine {
         std::shared_ptr<AABB> m_aabb;
         float m_stepHeight;
         float m_height;
+        float m_groundedHeight = 0.1f;  // The height at which the AABB is considered grounded.
 
         std::vector<AABB> m_aabbCache;  // Cached world AABBs around the AABB.
-        glm::ivec3
-            m_lastPosition;  // The last position of the AABB thus where the aabbCache is generated.
+        glm::ivec3 m_lastPosition;  // The last position of the AABB thus where the aabbCache is generated.
         glm::vec3 m_cacheDirection;  // The direction in which the AABB cache is generated.
 
 
@@ -58,6 +69,7 @@ namespace engine {
             float time;
             int axis;
         };
+
         void updateAABBCache(const glm::vec3& velocity, const glm::vec3& position);
         SweptResult swept(glm::vec3& velocity, const AABB& other);
         float swept1D(int axis, float velocity, const AABB& other);

@@ -18,6 +18,7 @@ namespace {
             case GLFW_KEY_S: return Key::S;
             case GLFW_KEY_D: return Key::D;
             case GLFW_KEY_P: return Key::P;
+            case GLFW_KEY_L: return Key::L;
             case GLFW_KEY_LEFT_SHIFT: return Key::LShift;
         }
         return Key::Esc;
@@ -32,6 +33,7 @@ namespace {
             case Key::S: return GLFW_KEY_S;
             case Key::D: return GLFW_KEY_D;
             case Key::P: return GLFW_KEY_P;
+            case Key::L: return GLFW_KEY_L;
             case Key::LShift: return GLFW_KEY_LEFT_SHIFT;
         }
         return GLFW_KEY_ESCAPE;

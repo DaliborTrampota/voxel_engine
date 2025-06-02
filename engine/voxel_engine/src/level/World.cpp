@@ -90,9 +90,9 @@ BlockID World::getBlockID(const ChunkID& chID, const glm::ivec3& pos) {
         std::cerr << "Position out of bounds\n";  // TODO add debug macros
         return INVALID_BLOCK;
     }
-        std::cerr << "Chunk not found or not generated\n";
     auto chunk = m_chunks.find(chID);
     if (chunk == m_chunks.end() || !chunk->second->generated()) {
+        //std::cerr << "Chunk not found or not generated\n";
         return INVALID_BLOCK;
     }
 

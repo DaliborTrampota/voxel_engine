@@ -92,6 +92,11 @@ void Player::update(float dt) {
 
         m_aabb->position(m_position);
     }
+
+    if (input->isKey(Down, Key::L)) {
+        auto dir = m_camera->lookDirection();
+        printf("Look direction: %.1f, %.1f, %.1f\n", dir.x, dir.y, dir.z);
+    }
 }
 
 // w prefixed variables are world space
@@ -122,14 +127,13 @@ void Player::move(glm::vec3 lDir, float dt) {
 
     glm::vec3 displacement = m_velocity * dt;
     CollisionInfo col = m_collider.collide(displacement, m_position);
+    displacement *= col.t;
     m_velocity = displacement / dt;
     
     if (m_velocity.y < -20.f)
-        m_velocity.y = -20.f;
+        m_velocity.y = -20.f; // terminal velocity
 
-    //printf("Speed: %.1f\n", glm::length(glm::vec2{m_velocity.x, m_velocity.z}));
-
-    if (col.axis & 2) {
+    if (col.grounded) {
         m_onGround = true;
         m_velocity.y = .0f;
     } else {

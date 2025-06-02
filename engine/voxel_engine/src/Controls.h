@@ -21,6 +21,7 @@ namespace engine {
         S,
         D,
         P,
+        L,
         Home,
         End,  // This should be last
     };
