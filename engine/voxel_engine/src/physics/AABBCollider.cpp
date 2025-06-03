@@ -38,47 +38,75 @@ void AABBCollider::setAABB(std::shared_ptr<AABB> aabb) {
 
 CollisionInfo AABBCollider::collide(glm::vec3& moveStep, const glm::vec3& position) {
     updateAABBCache(moveStep, position);
+
     CollisionInfo info;
     std::vector<const AABB*> hitBBs{};
     glm::vec3 displacement{0};
 
-    for (int i = 0; i < 3; ++i) {
+    for (int pass = 0; pass < 3; ++pass) {
         float bestTime = 1.f;
+        int axis = -1;
 
         for (const AABB& bb : m_aabbCache) {
-            glm::vec3 axisVel{0, 0, 0};
-            axisVel[i] = moveStep[i];
 
-            float t = swept(axisVel, bb).time;
-            if (t == 1.0f) {
-                if (i == 1 && moveStep[i] <= 0.0f) {  // y axis
+            SweptResult res = swept(moveStep, bb);
+            if (bb.intersects(*m_aabb)) {
+                printf(
+                    "AABBCollider: AABB cache intersects with player AABB, this should not "
+                    "happen! %.4f\n", res.time
+                );
+                printf(
+                    "AABB from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f)\n",
+                    bb.min.x,
+                    bb.min.y,
+                    bb.min.z,
+                    bb.max.x,
+                    bb.max.y,
+                    bb.max.z
+                );
+                printf(
+                    "Player AABB from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f)\n",
+                    m_aabb->min.x,
+                    m_aabb->min.y,
+                    m_aabb->min.z,
+                    m_aabb->max.x,
+                    m_aabb->max.y,
+                    m_aabb->max.z
+                );
+            }
+            
+            if (res.time == 1.0f) {
+                if (res.axis == 1 && moveStep[res.axis] <= 0.0f) {  // y axis
                     AABB extendedBB = bb;
                     extendedBB.max.y += m_groundedHeight;
                     if (extendedBB.intersects(*m_aabb))
                         info.grounded = true;
                 }
                 continue;
-            } else if (t == bestTime) {
+            } else if (res.time == bestTime) {
                 hitBBs.push_back(&bb);
-            } else if(t < bestTime) {
-                bestTime = t;
+            } else if(res.time < bestTime) {
+                bestTime = res.time;
+                axis = res.axis;
                 hitBBs.clear();
                 hitBBs.push_back(&bb);
                 
-                if (i == 1) // y axis
+                if (res.axis == 1) // y axis
                     info.grounded = bb.max.y + m_groundedHeight >= m_aabb->min.y;
             }
         }
 
         if (bestTime != 1.0f) {
-            info.axis |= 1 << i;
-            info.correction[i] = glm::sign(moveStep[i]) * std::numeric_limits<float>::epsilon() * 128.0f;
-            info.hitPositions[i].reserve(hitBBs.size());
-            info.t[i] = bestTime;
+            info.axis |= 1 << axis;
+            info.correction[axis] = glm::sign(moveStep[axis]) * std::numeric_limits<float>::epsilon() * 128.0f;
+            info.hitPositions[axis].reserve(hitBBs.size());
+            info.t[axis] = bestTime;
+
+            moveStep[axis] *= bestTime;
 
             for (const AABB* bb : hitBBs) {
                 glm::vec3 blockPos = bb->center();
-                info.hitPositions[i].push_back(blockPos);
+                info.hitPositions[axis].push_back(blockPos);
                 // auto id = extractChunkCoords(blockPos);
                 // info.touchingBlocks.push_back(m_world->getBlockID(id, blockPos));
             }
@@ -91,8 +119,9 @@ CollisionInfo AABBCollider::collide(glm::vec3& moveStep, const glm::vec3& positi
 
 void AABBCollider::updateAABBCache(const glm::vec3& velocity, const glm::vec3& position) {
     glm::ivec3 newPos = glm::floor(position);
+
     if (m_lastPosition == newPos)
-        return;
+       return;
 
     m_lastPosition = newPos;
     m_aabbCache.clear();

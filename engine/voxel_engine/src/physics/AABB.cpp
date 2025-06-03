@@ -11,7 +11,7 @@ bool AABB::contains(const glm::vec3& point) const {
 
 bool AABB::intersects(const AABB& other) const {
     return min.x < other.max.x && min.y < other.max.y && min.z < other.max.z &&
-           max.x >= other.min.x && max.y >= other.min.y && max.z >= other.min.z;
+           max.x > other.min.x && max.y > other.min.y && max.z > other.min.z;
 }
 
 glm::vec3 AABB::center() const {
