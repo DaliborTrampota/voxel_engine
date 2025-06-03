@@ -4,36 +4,23 @@
 
 using namespace engine;
 
-Camera::Camera(ProjectionType type) : m_type(type) {
-    m_worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
-    m_position = glm::vec3(0.0f, 0.0f, 0.0f);
-    m_front = glm::vec3(0.0f, 0.0f, -1.0f);
-
-    m_projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 10000.0f);
-
-    m_yaw = -90.0f;
-    m_pitch = 0.0f;
-
+Camera::Camera(ProjectionType type)
+    : m_type(type),
+      m_front(FORWARD),
+      m_position(0),
+      m_projection(glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 10000.0f)),
+      m_yaw(-90.0f),
+      m_pitch(0.0f) {
     updateVectors();
 }
+
+Camera::Camera() : Camera(ProjectionType::Perspective) {}
 
 void Camera::lookAt(const glm::vec3& target) {
     glm::vec3 dir = glm::normalize(target - m_position);
     m_pitch = glm::degrees(asin(dir.y));
     m_yaw = glm::degrees(atan2(dir.z, dir.x));
     updateVectors();
-}
-
-void Camera::move(Key key, float dt) {
-    switch (key) {
-        case Key::W: m_position += m_front * m_speed * dt; break;
-
-        case Key::S: m_position -= m_front * m_speed * dt; break;
-
-        case Key::A: m_position -= m_right * m_speed * dt; break;
-
-        case Key::D: m_position += m_right * m_speed * dt; break;
-    }
 }
 
 void Camera::rotate(float dx, float dy, bool constrainPitch) {
@@ -58,6 +45,11 @@ void Camera::resize(int width, int height) {
 
 glm::mat4 Camera::getView() const {
     return glm::lookAt(m_position, m_position + m_front, m_up);
+}
+
+glm::quat Camera::rotation(bool ignorePitch) const {
+    glm::vec3 front = ignorePitch ? glm::normalize(glm::vec3(m_front.x, 0.0f, m_front.z)) : m_front;
+    return glm::quatLookAt(front, m_worldUp);
 }
 
 void Camera::updateVectors() {

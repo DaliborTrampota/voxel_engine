@@ -11,13 +11,17 @@ namespace engine {
         Down = Pressed | Held,
     };
 
+    // When adding new key, add glfw conversion to InputSystem.cpp
     enum Key {
         Esc,
         Space,
+        LShift,
         W,
         A,
         S,
         D,
+        P,
+        L,
         Home,
         End,  // This should be last
     };

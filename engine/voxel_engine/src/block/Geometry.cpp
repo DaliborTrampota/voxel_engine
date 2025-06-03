@@ -10,13 +10,21 @@ Geometry::Geometry() : m_faces() {
     m_id = s_idCounter++;
 }
 
-Geometry::Geometry(std::vector<Face> faces) : Geometry() {
-    m_faces = std::move(faces);
+Geometry::Geometry(std::vector<Face> faces) : m_faces(std::move(faces)) {
+    m_id = s_idCounter++;
+    m_aabb = AABB::fromGeometry(*this);
+}
+
+Geometry::Geometry(std::vector<Face> faces, const AABB& aabb)
+    : m_faces(std::move(faces)),
+      m_aabb(aabb) {
+    m_id = s_idCounter++;
 }
 
 Geometry Geometry::Cube() {
     Geometry g;
     g.m_faces.insert(g.m_faces.begin(), data::f_faces.begin(), data::f_faces.end());
+    g.m_aabb = AABB::fromGeometry(g);
     return g;
 }
 

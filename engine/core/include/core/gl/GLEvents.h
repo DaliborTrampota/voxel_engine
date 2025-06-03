@@ -13,10 +13,11 @@ class ResizeEvent : public engine::Event {
 class MouseEvent : public engine::Event {
   public:
     MouseEvent(double x, double y) : x(x), y(y) {}
-    MouseEvent(bool still) : x(0), y(0), still(still) {}
+    MouseEvent() : x(-1), y(-1) {}
 
     double x, y;
-    bool still = false;
+
+    bool clearEvent() const { return x == -1 && y == -1; }
 };
 
 class KeyboardEvent : public engine::Event {
@@ -27,8 +28,13 @@ class KeyboardEvent : public engine::Event {
           action(action),
           mods(mods) {}
 
+    // Event to clear the state
+    KeyboardEvent() : action(-1), key(-1), scancode(-1), mods(-1) {}
+
     int key;
     int scancode;
     int action;
     int mods;
+
+    bool clearEvent() const { return action == -1; }
 };

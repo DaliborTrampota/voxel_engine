@@ -57,15 +57,14 @@ bool Chunk::generateMesh() {
                 Block block = RegistryManager::Blocks().get(blockID);
 
                 for (auto f : block.geometry()->faces()) {
-                    if (f.m_cull && m_world->checkBlock(
-                                        pos + f.m_cullDir + chunkBlockCoords, block, f.m_cullDir
-                                    ))
+                    if (f.cull &&
+                        m_world->checkBlock(pos + f.cullDir + chunkBlockCoords, block, f.cullDir))
                         continue;
 
                     f.translate(pos);
 
-                    for (Vertex v : f.m_vertices) {
-                        v.setData(block.material().forTag(f.tag), 0);
+                    for (Vertex v : f.vertices) {
+                        v.data(block.material().forTag(f.tag), 0);
                         m_vertexData.add(v);
                     }
                 }

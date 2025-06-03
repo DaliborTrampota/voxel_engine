@@ -17,6 +17,9 @@ namespace {
             case GLFW_KEY_A: return Key::A;
             case GLFW_KEY_S: return Key::S;
             case GLFW_KEY_D: return Key::D;
+            case GLFW_KEY_P: return Key::P;
+            case GLFW_KEY_L: return Key::L;
+            case GLFW_KEY_LEFT_SHIFT: return Key::LShift;
         }
         return Key::Esc;
     }
@@ -29,6 +32,9 @@ namespace {
             case Key::A: return GLFW_KEY_A;
             case Key::S: return GLFW_KEY_S;
             case Key::D: return GLFW_KEY_D;
+            case Key::P: return GLFW_KEY_P;
+            case Key::L: return GLFW_KEY_L;
+            case Key::LShift: return GLFW_KEY_LEFT_SHIFT;
         }
         return GLFW_KEY_ESCAPE;
     }
@@ -56,19 +62,25 @@ void InputSystem::setAxis(Axis axis, float value) {
 }
 
 void InputSystem::keyboardEvent(KeyboardEvent* pEvent) {
+    if (pEvent->clearEvent()) {
+        m_keyStates.fill(KeyState::None);
+        return;
+    }
+
     KeyState state = KeyState::None;
     switch (pEvent->action) {
         case GLFW_PRESS: state = KeyState::Pressed; break;
         case GLFW_RELEASE: state = KeyState::Released; break;
         case GLFW_REPEAT: state = KeyState::Held; break;
     }
+
     Key key = fromGLFW(pEvent->key);
     m_keyStates[key] = state;
 
     float sideways = getAxis(Axis::Sideways);
     float forward = getAxis(Axis::Forward);
 
-    int multiplier = state == Released ? -1 : state & Down ? 1 : 0;
+    int multiplier = state == Released ? -1 : state & Pressed ? 1 : 0;
 
     if (key == Key::A) {
         sideways -= 1.0f * multiplier;
@@ -77,10 +89,10 @@ void InputSystem::keyboardEvent(KeyboardEvent* pEvent) {
         sideways += 1.0f * multiplier;
     }
     if (key == Key::W) {
-        forward += 1.0f * multiplier;
+        forward -= 1.0f * multiplier;  // OpenGL -Z is forward
     }
     if (key == Key::S) {
-        forward -= 1.0f * multiplier;
+        forward += 1.0f * multiplier;
     }
 
 
@@ -89,15 +101,16 @@ void InputSystem::keyboardEvent(KeyboardEvent* pEvent) {
 }
 
 void InputSystem::mouseMoveEvent(MouseEvent* pEvent) {
-    float dx = !pEvent->still * (pEvent->x - m_mouseX);
-    float dy = !pEvent->still *
-               (m_mouseY - pEvent->y);  // reversed since y-coordinates go from bottom to top
+    if (pEvent->clearEvent()) {
+        setAxis(Axis::MouseX, 0.0f);
+        setAxis(Axis::MouseY, 0.0f);
+        return;
+    }
+    float dx = pEvent->x - m_mouseX;
+    float dy = m_mouseY - pEvent->y;  // reversed since y-coordinates go from bottom to top
 
     setAxis(Axis::MouseX, dx);
     setAxis(Axis::MouseY, dy);
-
-    if (pEvent->still)
-        return;
 
     m_mouseX = pEvent->x;
     m_mouseY = pEvent->y;

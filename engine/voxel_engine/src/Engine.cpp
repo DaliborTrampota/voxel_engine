@@ -3,12 +3,10 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <core/gl/GraphicsAPI.h>
-
-#include <Camera.h>
 #include <core/gl/ShaderPipeline.h>
 #include <level/Chunk.h>
 #include <level/World.h>
+#include <scene/Camera.h>
 
 #include "Updateable.h"
 

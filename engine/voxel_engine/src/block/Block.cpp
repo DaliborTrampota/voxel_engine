@@ -14,3 +14,8 @@ Block::Block(BlockID id, const Geometry* geo)
 engine::Block::Block(BlockID id, const Geometry* geo, const Material& mat) : Block(id, geo) {
     m_material = mat;
 }
+
+Block& engine::Block::air() {
+    static Block airBlock = Block(0, nullptr).isSolid(false).isOpaque(false);
+    return airBlock;
+}

@@ -9,10 +9,10 @@
 #include <core/gl/Shader.h>
 #include <core/gl/ShaderPipeline.h>
 
-#include <Camera.h>
-#include <TextureLoader.h>
 #include <Updateable.h>
+#include <data/TextureLoader.h>
 #include <level/World.h>
+#include <scene/Camera.h>
 
 #include "GameServices.h"
 #include "registry/Blocks.h"

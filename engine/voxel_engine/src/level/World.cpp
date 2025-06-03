@@ -4,11 +4,14 @@
 #include "ITerrainGenerator.h"
 #include "block/Block.h"
 #include "block/Geometry.h"
+#include "data/RegistryManager.h"
 
 #include <algorithm>
 #include <mutex>
 #include <queue>
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/component_wise.hpp>
 #include <iostream>
 
 using namespace engine;
@@ -81,6 +84,21 @@ void World::unloadAllChunks(const std::vector<ChunkID>& except) {
     }
 }
 
+BlockID World::getBlockID(const ChunkID& chID, const glm::ivec3& pos) {
+    if (glm::any(glm::lessThan(pos, glm::ivec3(0))) ||
+        glm::any(glm::greaterThan(pos, Chunk::Dims))) {
+        std::cerr << "Position out of bounds\n";  // TODO add debug macros
+        return INVALID_BLOCK;
+    }
+    auto chunk = m_chunks.find(chID);
+    if (chunk == m_chunks.end() || !chunk->second->generated()) {
+        //std::cerr << "Chunk not found or not generated\n";
+        return INVALID_BLOCK;
+    }
+
+    return chunk->second->m_data[pos.x][pos.y][pos.z];
+}
+
 bool World::checkBlock(glm::vec3 pos, Block& curBlock, glm::ivec3 dir) const {
     ChunkID chunkCoords = engine::extractChunkCoords(pos);
     // std::cout << "chunkCoords = " << chunkCoords.x << ", " << chunkCoords.y << ", " << chunkCoords.z << "\n";
@@ -96,7 +114,7 @@ bool World::checkBlock(glm::vec3 pos, Block& curBlock, glm::ivec3 dir) const {
     if (!curBlock.isVoxel() && block.isVoxel() || curBlock.isVoxel() && !block.isVoxel()) {
         dir = -dir;
         for (const auto& f : block.geometry()->faces()) {
-            if (f.m_cullDir == dir)
+            if (f.cullDir == dir)
                 return true;
         }
         return false;
