@@ -1,5 +1,7 @@
 #include "AABBCollider.h"
 
+#include <algorithm>
+
 #include "AABB.h"
 #include "CoordUtils.h"
 #include "data/RegistryManager.h"
