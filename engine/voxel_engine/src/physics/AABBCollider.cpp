@@ -121,7 +121,7 @@ void AABBCollider::updateAABBCache(const glm::vec3& velocity, const glm::vec3& p
     glm::ivec3 newPos = glm::floor(position);
 
     if (m_lastPosition == newPos)
-       return;
+        return;
 
     m_lastPosition = newPos;
     m_aabbCache.clear();

@@ -19,21 +19,18 @@ jobs:
         submodules: recursive
     
     - name: Check commit message and exit if needed
-      run: |
-        MSG=$(git log -1 --pretty=%B)
-        echo "Commit message: $MSG"
-        if [[ "$MSG" != *cppcheck* ]]; then
-            echo "No 'cppcheck' in commit message. Skipping job."
-            exit 0
-        fi
+      run: echo "msg=$(git log -1 --pretty=%B)" >> "$GITHUB_OUTPUT"
 
     - name: Configure CMake
+      if: contains(steps.commit_msg.outputs.msg, 'cppcheck')
       run: cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DUSE_DEPENDENCIES=OFF -B build -S .
 
     - name: Install cppcheck
+      if: contains(steps.commit_msg.outputs.msg, 'cppcheck')
       run: sudo apt-get install -y cppcheck
       
     - name: Run cppcheck
+      if: contains(steps.commit_msg.outputs.msg, 'cppcheck')
       run: |
         cppcheck --enable=all \
                 --inconclusive \
@@ -44,11 +41,13 @@ jobs:
         cat cppcheck_result.txt
 
     - name: Parse cppcheck result
+      if: contains(steps.commit_msg.outputs.msg, 'cppcheck')
       run: node .github/scripts/postCPPCheck.js > cppcheck_comment.txt
       env:
         OUTPUT: cppcheck_result.txt
 
     - name: Post comment on PR
+      if: contains(steps.commit_msg.outputs.msg, 'cppcheck')
       uses: actions/github-script@v7
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
