@@ -14,6 +14,8 @@ using namespace engine;
 
 AABBCollider::AABBCollider(std::shared_ptr<AABB> aabb, float stepHeight, float groundedHeight)
     : m_aabb(aabb),
+      m_lastPosition(0.f),
+      m_cacheDirection(0.f),
       m_height(aabb->max.y - aabb->min.y),
       m_stepHeight(stepHeight),
       m_groundedHeight(groundedHeight) {
@@ -67,7 +69,7 @@ CollisionInfo AABBCollider::collide(glm::vec3& moveStep, const glm::vec3& positi
         }
 
         if (bestTime != 1.0f) {
-            info.axis |= i + 1;
+            info.axis |= 1 << i;
             info.correction[i] = glm::sign(moveStep[i]) * std::numeric_limits<float>::epsilon() * 128.0f;
             info.hitPositions[i].reserve(hitBBs.size());
             info.t[i] = bestTime;
@@ -75,9 +77,6 @@ CollisionInfo AABBCollider::collide(glm::vec3& moveStep, const glm::vec3& positi
             for (const AABB* bb : hitBBs) {
                 glm::vec3 blockPos = bb->center();
                 info.hitPositions[i].push_back(blockPos);
-
-                //printf("Colliding with %d bbs\n", hitBBs.size());
-
                 // auto id = extractChunkCoords(blockPos);
                 // info.touchingBlocks.push_back(m_world->getBlockID(id, blockPos));
             }
@@ -89,12 +88,13 @@ CollisionInfo AABBCollider::collide(glm::vec3& moveStep, const glm::vec3& positi
 }
 
 void AABBCollider::updateAABBCache(const glm::vec3& velocity, const glm::vec3& position) {
-    glm::ivec3 newPos = floorToInt(position);
+    glm::ivec3 newPos = glm::floor(position);
     if (m_lastPosition == newPos)
         return;
 
     m_lastPosition = newPos;
     m_aabbCache.clear();
+
     for (int i = glm::floor(m_aabb->min.x - s_checkBox.x); i <= glm::ceil(m_aabb->max.x + s_checkBox.x); ++i) {
         for (int j = glm::floor(m_aabb->min.y - s_checkBox.y); j <= glm::ceil(m_aabb->max.y + s_checkBox.y); ++j) {
             for (int k = glm::floor(m_aabb->min.z - s_checkBox.z); k <= glm::ceil(m_aabb->max.z + s_checkBox.z); ++k) {
