@@ -35,6 +35,11 @@ void AABB::position(const glm::vec3& pos) {
     move(offset);
 }
 
+void AABB::expand(float amount) {
+    min -= glm::vec3(amount);
+    max += glm::vec3(amount);
+}
+
 AABB AABB::fromGeometry(const Geometry& geo) {
     AABB aabb;
     aabb.min = glm::vec3(geo.faces()[0].vertices[0].pos);

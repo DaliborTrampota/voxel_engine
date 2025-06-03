@@ -147,10 +147,12 @@ void AABBCollider::updateAABBCache(const glm::vec3& velocity, const glm::vec3& p
 }
 
 AABB broadphaseRect(const glm::vec3 velocity, const AABB& bb) {
-    return {
+    AABB rect{
         glm::min(bb.min, bb.min + velocity),
         glm::max(bb.max, bb.max + velocity),
     };
+    rect.expand(std::numeric_limits<float>::epsilon());  // Expand the rectangle slightly to avoid precision issues
+    return rect;
 }
 
 AABBCollider::SweptResult AABBCollider::swept(glm::vec3& velocity, const AABB& other) {
