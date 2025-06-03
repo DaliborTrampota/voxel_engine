@@ -17,9 +17,7 @@ class MouseEvent : public engine::Event {
 
     double x, y;
 
-    bool clearEvent() const {
-        return x == -1 && y == -1;
-    }
+    bool clearEvent() const { return x == -1 && y == -1; }
 };
 
 class KeyboardEvent : public engine::Event {
@@ -38,7 +36,5 @@ class KeyboardEvent : public engine::Event {
     int action;
     int mods;
 
-    bool clearEvent() const {
-        return action == -1;
-    }
+    bool clearEvent() const { return action == -1; }
 };

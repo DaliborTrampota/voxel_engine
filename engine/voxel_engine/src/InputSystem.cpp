@@ -73,7 +73,7 @@ void InputSystem::keyboardEvent(KeyboardEvent* pEvent) {
         case GLFW_RELEASE: state = KeyState::Released; break;
         case GLFW_REPEAT: state = KeyState::Held; break;
     }
-    
+
     Key key = fromGLFW(pEvent->key);
     m_keyStates[key] = state;
 
@@ -89,7 +89,7 @@ void InputSystem::keyboardEvent(KeyboardEvent* pEvent) {
         sideways += 1.0f * multiplier;
     }
     if (key == Key::W) {
-        forward -= 1.0f * multiplier; // OpenGL -Z is forward
+        forward -= 1.0f * multiplier;  // OpenGL -Z is forward
     }
     if (key == Key::S) {
         forward += 1.0f * multiplier;

@@ -1,8 +1,8 @@
 #pragma once
 
+#include <array>
 #include <glm/glm.hpp>
 #include <memory>
-#include <array>
 #include <vector>
 
 #include "../Globals.h"
@@ -18,7 +18,7 @@ namespace engine {
 
         /// @brief The time till the collision happens for all axis with the provided move step.
         /// @note If this is 1.0f for some axis, then there is no collision on that axis.
-        ///       If this is < 1.0f The move step should be multiplied by this value to reflect 
+        ///       If this is < 1.0f The move step should be multiplied by this value to reflect
         ///       the collision response. (eg. stopping movement in a obscured direction)
         glm::vec3 t{1.f};
 
@@ -36,7 +36,9 @@ namespace engine {
 
     class AABBCollider {
       public:
-        AABBCollider(std::shared_ptr<AABB> aabb, float stepHeight = 0.0f, float groundedHeight = 0.1f);
+        AABBCollider(
+            std::shared_ptr<AABB> aabb, float stepHeight = 0.0f, float groundedHeight = 0.1f
+        );
 
         /// @brief Sets the world for this collider.
         void setWorld(std::shared_ptr<World> world);
@@ -61,7 +63,8 @@ namespace engine {
         float m_groundedHeight = 0.1f;  // The height at which the AABB is considered grounded.
 
         std::vector<AABB> m_aabbCache;  // Cached world AABBs around the AABB.
-        glm::ivec3 m_lastPosition;  // The last position of the AABB thus where the aabbCache is generated.
+        glm::ivec3
+            m_lastPosition;  // The last position of the AABB thus where the aabbCache is generated.
         glm::vec3 m_cacheDirection;  // The direction in which the AABB cache is generated.
 
 

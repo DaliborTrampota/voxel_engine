@@ -1049,9 +1049,7 @@ GLAPI PFNGLDRAWBUFFERPROC glad_glDrawBuffer;
 typedef void(APIENTRYP PFNGLCLEARPROC)(GLbitfield mask);
 GLAPI PFNGLCLEARPROC glad_glClear;
 #define glClear glad_glClear
-typedef void(APIENTRYP PFNGLCLEARCOLORPROC)(
-    GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha
-);
+typedef void(APIENTRYP PFNGLCLEARCOLORPROC)(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha);
 GLAPI PFNGLCLEARCOLORPROC glad_glClearColor;
 #define glClearColor glad_glClearColor
 typedef void(APIENTRYP PFNGLCLEARSTENCILPROC)(GLint s);
@@ -1415,9 +1413,7 @@ GLAPI PFNGLPOINTPARAMETERIPROC glad_glPointParameteri;
 typedef void(APIENTRYP PFNGLPOINTPARAMETERIVPROC)(GLenum pname, const GLint* params);
 GLAPI PFNGLPOINTPARAMETERIVPROC glad_glPointParameteriv;
 #define glPointParameteriv glad_glPointParameteriv
-typedef void(APIENTRYP PFNGLBLENDCOLORPROC)(
-    GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha
-);
+typedef void(APIENTRYP PFNGLBLENDCOLORPROC)(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha);
 GLAPI PFNGLBLENDCOLORPROC glad_glBlendColor;
 #define glBlendColor glad_glBlendColor
 typedef void(APIENTRYP PFNGLBLENDEQUATIONPROC)(GLenum mode);
@@ -1614,9 +1610,7 @@ GLAPI PFNGLGETVERTEXATTRIBFVPROC glad_glGetVertexAttribfv;
 typedef void(APIENTRYP PFNGLGETVERTEXATTRIBIVPROC)(GLuint index, GLenum pname, GLint* params);
 GLAPI PFNGLGETVERTEXATTRIBIVPROC glad_glGetVertexAttribiv;
 #define glGetVertexAttribiv glad_glGetVertexAttribiv
-typedef void(APIENTRYP PFNGLGETVERTEXATTRIBPOINTERVPROC)(
-    GLuint index, GLenum pname, void** pointer
-);
+typedef void(APIENTRYP PFNGLGETVERTEXATTRIBPOINTERVPROC)(GLuint index, GLenum pname, void** pointer);
 GLAPI PFNGLGETVERTEXATTRIBPOINTERVPROC glad_glGetVertexAttribPointerv;
 #define glGetVertexAttribPointerv glad_glGetVertexAttribPointerv
 typedef GLboolean(APIENTRYP PFNGLISPROGRAMPROC)(GLuint program);
@@ -2035,9 +2029,7 @@ GLAPI PFNGLUNIFORM4UIVPROC glad_glUniform4uiv;
 typedef void(APIENTRYP PFNGLTEXPARAMETERIIVPROC)(GLenum target, GLenum pname, const GLint* params);
 GLAPI PFNGLTEXPARAMETERIIVPROC glad_glTexParameterIiv;
 #define glTexParameterIiv glad_glTexParameterIiv
-typedef void(APIENTRYP PFNGLTEXPARAMETERIUIVPROC)(
-    GLenum target, GLenum pname, const GLuint* params
-);
+typedef void(APIENTRYP PFNGLTEXPARAMETERIUIVPROC)(GLenum target, GLenum pname, const GLuint* params);
 GLAPI PFNGLTEXPARAMETERIUIVPROC glad_glTexParameterIuiv;
 #define glTexParameterIuiv glad_glTexParameterIuiv
 typedef void(APIENTRYP PFNGLGETTEXPARAMETERIIVPROC)(GLenum target, GLenum pname, GLint* params);
@@ -2200,11 +2192,7 @@ typedef void(APIENTRYP PFNGLPRIMITIVERESTARTINDEXPROC)(GLuint index);
 GLAPI PFNGLPRIMITIVERESTARTINDEXPROC glad_glPrimitiveRestartIndex;
 #define glPrimitiveRestartIndex glad_glPrimitiveRestartIndex
 typedef void(APIENTRYP PFNGLCOPYBUFFERSUBDATAPROC)(
-    GLenum readTarget,
-    GLenum writeTarget,
-    GLintptr readOffset,
-    GLintptr writeOffset,
-    GLsizeiptr size
+    GLenum readTarget, GLenum writeTarget, GLintptr readOffset, GLintptr writeOffset, GLsizeiptr size
 );
 GLAPI PFNGLCOPYBUFFERSUBDATAPROC glad_glCopyBufferSubData;
 #define glCopyBufferSubData glad_glCopyBufferSubData
@@ -2406,9 +2394,7 @@ GLAPI PFNGLSAMPLERPARAMETERIUIVPROC glad_glSamplerParameterIuiv;
 typedef void(APIENTRYP PFNGLGETSAMPLERPARAMETERIVPROC)(GLuint sampler, GLenum pname, GLint* params);
 GLAPI PFNGLGETSAMPLERPARAMETERIVPROC glad_glGetSamplerParameteriv;
 #define glGetSamplerParameteriv glad_glGetSamplerParameteriv
-typedef void(APIENTRYP PFNGLGETSAMPLERPARAMETERIIVPROC)(
-    GLuint sampler, GLenum pname, GLint* params
-);
+typedef void(APIENTRYP PFNGLGETSAMPLERPARAMETERIIVPROC)(GLuint sampler, GLenum pname, GLint* params);
 GLAPI PFNGLGETSAMPLERPARAMETERIIVPROC glad_glGetSamplerParameterIiv;
 #define glGetSamplerParameterIiv glad_glGetSamplerParameterIiv
 typedef void(APIENTRYP PFNGLGETSAMPLERPARAMETERFVPROC)(

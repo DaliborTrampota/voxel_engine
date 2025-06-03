@@ -103,7 +103,6 @@ void Player::update(float dt) {
             m_camera->position().y,
             m_camera->position().z
         );
-
     }
 }
 
@@ -113,12 +112,13 @@ void Player::move(glm::vec3 lDir, float dt) {
     glm::quat rotation = m_camera->rotation(true);
     glm::vec3 targetVelocity = rotation * lDir * m_speed;
 
-    float acceleration = m_onGround ? 20.f : 1.f; // This is like friction.
+    float acceleration = m_onGround ? 20.f : 1.f;  // This is like friction.
 
     float y = m_velocity.y;
     m_velocity.y = 0;
 
-    glm::vec3 blended = glm::mix(m_velocity, targetVelocity, glm::clamp(acceleration * dt, 0.0f, 1.0f));
+    glm::vec3 blended =
+        glm::mix(m_velocity, targetVelocity, glm::clamp(acceleration * dt, 0.0f, 1.0f));
     m_velocity.x = blended.x;
     m_velocity.z = blended.z;
 
@@ -133,9 +133,9 @@ void Player::move(glm::vec3 lDir, float dt) {
 
     glm::vec3 displacement = m_velocity * dt;
     CollisionInfo col = m_collider.collide(displacement, m_position);
-    
+
     if (m_velocity.y < -20.f)
-        m_velocity.y = -20.f; // terminal velocity
+        m_velocity.y = -20.f;  // terminal velocity
 
     if (col.grounded) {
         m_onGround = true;
@@ -144,9 +144,12 @@ void Player::move(glm::vec3 lDir, float dt) {
         m_onGround = false;
     }
 
-    if (col.axis & 1) m_velocity.x = 0.0f;  // X collision
-    if (col.axis & 2) m_velocity.y = 0.0f;  // Y collision  
-    if (col.axis & 4) m_velocity.z = 0.0f;  // Z collision
+    if (col.axis & 1)
+        m_velocity.x = 0.0f;  // X collision
+    if (col.axis & 2)
+        m_velocity.y = 0.0f;  // Y collision
+    if (col.axis & 4)
+        m_velocity.z = 0.0f;  // Z collision
 
     m_position += displacement - col.correction;
     m_aabb->position(m_position);
