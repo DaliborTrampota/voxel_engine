@@ -23,7 +23,8 @@ AABBCollider::AABBCollider(std::shared_ptr<AABB> aabb, float stepHeight, float g
     if (m_height <= 0.0f)
         throw std::runtime_error("AABBCollider: AABB height must be greater than 0.");
 
-    m_aabbCache.reserve(3 * 3 * 6);  // TODO: should take into account the aabb size
+    int volume = glm::dot(m_aabb->min - s_checkBox, m_aabb->max + s_checkBox);
+    m_aabbCache.reserve(volume - (m_aabb->max.y - m_aabb->min.y));
 }
 
 void AABBCollider::setWorld(std::shared_ptr<World> world) {
@@ -69,7 +70,7 @@ CollisionInfo AABBCollider::collide(glm::vec3& moveStep, const glm::vec3& positi
         }
 
         if (bestTime != 1.0f) {
-            info.axis |= 1 << i;
+            info.axis |= 1 << i + 1;
             info.correction[i] = glm::sign(moveStep[i]) * std::numeric_limits<float>::epsilon() * 128.0f;
             info.hitPositions[i].reserve(hitBBs.size());
             info.t[i] = bestTime;
