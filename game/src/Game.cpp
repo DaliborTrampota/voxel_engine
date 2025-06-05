@@ -44,7 +44,8 @@ void Game::render(double dt) {
     processInput();
     fireUpdate(dt);
 
-    Engine::render(&m_pipeline, m_plrCamera, activeWorld());
+    Engine::render(m_worldManager.activeWorld().get());
+    // Engine::render(&m_pipeline, m_plrCamera, activeWorld());
 }
 
 void Game::start() {
@@ -58,19 +59,6 @@ void Game::start() {
     m_player->spawn(activeWorld());
 
     subscribeUpdate(m_player);
-
-    {
-        gl::Shader vert("../../../game/shaders/VertexShader.glsl", GL_VERTEX_SHADER);
-        gl::Shader frag("../../../game/shaders/PixelShader.glsl", GL_FRAGMENT_SHADER);
-
-        if (!m_pipeline.registerShader(GL_VERTEX_SHADER, vert))
-            printf("Vert shader not registered");
-        if (!m_pipeline.registerShader(GL_FRAGMENT_SHADER, frag))
-            printf("Fragment shader not registered");
-        if (!m_pipeline.link())
-            return;  // throw error or something? 1;
-    }
-
 
     // uncomment this call to draw in wireframe polygons.
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

@@ -4,12 +4,14 @@
 #include <memory>
 #include <unordered_map>
 #include <unordered_set>
+#include <shared_mutex>
 
 #include "Chunk.h"
 #include "ITerrainGenerator.h"
 #include "ThreadPool.h"
+#include "block/Vertex.h"
 
-#include <shared_mutex>
+#include <core/render/Material.h>
 
 namespace gl {
     class ShaderPipeline;
@@ -57,6 +59,7 @@ namespace engine {
         std::unordered_map<ChunkID, Chunk*> m_chunks;
         std::unordered_set<ChunkID> m_loadedChunks;
         std::unique_ptr<ITerrainGenerator> m_generator = nullptr;
+        gl::Material m_material;
 
         ThreadPool m_genPool;
 

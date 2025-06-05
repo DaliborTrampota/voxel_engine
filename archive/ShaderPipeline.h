@@ -15,14 +15,13 @@ namespace gl {
     class ShaderPipeline {
       public:
         uint32_t ID;
-        std::map<GLenum, Shader> shaders;
+        std::array<Shader, 4> shaders; // 0: Vertex, 1: Fragment, 2: Geometry,
         std::string name;
 
         ShaderPipeline(std::string name = "Unnamed");
         ~ShaderPipeline();
 
-        bool registerShader(GLenum type, const Shader& shader);
-        Shader& getShader(GLenum type) { return shaders[type]; }
+        bool registerShader(ShaderType type, const Shader& shader);
         bool link();
 
         void use();

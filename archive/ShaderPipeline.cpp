@@ -23,11 +23,11 @@ ShaderPipeline::~ShaderPipeline() {
     }
 }
 
-bool ShaderPipeline::registerShader(GLenum type, const Shader& shader) {
+bool ShaderPipeline::registerShader(ShaderType type, const Shader& shader) {
     GL_GUARD
     glAttachShader(ID, shader.ID);
-    if (shaders.find(type) != shaders.end())
-        return false;
+    // if (shaders.find(type) != shaders.end()) //TODO: should allow replace shader?
+    //     return false;
     shaders[type] = shader;
     return true;
 }

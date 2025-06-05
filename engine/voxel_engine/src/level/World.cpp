@@ -18,7 +18,12 @@ using namespace engine;
 
 World::World(std::unique_ptr<ITerrainGenerator> gen, uint32_t genThreads)
     : m_generator(std::move(gen)),
-      m_genPool(genThreads) {}
+      m_genPool(genThreads) {
+
+        m_material = gl::Material("resources/shaders/ChunkVert.glsl",
+                                  "resources/shaders/ChunkFrag.glsl",
+                                  "ChunkMaterial");
+      }
 
 World::~World() {
     m_genPool.stop();
