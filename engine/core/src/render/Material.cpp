@@ -1,7 +1,6 @@
 #include "render/Material.h"
 
 #include <glm/gtc/type_ptr.hpp>
-
 #include "gl/Shader.h"
 #include "../Globals.h"
 

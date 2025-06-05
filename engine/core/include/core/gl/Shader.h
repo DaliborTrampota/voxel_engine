@@ -13,12 +13,10 @@ namespace gl {
         Compute,
     };
 
-    class Shader {
-      public:
+    struct Shader {
         unsigned int ID;
 
         Shader(const char* path, ShaderType type);
-        Shader() = default;
         ~Shader();
     };
 }  // namespace gl

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ShaderPipeline.h"
+#include <string>
 
 namespace gl
 {
