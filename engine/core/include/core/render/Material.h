@@ -1,6 +1,10 @@
 #pragma once
 
 #include <string>
+#include <glm/glm.hpp>
+#include "Globals.h"
+
+#include <glad/glad.h>
 
 namespace gl
 {
@@ -23,6 +27,7 @@ namespace gl
             template <typename ...Shaders>
             void attach(Shaders&&... shaders) {
                 GL_GUARD
+
                 (glAttachShader(m_id, shaders.ID), ...);
                 (glDeleteShader(shaders.ID), ...);
             }
