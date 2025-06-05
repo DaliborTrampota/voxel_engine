@@ -5,7 +5,7 @@
 #include <thread>
 
 #include <Controls.h>
-#include <Updateable.h>
+#include <scene/Updateable.h>
 #include <physics/AABBCollider.h>
 
 namespace engine {

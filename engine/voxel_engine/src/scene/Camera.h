@@ -24,7 +24,6 @@ namespace engine {
             Orthographic
         };
 
-        Camera();
         Camera(ProjectionType type, CameraOptions opts);
 
         void position(const glm::vec3& pos) { m_position = pos; }

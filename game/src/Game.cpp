@@ -6,10 +6,8 @@
 
 #include <core/gl/GLEvents.h>
 #include <core/gl/GraphicsAPI.h>
-#include <core/gl/Shader.h>
-#include <core/gl/ShaderPipeline.h>
 
-#include <Updateable.h>
+#include <scene/Updateable.h>
 #include <data/TextureLoader.h>
 #include <level/World.h>
 #include <scene/Camera.h>
@@ -65,14 +63,14 @@ void Game::start() {
 
 
     m_plrCamera = m_player->getCamera();
-    m_pipeline.use();
+    //m_pipeline.use();
 
     m_plrCamera->lookAt(glm::vec3(0, 0, 0));
-    m_pipeline.setInt("texArray", texSlot);
+    //m_pipeline.setInt("texArray", texSlot);
 
     glm::mat4 model = glm::mat4(1.0f);
-    m_pipeline.setMat4("model", model);
-    m_pipeline.setMat4("projection", m_plrCamera->getProjection());
+    //m_pipeline.setMat4("model", model);
+    //m_pipeline.setMat4("projection", m_plrCamera->getProjection());
 
 
     window()->mouseLock(true);

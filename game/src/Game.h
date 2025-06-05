@@ -4,9 +4,8 @@
 #include <unordered_map>
 
 #include <core/gl/GLEventSite.h>
-#include <core/gl/ShaderPipeline.h>
 
-#include <Engine.h>
+#include <render/Engine.h>
 #include <InputSystem.h>
 
 #include "Player.h"
@@ -46,7 +45,6 @@ class Game : public engine::Engine {
   private:
     std::unique_ptr<InputSystem> m_inputSystem;
     MouseState m_mouseState;
-    gl::ShaderPipeline m_pipeline;
 
     std::shared_ptr<Player> m_player;
     Camera* m_plrCamera;

@@ -19,8 +19,6 @@ Camera::Camera(ProjectionType type, CameraOptions opts)
     updateVectors();
 }
 
-Camera::Camera() : Camera(ProjectionType::Perspective) {}
-
 void Camera::lookAt(const glm::vec3& target) {
     glm::vec3 dir = glm::normalize(target - m_position);
     m_pitch = glm::degrees(asin(dir.y));

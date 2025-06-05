@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <vector>
 
-#include "../Globals.h"
+#include "../../Globals.h"
 #include "VertexLayout.h"
 #include "IAttributes.h"
 
@@ -61,6 +61,8 @@ namespace gl {
         const void* data() const override {
             return m_data.data();
         }
+
+        std::vector<VertexT>& vertexData() { return m_data; }
 
         template <typename... Vals>
         inline void add(Vals&&... data) {

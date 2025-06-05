@@ -2,7 +2,7 @@
 
 #include <string>
 #include <glm/glm.hpp>
-#include "Globals.h"
+#include "../Globals.h"
 
 #include <glad/glad.h>
 
