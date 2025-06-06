@@ -3,15 +3,15 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <core/gl/Attributes.h>
-#include <core/gl/ShaderPipeline.h>
+#include <core/gl/geometry/Attributes.h>
+#include <core/render/Material.h>
 
 #include "block/Vertex.h"
-#include "data/VertexData.h"
-
-#include "World.h"
 #include "block/Block.h"
+#include "data/VertexData.h"
 #include "data/RegistryManager.h"
+#include "World.h"
+#include "render/RenderContext.h"
 //#include "block/builder/CulledGeometry.h"
 //#include "block/builder/CubeGeometry.h"
 
@@ -72,7 +72,7 @@ bool Chunk::generateMesh() {
         }
     }
     m_generatingMesh = false;
-    m_vertexData.m_data.shrink_to_fit();
+    m_vertexData.vertexData().shrink_to_fit();
     m_generated = true;
     return true;
 }
@@ -82,6 +82,33 @@ Block Chunk::getBlock(glm::ivec3 pos) const {
                                    : m_data[pos.x][pos.y][pos.z];
     return RegistryManager::Blocks().get(blockID);
 }
+
+
+void Chunk::render(RenderContext& ctx, int pass) {
+    
+    size_t verts = m_vertexData.length();
+    if (verts == 0 || !m_generated){
+        ctx.skip = true;
+        return;
+    }
+
+    ctx.setModelMatrix(m_coords * Chunk::Dims);
+    if(pass == 0) {
+        ctx.attributes = &m_vertexData;
+    } 
+    
+    else if (pass == 1) { // Opaque front to back
+        ctx.attributes = &m_vertexData;
+        // ctx.
+
+    }
+
+    else if (pass == 2) { // Transparent back to front
+        ctx.attributes = &m_vertexData;
+        // ctx.
+    }
+}
+
 
 bool ChunkID::operator()(const ChunkID& a, const ChunkID& b) const {
     return a.x == b.x && a.y == b.y && a.z == b.z;

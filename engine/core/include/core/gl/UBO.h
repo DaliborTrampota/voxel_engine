@@ -17,6 +17,8 @@ namespace gl {
 
         Mat2, Mat3, Mat4,
         DMat2, DMat3, DMat4,
+        //TODO Mat2x3 3x2 etc
+        
     };
 
     /// @brief Get the alignment size for a given type.

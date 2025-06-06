@@ -3,35 +3,50 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <core/gl/ShaderPipeline.h>
-#include <level/Chunk.h>
-#include <level/World.h>
-#include <scene/Camera.h>
+#include <core/render/Material.h>
 
-#include "Updateable.h"
+#include "level/Chunk.h"
+#include "level/World.h"
+#include "scene/Camera.h"
+#include "scene/Updateable.h"
+#include "render/Renderable.h"
+#include "render/RenderContext.h"
 
 
 using namespace engine;
 
 Engine::Engine(std::unique_ptr<gl::Window> window) : m_window(std::move(window)) {}
 
-void Engine::render(gl::ShaderPipeline* pipeline, Chunk* chunk) {
-    size_t verts = chunk->m_vertexData.length();
-    if (verts == 0 || !chunk->m_generated)
+void Engine::render(RenderContext ctx) {
+    size_t n = ctx.attributes->length();
+    if(n == 0)
         return;
 
-    chunk->m_vertexData.bind();
+    ctx.attributes->bind();
+    ctx.material->use();
 
-    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(chunk->m_coords * Chunk::Dims));
-    pipeline->setMat4("model", model);
-    glDrawArrays(GL_TRIANGLES, 0, verts);
+    ctx.material->setMat4("model", ctx.modelMatrix);
+    ctx.material->setMat4("view", ctx.viewMatrixOverride); // TODO set view matrix
+
+    glDrawArrays(GL_TRIANGLES, 0, n);
 }
 
-void Engine::render(gl::ShaderPipeline* pipeline, Camera* cam, std::shared_ptr<World> world) {
-    pipeline->setViewMatrix(cam->getView());
-    for (auto& pos : world->m_loadedChunks) {
-        render(pipeline, world->m_chunks[pos]);
-    }
+
+void Engine::render(Renderable* renderable) {
+    RenderContext ctx;
+    renderable->render(ctx);
+
+    size_t n = ctx.attributes->length();
+    if(n == 0)
+        return;
+
+    ctx.material->use();
+    ctx.material->setMat4("model", ctx.modelMatrix);
+    // if(ctx.viewMatrixOverride)
+    //     ctx.material->setMat4("view", ctx.viewMatrixOverride);
+
+    ctx.attributes->bind();
+    glDrawArrays(GL_TRIANGLES, 0, n);
 }
 
 void Engine::gameloop() {

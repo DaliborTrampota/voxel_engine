@@ -9,6 +9,7 @@
 #include "Chunk.h"
 #include "ITerrainGenerator.h"
 #include "ThreadPool.h"
+#include "render/Renderable.h"
 #include "block/Vertex.h"
 
 #include <core/render/Material.h>
@@ -22,8 +23,9 @@ namespace engine {
 
     class Chunk;
     struct ChunkID;
+    struct RenderContext;
 
-    class World {
+    class World : public Renderable {
       public:
         World(std::unique_ptr<ITerrainGenerator> gen, uint32_t genThreads = 8);
         ~World();
@@ -55,7 +57,10 @@ namespace engine {
 
         const std::unordered_set<ChunkID>& loadedChunks() const { return m_loadedChunks; }
 
-      private:
+
+        virtual void render(RenderContext& ctx, int pass = 0) override;
+
+      protected:
         std::unordered_map<ChunkID, Chunk*> m_chunks;
         std::unordered_set<ChunkID> m_loadedChunks;
         std::unique_ptr<ITerrainGenerator> m_generator = nullptr;
@@ -66,6 +71,7 @@ namespace engine {
         friend class Chunk;
         friend class Engine;
 
+      private:
         void createChunk(ChunkID id, bool load);
     };
 

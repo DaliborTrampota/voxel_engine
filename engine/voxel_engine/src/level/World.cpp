@@ -5,6 +5,7 @@
 #include "block/Block.h"
 #include "block/Geometry.h"
 #include "data/RegistryManager.h"
+#include "render/RenderContext.h"
 
 #include <algorithm>
 #include <mutex>
@@ -12,6 +13,7 @@
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/component_wise.hpp>
+#include <glm/gtx/norm.hpp>
 #include <iostream>
 
 using namespace engine;
@@ -126,6 +128,14 @@ bool World::checkBlock(glm::vec3 pos, Block& curBlock, glm::ivec3 dir) const {
     }
 
     return block.getID() == curBlock.getID() || block.isSolid() && curBlock.isSolid();
+}
+
+void World::render(RenderContext& ctx, int pass) {
+    ctx.material = &m_material;
+
+    for(const ChunkID& pos : m_loadedChunks) {
+        m_chunks[pos]->render(ctx, 0);
+    }
 }
 
 void World::createChunk(ChunkID id, bool load) {

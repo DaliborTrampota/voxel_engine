@@ -5,6 +5,8 @@
 
 #include <core/Window.h>
 
+#include "RenderContext.h"
+
 namespace gl {
     class ShaderPipeline;
     class GraphicsAPI;
@@ -15,14 +17,15 @@ namespace engine {
     class World;
     class Camera;
     class Updateable;
+    class Renderable;
 
     class Engine {
       public:
         Engine(std::unique_ptr<gl::Window> window);
         ~Engine() = default;
 
-        void render(gl::ShaderPipeline* pipeline, Chunk* chunk);
-        void render(gl::ShaderPipeline* pipeline, Camera* cam, std::shared_ptr<World> world);
+        void render(RenderContext ctx);
+        void render(Renderable* renderable);
 
         void subscribeUpdate(std::shared_ptr<Updateable> updateable);
         // void subscribeInputSystem(engine::InputSystem* inputSystem);

@@ -48,7 +48,7 @@ constexpr size_t gl::alignmentFor(Type type) {
 }
 
 constexpr size_t gl::alignTo(size_t offset, size_t alignment) {
-    return (offset + alignment - 1) & ~(alignment - 1);
+    return (offset + alignment - 1) & ~(alignment - 1); // same as ((offset + alignment - 1) / alignment) * alignment
 }
 
 constexpr size_t gl::sizeFor(Type type) {
