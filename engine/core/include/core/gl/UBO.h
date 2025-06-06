@@ -37,11 +37,12 @@ namespace gl {
     // glGetUniformBlockIndex glUniformBlockBinding no need to use, use binding = x in shader 
     class UBO {
         public:
+            UBO() = default;
             UBO(unsigned int bindingPoint, size_t size, const std::string& name);
             UBO(unsigned int bindingPoint, std::vector<Type> layout, const std::string& name);
 
             void create();
-            void bindToShader(unsigned int shaderID) const;
+            void bindToProgram(unsigned int programID) const;
 
             void setSubData(size_t index, const void* data);
             void setData(const void* data) const;

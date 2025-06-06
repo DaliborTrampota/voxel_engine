@@ -12,6 +12,7 @@
 #include "data/RegistryManager.h"
 #include "World.h"
 #include "render/RenderContext.h"
+#include "render/Engine.h"
 //#include "block/builder/CulledGeometry.h"
 //#include "block/builder/CubeGeometry.h"
 
@@ -84,28 +85,31 @@ Block Chunk::getBlock(glm::ivec3 pos) const {
 }
 
 
-void Chunk::render(RenderContext& ctx, int pass) {
+void Chunk::render(Engine& engine, int pass) {
     
     size_t verts = m_vertexData.length();
-    if (verts == 0 || !m_generated){
-        ctx.skip = true;
+    if (verts == 0 || !m_generated){ true;
         return;
     }
 
+    RenderContext ctx;
     ctx.setModelMatrix(m_coords * Chunk::Dims);
     if(pass == 0) {
         ctx.attributes = &m_vertexData;
+        ctx.material = &m_world->m_material;
+        engine.submitRender(std::move(ctx));
     } 
     
     else if (pass == 1) { // Opaque front to back
         ctx.attributes = &m_vertexData;
         // ctx.
-
+        engine.submitRender(std::move(ctx));
     }
 
     else if (pass == 2) { // Transparent back to front
         ctx.attributes = &m_vertexData;
         // ctx.
+        engine.submitRender(std::move(ctx));
     }
 }
 

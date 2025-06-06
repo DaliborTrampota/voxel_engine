@@ -6,6 +6,7 @@
 #include "block/Geometry.h"
 #include "data/RegistryManager.h"
 #include "render/RenderContext.h"
+#include "render/Engine.h"
 
 #include <algorithm>
 #include <mutex>
@@ -20,14 +21,13 @@ using namespace engine;
 
 World::World(std::unique_ptr<ITerrainGenerator> gen, uint32_t genThreads)
     : m_generator(std::move(gen)),
-      m_genPool(genThreads) {
-
-        m_material = gl::Material("resources/shaders/ChunkVert.glsl",
-                                  "resources/shaders/ChunkFrag.glsl",
-                                  "ChunkMaterial");
+      m_genPool(genThreads),
+      m_material("resources/shaders/ChunkVert.glsl", "resources/shaders/ChunkFrag.glsl", "ChunkMaterial") {
+    printf("World created\n");
       }
 
 World::~World() {
+          printf("World deleted\n");
     m_genPool.stop();
 
     for (auto& [pos, chunk] : m_chunks) {
@@ -130,11 +130,9 @@ bool World::checkBlock(glm::vec3 pos, Block& curBlock, glm::ivec3 dir) const {
     return block.getID() == curBlock.getID() || block.isSolid() && curBlock.isSolid();
 }
 
-void World::render(RenderContext& ctx, int pass) {
-    ctx.material = &m_material;
-
+void World::render(Engine& engine, int pass) {
     for(const ChunkID& pos : m_loadedChunks) {
-        m_chunks[pos]->render(ctx, 0);
+        m_chunks[pos]->render(engine, 0);
     }
 }
 

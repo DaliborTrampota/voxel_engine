@@ -4,6 +4,7 @@
 namespace engine {
     
     struct RenderContext;
+    class Engine;
 
     class Renderable {
         public:
@@ -15,7 +16,7 @@ namespace engine {
             /// @param ctx The render context to be filled with the necessary data for rendering.
             /// @param pass Number indicating the pass, if you need multiple passes for rendering.
             /// @note The render pass has to be set by the caller of this method.
-            virtual void render(RenderContext& ctx, int pass = 0) = 0;
+            //virtual void render(RenderContext& ctx, int pass = 0) = 0;
 
             
             /// @brief Engine will call this method before rendering the object.

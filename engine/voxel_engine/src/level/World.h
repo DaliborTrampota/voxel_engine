@@ -22,6 +22,7 @@ namespace engine {
     static inline constexpr BlockID INVALID_BLOCK = -1;
 
     class Chunk;
+    class Engine;
     struct ChunkID;
     struct RenderContext;
 
@@ -58,7 +59,8 @@ namespace engine {
         const std::unordered_set<ChunkID>& loadedChunks() const { return m_loadedChunks; }
 
 
-        virtual void render(RenderContext& ctx, int pass = 0) override;
+        virtual void render(Engine& engine, int pass = 0) override;
+        const gl::Material& getMaterial() const { return m_material; }
 
       protected:
         std::unordered_map<ChunkID, Chunk*> m_chunks;

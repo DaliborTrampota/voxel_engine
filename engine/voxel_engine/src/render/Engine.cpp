@@ -17,25 +17,12 @@ using namespace engine;
 
 Engine::Engine(std::unique_ptr<gl::Window> window) : m_window(std::move(window)) {}
 
-void Engine::render(RenderContext ctx) {
-    size_t n = ctx.attributes->length();
-    if(n == 0)
+void Engine::submitRender(RenderContext&& ctx, bool immediate) {
+    if (!immediate) {
+        m_renderQueue.push_back(std::move(ctx));
         return;
-
-    ctx.attributes->bind();
-    ctx.material->use();
-
-    ctx.material->setMat4("model", ctx.modelMatrix);
-    ctx.material->setMat4("view", ctx.viewMatrixOverride); // TODO set view matrix
-
-    glDrawArrays(GL_TRIANGLES, 0, n);
-}
-
-
-void Engine::render(Renderable* renderable) {
-    RenderContext ctx;
-    renderable->render(ctx);
-
+    }
+    
     size_t n = ctx.attributes->length();
     if(n == 0)
         return;
@@ -47,6 +34,13 @@ void Engine::render(Renderable* renderable) {
 
     ctx.attributes->bind();
     glDrawArrays(GL_TRIANGLES, 0, n);
+}
+
+void Engine::flush() {
+    for (auto& ctx : m_renderQueue) {
+        render(ctx);
+    }
+    m_renderQueue.clear();
 }
 
 void Engine::gameloop() {
@@ -63,6 +57,7 @@ void Engine::gameloop() {
 
         beforeRender();
         render(deltaTime);
+        flush();
         afterRender();
 
         GLenum err;
@@ -71,6 +66,22 @@ void Engine::gameloop() {
 
         m_window->endFrame();
     }
+}
+
+void Engine::render(RenderContext& ctx) const {
+    size_t n = ctx.attributes->length();
+    if(n == 0)
+        return;
+
+    ctx.material->use();
+    ctx.material->setMat4("model", ctx.modelMatrix);
+    // ctx.material->setMat4("view", ctx.camera->getView());
+    // ctx.material->setMat4("projection", ctx.camera->getProjection());
+    // if(ctx.viewMatrixOverride)
+    //     ctx.material->setMat4("view", ctx.viewMatrixOverride);
+
+    ctx.attributes->bind();
+    glDrawArrays(GL_TRIANGLES, 0, n);
 }
 
 void Engine::fireUpdate(float dt) {

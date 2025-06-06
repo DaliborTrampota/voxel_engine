@@ -30,27 +30,26 @@ Game::Game(std::unique_ptr<gl::Window> window, glm::ivec2 dims)
     GameServices::setInputSystem(m_inputSystem.get());
 }
 
+Game::~Game() {}
+
+
 void Game::processInput() {
     if (m_inputSystem->getKeyState(Key::Esc) == KeyState::Pressed)
         window()->close();
 }
 
-Game::~Game() {}
-
-
 void Game::render(double dt) {
     processInput();
     fireUpdate(dt);
 
-    Engine::render(m_worldManager.activeWorld().get());
-    // Engine::render(&m_pipeline, m_plrCamera, activeWorld());
+    m_worldManager.activeWorld()->render(*this);
 }
 
 void Game::start() {
     uint32_t texSlot = 0;
     TextureLoader loader(texSlot);
-    loader.load("resources/textures/blocks/");
-    //loader.bind();
+    loader.load("resources/textures/blocks/"); // bind in load
+    
     RegisterBlocks();
 
     m_player = std::make_shared<Player>();

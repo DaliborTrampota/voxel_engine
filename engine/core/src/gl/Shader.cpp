@@ -44,6 +44,7 @@ Shader::Shader(const char* path, ShaderType type) {
         glGetShaderInfoLog(ID, 512, NULL, infoLog);
         printf("ERROR::SHADER::COMPILATION_FAILED::%s\n%s", path, infoLog);
     }
+    printf("Shader %s compiled %d\n", path, ID);
 }
 
 Shader::~Shader() {

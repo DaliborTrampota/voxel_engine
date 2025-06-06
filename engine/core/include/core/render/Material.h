@@ -8,6 +8,8 @@
 
 namespace gl
 {
+    class UBO;
+
     // Used to be named ShaderPipeline
     /// @brief Material class representing shader program.
     class Material {
@@ -30,6 +32,8 @@ namespace gl
 
                 (glAttachShader(m_id, shaders.ID), ...);
             }
+
+            void bindUBO(const UBO& ubo) const;
 
         protected:
 

@@ -2,6 +2,7 @@
 
 #include <glm/gtc/type_ptr.hpp>
 #include "gl/Shader.h"
+#include "gl/UBO.h"
 
 using namespace gl;
 
@@ -12,6 +13,7 @@ gl::Material::Material(
     const std::string& fragmentPath,
     std::string name
 ) : m_name(std::move(name)) {
+    GL_GUARD
     m_id = glCreateProgram();
 
     Shader vert(vertexPath.c_str(), ShaderType::Vertex);
@@ -27,6 +29,7 @@ gl::Material::Material(
     std::string name
 )
     : m_name(std::move(name)) {
+    GL_GUARD
     m_id = glCreateProgram();
 
     Shader vert(vertexPath.c_str(), ShaderType::Vertex);
@@ -63,9 +66,9 @@ void Material::setMat4(const std::string& name, const glm::mat4& mat) const {
     glUniformMatrix4fv(glGetUniformLocation(m_id, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
 }
 
-
-
-
+void Material::bindUBO(const UBO& ubo) const {
+    ubo.bindToProgram(m_id);
+}
 
 
 bool Material::link() {
@@ -79,5 +82,6 @@ bool Material::link() {
         glGetProgramInfoLog(m_id, 512, NULL, infoLog);
         printf("ERROR::SHADER::PROGRAM\n%s", infoLog);
     }
+    printf("Material %s linked successfully %d\n", m_name.c_str(), m_id);
     return success;
 }

@@ -4,11 +4,12 @@
 #include "level/Chunk.h"
 #include "CoordUtils.h"
 
+#include <render/Engine.h>
 #include <glm/gtx/norm.hpp>
 
 using namespace engine;
 
-void MyWorld::render(RenderContext& ctx, int pass) {
+void MyWorld::render(Engine& engine, int pass) {
 
     glm::vec3 playerPos = m_player->position();
     glm::vec3 curChunk = extractChunkCoords(playerPos);
@@ -19,14 +20,15 @@ void MyWorld::render(RenderContext& ctx, int pass) {
               return glm::length2(curChunk - glm::vec3(a)) < glm::length2(curChunk - glm::vec3(b));
           });
 
-    for(const ChunkID& pos : renderOrder) {// Opaque front to back
-        m_chunks.at(pos)->render(ctx, 1);
+    //for(const ChunkID& pos : renderOrder) {// Opaque front to back
+    //    m_chunks.at(pos)->render(engine, 1);
+    //}
+
+    //std::reverse(renderOrder.begin(), renderOrder.end());
+    for(const ChunkID& pos : renderOrder) {
+        m_chunks.at(pos)->render(engine, 0);
     }
 
-    std::reverse(renderOrder.begin(), renderOrder.end());
-    for(const ChunkID& pos : renderOrder) {// Transparent back to front
-        m_chunks.at(pos)->render(ctx, 2);
-    }
 }
 
 void MyWorld::setPlayer(std::shared_ptr<Player> player) {

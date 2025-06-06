@@ -20,6 +20,7 @@ namespace gl {
 namespace engine {
 
     class World;
+    class Engine;
     struct RenderContext;
 
     using T = unsigned int;
@@ -65,7 +66,7 @@ namespace engine {
 
         /// @brief Renders the chunk.
         /// @param pass Pass == 0 will render the whole chunk, pass == 1 will render opaque blocks, pass == 2 will render transparent blocks.
-        void render(RenderContext& ctx, int pass) override;
+        void render(Engine& engine, int pass) override;
 
       private:
         World* m_world;

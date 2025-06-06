@@ -128,16 +128,21 @@ void UBO::create() {
     GL_GUARD
     glGenBuffers(1, &m_id);
     glBindBuffer(GL_UNIFORM_BUFFER, m_id);
-    glBufferData(GL_UNIFORM_BUFFER, m_size, nullptr, GL_DYNAMIC_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER, m_size, nullptr, GL_STATIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, m_bindingPoint);
 
     glBindBufferRange(GL_UNIFORM_BUFFER, m_bindingPoint, m_id, 0, m_size);
+    printf("UBO %s created with ID %d, size %zu bytes\n", m_blockName.c_str(), m_id, m_size);
 }
 
-void UBO::bindToShader(unsigned int shaderID) const {
+void UBO::bindToProgram(unsigned int programID) const {
     GL_GUARD
-    unsigned int blockIndex = glGetUniformBlockIndex(shaderID, m_blockName.c_str());
-    glUniformBlockBinding(shaderID, blockIndex, m_bindingPoint);
+    unsigned int blockIndex = glGetUniformBlockIndex(programID, m_blockName.c_str());
+    if (blockIndex == GL_INVALID_INDEX) {
+        printf("UBO::bindToProgram: uniform block \"%s\" not found or not active!\n", m_blockName.c_str());
+        return;
+    }
+    glUniformBlockBinding(programID, blockIndex, m_bindingPoint);
 }
 
 void UBO::setSubData(size_t index, const void* data) {
@@ -158,6 +163,6 @@ void UBO::setSubData(size_t index, const void* data) {
 void UBO::setData(const void* data) const {
     GL_GUARD
     glBindBuffer(GL_UNIFORM_BUFFER, m_id);
-    glBufferData(GL_UNIFORM_BUFFER, m_size, data, GL_DYNAMIC_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER, m_size, data, GL_STATIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, m_bindingPoint); 
 }

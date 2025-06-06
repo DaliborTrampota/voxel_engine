@@ -8,7 +8,7 @@ WorldManager::WorldManager() {
     m_currentWorld = 0;
     m_worlds[0] =
         // std::make_unique<engine::World>(std::make_unique<engine::FlatTerrainGenerator>());
-        std::make_unique<engine::World>(std::make_unique<engine::PerlinTerrainGenerator>(100));
+        std::make_shared<engine::World>(std::make_unique<engine::PerlinTerrainGenerator>(100));
 }
 
 WorldManager::~WorldManager() {}
