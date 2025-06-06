@@ -4,6 +4,7 @@
 #include <unordered_map>
 
 #include <core/gl/GLEventSite.h>
+#include <core/gl/UBO.h>
 
 #include <render/Engine.h>
 #include <InputSystem.h>
@@ -45,6 +46,8 @@ class Game : public engine::Engine {
   private:
     std::unique_ptr<InputSystem> m_inputSystem;
     MouseState m_mouseState;
+
+    gl::UBO m_commonUBO;
 
     std::shared_ptr<Player> m_player;
     Camera* m_plrCamera;

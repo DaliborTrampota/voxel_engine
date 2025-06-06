@@ -42,6 +42,7 @@ void Game::render(double dt) {
     processInput();
     fireUpdate(dt);
 
+    m_commonUBO.setSubData(1, glm::value_ptr(m_plrCamera->getView()));
     m_worldManager.activeWorld()->render(*this);
 }
 
@@ -61,16 +62,21 @@ void Game::start() {
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 
+
     m_plrCamera = m_player->getCamera();
-    //m_pipeline.use();
-
     m_plrCamera->lookAt(glm::vec3(0, 0, 0));
-    //m_pipeline.setInt("texArray", texSlot);
 
-    glm::mat4 model = glm::mat4(1.0f);
-    //m_pipeline.setMat4("model", model);
-    //m_pipeline.setMat4("projection", m_plrCamera->getProjection());
-
+    
+    glm::mat4 commonData[2] = {
+        m_player->getCamera()->getProjection(),
+        m_player->getCamera()->getView(),
+    };
+    
+    m_commonUBO = gl::UBO(0, {gl::Type::Mat4, gl::Type::Mat4}, "Common");
+    m_commonUBO.create();
+    m_commonUBO.setData(static_cast<void*>(commonData));
+    m_worldManager.activeWorld()->getMaterial().bindUBO(m_commonUBO);
+    // m_worldManager.activeWorld()->getMaterial().setInt("texArray", texSlot);
 
     window()->mouseLock(true);
     gameloop();
