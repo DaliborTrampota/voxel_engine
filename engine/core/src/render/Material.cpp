@@ -12,6 +12,8 @@ gl::Material::Material(
     const std::string& fragmentPath,
     std::string name
 ) : m_name(std::move(name)) {
+    m_id = glCreateProgram();
+
     Shader vert(vertexPath.c_str(), ShaderType::Vertex);
     Shader geom(geometryPath.c_str(), ShaderType::Geometry);
     Shader frag(fragmentPath.c_str(), ShaderType::Fragment);
@@ -23,7 +25,10 @@ gl::Material::Material(
     const std::string& vertexPath,
     const std::string& fragmentPath,
     std::string name
-) : m_name(std::move(name)) {
+)
+    : m_name(std::move(name)) {
+    m_id = glCreateProgram();
+
     Shader vert(vertexPath.c_str(), ShaderType::Vertex);
     Shader frag(fragmentPath.c_str(), ShaderType::Fragment);
 

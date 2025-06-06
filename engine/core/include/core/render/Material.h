@@ -12,7 +12,7 @@ namespace gl
     /// @brief Material class representing shader program.
     class Material {
         public:
-            Material() = default;
+            Material() = delete;
             Material(const std::string& vertexPath, const std::string& fragmentPath, std::string name);
             Material(const std::string& vertexPath, const std::string& geometryPath, const std::string& fragmentPath, std::string name);
             ~Material();
@@ -29,14 +29,13 @@ namespace gl
                 GL_GUARD
 
                 (glAttachShader(m_id, shaders.ID), ...);
-                (glDeleteShader(shaders.ID), ...);
             }
 
         protected:
 
 
         private:
-            unsigned int m_id;
+            unsigned int m_id = 0;
             std::string m_name = "Unnamed";
 
             bool link();
