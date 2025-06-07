@@ -17,6 +17,8 @@ target_include_directories(Core
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
         ${CMAKE_CURRENT_SOURCE_DIR}/include/core
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/core/texture
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/core/render
         ${CMAKE_CURRENT_SOURCE_DIR}/include/core/gl
         ${CMAKE_CURRENT_SOURCE_DIR}/include/core/events
 )

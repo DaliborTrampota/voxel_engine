@@ -7,6 +7,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <glad/glad.h>
 #include <tools/stb_image.h>
+#include <core/texture/ImageData.h>
 
 #include "data/TextureManager.h"
 
@@ -14,16 +15,17 @@ namespace fs = std::filesystem;
 
 using namespace engine;
 
-TextureLoader::TextureLoader(int slot, gl::TextureSettings settings) : m_texArray(slot, settings) {}
+TextureLoader::TextureLoader(int slot) : m_texArray(slot) {}
 
-void TextureLoader::load(const char* path) {
-    m_texArray.bind();
-
-
-    std::vector<std::string> paths;
+void TextureLoader::load(const char* path, gl::texture::ArraySettings settings) {
     int width = 0;
     int height = 0;
-    bool query = true;
+    std::vector<gl::ImageData> images;
+
+    if (!fs::exists(path)) {
+        printf("Path %s does not exist\n", path);
+        return;
+    }
 
     try {
         for (const fs::directory_entry entry : fs::directory_iterator(path)) {
@@ -32,31 +34,35 @@ void TextureLoader::load(const char* path) {
                 continue;
             }
 
-            int n, w, h;
-            std::string p = entry.path().string();
-            int ok = stbi_info(p.c_str(), &w, &h, nullptr);
-            if (ok == 1) {
-                paths.push_back(p);
-                width = w;
-                height = h;
-            } else {
-                printf("Could not load %s\n", entry.path().string().c_str());
-            }
+            gl::ImageData data(entry.path().string().c_str());
+            width = data.width;
+            height = data.height;
+            images.emplace_back(std::move(data));
         }
     } catch (std::filesystem::filesystem_error& e) {
         printf("Error loading texutes: %s\n", e.what());
         exit(0);
     }
+
     if (width == 0 || height == 0) {
         printf("No valid images found in %s\n", path);
         return;
     }
+    
 
-    m_texArray.create(width, height, paths.size());
+    settings.layers = images.size();
+    settings.width = width;
+    settings.height = height;
+    settings.format = gl::ImageFormat::RGBA;
+
+
+    m_texArray.create(settings);
+    m_texArray.bind();
     TextureManager& texMgr = TextureManager::Get();
-    for (const auto& p : paths) {
-        int layer = m_texArray.load(p.c_str());
-        texMgr.add(getTextureName(p), layer);
+
+    for (const auto& imgData : images) {
+        int layer = m_texArray.load(imgData);
+        texMgr.add(getTextureName(imgData.path), layer);
     }
 }
 
