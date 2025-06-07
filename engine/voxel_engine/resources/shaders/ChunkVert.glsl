@@ -5,11 +5,8 @@ layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aUV;
 layout (location = 3) in uint aData;
 
-layout (std140) uniform Common
-{
-    mat4 projection;
-    mat4 view;
-};
+uniform mat4 projection;
+uniform mat4 view;
 uniform mat4 model;
 
 out vec3 pos;

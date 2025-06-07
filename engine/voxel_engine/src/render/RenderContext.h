@@ -14,11 +14,13 @@ namespace gl {
 
 namespace engine {
 
+    class Camera;
+
     struct RenderContext {
             gl::IAttributes* attributes;
             const gl::Material* material;
             glm::mat4 modelMatrix;
-            glm::mat4 viewMatrixOverride;
+            const Camera* camera = nullptr;
 
             void setModelMatrix(const glm::vec3& position) {
                 modelMatrix = glm::translate(glm::mat4(1.0f), position);

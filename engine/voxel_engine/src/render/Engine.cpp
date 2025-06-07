@@ -75,10 +75,10 @@ void Engine::render(RenderContext& ctx) const {
 
     ctx.material->use();
     ctx.material->setMat4("model", ctx.modelMatrix);
-    // ctx.material->setMat4("view", ctx.camera->getView());
-    // ctx.material->setMat4("projection", ctx.camera->getProjection());
-    // if(ctx.viewMatrixOverride)
-    //     ctx.material->setMat4("view", ctx.viewMatrixOverride);
+    if (ctx.camera) {
+        ctx.material->setMat4("view", ctx.camera->getView());
+        ctx.material->setMat4("projection", ctx.camera->getProjection());
+    }
 
     ctx.attributes->bind();
     glDrawArrays(GL_TRIANGLES, 0, n);

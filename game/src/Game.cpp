@@ -42,7 +42,8 @@ void Game::render(double dt) {
     processInput();
     fireUpdate(dt);
 
-    m_commonUBO.setSubData(1, glm::value_ptr(m_plrCamera->getView()));
+    // m_commonUBO.setSubData(1, glm::value_ptr(m_plrCamera->getView()));
+    m_worldManager.activeWorld()->getMaterial().setMat4("view", m_player->getCamera()->getView());
     m_worldManager.activeWorld()->render(*this);
 }
 
@@ -67,16 +68,21 @@ void Game::start() {
     m_plrCamera->lookAt(glm::vec3(0, 0, 0));
 
     
-    glm::mat4 commonData[2] = {
-        m_player->getCamera()->getProjection(),
-        m_player->getCamera()->getView(),
-    };
+    // glm::mat4 commonData[2] = {
+    //     m_player->getCamera()->getProjection(),
+    //     m_player->getCamera()->getView(),
+    // };
     
-    m_commonUBO = gl::UBO(0, {gl::Type::Mat4, gl::Type::Mat4}, "Common");
-    m_commonUBO.create();
-    m_commonUBO.setData(static_cast<void*>(commonData));
-    m_worldManager.activeWorld()->getMaterial().bindUBO(m_commonUBO);
+    // m_commonUBO = gl::UBO(0, {gl::Type::Mat4, gl::Type::Mat4}, "Common");
+    // m_commonUBO.create();
+    // m_commonUBO.setData(static_cast<void*>(commonData));
+    // m_worldManager.activeWorld()->getMaterial().bindUBO(m_commonUBO);
     // m_worldManager.activeWorld()->getMaterial().setInt("texArray", texSlot);
+
+    gl::Material mat = m_worldManager.activeWorld()->getMaterial();
+    mat.use();
+    mat.setMat4("projection", m_player->getCamera()->getProjection());
+    mat.setMat4("view", m_player->getCamera()->getView());
 
     window()->mouseLock(true);
     gameloop();
