@@ -50,31 +50,31 @@ CollisionInfo AABBCollider::collide(glm::vec3& moveStep, const glm::vec3& positi
 
         for (const AABB& bb : m_aabbCache) {
             SweptResult res = swept(moveStep, bb);
-            if (bb.intersects(*m_aabb)) {
-                printf(
-                    "AABBCollider: AABB cache intersects with player AABB, this should not "
-                    "happen! %.4f\n",
-                    res.time
-                );
-                printf(
-                    "AABB from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f)\n",
-                    bb.min.x,
-                    bb.min.y,
-                    bb.min.z,
-                    bb.max.x,
-                    bb.max.y,
-                    bb.max.z
-                );
-                printf(
-                    "Player AABB from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f)\n",
-                    m_aabb->min.x,
-                    m_aabb->min.y,
-                    m_aabb->min.z,
-                    m_aabb->max.x,
-                    m_aabb->max.y,
-                    m_aabb->max.z
-                );
-            }
+            // if (bb.intersects(*m_aabb)) {
+            //     printf(
+            //         "AABBCollider: AABB cache intersects with player AABB, this should not "
+            //         "happen! %.4f\n",
+            //         res.time
+            //     );
+            //     printf(
+            //         "AABB from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f)\n",
+            //         bb.min.x,
+            //         bb.min.y,
+            //         bb.min.z,
+            //         bb.max.x,
+            //         bb.max.y,
+            //         bb.max.z
+            //     );
+            //     printf(
+            //         "Player AABB from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f)\n",
+            //         m_aabb->min.x,
+            //         m_aabb->min.y,
+            //         m_aabb->min.z,
+            //         m_aabb->max.x,
+            //         m_aabb->max.y,
+            //         m_aabb->max.z
+            //     );
+            // }
 
             if (res.time == 1.0f) {
                 if (res.axis == 1 && moveStep[res.axis] <= 0.0f) {  // y axis
