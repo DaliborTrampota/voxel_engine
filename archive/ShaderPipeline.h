@@ -15,7 +15,7 @@ namespace gl {
     class ShaderPipeline {
       public:
         uint32_t ID;
-        std::array<Shader, 4> shaders; // 0: Vertex, 1: Fragment, 2: Geometry,
+        std::array<Shader, 4> shaders;  // 0: Vertex, 1: Fragment, 2: Geometry,
         std::string name;
 
         ShaderPipeline(std::string name = "Unnamed");

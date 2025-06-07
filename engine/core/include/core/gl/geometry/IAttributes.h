@@ -10,4 +10,4 @@ namespace gl {
         virtual size_t length() const = 0;
         virtual size_t stride() const = 0;
     };
-}
+}  // namespace gl

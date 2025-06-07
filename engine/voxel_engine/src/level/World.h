@@ -2,15 +2,15 @@
 
 #include <glm/glm.hpp>
 #include <memory>
+#include <shared_mutex>
 #include <unordered_map>
 #include <unordered_set>
-#include <shared_mutex>
 
 #include "Chunk.h"
 #include "ITerrainGenerator.h"
 #include "ThreadPool.h"
-#include "render/Renderable.h"
 #include "block/Vertex.h"
+#include "render/Renderable.h"
 
 #include <core/render/Material.h>
 

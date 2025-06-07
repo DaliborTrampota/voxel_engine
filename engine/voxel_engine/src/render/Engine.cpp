@@ -7,10 +7,10 @@
 
 #include "level/Chunk.h"
 #include "level/World.h"
+#include "render/RenderContext.h"
+#include "render/Renderable.h"
 #include "scene/Camera.h"
 #include "scene/Updateable.h"
-#include "render/Renderable.h"
-#include "render/RenderContext.h"
 
 
 using namespace engine;
@@ -22,9 +22,9 @@ void Engine::submitRender(RenderContext&& ctx, bool immediate) {
         m_renderQueue.push_back(std::move(ctx));
         return;
     }
-    
+
     size_t n = ctx.attributes->length();
-    if(n == 0)
+    if (n == 0)
         return;
 
     ctx.material->use();
@@ -70,7 +70,7 @@ void Engine::gameloop() {
 
 void Engine::render(RenderContext& ctx) const {
     size_t n = ctx.attributes->length();
-    if(n == 0)
+    if (n == 0)
         return;
 
     ctx.material->use();

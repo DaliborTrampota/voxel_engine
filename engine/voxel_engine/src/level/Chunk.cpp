@@ -6,13 +6,13 @@
 #include <core/gl/geometry/Attributes.h>
 #include <core/render/Material.h>
 
-#include "block/Vertex.h"
-#include "block/Block.h"
-#include "data/VertexData.h"
-#include "data/RegistryManager.h"
 #include "World.h"
-#include "render/RenderContext.h"
+#include "block/Block.h"
+#include "block/Vertex.h"
+#include "data/RegistryManager.h"
+#include "data/VertexData.h"
 #include "render/Engine.h"
+#include "render/RenderContext.h"
 //#include "block/builder/CulledGeometry.h"
 //#include "block/builder/CubeGeometry.h"
 
@@ -86,27 +86,27 @@ Block Chunk::getBlock(glm::ivec3 pos) const {
 
 
 void Chunk::render(Engine& engine, int pass) {
-    
     size_t verts = m_vertexData.length();
-    if (verts == 0 || !m_generated){ true;
+    if (verts == 0 || !m_generated) {
+        true;
         return;
     }
 
     RenderContext ctx;
     ctx.setModelMatrix(m_coords * Chunk::Dims);
-    if(pass == 0) {
+    if (pass == 0) {
         ctx.attributes = &m_vertexData;
         ctx.material = &m_world->m_material;
         engine.submitRender(std::move(ctx));
-    } 
-    
-    else if (pass == 1) { // Opaque front to back
+    }
+
+    else if (pass == 1) {  // Opaque front to back
         ctx.attributes = &m_vertexData;
         // ctx.
         engine.submitRender(std::move(ctx));
     }
 
-    else if (pass == 2) { // Transparent back to front
+    else if (pass == 2) {  // Transparent back to front
         ctx.attributes = &m_vertexData;
         // ctx.
         engine.submitRender(std::move(ctx));

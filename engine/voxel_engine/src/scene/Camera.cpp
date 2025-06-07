@@ -10,9 +10,15 @@ Camera::Camera(ProjectionType type, CameraOptions opts)
       m_position(0),
       m_yaw(-90.0f),
       m_pitch(0.0f) {
-
-    if(type == ProjectionType::Orthographic) {
-        m_projection = glm::ortho(-opts.orthoWidth/2, opts.orthoWidth/2, -opts.orthoHeight/2, opts.orthoHeight/2, opts.zNear, opts.zFar);
+    if (type == ProjectionType::Orthographic) {
+        m_projection = glm::ortho(
+            -opts.orthoWidth / 2,
+            opts.orthoWidth / 2,
+            -opts.orthoHeight / 2,
+            opts.orthoHeight / 2,
+            opts.zNear,
+            opts.zFar
+        );
     } else {
         m_projection = glm::perspective(opts.fov, opts.aspectRatio, opts.zNear, opts.zFar);
     }

@@ -6,8 +6,8 @@
 #include <vector>
 
 #include "../../Globals.h"
-#include "VertexLayout.h"
 #include "IAttributes.h"
+#include "VertexLayout.h"
 
 
 namespace {
@@ -58,9 +58,7 @@ namespace gl {
         void bind() override;
         size_t length() const override { return m_elements; }
         size_t stride() const override { return VertexT::layout().stride; }
-        const void* data() const override {
-            return m_data.data();
-        }
+        const void* data() const override { return m_data.data(); }
 
         std::vector<VertexT>& vertexData() { return m_data; }
 
@@ -86,10 +84,11 @@ namespace gl {
         bool m_dirty = true;
 
         /// @param stride If tightly packed then should be equal to size
-        void registerAttribute(uint32_t loc, uint32_t size, GLenum type, uint32_t stride, uint32_t offset) const;
+        void registerAttribute(
+            uint32_t loc, uint32_t size, GLenum type, uint32_t stride, uint32_t offset
+        ) const;
     };
 }  // namespace gl
-
 
 
 template <gl::VertexType VertexT>
@@ -112,9 +111,7 @@ void gl::Attributes<VertexT>::create() {
 
     VertexLayout layout = VertexT::layout();
     for (auto& attr : layout.attributes) {
-        registerAttribute(
-            attr.location, attr.size, getType(attr.type), layout.stride, attr.offset
-        );
+        registerAttribute(attr.location, attr.size, getType(attr.type), layout.stride, attr.offset);
     }
 }
 
@@ -132,11 +129,7 @@ void gl::Attributes<VertexT>::bind() {
 
 template <gl::VertexType VertexT>
 void gl::Attributes<VertexT>::registerAttribute(
-    uint32_t loc, 
-    uint32_t size, 
-    GLenum type, 
-    uint32_t stride, 
-    uint32_t offset
+    uint32_t loc, uint32_t size, GLenum type, uint32_t stride, uint32_t offset
 ) const {
     GL_GUARD
     auto typeSize = sizeOfType(type);

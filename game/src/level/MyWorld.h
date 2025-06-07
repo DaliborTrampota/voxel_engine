@@ -3,8 +3,7 @@
 #include <level/World.h>
 #include <render/RenderContext.h>
 
-namespace engine
-{
+namespace engine {
     class Engine;
 }
 
@@ -12,10 +11,10 @@ namespace engine
 class Player;
 
 class MyWorld : public engine::World {
-    public:
-        void render(engine::Engine& engine, int pass = 0) override;
-        void setPlayer(std::shared_ptr<Player> player);
+  public:
+    void render(engine::Engine& engine, int pass = 0) override;
+    void setPlayer(std::shared_ptr<Player> player);
 
-    private:
-        std::shared_ptr<Player> m_player;
+  private:
+    std::shared_ptr<Player> m_player;
 };

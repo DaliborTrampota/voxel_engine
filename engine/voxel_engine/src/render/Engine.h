@@ -38,9 +38,9 @@ namespace engine {
         gl::Window* window() const { return m_window.get(); }
 
 
-        protected:
-            std::vector<RenderContext> m_renderQueue;
-            
+      protected:
+        std::vector<RenderContext> m_renderQueue;
+
       private:
         std::unique_ptr<gl::Window> m_window;
         std::deque<std::weak_ptr<Updateable>>

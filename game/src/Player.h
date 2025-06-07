@@ -5,8 +5,8 @@
 #include <thread>
 
 #include <Controls.h>
-#include <scene/Updateable.h>
 #include <physics/AABBCollider.h>
+#include <scene/Updateable.h>
 
 namespace engine {
     class World;

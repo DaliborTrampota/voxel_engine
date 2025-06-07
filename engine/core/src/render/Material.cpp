@@ -12,7 +12,8 @@ gl::Material::Material(
     const std::string& geometryPath,
     const std::string& fragmentPath,
     std::string name
-) : m_name(std::move(name)) {
+)
+    : m_name(std::move(name)) {
     GL_GUARD
     m_id = glCreateProgram();
 
@@ -24,9 +25,7 @@ gl::Material::Material(
     link();
 }
 gl::Material::Material(
-    const std::string& vertexPath,
-    const std::string& fragmentPath,
-    std::string name
+    const std::string& vertexPath, const std::string& fragmentPath, std::string name
 )
     : m_name(std::move(name)) {
     GL_GUARD

@@ -2,9 +2,9 @@
 
 #include <glm/glm.hpp>
 
+#include <thread>
 #include <unordered_map>
 #include <vector>
-#include <thread>
 
 #include "block/Block.h"
 #include "block/BlockData.h"

@@ -9,14 +9,14 @@ using namespace gl;
 namespace {
     constexpr GLenum shaderTypeToGL(ShaderType type) {
         switch (type) {
-            case ShaderType::Vertex:   return GL_VERTEX_SHADER;
+            case ShaderType::Vertex: return GL_VERTEX_SHADER;
             case ShaderType::Fragment: return GL_FRAGMENT_SHADER;
             case ShaderType::Geometry: return GL_GEOMETRY_SHADER;
-            case ShaderType::Compute:  return GL_COMPUTE_SHADER;
-            default:                   return GL_NONE; // Invalid type
+            case ShaderType::Compute: return GL_COMPUTE_SHADER;
+            default: return GL_NONE;  // Invalid type
         }
     }
-}
+}  // namespace
 
 Shader::Shader(const char* path, ShaderType type) {
     GL_GUARD

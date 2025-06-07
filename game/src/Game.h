@@ -6,8 +6,8 @@
 #include <core/gl/GLEventSite.h>
 #include <core/gl/UBO.h>
 
-#include <render/Engine.h>
 #include <InputSystem.h>
+#include <render/Engine.h>
 
 #include "Player.h"
 #include "WorldManager.h"
