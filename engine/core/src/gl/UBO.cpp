@@ -48,7 +48,8 @@ constexpr size_t gl::alignmentFor(Type type) {
 }
 
 constexpr size_t gl::alignTo(size_t offset, size_t alignment) {
-    return (offset + alignment - 1) & ~(alignment - 1); // same as ((offset + alignment - 1) / alignment) * alignment
+    return (offset + alignment - 1) &
+           ~(alignment - 1);  // same as ((offset + alignment - 1) / alignment) * alignment
 }
 
 constexpr size_t gl::sizeFor(Type type) {
@@ -139,7 +140,10 @@ void UBO::bindToProgram(unsigned int programID) const {
     GL_GUARD
     unsigned int blockIndex = glGetUniformBlockIndex(programID, m_blockName.c_str());
     if (blockIndex == GL_INVALID_INDEX) {
-        printf("UBO::bindToProgram: uniform block \"%s\" not found or not active!\n", m_blockName.c_str());
+        printf(
+            "UBO::bindToProgram: uniform block \"%s\" not found or not active!\n",
+            m_blockName.c_str()
+        );
         return;
     }
     glUniformBlockBinding(programID, blockIndex, m_bindingPoint);
@@ -164,5 +168,5 @@ void UBO::setData(const void* data) const {
     GL_GUARD
     glBindBuffer(GL_UNIFORM_BUFFER, m_id);
     glBufferData(GL_UNIFORM_BUFFER, m_size, data, GL_STATIC_DRAW);
-    glBindBuffer(GL_UNIFORM_BUFFER, m_bindingPoint); 
+    glBindBuffer(GL_UNIFORM_BUFFER, m_bindingPoint);
 }

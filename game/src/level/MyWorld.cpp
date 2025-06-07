@@ -5,6 +5,7 @@
 #include "level/Chunk.h"
 
 #include <render/Engine.h>
+#include <algorithm>
 #include <glm/gtx/norm.hpp>
 
 using namespace engine;
