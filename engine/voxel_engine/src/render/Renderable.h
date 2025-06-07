@@ -5,6 +5,7 @@ namespace engine {
 
     struct RenderContext;
     class Engine;
+    class Camera;
 
     class Renderable {
       public:
@@ -26,6 +27,6 @@ namespace engine {
         /// @param pass Number indicating the pass, if you need multiple passes for rendering.
         /// @note The render pass has to be set by the caller of this method.
         /// @note The render context has to be filled with the necessary data for rendering.
-        virtual void render(Engine& engine, int pass = 0) = 0;
+        virtual void render(Engine& engine, const Camera* camera, int pass = 0) = 0;
     };
 }  // namespace engine

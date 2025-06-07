@@ -28,6 +28,16 @@ namespace gl::texture {
                 Linear,
             };
         }
+
+        static Settings Cubemap() {
+            return {
+                ClampToEdge,
+                ClampToEdge,
+                ClampToEdge,
+                Linear,
+                Linear,
+            };
+        }
     };
 
     struct ArraySettings : public Settings {

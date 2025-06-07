@@ -11,6 +11,7 @@
 #include "ThreadPool.h"
 #include "block/Vertex.h"
 #include "render/Renderable.h"
+#include "scene/Skybox.h"
 
 #include <core/render/Material.h>
 
@@ -59,14 +60,17 @@ namespace engine {
         const std::unordered_set<ChunkID>& loadedChunks() const { return m_loadedChunks; }
 
 
-        virtual void render(Engine& engine, int pass = 0) override;
+        virtual void render(Engine& engine, const Camera* camera, int pass = 0) override;
         const gl::Material& getMaterial() const { return m_material; }
+        Skybox& getSkybox() { return m_skybox; }
 
       protected:
         std::unordered_map<ChunkID, Chunk*> m_chunks;
         std::unordered_set<ChunkID> m_loadedChunks;
         std::unique_ptr<ITerrainGenerator> m_generator = nullptr;
         gl::Material m_material;
+
+        Skybox m_skybox;
 
         ThreadPool m_genPool;
 

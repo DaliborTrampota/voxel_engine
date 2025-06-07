@@ -12,7 +12,7 @@ class Player;
 
 class MyWorld : public engine::World {
   public:
-    void render(engine::Engine& engine, int pass = 0) override;
+    void render(engine::Engine& engine, const engine::Camera* camera, int pass = 0) override;
     void setPlayer(std::shared_ptr<Player> player);
 
   private:
