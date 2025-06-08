@@ -1,10 +1,12 @@
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp src/*.h)
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/src" PREFIX "Source Files" FILES ${SOURCES})
 
+
 add_executable(Game WIN32 ${SOURCES})
 if(WIN32)
     target_link_options(Game PRIVATE "/SUBSYSTEM:CONSOLE")
 endif()
+
 target_link_libraries(Game PRIVATE VoxelEngine)
 
 add_custom_command(TARGET Game POST_BUILD

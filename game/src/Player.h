@@ -5,8 +5,8 @@
 #include <thread>
 
 #include <Controls.h>
-#include <Updateable.h>
 #include <physics/AABBCollider.h>
+#include <scene/Updateable.h>
 
 namespace engine {
     class World;
@@ -30,6 +30,7 @@ class Player : public engine::Updateable {
     void rotate(float dx, float dy, bool constrainPitch = true);
 
     engine::Camera* getCamera() { return m_camera.get(); }
+    glm::vec3 position() const { return m_position; }
 
   private:
     glm::vec3 m_velocity{0, 0, 0};

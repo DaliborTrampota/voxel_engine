@@ -9,6 +9,14 @@
 
 namespace engine {
 
+    struct CameraOptions {
+        float zNear = 0.1f, zFar = 10000.0f;
+        float fov = glm::radians(45.0f);
+        float aspectRatio;
+        float orthoWidth;
+        float orthoHeight;
+    };
+
     class Camera {
       public:
         enum class ProjectionType {
@@ -16,8 +24,7 @@ namespace engine {
             Orthographic
         };
 
-        Camera();
-        Camera(ProjectionType type);
+        Camera(ProjectionType type, CameraOptions opts);
 
         void position(const glm::vec3& pos) { m_position = pos; }
         const glm::vec3& position() const { return m_position; }

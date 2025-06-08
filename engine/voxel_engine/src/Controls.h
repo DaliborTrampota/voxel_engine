@@ -13,6 +13,7 @@ namespace engine {
 
     // When adding new key, add glfw conversion to InputSystem.cpp
     enum Key {
+        Unknown = -1,
         Esc,
         Space,
         LShift,

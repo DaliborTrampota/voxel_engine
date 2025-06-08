@@ -18,6 +18,10 @@ option(USE_DEPENDENCIES "Configure with dependencies" ON)
 if(USE_DEPENDENCIES)
     add_subdirectory(dependencies)
 endif()
+
+
+set(PROJECT_RUNTIME_OUTPUT_DIR "${CMAKE_BINARY_DIR}/Game/$<CONFIG>")
+
 add_subdirectory(engine)
 add_subdirectory(game)
 add_subdirectory(tests)

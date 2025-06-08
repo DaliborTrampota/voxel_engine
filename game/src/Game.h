@@ -4,10 +4,10 @@
 #include <unordered_map>
 
 #include <core/gl/GLEventSite.h>
-#include <core/gl/ShaderPipeline.h>
+#include <core/gl/UBO.h>
 
-#include <Engine.h>
 #include <InputSystem.h>
+#include <render/Engine.h>
 
 #include "Player.h"
 #include "WorldManager.h"
@@ -46,7 +46,8 @@ class Game : public engine::Engine {
   private:
     std::unique_ptr<InputSystem> m_inputSystem;
     MouseState m_mouseState;
-    gl::ShaderPipeline m_pipeline;
+
+    gl::UBO m_commonUBO;
 
     std::shared_ptr<Player> m_player;
     Camera* m_plrCamera;

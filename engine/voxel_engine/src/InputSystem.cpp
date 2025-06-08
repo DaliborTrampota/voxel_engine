@@ -21,7 +21,7 @@ namespace {
             case GLFW_KEY_L: return Key::L;
             case GLFW_KEY_LEFT_SHIFT: return Key::LShift;
         }
-        return Key::Esc;
+        return Key::Unknown;
     }
 
     constexpr int toGLFW(Key key) {
@@ -36,7 +36,7 @@ namespace {
             case Key::L: return GLFW_KEY_L;
             case Key::LShift: return GLFW_KEY_LEFT_SHIFT;
         }
-        return GLFW_KEY_ESCAPE;
+        return GLFW_KEY_UNKNOWN;
     }
 }  // namespace
 

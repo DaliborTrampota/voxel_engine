@@ -21,8 +21,7 @@
 using namespace engine;
 
 Player::Player()
-    : m_camera(std::make_unique<Camera>(Camera::ProjectionType::Perspective)),
-      m_currentChunk(nullptr),
+    : m_currentChunk(nullptr),
       m_position(0, 0, 0),
       m_aabb(
           std::make_shared<AABB>(AABB({
@@ -30,7 +29,12 @@ Player::Player()
               glm::vec3(0.4f, 1.8f, 0.4f),
           }))
       ),
-      m_collider(m_aabb, 0.5f) {}
+      m_collider(m_aabb, 0.5f) {
+    CameraOptions opts;
+    opts.fov = glm::radians(45.0f);
+    opts.aspectRatio = 800.0f / 600.0f;
+    m_camera = std::make_unique<Camera>(Camera::ProjectionType::Perspective, opts);
+}
 
 Player::~Player() {
     if (m_viewDistThread.joinable())

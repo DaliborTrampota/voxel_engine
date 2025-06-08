@@ -2,14 +2,17 @@
 
 #include <glm/glm.hpp>
 #include <memory>
+#include <shared_mutex>
 #include <unordered_map>
 #include <unordered_set>
 
 #include "Chunk.h"
 #include "ITerrainGenerator.h"
 #include "ThreadPool.h"
+#include "block/Vertex.h"
+#include "render/Renderable.h"
 
-#include <shared_mutex>
+#include <core/render/Material.h>
 
 namespace gl {
     class ShaderPipeline;
@@ -19,9 +22,11 @@ namespace engine {
     static inline constexpr BlockID INVALID_BLOCK = -1;
 
     class Chunk;
+    class Engine;
     struct ChunkID;
+    struct RenderContext;
 
-    class World {
+    class World : public Renderable {
       public:
         World(std::unique_ptr<ITerrainGenerator> gen, uint32_t genThreads = 8);
         ~World();
@@ -53,16 +58,22 @@ namespace engine {
 
         const std::unordered_set<ChunkID>& loadedChunks() const { return m_loadedChunks; }
 
-      private:
+
+        virtual void render(Engine& engine, int pass = 0) override;
+        const gl::Material& getMaterial() const { return m_material; }
+
+      protected:
         std::unordered_map<ChunkID, Chunk*> m_chunks;
         std::unordered_set<ChunkID> m_loadedChunks;
         std::unique_ptr<ITerrainGenerator> m_generator = nullptr;
+        gl::Material m_material;
 
         ThreadPool m_genPool;
 
         friend class Chunk;
         friend class Engine;
 
+      private:
         void createChunk(ChunkID id, bool load);
     };
 

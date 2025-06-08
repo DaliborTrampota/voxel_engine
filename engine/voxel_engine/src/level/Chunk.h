@@ -1,14 +1,17 @@
 #pragma once
 
 #include <glm/glm.hpp>
+
+#include <thread>
 #include <unordered_map>
 #include <vector>
 
-#include <block/Block.h>
-#include <block/BlockData.h>
-#include <core/gl/Attributes.h>
+#include "block/Block.h"
+#include "block/BlockData.h"
+#include "render/Renderable.h"
 
-#include <thread>
+#include <core/gl/geometry/Attributes.h>
+
 
 namespace gl {
     class ShaderPipeline;
@@ -17,6 +20,8 @@ namespace gl {
 namespace engine {
 
     class World;
+    class Engine;
+    struct RenderContext;
 
     using T = unsigned int;
     using VoxelData = std::vector<std::vector<std::vector<T>>>;
@@ -31,7 +36,7 @@ namespace engine {
     };
 
 
-    class Chunk {
+    class Chunk : public Renderable {
       public:
         static inline glm::ivec3 Dims{16, 16, 16};
 
@@ -57,6 +62,11 @@ namespace engine {
 
         /// @return 3D vector of the block data.
         VoxelData& data() { return m_data; }
+
+
+        /// @brief Renders the chunk.
+        /// @param pass Pass == 0 will render the whole chunk, pass == 1 will render opaque blocks, pass == 2 will render transparent blocks.
+        void render(Engine& engine, int pass) override;
 
       private:
         World* m_world;
