@@ -10,7 +10,7 @@
 #include "VertexLayout.h"
 
 
-namespace {
+namespace { // todo outside header
     constexpr GLsizei sizeOfType(GLenum type) {
         switch (type) {
             case GL_BYTE:
