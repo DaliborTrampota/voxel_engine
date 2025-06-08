@@ -130,7 +130,7 @@ void UBO::create() {
     glGenBuffers(1, &m_id);
     glBindBuffer(GL_UNIFORM_BUFFER, m_id);
     glBufferData(GL_UNIFORM_BUFFER, m_size, nullptr, GL_STATIC_DRAW);
-    glBindBuffer(GL_UNIFORM_BUFFER, m_bindingPoint);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);  // unbind
 
     glBindBufferRange(GL_UNIFORM_BUFFER, m_bindingPoint, m_id, 0, m_size);
     printf("UBO %s created with ID %d, size %zu bytes\n", m_blockName.c_str(), m_id, m_size);
@@ -160,7 +160,7 @@ void UBO::setSubData(size_t index, const void* data) {
 
     size_t offset = layoutSize(std::vector<Type>(m_layout.begin(), m_layout.begin() + index));
     glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeFor(m_layout[index]), data);
-    glBindBuffer(GL_UNIFORM_BUFFER, m_bindingPoint);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 
@@ -168,5 +168,5 @@ void UBO::setData(const void* data) const {
     GL_GUARD
     glBindBuffer(GL_UNIFORM_BUFFER, m_id);
     glBufferData(GL_UNIFORM_BUFFER, m_size, data, GL_STATIC_DRAW);
-    glBindBuffer(GL_UNIFORM_BUFFER, m_bindingPoint);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }

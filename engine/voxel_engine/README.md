@@ -18,7 +18,7 @@
 |---------------------------|----------------------------------------------------------------------------------|
 | `<data/Registry.h>`       | Provides the `Registry` class for registering and managing anything.           |
 | `<data/RegistryManager.h>`| Offers the `RegistryManager` class to handle multiple registries. By default, blocks and geometries |
-| `<data/TextureLoader.h>`  | Loads a directory into a openGL texture array or sampler2DArray and adds them to TextureManager                   |
+| `<data/TextureLoader.h>`  | Loads a directory into a OpenGL texture array or sampler2DArray and adds them to TextureManager                   |
 | `<data/TextureManager.h>` | Holds loaded textures to obtain texture index by its name.         |
 
 ```cpp
