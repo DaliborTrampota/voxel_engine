@@ -20,4 +20,4 @@ namespace gl::texture {
         unsigned int m_layer = 0;
         unsigned int m_maxLayers = 0;
     };
-}  // namespace gl
+}  // namespace gl::texture

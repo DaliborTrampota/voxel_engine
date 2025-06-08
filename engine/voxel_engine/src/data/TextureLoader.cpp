@@ -5,9 +5,9 @@
 #include <vector>
 
 #define STB_IMAGE_IMPLEMENTATION
+#include <core/texture/ImageData.h>
 #include <glad/glad.h>
 #include <tools/stb_image.h>
-#include <core/texture/ImageData.h>
 
 #include "data/TextureManager.h"
 
@@ -48,7 +48,7 @@ void TextureLoader::load(const char* path, gl::texture::ArraySettings settings) 
         printf("No valid images found in %s\n", path);
         return;
     }
-    
+
 
     settings.layers = images.size();
     settings.width = width;

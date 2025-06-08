@@ -74,7 +74,7 @@ namespace gl::texture {
         Buffer
     };
 
-    
+
     enum class CubeFace {
         Right = 0,
         Left,
@@ -89,17 +89,17 @@ namespace gl::texture {
     using Data = unsigned char*;
 
     class TextureBase {
-        public:
-            TextureBase(UInt unit, Type type);
-            virtual ~TextureBase();
+      public:
+        TextureBase(UInt unit, Type type);
+        virtual ~TextureBase();
 
-            UInt id() const { return m_id; }
-            void bind() const;
-            void unbind() const;
+        UInt id() const { return m_id; }
+        void bind() const;
+        void unbind() const;
 
-        protected:
-            UInt m_id = 0;
-            UInt m_unit = 0;
-            Type m_type;  // OpenGL texture type (e.g., GL_TEXTURE_2D)
+      protected:
+        UInt m_id = 0;
+        UInt m_unit = 0;
+        Type m_type;  // OpenGL texture type (e.g., GL_TEXTURE_2D)
     };
-}
+}  // namespace gl::texture

@@ -1,6 +1,6 @@
 #include "CubeMap.h"
-#include "TexturePrivate.h"
 #include "ImageData.h"
+#include "TexturePrivate.h"
 
 #include <glad/glad.h>
 
@@ -14,24 +14,16 @@ void CubeMap::create(Settings setting) {
 }
 
 void CubeMap::loadFace(CubeFace face, const gl::ImageData& data) {
-    if(data.width != data.height)
+    if (data.width != data.height)
         throw std::runtime_error("Cube map face must be square");
 
     m_width = data.width;
     m_channels = data.channels;
 
-    Data2D(
-        toGLCubeFace(face),
-        data.width,
-        data.height,
-        data.format,
-        data.data
-    );
+    Data2D(toGLCubeFace(face), data.width, data.height, data.format, data.data);
 }
 
-void CubeMap::loadFaceRaw(
-    CubeFace face, int w, int ch, gl::ImageFormat format, Data data
-) {
+void CubeMap::loadFaceRaw(CubeFace face, int w, int ch, gl::ImageFormat format, Data data) {
     if (w <= 0 || ch <= 0)
         throw std::runtime_error("Width and height must be greater than zero");
 

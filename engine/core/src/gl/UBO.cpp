@@ -160,7 +160,7 @@ void UBO::setSubData(size_t index, const void* data) {
 
     size_t offset = layoutSize(std::vector<Type>(m_layout.begin(), m_layout.begin() + index));
     glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeFor(m_layout[index]), data);
-    glBindBuffer(GL_UNIFORM_BUFFER, m_bindingPoint); 
+    glBindBuffer(GL_UNIFORM_BUFFER, m_bindingPoint);
 }
 
 

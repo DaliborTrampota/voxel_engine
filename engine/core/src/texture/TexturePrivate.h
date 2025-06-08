@@ -1,5 +1,5 @@
-#include "TextureBase.h"
 #include "ImageData.h"
+#include "TextureBase.h"
 
 #include <glad/glad.h>
 
@@ -46,7 +46,7 @@ namespace gl::texture {
         }
         return GL_NONE;  // Should not happen
     }
-    
+
     constexpr GLenum toGLInternalFormat(gl::ImageFormat format) {
         switch (format) {
             case gl::ImageFormat::RGB: return GL_RGB8;
@@ -73,7 +73,16 @@ namespace gl::texture {
     void ConfigureTexture(GLenum type, const Settings& settings);
     void Data1D(GLenum type, int width, gl::ImageFormat format, unsigned char* data);
     void Data2D(GLenum type, int width, int height, gl::ImageFormat format, unsigned char* data);
-    void Data3D(GLenum type, int width, int height, int depth, gl::ImageFormat format, unsigned char* data);
-    void SubData3D(GLenum type, int layer, int width, int height, int depth, gl::ImageFormat format, unsigned char* data);
-}  // namespace gl
-
+    void Data3D(
+        GLenum type, int width, int height, int depth, gl::ImageFormat format, unsigned char* data
+    );
+    void SubData3D(
+        GLenum type,
+        int layer,
+        int width,
+        int height,
+        int depth,
+        gl::ImageFormat format,
+        unsigned char* data
+    );
+}  // namespace gl::texture

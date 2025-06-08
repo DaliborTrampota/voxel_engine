@@ -1,15 +1,15 @@
 #include "Texture1D.h"
-#include "TexturePrivate.h"
 #include "ImageData.h"
+#include "TexturePrivate.h"
 
-#include <stdexcept>
 #include <format>
+#include <stdexcept>
 
 using namespace gl::texture;
 
 
 void Texture1D::create(Settings settings) {
-    if(m_id != 0)
+    if (m_id != 0)
         throw std::runtime_error("Texture1D already created");
 
     glGenTextures(1, &m_id);
@@ -23,12 +23,7 @@ void Texture1D::load(const gl::ImageData& imageData) {
     m_width = imageData.width;
     m_channels = imageData.channels;
 
-    Data1D(
-        GL_TEXTURE_1D,
-        imageData.width,
-        imageData.format,
-        imageData.data
-    );
+    Data1D(GL_TEXTURE_1D, imageData.width, imageData.format, imageData.data);
     // glTexImage1D(
     //     GL_TEXTURE_1D,
     //     0,                 // mipmap level
@@ -47,8 +42,8 @@ void Texture1D::loadRaw(int w, int ch, gl::ImageFormat format, Data data) {
 
     Data1D(
         GL_TEXTURE_1D,
-        w,                 // width of the texture
-        format,           // format of the input data
-        data              // data pointer (null = reserve space only)
+        w,       // width of the texture
+        format,  // format of the input data
+        data     // data pointer (null = reserve space only)
     );
 }

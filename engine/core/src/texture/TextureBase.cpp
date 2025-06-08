@@ -15,5 +15,9 @@ TextureBase::~TextureBase() {
     glDeleteTextures(1, &m_id);
 }
 
-void TextureBase::bind() const { glBindTexture(toGLType(m_type), m_id); }
-void TextureBase::unbind() const { glBindTexture(toGLType(m_type), 0); }
+void TextureBase::bind() const {
+    glBindTexture(toGLType(m_type), m_id);
+}
+void TextureBase::unbind() const {
+    glBindTexture(toGLType(m_type), 0);
+}

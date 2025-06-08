@@ -1,6 +1,6 @@
 #include "TextureArray.h"
-#include "TexturePrivate.h"
 #include "ImageData.h"
+#include "TexturePrivate.h"
 
 #include <format>
 #include <stdexcept>
@@ -15,9 +15,9 @@ void TextureArray::create(ArraySettings setting) {
     glGenTextures(1, &m_id);
     glActiveTexture(GL_TEXTURE0 + m_unit);
     glBindTexture(GL_TEXTURE_2D_ARRAY, m_id);
-    
+
     ConfigureTexture(GL_TEXTURE_2D_ARRAY, setting);
-    
+
     m_maxLayers = setting.layers;
     m_format = setting.format;
     m_width = setting.width;
@@ -25,13 +25,12 @@ void TextureArray::create(ArraySettings setting) {
 
     Data3D(
         GL_TEXTURE_2D_ARRAY,
-        setting.width,           // width of each 2D layer
-        setting.height,          // height of each 2D layer
-        setting.layers,          // number of layers
-        setting.format,          // format of the input data
-        nullptr                 // data pointer (null = reserve space only)
+        setting.width,   // width of each 2D layer
+        setting.height,  // height of each 2D layer
+        setting.layers,  // number of layers
+        setting.format,  // format of the input data
+        nullptr          // data pointer (null = reserve space only)
     );
-
 }
 int TextureArray::load(const gl::ImageData& imageData, int layer) {
     if (imageData.width != m_width || imageData.height != m_height)
@@ -39,12 +38,16 @@ int TextureArray::load(const gl::ImageData& imageData, int layer) {
             std::format("Image data size does not match texture size: ({}, {})", m_width, m_height)
         );
 
-    if (imageData.format != m_format) // todo compatible formats?
-        throw std::runtime_error("Image format is different from the one provided when creating this instance");
+    if (imageData.format != m_format)  // todo compatible formats?
+        throw std::runtime_error(
+            "Image format is different from the one provided when creating this instance"
+        );
 
 
     if (m_layer == -1 && layer == -1) {
-        throw std::runtime_error("Layer must be specified after loading with manual layer management.");
+        throw std::runtime_error(
+            "Layer must be specified after loading with manual layer management."
+        );
     }
 
     int targetLayer = (layer == -1) ? m_layer++ : layer;

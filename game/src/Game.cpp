@@ -48,8 +48,6 @@ void Game::render(double dt) {
     world->render(*this, m_plrCamera);
 
     world->getSkybox().render(*this, m_plrCamera);
-
-
 }
 
 void Game::start() {

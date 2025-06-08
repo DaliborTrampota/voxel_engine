@@ -27,7 +27,7 @@ namespace {
         1.0f,  -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f, 1.0f
     };
     constexpr int size = sizeof(skyboxVertices) / sizeof(float);
-}
+}  // namespace
 
 Skybox::Skybox(unsigned int unit)
     : gl::texture::CubeMap(unit),
@@ -35,14 +35,17 @@ Skybox::Skybox(unsigned int unit)
           "resources/shaders/SkyboxVert.glsl", "resources/shaders/SkyboxFrag.glsl", "Skybox"
       ) {
     m_attributes.create();
-    m_attributes.reserve(size / 3); // 3 floats per vertex
+    m_attributes.reserve(size / 3);  // 3 floats per vertex
     for (int i = 0; i < size; i += 3) {
-        m_attributes.add(glm::vec3(skyboxVertices[i], skyboxVertices[i + 1], skyboxVertices[i + 2]));
+        m_attributes.add(
+            glm::vec3(skyboxVertices[i], skyboxVertices[i + 1], skyboxVertices[i + 2])
+        );
     }
 }
 
 void Skybox::render(Engine& engine, const Camera* camera, int pass) {
-    if (pass != 0) return; // Only render in the first pass
+    if (pass != 0)
+        return;  // Only render in the first pass
 
     RenderContext ctx;
     ctx.material = &m_material;
