@@ -51,7 +51,7 @@ void Skybox::render(Engine& engine, const Camera* camera, int pass) {
     ctx.material = &m_material;
     ctx.attributes = &m_attributes;
 
-    glDepthMask(GL_FALSE);
+    glDepthFunc(GL_LEQUAL);
     m_material.use();
     m_attributes.bind();
     bind();
@@ -64,5 +64,5 @@ void Skybox::render(Engine& engine, const Camera* camera, int pass) {
     glDrawArrays(GL_TRIANGLES, 0, m_attributes.length());
 
     // engine.submitRender(std::move(ctx));
-    glDepthMask(GL_TRUE);
+    glDepthFunc(GL_LESS);
 }
