@@ -24,8 +24,8 @@ namespace gl::texture {
                 MirroredRepeat,
                 MirroredRepeat,
                 MirroredRepeat,
-                Linear,
-                Linear,
+                Nearest,
+                Nearest,
             };
         }
 
@@ -51,8 +51,8 @@ namespace gl::texture {
                 MirroredRepeat,
                 MirroredRepeat,
                 MirroredRepeat,
-                Linear,
-                Linear,
+                Nearest,
+                Nearest,
             };
         }
     };
