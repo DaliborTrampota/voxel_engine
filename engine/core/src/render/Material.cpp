@@ -81,6 +81,5 @@ bool Material::link() {
         glGetProgramInfoLog(m_id, 512, NULL, infoLog);
         printf("ERROR::SHADER::PROGRAM\n%s", infoLog);
     }
-    printf("Material %s linked successfully %d\n", m_name.c_str(), m_id);
     return success;
 }
