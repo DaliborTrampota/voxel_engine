@@ -1,10 +1,11 @@
 #include "buffer/IBuffer.h"
 
+#include <glad/glad.h>
 #include "../detail/conversions.h"
 #include "Globals.h"
-#include <glad/glad.h>
 
-void gl::IBuffer::registerAttribute(uint32_t loc, uint32_t size, VertexAttribute::Type type, uint32_t stride, uint32_t offset
+void gl::IBuffer::registerAttribute(
+    uint32_t loc, uint32_t size, VertexAttribute::Type type, uint32_t stride, uint32_t offset
 ) {
     GL_GUARD
     GLenum glType = detail::getType(type);

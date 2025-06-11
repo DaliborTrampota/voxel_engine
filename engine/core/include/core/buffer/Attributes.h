@@ -53,13 +53,15 @@ namespace gl {
         // end of IBuffer interface
 
         std::vector<VertexT>& vertexData() { return m_data; }
-        
+
         // TODO make more streamlined with Buffer?
         template <typename... Vals>
-        inline void add(Vals&&... data) { //TODO better naming? and does this work how I think it does?
+        inline void add(
+            Vals&&... data
+        ) {  //TODO better naming? and does this work how I think it does?
             m_data.emplace_back(data...);
             m_dirty = true;
-            if(!hasEBO())
+            if (!hasEBO())
                 m_elements++;
         }
 
@@ -70,7 +72,7 @@ namespace gl {
                 m_elements++;
         }
 
-        
+
         template <typename IndexT>
         void setElements(const std::vector<IndexT>& indices) {
             GL_GUARD
@@ -79,7 +81,9 @@ namespace gl {
 
             glBindVertexArray(m_VAO);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(IndexT), indices.data(), m_drawType);
+            glBufferData(
+                GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(IndexT), indices.data(), m_drawType
+            );
 
             m_elements = indices.size();
         }
@@ -118,8 +122,6 @@ void gl::Attributes<VertexT>::create() {
 
     VertexLayout layout = VertexT::layout();
     for (auto& attr : layout.attributes) {
-        registerAttribute(
-            attr.location, attr.size, attr.type, layout.stride, attr.offset
-        );
+        registerAttribute(attr.location, attr.size, attr.type, layout.stride, attr.offset);
     }
 }

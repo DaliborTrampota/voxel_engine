@@ -33,12 +33,8 @@ namespace gl {
         size_t length() const override { return m_data.size() / m_attr.size; }
         size_t stride() const override { return 0; }
         const void* data() const override { return m_data.data(); }
-        bool hasEBO() const override {
-            return m_EBO != 0;
-        }
-        unsigned int elements() const override {
-            return m_elements;
-        }
+        bool hasEBO() const override { return m_EBO != 0; }
+        unsigned int elements() const override { return m_elements; }
 
         void clear() override {
             m_data.clear();
@@ -73,10 +69,8 @@ namespace gl {
             registerAttribute(m_attr.location, m_attr.size, m_attr.type, 0, m_attr.offset);
         }
 
-        void reserve(int size) {
-            m_data.reserve(size);
-        }
-        
+        void reserve(int size) { m_data.reserve(size); }
+
         template <typename... Vals>
         inline void add(Vals&&... data) {
             m_data.emplace_back(data...);
@@ -96,22 +90,24 @@ namespace gl {
 
             glBindVertexArray(m_VAO);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(IndexT), indices.data(), m_drawType);
+            glBufferData(
+                GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(IndexT), indices.data(), m_drawType
+            );
 
             m_elements = indices.size();
         }
 
-        private:
-            unsigned int m_VAO = 0;
-            unsigned int m_VBO = 0;
-            unsigned int m_EBO = 0;
+      private:
+        unsigned int m_VAO = 0;
+        unsigned int m_VBO = 0;
+        unsigned int m_EBO = 0;
 
-            VertexAttribute m_attr;
+        VertexAttribute m_attr;
 
-            std::vector<T> m_data;
-            bool m_dirty = true;
-            unsigned int m_elements = 0;
+        std::vector<T> m_data;
+        bool m_dirty = true;
+        unsigned int m_elements = 0;
 
-            GLint m_drawType;
+        GLint m_drawType;
     };
-}
+}  // namespace gl

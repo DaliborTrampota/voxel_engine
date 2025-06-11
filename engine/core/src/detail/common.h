@@ -1,8 +1,6 @@
 #pragma once
 
-#include "../../Globals.h"
 #include <glad/glad.h>
+#include "../../Globals.h"
 
-namespace gl::detail {
-
-}
+namespace gl::detail {}
