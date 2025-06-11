@@ -48,7 +48,7 @@ namespace gl {
     template <VertexType VertexT>
     struct Attributes : public IAttributes {
         Attributes(GLint drawType = GL_STATIC_DRAW) : m_drawType(drawType), m_elements(0) {}
-        virtual ~Attributes() = default;
+        virtual ~Attributes();
 
         void create();
         void reserve(int size) { m_data.reserve(size); }
