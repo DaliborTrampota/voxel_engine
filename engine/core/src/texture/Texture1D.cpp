@@ -14,7 +14,7 @@ void Texture1D::create(Settings settings) {
 
     glGenTextures(1, &m_id);
     glActiveTexture(GL_TEXTURE0 + m_unit);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, m_id);
+    glBindTexture(GL_TEXTURE_1D, m_id);
 
     ConfigureTexture(GL_TEXTURE_1D, settings);
 }

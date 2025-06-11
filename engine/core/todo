@@ -3,3 +3,4 @@
 - lights
 - shadows
 - vulcan?
+- texture keep track of bound units and warn if two textures are bound to the same unit at the same time

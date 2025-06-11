@@ -11,7 +11,7 @@ using namespace gl::texture;
 
 void Texture2D::create(Settings settings) {
     if (m_id != 0)
-        throw std::runtime_error("Texture1D already created");
+        throw std::runtime_error("Texture2D already created");
 
     glGenTextures(1, &m_id);
     glActiveTexture(GL_TEXTURE0 + m_unit);
