@@ -6,8 +6,8 @@
 #include <stdexcept>
 
 #include "Globals.h"
-#include "gl/CallbackWrapper.h"
-#include "gl/GLEvents.h"
+#include "../events/CallbackWrapper.h"
+#include "../events/GLEvents.h"
 
 using namespace gl;
 

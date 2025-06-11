@@ -3,7 +3,7 @@
 #include <glm/glm.hpp>
 #include <memory>
 
-#include "gl/GLEventSite.h"
+#include "events/GLEventSite.h"
 
 using namespace engine;
 

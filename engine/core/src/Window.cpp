@@ -1,6 +1,6 @@
 #include "Window.h"
 
-#include "core/gl/GLEvents.h"
+#include "events/GLEvents.h"
 #include "core/gl/GraphicsAPI.h"
 
 #define GLFW_INCLUDE_NONE

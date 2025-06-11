@@ -3,7 +3,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <core/gl/geometry/Attributes.h>
+#include <core/buffer/Attributes.h>
 #include <core/render/Material.h>
 
 #include "World.h"

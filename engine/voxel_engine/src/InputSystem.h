@@ -4,7 +4,7 @@
 #include <cstddef>
 #include "Controls.h"
 
-#include <core/gl/GLEventSite.h>
+#include <core/events/GLEventSite.h>
 
 namespace engine {
 

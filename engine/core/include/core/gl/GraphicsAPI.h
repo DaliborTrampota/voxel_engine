@@ -5,7 +5,7 @@
 
 #include <memory>
 
-#include "GLEventSource.h"
+#include "../events/GLEventSource.h"
 
 struct GLFWwindow;
 
