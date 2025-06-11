@@ -9,13 +9,17 @@
 #include "render/RenderContext.h"
 
 #include <algorithm>
+#include <filesystem>
 #include <mutex>
 #include <queue>
+
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/component_wise.hpp>
 #include <glm/gtx/norm.hpp>
 #include <iostream>
+
+namespace fs = std::filesystem;
 
 using namespace engine;
 
@@ -24,7 +28,18 @@ World::World(std::unique_ptr<ITerrainGenerator> gen, uint32_t genThreads)
       m_genPool(genThreads),
       m_material(
           "resources/shaders/ChunkVert.glsl", "resources/shaders/ChunkFrag.glsl", "ChunkMaterial"
-      ) {
+      ),
+      m_skybox(0) {
+    m_skybox.create(gl::texture::Settings::Cubemap());
+
+    m_skybox.loadFace(gl::texture::CubeFace::Top, gl::ImageData("resources/skybox/top.jpg"));
+    m_skybox.loadFace(gl::texture::CubeFace::Bottom, gl::ImageData("resources/skybox/bottom.jpg"));
+    m_skybox.loadFace(gl::texture::CubeFace::Front, gl::ImageData("resources/skybox/front.jpg"));
+    m_skybox.loadFace(gl::texture::CubeFace::Back, gl::ImageData("resources/skybox/back.jpg"));
+    m_skybox.loadFace(gl::texture::CubeFace::Left, gl::ImageData("resources/skybox/left.jpg"));
+    m_skybox.loadFace(gl::texture::CubeFace::Right, gl::ImageData("resources/skybox/right.jpg"));
+
+
     printf("World created\n");
 }
 
@@ -132,9 +147,9 @@ bool World::checkBlock(glm::vec3 pos, Block& curBlock, glm::ivec3 dir) const {
     return block.getID() == curBlock.getID() || block.isSolid() && curBlock.isSolid();
 }
 
-void World::render(Engine& engine, int pass) {
+void World::render(Engine& engine, const Camera* camera, int pass) {
     for (const ChunkID& pos : m_loadedChunks) {
-        m_chunks[pos]->render(engine, 0);
+        m_chunks[pos]->render(engine, camera, 0);
     }
 }
 

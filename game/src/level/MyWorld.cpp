@@ -10,7 +10,7 @@
 
 using namespace engine;
 
-void MyWorld::render(Engine& engine, int pass) {
+void MyWorld::render(Engine& engine, const Camera* camera, int pass) {
     glm::vec3 playerPos = m_player->position();
     glm::vec3 curChunk = extractChunkCoords(playerPos);
 
@@ -29,7 +29,7 @@ void MyWorld::render(Engine& engine, int pass) {
 
     //std::reverse(renderOrder.begin(), renderOrder.end());
     for (const ChunkID& pos : renderOrder) {
-        m_chunks.at(pos)->render(engine, 0);
+        m_chunks.at(pos)->render(engine, camera, 0);
     }
 }
 

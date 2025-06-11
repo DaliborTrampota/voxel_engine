@@ -2,26 +2,22 @@
 
 #include <string>
 
-#include <core/gl/TextureArray.h>
+#include <core/texture/TextureArray.h>
 
 namespace engine {
 
-    inline constexpr gl::TextureSettings pixelFormat = {
-        gl::TextureSettings::MirroredRepeat,
-        gl::TextureSettings::MirroredRepeat,
-        gl::TextureSettings::Nearest,
-        gl::TextureSettings::Nearest
-    };
-
     class TextureLoader {
       public:
-        TextureLoader(int slot, gl::TextureSettings settings = pixelFormat);
+        TextureLoader(int slot);
 
-        void load(const char* dirPath);
+        void load(
+            const char* dirPath,
+            gl::texture::ArraySettings settings = gl::texture::ArraySettings::Pixelated()
+        );
         void bind() const;
 
       private:
-        gl::TextureArray m_texArray;
+        gl::texture::TextureArray m_texArray;
 
         static std::string getTextureName(const std::string& path);
     };

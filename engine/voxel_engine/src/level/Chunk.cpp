@@ -85,7 +85,7 @@ Block Chunk::getBlock(glm::ivec3 pos) const {
 }
 
 
-void Chunk::render(Engine& engine, int pass) {
+void Chunk::render(Engine& engine, const Camera* camera, int pass) {
     size_t verts = m_vertexData.length();
     if (verts == 0 || !m_generated) {
         true;

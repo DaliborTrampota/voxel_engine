@@ -10,7 +10,7 @@
 #include "VertexLayout.h"
 
 
-namespace {
+namespace {  // todo outside header
     constexpr GLsizei sizeOfType(GLenum type) {
         switch (type) {
             case GL_BYTE:
@@ -47,10 +47,8 @@ namespace gl {
 
     template <VertexType VertexT>
     struct Attributes : public IAttributes {
-        Attributes() = default;
         Attributes(GLint drawType = GL_STATIC_DRAW) : m_drawType(drawType), m_elements(0) {}
-
-        ~Attributes();
+        virtual ~Attributes();
 
         void create();
         void reserve(int size) { m_data.reserve(size); }

@@ -43,8 +43,11 @@ void Game::render(double dt) {
     fireUpdate(dt);
 
     // m_commonUBO.setSubData(1, glm::value_ptr(m_plrCamera->getView()));
-    m_worldManager.activeWorld()->getMaterial().setMat4("view", m_player->getCamera()->getView());
-    m_worldManager.activeWorld()->render(*this);
+    auto world = m_worldManager.activeWorld();
+    world->getMaterial().setMat4("view", m_player->getCamera()->getView());
+    world->render(*this, m_plrCamera);
+
+    world->getSkybox().render(*this, m_plrCamera);
 }
 
 void Game::start() {

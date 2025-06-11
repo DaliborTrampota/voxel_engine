@@ -8,14 +8,15 @@ if(WIN32)
 endif()
 
 target_link_libraries(Game PRIVATE VoxelEngine)
+setup_voxelengine_resource_copy(Game)
 
 add_custom_command(TARGET Game POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_SOURCE_DIR}/game/resources $<TARGET_FILE_DIR:Game>/resources
+        ${CMAKE_CURRENT_SOURCE_DIR}/resources $<TARGET_FILE_DIR:Game>/resources
 )
 add_custom_command(TARGET Game POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_SOURCE_DIR}/game/shaders $<TARGET_FILE_DIR:Game>/shaders
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders $<TARGET_FILE_DIR:Game>/shaders
 )
 set_target_properties(Game PROPERTIES
     VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:Game>"
@@ -31,6 +32,8 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/shaders" PREFIX "Shaders" FILES $
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/resources" PREFIX "Resources" FILES ${RESOURCE_FILES})
 
 target_sources(Game PRIVATE ${RESOURCE_FILES})
+target_sources(Game PRIVATE ${SHADER_FILES})
+
 
 # Shaders
 # file(GLOB_RECURSE SHADER_FILES shaders/*.glsl)
