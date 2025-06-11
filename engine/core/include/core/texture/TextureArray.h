@@ -17,7 +17,7 @@ namespace gl::texture {
         int m_height = 0;
         int m_channels = 0;
         gl::ImageFormat m_format = gl::ImageFormat::Unknown;
-        unsigned int m_layer = 0;
+        int m_layer = 0;
         unsigned int m_maxLayers = 0;
     };
 }  // namespace gl::texture
