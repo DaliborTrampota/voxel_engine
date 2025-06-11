@@ -8,7 +8,6 @@ namespace gl {
 
     template <typename T>
     struct Buffer : public IAttributes {
-
         Buffer(GLint drawType = GL_STATIC_DRAW) : m_drawType(drawType) {}
 
         void create(VertexAttribute attr) {
@@ -27,10 +26,8 @@ namespace gl {
         size_t stride() const override { return 0; }
         const void* data() const override { return m_data.data(); }
 
-        void reserve(int size) {
-            m_data.reserve(size);
-        }
-        
+        void reserve(int size) { m_data.reserve(size); }
+
         template <typename... Vals>
         inline void add(Vals&&... data) {
             m_data.emplace_back(data...);
@@ -42,13 +39,13 @@ namespace gl {
             m_dirty = true;
         }
 
-        private:
-            unsigned int m_VBO = 0;
-            std::vector<T> m_data;
-            int m_stride = 0; // stride in elements
-            VertexAttribute m_attr;
-            GLint m_drawType;
-            bool m_dirty = true;
+      private:
+        unsigned int m_VBO = 0;
+        std::vector<T> m_data;
+        int m_stride = 0;  // stride in elements
+        VertexAttribute m_attr;
+        GLint m_drawType;
+        bool m_dirty = true;
     };
 
     template <typename T>
@@ -61,4 +58,4 @@ namespace gl {
             m_dirty = false;
         }
     }
-}
+}  // namespace gl

@@ -51,15 +51,15 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Cache build directory
-      uses: actions/cache@v3
-      with:
-          path: |
-            ${{ github.workspace }}/build
-            ~/.cache
-          key: ${{ runner.os }}-cmake-${{ hashFiles('**/CMakeLists.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-cmake-
+    # - name: Cache build directory
+    #   uses: actions/cache@v3
+    #   with:
+    #       path: |
+    #         ${{ github.workspace }}/build
+    #         ~/.cache
+    #       key: ${{ runner.os }}-cmake-${{ hashFiles('**/CMakeLists.txt') }}
+    #       restore-keys: |
+    #         ${{ runner.os }}-cmake-
 
 
 
