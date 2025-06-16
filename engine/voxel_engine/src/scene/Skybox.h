@@ -1,6 +1,6 @@
 #pragma once
 
-#include <core/gl/geometry/Attributes.h>
+#include <core/buffer/Buffer.h>
 #include <core/render/Material.h>
 #include <core/texture/CubeMap.h>
 
@@ -8,17 +8,17 @@
 
 namespace engine {
 
-    struct SkyboxVertex {
-        glm::vec3 position;
-        static gl::VertexLayout layout() {
-            return {
-                .stride = sizeof(SkyboxVertex),
-                .attributes = {
-                    {0, gl::VertexAttribute::Type::Float, 3, offsetof(SkyboxVertex, position)}
-                }
-            };
-        };
-    };
+    // struct SkyboxVertex {
+    //     glm::vec3 position;
+    //     static gl::VertexLayout layout() {
+    //         return {
+    //             .stride = sizeof(SkyboxVertex),
+    //             .attributes = {
+    //                 {0, gl::VertexAttribute::Type::Float, 3, offsetof(SkyboxVertex, position)}
+    //             }
+    //         };
+    //     };
+    // };
 
     class Skybox : public gl::texture::CubeMap,
                    public Renderable {
@@ -28,7 +28,8 @@ namespace engine {
         void render(Engine& engine, const Camera* camera, int pass = 0) override;
 
       private:
-        gl::Attributes<SkyboxVertex> m_attributes;
+        // gl::Attributes<SkyboxVertex> m_attributes;
+        gl::Buffer<float> m_buffer;
         gl::Material m_material;
     };
 }  // namespace engine

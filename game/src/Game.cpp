@@ -4,7 +4,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <core/gl/GLEvents.h>
+#include <core/events/GLEvents.h>
 #include <core/gl/GraphicsAPI.h>
 
 #include <data/TextureLoader.h>

@@ -1,8 +1,8 @@
 #include "render/Material.h"
 
 #include <glm/gtc/type_ptr.hpp>
-#include "gl/Shader.h"
-#include "gl/UBO.h"
+#include "buffer/UBO.h"
+#include "render/Shader.h"
 
 using namespace gl;
 

@@ -1,7 +1,7 @@
 #include "Window.h"
 
-#include "core/gl/GLEvents.h"
 #include "core/gl/GraphicsAPI.h"
+#include "events/GLEvents.h"
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
