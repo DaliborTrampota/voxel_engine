@@ -8,10 +8,10 @@ target_link_libraries(VoxelEngine PRIVATE glfw)
 
 target_link_libraries(VoxelEngine PUBLIC glm)
 target_link_libraries(VoxelEngine PUBLIC tools)
-target_link_libraries(VoxelEngine PUBLIC Core)
+target_link_libraries(VoxelEngine PUBLIC LWGL)
 
 
-target_include_directories(VoxelEngine SYSTEM PUBLIC "${PROJECT_SOURCE_DIR}/engine/core/include")
+target_include_directories(VoxelEngine SYSTEM PUBLIC "${PROJECT_SOURCE_DIR}/engine/LWGL/include")
 target_include_directories(VoxelEngine SYSTEM PUBLIC "${PROJECT_SOURCE_DIR}/engine/voxel_engine/src")
 
 

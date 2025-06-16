@@ -3,7 +3,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <core/render/Material.h>
+#include <LWGL/render/Material.h>
 
 #include "level/Chunk.h"
 #include "level/World.h"

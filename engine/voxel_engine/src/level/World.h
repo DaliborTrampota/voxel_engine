@@ -13,7 +13,7 @@
 #include "render/Renderable.h"
 #include "scene/Skybox.h"
 
-#include <core/render/Material.h>
+#include <LWGL/render/Material.h>
 
 namespace gl {
     class ShaderPipeline;

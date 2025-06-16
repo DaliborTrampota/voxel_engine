@@ -1,5 +1,5 @@
-#include <core/Window.h>
-#include <core/gl/GraphicsAPI.h>
+#include <LWGL/Window.h>
+#include <LWGL/gl/GraphicsAPI.h>
 
 #include "Game.h"
 

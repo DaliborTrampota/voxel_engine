@@ -1,8 +1,8 @@
 #pragma once
 
-#include <core/gl/geometry/Attributes.h>
-#include <core/render/Material.h>
-#include <core/texture/CubeMap.h>
+#include <LWGL/gl/geometry/Attributes.h>
+#include <LWGL/render/Material.h>
+#include <LWGL/texture/CubeMap.h>
 
 #include "render/Renderable.h"
 

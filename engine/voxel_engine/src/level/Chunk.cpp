@@ -3,8 +3,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <core/gl/geometry/Attributes.h>
-#include <core/render/Material.h>
+#include <LWGL/gl/geometry/Attributes.h>
+#include <LWGL/render/Material.h>
 
 #include "World.h"
 #include "block/Block.h"

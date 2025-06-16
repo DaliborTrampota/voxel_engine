@@ -5,7 +5,7 @@
 #include <vector>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include <core/texture/ImageData.h>
+#include <LWGL/texture/ImageData.h>
 #include <glad/glad.h>
 #include <tools/stb_image.h>
 

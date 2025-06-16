@@ -3,7 +3,7 @@
 #include <deque>
 #include <memory>
 
-#include <core/Window.h>
+#include <LWGL/Window.h>
 
 #include "RenderContext.h"
 
