@@ -9,7 +9,6 @@ void gl::IBuffer::registerAttribute(
 ) {
     GL_GUARD
     GLenum glType = detail::getType(type);
-    auto typeSize = gl::detail::sizeOfType(glType);
     if (glType == GL_FLOAT)
         glVertexAttribPointer(loc, size, glType, GL_FALSE, stride, (void*)(uintptr_t(offset)));
     else if (glType == GL_INT || glType == GL_UNSIGNED_INT)
