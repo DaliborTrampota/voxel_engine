@@ -6,7 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <LWGL/gl/geometry/IAttributes.h>
+#include <LWGL/buffer/IBuffer.h>
 
 namespace gl {
     class Material;
@@ -17,7 +17,7 @@ namespace engine {
     class Camera;
 
     struct RenderContext {
-        gl::IAttributes* attributes;
+        gl::IBuffer* attributes;
         const gl::Material* material;
         glm::mat4 modelMatrix;
         const Camera* camera = nullptr;

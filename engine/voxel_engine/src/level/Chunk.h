@@ -10,7 +10,7 @@
 #include "block/BlockData.h"
 #include "render/Renderable.h"
 
-#include <LWGL/gl/geometry/Attributes.h>
+#include <LWGL/buffer/Attributes.h>
 
 
 namespace gl {

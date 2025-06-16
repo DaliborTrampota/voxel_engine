@@ -1,6 +1,6 @@
 #pragma once
 
-#include <LWGL/gl/geometry/VertexLayout.h>
+#include <LWGL/buffer/VertexLayout.h>
 #include <glm/glm.hpp>
 
 namespace engine {
