@@ -9,7 +9,7 @@ add_library(tools INTERFACE)
 add_library(glad STATIC glad.c)
 add_subdirectory(glm)
 add_subdirectory(glfw)
-
+add_subdirectory(lwgl)
 
 target_include_directories(tools INTERFACE include/)
 target_include_directories(glad PUBLIC include/)

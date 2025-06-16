@@ -4,6 +4,6 @@
 [submodule "dependencies/glm"]
 	path = dependencies/glm
 	url = https://github.com/g-truc/glm.git
-[submodule "engine/core"]
-	path = engine/core
+[submodule "dependencies/lwgl"]
+	path = dependencies/lwgl
 	url = git@github.com:DaliborTrampota/LWGL.git
