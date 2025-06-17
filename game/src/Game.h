@@ -3,8 +3,8 @@
 #include <deque>
 #include <unordered_map>
 
-#include <core/buffer/UBO.h>
-#include <core/events/GLEventSite.h>
+#include <LWGL/buffer/UBO.h>
+#include <LWGL/events/GLEventSite.h>
 
 #include <InputSystem.h>
 #include <render/Engine.h>
