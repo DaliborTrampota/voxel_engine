@@ -7,6 +7,10 @@
 #include <LWGL/events/GLEvents.h>
 #include <LWGL/gl/GraphicsAPI.h>
 
+#include <UI/Panel.h>
+#include <UI/Renderer.h>
+
+
 #include <data/TextureLoader.h>
 #include <level/World.h>
 #include <scene/Camera.h>
@@ -26,6 +30,9 @@ Game::Game(std::unique_ptr<gl::Window> window, glm::ivec2 dims)
 
     this->window()->graphicsAPI()->subscribe(m_inputSystem.get());
 
+    m_uiManager = std::make_unique<UIManager>(this->window()->size());
+
+
     GameServices::setGame(this);
     GameServices::setInputSystem(m_inputSystem.get());
 }
@@ -44,10 +51,12 @@ void Game::render(double dt) {
 
     // m_commonUBO.setSubData(1, glm::value_ptr(m_plrCamera->getView()));
     auto world = m_worldManager.activeWorld();
+    world->getMaterial().use();
     world->getMaterial().setMat4("view", m_player->getCamera()->getView());
     world->render(*this, m_plrCamera);
 
     world->getSkybox().render(*this, m_plrCamera);
+    m_uiManager->render();
 }
 
 void Game::start() {

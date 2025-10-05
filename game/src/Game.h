@@ -11,9 +11,14 @@
 
 #include "Player.h"
 #include "WorldManager.h"
+#include "ui/UIManager.h"
 
 namespace gl {
     class Window;
+}
+
+namespace ui {
+    class Renderer;
 }
 
 using namespace engine;
@@ -52,4 +57,6 @@ class Game : public engine::Engine {
     std::shared_ptr<Player> m_player;
     Camera* m_plrCamera;
     WorldManager m_worldManager;
+
+    std::unique_ptr<UIManager> m_uiManager;
 };

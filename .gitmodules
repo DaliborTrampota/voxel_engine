@@ -7,3 +7,6 @@
 [submodule "dependencies/lwgl"]
 	path = dependencies/lwgl
 	url = git@github.com:DaliborTrampota/LWGL.git
+[submodule "dependencies/seuil"]
+	path = dependencies/seuil
+	url = https://github.com/DaliborTrampota/SEUIL.git
