@@ -14,13 +14,13 @@ UIManager::UIManager(glm::ivec2 screenSize)
     std::shared_ptr<Panel> mainPanel = std::make_shared<Panel>(
         Pos<Rel, Rel>{0.f, 0.f},
         Size<Rel, Rel>{1.f, 1.f},
-        Style<Panel>{.backgroundColor = {0.f, .0f, .0f, 0.0f}, .roundRadius = 10.f}
+        Style<Panel>{.backgroundColor = {1.f, .0f, .0f, 0.0f}, .roundRadius = 0.f}
     );
 
     std::shared_ptr<Panel> childPanel = std::make_shared<Panel>(
-        Pos<Abs, Rel>{0.f, 0.0f},
+        Pos<Abs, Rel>{0.f, 0.5f},
         Size<Rel, Rel>{0.25f, 0.25f},
-        Style<Panel>{.backgroundColor = {0.f, 1.0f, .0f, 1.f}, .roundRadius = 0.f}
+        Style<Panel>{.backgroundColor = {0.f, 1.0f, .0f, 1.f}, .roundRadius = 50.f}
     );
 
     mainPanel->addChild(childPanel);
