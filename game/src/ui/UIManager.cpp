@@ -18,7 +18,7 @@ UIManager::UIManager(glm::ivec2 screenSize)
     );
 
     std::shared_ptr<Panel> childPanel = std::make_shared<Panel>(
-        Pos<Abs, Rel>{100.f, 0.5f},
+        Pos<Abs, Rel>{0.f, 0.0f},
         Size<Rel, Rel>{0.25f, 0.25f},
         Style<Panel>{.backgroundColor = {0.f, 1.0f, .0f, 1.f}, .roundRadius = 0.f}
     );
@@ -53,10 +53,9 @@ void UIManager::render() {
 
     m_fboShader.use();
 
-    // Disable depth test completely for UI
+    // Disable depth test so UI always renders on top
     glDisable(GL_DEPTH_TEST);
-    glDepthMask(GL_FALSE);  // Don't write to depth buffer
-
+    glDepthMask(GL_FALSE);
 
     glBindVertexArray(m_vaoID);
     glBindBuffer(GL_ARRAY_BUFFER, m_vboID);
@@ -73,6 +72,6 @@ void UIManager::render() {
 
     // Restore OpenGL state
     glDisable(GL_BLEND);
-    glEnable(GL_DEPTH_TEST);  // Re-enable depth test
-    glDepthMask(GL_TRUE);     // Re-enable depth writing
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
 }

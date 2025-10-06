@@ -56,6 +56,10 @@ void Game::render(double dt) {
     world->render(*this, m_plrCamera);
 
     world->getSkybox().render(*this, m_plrCamera);
+}
+
+void Game::afterRender() {
+    // Render UI AFTER flush() so it draws on top of everything
     m_uiManager->render();
 }
 

@@ -47,6 +47,7 @@ class Game : public engine::Engine {
 
     void processInput();
     void render(double dt) override;
+    void afterRender() override;
 
   private:
     std::unique_ptr<InputSystem> m_inputSystem;
