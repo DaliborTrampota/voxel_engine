@@ -7,8 +7,8 @@
 #include <LWGL/events/GLEvents.h>
 #include <LWGL/gl/GraphicsAPI.h>
 
-#include <UI/Panel.h>
 #include <UI/Renderer.h>
+#include <UI/elements/Panel.h>
 
 
 #include <data/TextureLoader.h>
@@ -94,7 +94,7 @@ void Game::start() {
     // m_worldManager.activeWorld()->getMaterial().bindUBO(m_commonUBO);
     // m_worldManager.activeWorld()->getMaterial().setInt("texArray", texSlot);
 
-    gl::Material mat = m_worldManager.activeWorld()->getMaterial();
+    const gl::Material& mat = m_worldManager.activeWorld()->getMaterial();
     mat.use();
     mat.setMat4("projection", m_player->getCamera()->getProjection());
     mat.setMat4("view", m_player->getCamera()->getView());

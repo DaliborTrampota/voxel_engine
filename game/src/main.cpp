@@ -3,6 +3,12 @@
 
 #include "Game.h"
 
+// Force dedicated GPU
+extern "C" {
+__declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;  // for nvidia
+__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;    // for amd
+}
+
 int gameEntry() {
     std::unique_ptr<gl::Window> window =
         std::make_unique<gl::Window>(std::make_unique<gl::GraphicsAPI>());

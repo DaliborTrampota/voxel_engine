@@ -1,6 +1,8 @@
 #include "UIManager.h"
 
-#include <UI/Panel.h>
+#include <UI/elements/Image.h>
+#include <UI/elements/Panel.h>
+
 
 #include <glad/glad.h>
 
@@ -11,19 +13,86 @@ using namespace ui;
 UIManager::UIManager(glm::ivec2 screenSize)
     : m_renderer(RendererType::OpenGL, screenSize),
       m_fboShader("shaders/UI.vert", "shaders/UI.frag", "UI FBO") {
-    std::shared_ptr<Panel> mainPanel = std::make_shared<Panel>(
-        Pos<Rel, Rel>{0.f, 0.f},
-        Size<Rel, Rel>{1.f, 1.f},
-        Style<Panel>{.backgroundColor = {1.f, .0f, .0f, 0.0f}, .roundRadius = 0.f}
-    );
+    std::shared_ptr<Panel> mainPanel =
+        std::make_shared<Panel>(Pos<Rel, Rel>{0.f, 0.f}, Size<Rel, Rel>{1.f, 1.f});
 
     std::shared_ptr<Panel> childPanel = std::make_shared<Panel>(
-        Pos<Abs, Rel>{0.f, 0.5f},
-        Size<Rel, Rel>{0.25f, 0.25f},
-        Style<Panel>{.backgroundColor = {0.f, 1.0f, .0f, 1.f}, .roundRadius = 50.f}
+        Pos<Abs, Rel>{0.f, 0.0f},
+        Size<Rel, Rel>{0.5f, 0.5f},
+        Style<Panel>{
+            .backgroundColor = {0.f, 1.0f, .0f, 0.8f},
+            .roundRadius = 50,
+            .borderThickness = 30,
+            .borderColor = {1.f, 0.f, 1.f}
+        }
     );
 
+    std::shared_ptr<Panel> anchorTest = std::make_shared<Panel>(
+        Pos<Abs, Abs>{100, 50},
+        Size<Rel, Rel>{0.25f, 0.1f},
+        Style<Panel>{
+            .backgroundColor = {.05f, 0.2f, .1f, 0.8f},
+            .roundRadius = 0,
+            .borderThickness = 10,
+            .borderColor = {1.f, 1.f, 1.f}
+        },
+        AnchorPoint::BottomRight
+    );
+    childPanel->addChild(anchorTest);
+
+    std::shared_ptr<Panel> childPanel2 = std::make_shared<Panel>(
+        Pos<Rel, Rel>{0.5f, 0.5f},
+        Size<Rel, Rel>{0.5f, 0.5f},
+        Style<Panel>{
+            .backgroundColor = {.05f, 0.2f, .1f, 0.8f},
+            .roundRadius = 0,
+            .borderThickness = 10,
+            .borderColor = {1.f, 1.f, 1.f}
+        }
+    );
+
+    auto makeAnchorPanel = [&](AnchorPoint pt) {
+        std::shared_ptr<Panel> anchorPanel = std::make_shared<Panel>(
+            Pos<Abs, Abs>{0, 0},
+            Size<Abs, Abs>{50, 50},
+            //Size<Rel, Rel>{0.5f, 0.5f},
+            Style<Panel>{
+                .backgroundColor = {1.f, 0.f, 1.f, 0.8f},
+                .roundRadius = 0,
+                .borderThickness = 10,
+                .borderColor = {1.f, 1.f, 1.f}
+            },
+            pt
+        );
+
+        childPanel2->addChild(anchorPanel);
+    };
+
+    makeAnchorPanel(AnchorPoint::TopLeft);
+    makeAnchorPanel(AnchorPoint::TopRight);
+    makeAnchorPanel(AnchorPoint::BottomLeft);
+    makeAnchorPanel(AnchorPoint::BottomRight);
+    makeAnchorPanel(AnchorPoint::Mid);
+    makeAnchorPanel(AnchorPoint::Top);
+    makeAnchorPanel(AnchorPoint::Bottom);
+    makeAnchorPanel(AnchorPoint::Left);
+    makeAnchorPanel(AnchorPoint::Right);
+
+    std::shared_ptr<Image> image = std::make_shared<Image>(
+        "resources/ui/test.png",
+        Pos<Abs, Abs>{100, 100},
+        Size<Abs, Abs>{500, 500},
+        Style<Image>{.opacity = 0.8f, .pixelated = true},
+        AnchorPoint::BottomLeft
+        // Style<Image>{
+        //     .backgroundColor = {1.f, 1.f, 1.f, 0.8f},
+        // },
+    );
+
+    mainPanel->addChild(image);
+
     mainPanel->addChild(childPanel);
+    mainPanel->addChild(childPanel2);
     m_renderer.setRoot(mainPanel);
 
     m_fboShader.use();
