@@ -1,9 +1,15 @@
 #include "UIManager.h"
 
+#include <UI/elements/Button.h>
 #include <UI/elements/Image.h>
 #include <UI/elements/Panel.h>
+#include <UI/elements/Label.h>
+
+#include <LWGL/events/GLEventSource.h>
+#include <LWGL/events/GLEvents.h>
 
 
+#include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
 
@@ -13,6 +19,36 @@ using namespace ui;
 UIManager::UIManager(glm::ivec2 screenSize)
     : m_renderer(RendererType::OpenGL, screenSize),
       m_fboShader("shaders/UI.vert", "shaders/UI.frag", "UI FBO") {
+    Renderer::registerCursorFunction([](CursorType type) {
+        switch (type) {
+            case CursorType::Pointer:
+                if (s_currentCursor) {
+                    glfwDestroyCursor(s_currentCursor);
+                    s_currentCursor = nullptr;
+                }
+                s_currentCursor = glfwCreateStandardCursor(GLFW_HAND_CURSOR);
+                glfwSetCursor(glfwGetCurrentContext(), s_currentCursor);
+                break;
+            case CursorType::Default:
+                if (s_currentCursor) {
+                    glfwDestroyCursor(s_currentCursor);
+                    s_currentCursor = nullptr;
+                }
+                //s_currentCursor = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+                //glfwSetCursor(glfwGetCurrentContext(), s_currentCursor);
+                break;
+            case CursorType::Type:
+                if (s_currentCursor) {
+                    glfwDestroyCursor(s_currentCursor);
+                    s_currentCursor = nullptr;
+                }
+                s_currentCursor = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
+                glfwSetCursor(glfwGetCurrentContext(), s_currentCursor);
+                break;
+        }
+    });
+
+
     std::shared_ptr<Panel> mainPanel =
         std::make_shared<Panel>(Pos<Rel, Rel>{0.f, 0.f}, Size<Rel, Rel>{1.f, 1.f});
 
@@ -89,7 +125,39 @@ UIManager::UIManager(glm::ivec2 screenSize)
         // },
     );
 
+    using BtnStyle = Style<Button>;
+
+    BtnStyle::State normal{.background{1.f, 0.f, 0.f, 0.8f}, .border{1.f, 1.f, 1.f}};
+    BtnStyle::State hover{.background{1.f, 0.f, 1.f, 0.8f}, .border{0.f, 1.f, 1.f}};
+    BtnStyle::State pressed{.background{0.f, 1.f, 1.f, 0.8f}, .border{0.f, 1.f, 0.f}};
+
+
+    auto btnStyle = Style<Button>{
+        .normal = normal,
+        .hovered = hover,
+        .pressed = pressed,
+        .roundRadius = 20,
+        .borderThickness = 2,
+    };
+
+    std::shared_ptr<Button> button = std::make_shared<Button>(
+        Pos<Abs, Abs>{600, 100}, Size<Abs, Abs>{200, 100}, btnStyle, AnchorPoint::BottomLeft
+    );
+
+    std::shared_ptr<Label> text = std::make_shared<Label>(
+        "Hello world!",
+        Pos<Rel, Rel>{0.f, 0.f},
+        Style<Label>{
+            .color = {1.f, 0.2f, 0.f, 1.f}, .font = "resources/fonts/ARIAL.TTF", .fontSize = 100
+        },
+        AnchorPoint::Mid,
+        AnchorPoint::Top
+    );
+
+
+    mainPanel->addChild(button);
     mainPanel->addChild(image);
+    mainPanel->addChild(text);
 
     mainPanel->addChild(childPanel);
     mainPanel->addChild(childPanel2);
@@ -143,4 +211,37 @@ void UIManager::render() {
     glDisable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
+}
+
+void UIManager::mouseMoveEvent(::MouseEvent* pEvent) {
+    if (pEvent->clearEvent())
+        return;
+    ui::MouseEvent event{
+        .button = ui::MouseBtn::None, .action = ui::Action::Move, .pos = {pEvent->x, pEvent->y}
+    };
+    m_lastMousePos = event.pos;
+
+    m_renderer.mouseEvent(event);
+}
+
+void UIManager::mouseButtonEvent(::MouseButtonEvent* pEvent) {
+    ui::MouseBtn btn;
+    switch (pEvent->button) {
+        case GLFW_MOUSE_BUTTON_LEFT: btn = ui::MouseBtn::LMB; break;
+        case GLFW_MOUSE_BUTTON_RIGHT: btn = ui::MouseBtn::RMB; break;
+        case GLFW_MOUSE_BUTTON_MIDDLE: btn = ui::MouseBtn::Wheel; break;
+        default: btn = ui::MouseBtn::None; break;
+    }
+    ui::Action act;
+    switch (pEvent->action) {
+        case GLFW_PRESS: act = ui::Action::Press; break;
+        case GLFW_RELEASE: act = ui::Action::Release; break;
+    }
+    ui::MouseEvent event{
+        .button = btn,
+        .action = act,
+        .pos = m_lastMousePos,
+    };
+
+    m_renderer.mouseEvent(event);
 }

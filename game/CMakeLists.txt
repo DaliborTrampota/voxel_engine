@@ -9,6 +9,8 @@ endif()
 
 target_link_libraries(Game PRIVATE VoxelEngine)
 target_link_libraries(Game PUBLIC seuil)
+target_link_libraries(Game PUBLIC glfw)
+
 setup_voxelengine_resource_copy(Game)
 setup_seuil_resource_copy(Game)
 
