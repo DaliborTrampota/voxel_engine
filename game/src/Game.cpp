@@ -27,10 +27,10 @@ Game::Game(std::unique_ptr<gl::Window> window, glm::ivec2 dims)
     : Engine(std::move(window)),
       m_mouseState(dims) {
     m_inputSystem = std::make_unique<engine::InputSystem>();
-
     this->window()->graphicsAPI()->subscribe(m_inputSystem.get());
 
     m_uiManager = std::make_unique<UIManager>(this->window()->size());
+    this->window()->graphicsAPI()->subscribe(m_uiManager.get());
 
 
     GameServices::setGame(this);
@@ -60,7 +60,7 @@ void Game::render(double dt) {
 
 void Game::afterRender() {
     // Render UI AFTER flush() so it draws on top of everything
-    m_uiManager->render();
+    //m_uiManager->render();
 }
 
 void Game::start() {

@@ -17,9 +17,12 @@ target_include_directories(glad PUBLIC include/)
 
 set_target_properties(glad PROPERTIES FOLDER "Libraries")
 set_target_properties(glm PROPERTIES FOLDER "Libraries")
+set_target_properties(lwgl PROPERTIES FOLDER "Libraries")
+set_target_properties(seuil PROPERTIES FOLDER "Libraries")
 
-set_target_properties(glfw PROPERTIES FOLDER "Libraries")
-set_target_properties(uninstall PROPERTIES FOLDER "Libraries")
-set_target_properties(update_mappings PROPERTIES FOLDER "Libraries")
+set_target_properties(glfw PROPERTIES FOLDER "Libraries/GLFW3")
+set_target_properties(uninstall PROPERTIES FOLDER "Libraries/GLFW3")
+set_target_properties(update_mappings PROPERTIES FOLDER "Libraries/GLFW3")
+set_target_properties(docs PROPERTIES FOLDER "Libraries/GLFW3")
 
 #target_include_directories(glm PUBLIC glm/glm/)

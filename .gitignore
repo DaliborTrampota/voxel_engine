@@ -8,8 +8,10 @@ install_manifest.txt
 compile_commands.json
 _deps
 build/
+build-ninja/
 .vs/
 .vscode/
 docs/
 .timetracker
+.cache/
 archive
