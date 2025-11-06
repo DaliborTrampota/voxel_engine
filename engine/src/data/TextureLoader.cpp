@@ -17,7 +17,7 @@ using namespace engine;
 
 TextureLoader::TextureLoader(int slot) : m_texArray(slot) {}
 
-void TextureLoader::load(const char* path, gl::texture::ArraySettings settings) {
+void TextureLoader::load(const char* path, gl::ArraySettings settings) {
     int width = 0;
     int height = 0;
     std::vector<gl::ImageData> images;

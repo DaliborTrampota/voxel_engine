@@ -30,7 +30,7 @@ namespace {
 }  // namespace
 
 Skybox::Skybox(unsigned int unit)
-    : gl::texture::CubeMap(unit),
+    : gl::CubeMap(unit),
       m_material(
           "resources/shaders/SkyboxVert.glsl", "resources/shaders/SkyboxFrag.glsl", "Skybox"
       ) {
