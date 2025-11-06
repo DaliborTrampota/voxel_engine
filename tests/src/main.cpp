@@ -310,10 +310,10 @@ int main(int argc, char* argv[]) {
 
     // Create a white texture
     unsigned char* data = new unsigned char[100 * 100 * 3];
-    const unsigned char limit = unsigned char(rand() % 231 + 25);
+    const unsigned char limit = static_cast<unsigned char>(rand() % 231 + 25);
     // Randomly generate an unsigned char per RGB channel
     for (int j = 0; j < 100 * 100 * 3; ++j) {
-        data[j] = unsigned char(rand() % limit);
+        data[j] = static_cast<unsigned char>(rand() % limit);
     }
     createTexture(data, 100, 100, 3, false);
     //delete[] data;
