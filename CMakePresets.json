@@ -1,0 +1,18 @@
+{
+    "version": 3,
+    "configurePresets": [
+      {
+        "name": "ninja-clangd",
+        "generator": "Ninja",
+        "binaryDir": "${sourceDir}/build-ninja",
+        "cacheVariables": {
+          "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+        }
+      },
+      {
+        "name": "vs2022",
+        "generator": "Visual Studio 17 2022",
+        "binaryDir": "${sourceDir}/build"
+      }
+    ]
+  }
