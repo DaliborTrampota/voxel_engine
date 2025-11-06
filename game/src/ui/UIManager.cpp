@@ -2,8 +2,8 @@
 
 #include <UI/elements/Button.h>
 #include <UI/elements/Image.h>
-#include <UI/elements/Panel.h>
 #include <UI/elements/Label.h>
+#include <UI/elements/Panel.h>
 
 #include <LWGL/events/GLEventSource.h>
 #include <LWGL/events/GLEvents.h>
