@@ -1,0 +1,13 @@
+CompileFlags:
+  CompilationDatabase: build
+  Add:
+    - --target=x86_64-pc-windows-msvc
+    - -fms-compatibility
+    - -fms-extensions
+    - -xc++
+    - -IP:/Github/VoxelEngine/voxel_engine_cmake/dependencies/glm
+    - -IP:/Github/VoxelEngine/voxel_engine_cmake/dependencies/include
+    - -IP:/Github/VoxelEngine/voxel_engine_cmake/dependencies/glfw/include
+    - -IP:/Github/VoxelEngine/voxel_engine_cmake/dependencies/lwgl/include
+    - -IP:/Github/VoxelEngine/voxel_engine_cmake/dependencies/seuil/include
+    - -IP:/Github/VoxelEngine/voxel_engine_cmake/engine/src
