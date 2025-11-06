@@ -20,7 +20,7 @@ namespace engine {
     //     };
     // };
 
-    class Skybox : public gl::texture::CubeMap,
+    class Skybox : public gl::CubeMap,
                    public Renderable {
       public:
         Skybox(unsigned int unit);

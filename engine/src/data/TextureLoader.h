@@ -10,14 +10,11 @@ namespace engine {
       public:
         TextureLoader(int slot);
 
-        void load(
-            const char* dirPath,
-            gl::texture::ArraySettings settings = gl::texture::ArraySettings::Pixelated()
-        );
+        void load(const char* dirPath, gl::ArraySettings settings = gl::ArraySettings::Pixelated());
         void bind() const;
 
       private:
-        gl::texture::TextureArray m_texArray;
+        gl::TextureArray m_texArray;
 
         static std::string getTextureName(const std::string& path);
     };

@@ -7,6 +7,10 @@
 #include <LWGL/events/GLEvents.h>
 #include <LWGL/gl/GraphicsAPI.h>
 
+#include <UI/Renderer.h>
+#include <UI/elements/Panel.h>
+
+
 #include <data/TextureLoader.h>
 #include <level/World.h>
 #include <scene/Camera.h>
@@ -23,8 +27,11 @@ Game::Game(std::unique_ptr<gl::Window> window, glm::ivec2 dims)
     : Engine(std::move(window)),
       m_mouseState(dims) {
     m_inputSystem = std::make_unique<engine::InputSystem>();
-
     this->window()->graphicsAPI()->subscribe(m_inputSystem.get());
+
+    m_uiManager = std::make_unique<UIManager>(this->window()->size());
+    this->window()->graphicsAPI()->subscribe(m_uiManager.get());
+
 
     GameServices::setGame(this);
     GameServices::setInputSystem(m_inputSystem.get());
@@ -44,10 +51,16 @@ void Game::render(double dt) {
 
     // m_commonUBO.setSubData(1, glm::value_ptr(m_plrCamera->getView()));
     auto world = m_worldManager.activeWorld();
+    world->getMaterial().use();
     world->getMaterial().setMat4("view", m_player->getCamera()->getView());
     world->render(*this, m_plrCamera);
 
     world->getSkybox().render(*this, m_plrCamera);
+}
+
+void Game::afterRender() {
+    // Render UI AFTER flush() so it draws on top of everything
+    //m_uiManager->render();
 }
 
 void Game::start() {
@@ -81,7 +94,7 @@ void Game::start() {
     // m_worldManager.activeWorld()->getMaterial().bindUBO(m_commonUBO);
     // m_worldManager.activeWorld()->getMaterial().setInt("texArray", texSlot);
 
-    gl::Material mat = m_worldManager.activeWorld()->getMaterial();
+    const gl::Material& mat = m_worldManager.activeWorld()->getMaterial();
     mat.use();
     mat.setMat4("projection", m_player->getCamera()->getProjection());
     mat.setMat4("view", m_player->getCamera()->getView());
