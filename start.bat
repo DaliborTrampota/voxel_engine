@@ -5,7 +5,7 @@ if not exist build (
 )
 
 if "%1" == "-cc" (
-    @REM cmake --preset ninja-clangd
+    cmake --preset ninja-clangd
     move /y .\build-ninja\compile_commands.json .\build\compile_commands.json
     exit
 )
