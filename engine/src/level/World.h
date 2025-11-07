@@ -35,7 +35,7 @@ namespace engine {
         /// @section Chunk management
 
         /// @brief Loads chunks in the given range.
-        /// @param unloadRest If true, all chunks outside the view distance will be unloaded.
+        /// @param unloadRest If true, all chunks outside the range will be unloaded.
         void loadChunks(const glm::vec3& from, const glm::vec3& to, bool unloadRest = false);
 
         /// @brief Unloads chunks in the given range.
@@ -65,7 +65,7 @@ namespace engine {
         Skybox& getSkybox() { return m_skybox; }
 
       protected:
-        std::unordered_map<ChunkID, Chunk*> m_chunks;
+        std::unordered_map<ChunkID, std::unique_ptr<Chunk>> m_chunks;
         std::unordered_set<ChunkID> m_loadedChunks;
         std::unique_ptr<ITerrainGenerator> m_generator = nullptr;
         gl::Material m_material;

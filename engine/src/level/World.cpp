@@ -19,8 +19,6 @@
 #include <glm/gtx/norm.hpp>
 #include <iostream>
 
-namespace fs = std::filesystem;
-
 using namespace engine;
 
 World::World(std::unique_ptr<ITerrainGenerator> gen, uint32_t genThreads)
@@ -47,9 +45,9 @@ World::~World() {
     printf("World deleted\n");
     m_genPool.stop();
 
-    for (auto& [pos, chunk] : m_chunks) {
-        delete chunk;
-    }
+    // for (auto& [pos, chunk] : m_chunks) {
+    //     delete chunk;
+    // }
 }
 
 void World::loadChunks(const glm::vec3& from, const glm::vec3& to, bool unloadRest) {
@@ -120,7 +118,7 @@ BlockID World::getBlockID(const ChunkID& chID, const glm::ivec3& pos) {
         return INVALID_BLOCK;
     }
 
-    return chunk->second->m_data[pos.x][pos.y][pos.z];
+    return chunk->second->m_data.getBlock(pos);
 }
 
 bool World::checkBlock(glm::vec3 pos, Block& curBlock, glm::ivec3 dir) const {
@@ -129,11 +127,11 @@ bool World::checkBlock(glm::vec3 pos, Block& curBlock, glm::ivec3 dir) const {
     if (!m_chunks.contains(chunkCoords))
         return false;
 
-    Chunk* chunk = m_chunks.at(chunkCoords);
-    if (!chunk)
+    const Chunk* chunk = m_chunks.at(chunkCoords).get();
+    if (!chunk)  // todo check from generator?
         return false;
-    Block block = chunk->getBlock(pos);
 
+    Block block = chunk->getBlock(pos);
 
     if (!curBlock.isVoxel() && block.isVoxel() || curBlock.isVoxel() && !block.isVoxel()) {
         dir = -dir;
@@ -154,13 +152,13 @@ void World::render(Engine& engine, const Camera* camera, int pass) {
 }
 
 void World::createChunk(ChunkID id, bool load) {
-    Chunk* chunk = new Chunk(this, id);
-    m_chunks[id] = chunk;
+    m_chunks.emplace(id, std::make_unique<Chunk>(this, id));
 
-    m_genPool.add([this, chunk, load] {
+    m_genPool.add([this, id, load] {
+        Chunk* chunk = m_chunks[id].get();
         chunk->generate();
         chunk->generateMesh();
         if (load)
-            m_loadedChunks.insert(chunk->id());
+            m_loadedChunks.insert(id);
     });
 }

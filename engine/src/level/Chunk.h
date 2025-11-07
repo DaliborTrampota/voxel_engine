@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "ChunkData.h"
 #include "block/Block.h"
 #include "block/BlockData.h"
 #include "render/Renderable.h"
@@ -22,9 +23,6 @@ namespace engine {
     class World;
     class Engine;
     struct RenderContext;
-
-    using T = unsigned int;
-    using VoxelData = std::vector<std::vector<std::vector<T>>>;
 
 
     struct ChunkID : glm::ivec3 {
@@ -61,7 +59,7 @@ namespace engine {
         Block getBlock(glm::ivec3 pos) const;
 
         /// @return 3D vector of the block data.
-        VoxelData& data() { return m_data; }
+        ChunkData& data() { return m_data; }
 
 
         /// @brief Renders the chunk.
@@ -72,7 +70,7 @@ namespace engine {
         World* m_world;
         ChunkID m_coords;
 
-        VoxelData m_data;
+        ChunkData m_data;
         gl::Attributes<Vertex> m_vertexData;
 
         bool m_generated = false;

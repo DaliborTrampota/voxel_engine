@@ -10,7 +10,6 @@
 #include "block/Block.h"
 #include "block/Vertex.h"
 #include "data/RegistryManager.h"
-#include "data/VertexData.h"
 #include "render/Engine.h"
 #include "render/RenderContext.h"
 //#include "block/builder/CulledGeometry.h"
@@ -22,7 +21,8 @@ using namespace engine;
 Chunk::Chunk(World* world, ChunkID coords)
     : m_world(world),
       m_coords(coords),
-      m_vertexData(GL_DYNAMIC_DRAW) {
+      m_vertexData(GL_DYNAMIC_DRAW),
+      m_data(Chunk::Dims) {
     m_vertexData.create();
 }
 
@@ -32,8 +32,8 @@ void Chunk::generate() {
     if (m_generated)
         return;
 
-    m_data = VoxelData(Dims.x, std::vector<std::vector<T>>(Dims.y, std::vector<T>(Dims.z, 0)));
     m_world->m_generator->populate(*this);
+    m_data.populated = true;
 }
 
 bool Chunk::generateMesh() {
@@ -42,18 +42,18 @@ bool Chunk::generateMesh() {
         return false;
 
     glm::ivec3 chunkBlockCoords = m_coords * Chunk::Dims;
-    for (int x = 0; x < Chunk::Dims.x; x++) {
-        m_vertexData.reserve(
-            Chunk::Dims.x * Chunk::Dims.y * Chunk::Dims.z * 6
-        );  // 16x16x6 faces (6 vertices per face)
+    m_vertexData.reserve(
+        Chunk::Dims.x * Chunk::Dims.y * Chunk::Dims.z * 6
+    );  // 16x16x6 faces (6 vertices per face)
 
+    for (int x = 0; x < Chunk::Dims.x; x++) {
         for (int y = 0; y < Chunk::Dims.y; y++) {
             for (int z = 0; z < Chunk::Dims.z; z++) {
-                if (m_data[x][y][z] == 0)
+                if (m_data(x, y, z) == 0)
                     continue;
 
                 glm::ivec3 pos(x, y, z);
-                int blockID = m_data[x][y][z];
+                BlockID blockID = m_data.getBlock(pos);
 
                 Block block = RegistryManager::Blocks().get(blockID);
 
@@ -79,8 +79,9 @@ bool Chunk::generateMesh() {
 }
 
 Block Chunk::getBlock(glm::ivec3 pos) const {
-    T blockID = m_data.size() == 0 ? m_world->m_generator->voxelAt(pos + m_coords * Chunk::Dims)
-                                   : m_data[pos.x][pos.y][pos.z];
+    BlockID blockID = !m_data.populated
+                          ? m_world->m_generator->voxelAt(pos + m_coords * Chunk::Dims)
+                          : m_data.getBlock(pos);
     return RegistryManager::Blocks().get(blockID);
 }
 
