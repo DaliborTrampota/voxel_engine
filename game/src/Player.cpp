@@ -91,6 +91,7 @@ void Player::update(float dt) {
 
     if (input->isKey(Down, Key::P)) {
         m_position = glm::vec3(Chunk::Dims.x / 2, 20, Chunk::Dims.z / 2);
+        m_velocity = glm::vec3(0.f);
         m_camera->position(m_position);
         m_camera->lookAt(glm::vec3(Chunk::Dims.x / 2, 0, Chunk::Dims.z / 2));
 
@@ -155,7 +156,7 @@ void Player::move(glm::vec3 lDir, float dt) {
     if (col.axis & 4)
         m_velocity.z = 0.0f;  // Z collision
 
-    m_position += displacement - col.correction;
+    m_position += displacement;
     m_aabb->position(m_position);
     m_camera->position(m_position);
 }

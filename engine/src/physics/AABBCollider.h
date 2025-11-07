@@ -71,6 +71,7 @@ namespace engine {
         struct SweptResult {
             float time;
             int axis;
+            const AABB* bb;
         };
 
         void updateAABBCache(const glm::vec3& velocity, const glm::vec3& position);
