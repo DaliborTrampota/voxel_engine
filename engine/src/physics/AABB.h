@@ -17,6 +17,7 @@ namespace engine {
 
         void transform(const glm::mat4& matrix);
         void move(const glm::vec3& offset);
+        void moveAxis(int axis, float amount);
         void position(const glm::vec3& pos);
         void expand(float amount);
 

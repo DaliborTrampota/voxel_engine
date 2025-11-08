@@ -29,7 +29,7 @@ Player::Player()
               glm::vec3(0.4f, 1.8f, 0.4f),
           }))
       ),
-      m_collider(m_aabb, 0.5f) {
+      m_collider(m_aabb, 1.05f) {
     CameraOptions opts;
     opts.fov = glm::radians(45.0f);
     opts.aspectRatio = 800.0f / 600.0f;

@@ -19,8 +19,7 @@ AABBCollider::AABBCollider(std::shared_ptr<AABB> aabb, float stepHeight, float g
       m_lastPosition(0.f),
       m_cacheDirection(0.f),
       m_height(aabb->max.y - aabb->min.y),
-      m_stepHeight(stepHeight),
-      m_groundedHeight(groundedHeight) {
+      m_stepHeight(stepHeight) {
     if (m_height <= 0.0f)
         throw std::runtime_error("AABBCollider: AABB height must be greater than 0.");
 
@@ -46,9 +45,8 @@ CollisionInfo AABBCollider::collide(glm::vec3& moveStep, const glm::vec3& positi
 
     CollisionInfo info;
     std::vector<const AABB*> hitBBs{};
-    //glm::vec3 displacement{0};
 
-    info.correction = moveStep;
+    info.correction = {0, 0, 0};
 
     std::set<int> foundAxis;
 
@@ -68,12 +66,40 @@ CollisionInfo AABBCollider::collide(glm::vec3& moveStep, const glm::vec3& positi
         }
 
         if (bestRes.axis == -1) {
-            //checkGrounded();
             break;
         }
 
         if (bestRes.axis == 1) {
             info.grounded = true;
+        }
+
+        // Try to step up if we hit a horizontal wall (X or Z axis)
+        if (bestRes.axis != 1 && m_stepHeight > 0.0f) {
+            float colHeight = bestRes.bb->max.y;
+            float feetHeight = m_aabb->min.y;
+            float requiredStepHeight = colHeight - feetHeight;
+
+            // Only try stepping if the height is reasonable
+            if (requiredStepHeight > 0.0f && requiredStepHeight <= m_stepHeight) {
+                // Test with the colliding axis movement only
+                // glm::vec3 horizontalMove{0};
+                glm::vec3 horizontalMove{moveStep.x, 0, moveStep.z};
+                horizontalMove[bestRes.axis] = moveStep[bestRes.axis];
+
+                float stepHeight = tryStepUp(horizontalMove, bestRes.bb);
+
+                if (stepHeight > 0.0f) {
+                    info.stepHeight = stepHeight;
+
+                    // Set Y movement to the step height (override gravity for this frame)
+                    // This ensures we actually move up, not just add to falling velocity
+                    moveStep.y = stepHeight;
+
+                    // Clear this axis collision since we stepped over it
+                    hitBBs.clear();
+                    continue;  // Skip the rest and go to next pass
+                }
+            }
         }
 
         info.axis |= 1 << bestRes.axis;
@@ -82,11 +108,11 @@ CollisionInfo AABBCollider::collide(glm::vec3& moveStep, const glm::vec3& positi
         foundAxis.insert(bestRes.axis);
         assert(foundAxis.size() == pass + 1);
 
+        float originalAxisMove = moveStep[bestRes.axis];
         float& axisMove = moveStep[bestRes.axis];
         axisMove *= bestRes.time;
-        axisMove -= glm::sign(axisMove) * std::numeric_limits<float>::epsilon() * 64.0f;
-        //info.correction[bestRes.axis] = axisMove;
-        //m_aabb->moveAxis(bestRes.axis, axisMove);
+        axisMove -= glm::sign(axisMove) * s_epsGap;
+        info.correction[bestRes.axis] = originalAxisMove - axisMove;
 
         info.hitPositions[bestRes.axis].reserve(hitBBs.size());
         for (const AABB* bb : hitBBs) {
@@ -96,21 +122,18 @@ CollisionInfo AABBCollider::collide(glm::vec3& moveStep, const glm::vec3& positi
             // info.touchingBlocks.push_back(m_world->getBlockID(id, blockPos));
         }
         hitBBs.clear();
-
-        //info.grounded = bb.max.y + m_groundedHeight >= m_aabb->min.y;
-        //if (res.time == 1.0f) {
-        //    if (res.axis == 1 && moveStep[res.axis] <= 0.0f) {  // y axis
-        //        AABB extendedBB = bb;
-        //        extendedBB.max.y += m_groundedHeight;
-        //        if (extendedBB.intersects(*m_aabb))
-        //            info.grounded = true;
-        //    }
-        //    continue;
-        //}
     }
     return info;
 }
+//info.grounded = bb.max.y + m_groundedHeight >= m_aabb->min.y;
 
+// if (res.axis == 1 && moveStep[res.axis] <= 0.0f) {  // y axis
+//     AABB extendedBB = bb;
+//     extendedBB.max.y += m_groundedHeight;
+//     if (extendedBB.intersects(*m_aabb))
+//         info.grounded = true;
+// }
+// continue;
 void AABBCollider::updateAABBCache(const glm::vec3& velocity, const glm::vec3& position) {
     glm::ivec3 newPos = glm::floor(position);
 
@@ -146,11 +169,12 @@ AABB broadphaseRect(const glm::vec3 velocity, const AABB& bb) {
         glm::min(bb.min, bb.min + velocity),
         glm::max(bb.max, bb.max + velocity),
     };
-    rect.expand(std::numeric_limits<float>::epsilon());  // Expand the rectangle slightly to avoid precision issues
+    // Expand the rectangle slightly to avoid precision issues
+    rect.expand(std::numeric_limits<float>::epsilon());  
     return rect;
 }
 
-AABBCollider::SweptResult AABBCollider::swept(glm::vec3& velocity, const AABB& other) {
+AABBCollider::SweptResult AABBCollider::swept(const glm::vec3& velocity, const AABB& other) const {
     // Broadphase check
     if (!broadphaseRect(velocity, *m_aabb).intersects(other))
         return {1.0f, -1};
@@ -253,6 +277,54 @@ float AABBCollider::swept1D(int axis, float velocity, const AABB& other) {
     }
 
     return entryTime;
+}
+
+float AABBCollider::tryStepUp(const glm::vec3& horizontalMove, const AABB* collidingBB) {
+    if (m_stepHeight <= 0.0f)
+        return -1.0f;
+
+    // Calculate exact step height needed (just above the block)
+    float colHeight = collidingBB->max.y;
+    float feetHeight = m_aabb->min.y;
+    float stepHeight = colHeight - feetHeight + s_epsGap;
+    
+    // Check if step height is valid
+    if (stepHeight <= 0.0f || stepHeight > m_stepHeight)
+        return -1.0f;
+
+    // Temporarily move AABB up to test
+    m_aabb->moveAxis(1, stepHeight);
+
+    bool canStep = true;
+    
+    // Test if we can move horizontally at this height
+    for (const AABB& aabb : m_aabbCache) {
+        // Skip the block we're stepping over
+        if (&aabb == collidingBB)
+            continue;
+            
+        SweptResult res = swept(horizontalMove, aabb);
+
+        // If we still collide on the horizontal axis at the beginning, can't step
+        if (res.axis != 1 && res.time != 1.0f) {
+            float absMove = horizontalMove[res.axis] * res.time;
+            if (absMove < 1/16.f){
+                canStep = false;
+                break;
+            }
+        }
+
+        // Check if there's a ceiling blocking us
+        if (m_aabb->intersects(aabb)) {
+            canStep = false;
+            break;
+        }
+    }
+
+    // Restore AABB position
+    m_aabb->moveAxis(1, -stepHeight);
+
+    return canStep ? stepHeight : -1.0f;
 }
 
 

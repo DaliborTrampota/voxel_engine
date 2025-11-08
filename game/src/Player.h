@@ -35,7 +35,7 @@ class Player : public engine::Updateable {
   private:
     glm::vec3 m_velocity{0, 0, 0};
     glm::vec3 m_position;
-    float m_speed = 10;
+    float m_speed = 5;
     bool m_onGround = false;
 
 
