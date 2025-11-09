@@ -38,19 +38,12 @@ void AABBCollider::setAABB(std::shared_ptr<AABB> aabb) {
     m_aabb = aabb;
 }
 
-#include <assert.h>
-#include <set>
-
-
 CollisionInfo AABBCollider::collide(glm::vec3& moveStep, const glm::vec3& position) {
     updateAABBCache(moveStep, position);
 
     CollisionInfo info;
     std::vector<const AABB*> hitBBs{};
 
-    info.correction = {0, 0, 0};
-
-    std::set<int> foundAxis;
 
     for (int pass = 0; pass < 3; ++pass) {
         SweptResult bestRes{1.0f, -1};
@@ -99,9 +92,6 @@ CollisionInfo AABBCollider::collide(glm::vec3& moveStep, const glm::vec3& positi
 
         info.axis |= 1 << bestRes.axis;
         info.t[bestRes.axis] = bestRes.time;
-
-        foundAxis.insert(bestRes.axis);
-        assert(foundAxis.size() == pass + 1);
 
         float originalAxisMove = moveStep[bestRes.axis];
         float& axisMove = moveStep[bestRes.axis];
