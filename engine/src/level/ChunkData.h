@@ -3,7 +3,7 @@
 #include <glm/glm.hpp>
 #include <vector>
 
-#include "Globals.h"
+#include "../Globals.h"
 
 namespace engine {
 

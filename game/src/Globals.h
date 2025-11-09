@@ -3,3 +3,4 @@
 #include <glm/glm.hpp>
 
 #define FRONT glm::vec3(1, 0, 0)
+#define TERMINAL_VELOCITY 20.f

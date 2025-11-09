@@ -1,6 +1,5 @@
 #include "Player.h"
 
-#include <functional>
 #include <memory>
 
 #include <CoordUtils.h>
@@ -49,15 +48,6 @@ void Player::spawn(std::shared_ptr<World> world) {
     m_aabb->transform(glm::translate(glm::mat4(1.0f), glm::vec3(m_position)));
 
     printf("Spawning player at %.2f %.2f %.2f\n", m_position.x, m_position.y, m_position.z);
-    printf(
-        "AABB: %.2f %.2f %.2f - %.2f %.2f %.2f\n",
-        m_aabb->min.x,
-        m_aabb->min.y,
-        m_aabb->min.z,
-        m_aabb->max.x,
-        m_aabb->max.y,
-        m_aabb->max.z
-    );
 
     m_collider.setWorld(world);
     glm::vec3 pos = m_position;
@@ -118,47 +108,61 @@ void Player::move(glm::vec3 lDir, float dt) {
     glm::vec3 targetVelocity = rotation * lDir * m_speed;
 
     float acceleration = m_onGround ? 20.f : 1.f;  // This is like friction.
+    float blend = glm::clamp(acceleration * dt, 0.0f, 1.0f);
+    m_velocity.x = glm::mix(m_velocity.x, targetVelocity.x, blend);
+    m_velocity.z = glm::mix(m_velocity.z, targetVelocity.z, blend);
 
-    float y = m_velocity.y;
-    m_velocity.y = 0;
-
-    glm::vec3 blended =
-        glm::mix(m_velocity, targetVelocity, glm::clamp(acceleration * dt, 0.0f, 1.0f));
-    m_velocity.x = blended.x;
-    m_velocity.z = blended.z;
-
-    glm::vec2 horizontalVelocity{m_velocity.x, m_velocity.z};
-    if (glm::length2(horizontalVelocity) > m_speed * m_speed) {
-        horizontalVelocity = glm::normalize(horizontalVelocity) * m_speed;
-        m_velocity.x = horizontalVelocity.x;
-        m_velocity.z = horizontalVelocity.y;
+    float horSpeed = m_velocity.x * m_velocity.x + m_velocity.z * m_velocity.z;
+    if (horSpeed > m_speed * m_speed) {
+        float scale = m_speed / glm::sqrt(horSpeed);
+        m_velocity.x *= scale;
+        m_velocity.z *= scale;
     }
 
-    m_velocity.y = y - 9.81f * dt;
+    m_velocity.y -= 9.81f * 2 * dt;
+    m_velocity.y = glm::max(m_velocity.y, -TERMINAL_VELOCITY);
 
     glm::vec3 displacement = m_velocity * dt;
     CollisionInfo col = m_collider.collide(displacement, m_position);
-
-    if (m_velocity.y < -20.f)
-        m_velocity.y = -20.f;  // terminal velocity
-
-    if (col.grounded) {
-        m_onGround = true;
-        m_velocity.y = .0f;
-    } else {
-        m_onGround = false;
-    }
-
-    if (col.axis & 1)
-        m_velocity.x = 0.0f;  // X collision
-    if (col.axis & 2)
-        m_velocity.y = 0.0f;  // Y collision
-    if (col.axis & 4)
-        m_velocity.z = 0.0f;  // Z collision
-
     m_position += displacement;
     m_aabb->position(m_position);
-    m_camera->position(m_position);
+    m_onGround = col.grounded;
+
+    if (col.axis & CollisionInfo::AXIS_X_MASK)
+        m_velocity.x = 0.0f;  // X collision
+    if (col.axis & CollisionInfo::AXIS_Y_MASK)
+        m_velocity.y = 0.0f;  // Y collision
+    if (col.axis & CollisionInfo::AXIS_Z_MASK)
+        m_velocity.z = 0.0f;  // Z collision
+
+
+    // Detect step-up and start smooth animation
+    if (col.stepHeight > 0.01f) {
+        m_stepStartY = m_camera->position().y;
+        m_stepTargetY = m_position.y;
+        m_stepAnimProgress = 0.0f;  // Start animation
+    }
+
+    // Update step animation
+    if (m_stepAnimProgress < 1.0f) {
+        m_stepAnimProgress += dt * 8.0f;  // Animation speed (8 = 0.125 seconds)
+        if (m_stepAnimProgress > 1.0f)
+            m_stepAnimProgress = 1.0f;
+
+        // Smooth interpolation using smoothstep
+        float t = m_stepAnimProgress;
+        t = t * t * (3.0f - 2.0f * t);  // smoothstep formula
+
+        float interpolatedY = glm::mix(m_stepStartY, m_stepTargetY, t);
+
+        // Set camera to interpolated position
+        glm::vec3 cameraPos = m_position;
+        cameraPos.y = interpolatedY;
+        m_camera->position(cameraPos);
+    } else {
+        // No animation, camera follows physics exactly
+        m_camera->position(m_position);
+    }
 }
 
 void Player::rotate(float dx, float dy, bool constrainPitch) {

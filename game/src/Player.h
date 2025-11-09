@@ -33,11 +33,15 @@ class Player : public engine::Updateable {
     glm::vec3 position() const { return m_position; }
 
   private:
-    glm::vec3 m_velocity{0, 0, 0};
+    glm::vec3 m_velocity{0.f};
     glm::vec3 m_position;
-    float m_speed = 5;
+    float m_speed = 5.f;
     bool m_onGround = false;
 
+    // Smooth step animation
+    float m_stepAnimProgress = 1.0f;  // 1.0 = no animation playing
+    float m_stepStartY = 0.0f;
+    float m_stepTargetY = 0.0f;
 
     std::thread m_viewDistThread;
     engine::Chunk* m_currentChunk;

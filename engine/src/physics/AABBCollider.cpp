@@ -2,10 +2,12 @@
 
 #include <algorithm>
 
+#include "../Globals.h"
 #include "AABB.h"
 #include "CoordUtils.h"
 #include "data/RegistryManager.h"
 #include "level/World.h"
+
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtc/matrix_transform.hpp>
@@ -73,27 +75,20 @@ CollisionInfo AABBCollider::collide(glm::vec3& moveStep, const glm::vec3& positi
             info.grounded = true;
         }
 
-        // Try to step up if we hit a horizontal wall (X or Z axis)
         if (bestRes.axis != 1 && m_stepHeight > 0.0f) {
             float colHeight = bestRes.bb->max.y;
             float feetHeight = m_aabb->min.y;
             float requiredStepHeight = colHeight - feetHeight;
 
-            // Only try stepping if the height is reasonable
             if (requiredStepHeight > 0.0f && requiredStepHeight <= m_stepHeight) {
-                // Test with the colliding axis movement only
-                // glm::vec3 horizontalMove{0};
                 glm::vec3 horizontalMove{moveStep.x, 0, moveStep.z};
-                horizontalMove[bestRes.axis] = moveStep[bestRes.axis];
 
                 float stepHeight = tryStepUp(horizontalMove, bestRes.bb);
 
                 if (stepHeight > 0.0f) {
                     info.stepHeight = stepHeight;
 
-                    // Set Y movement to the step height (override gravity for this frame)
-                    // This ensures we actually move up, not just add to falling velocity
-                    moveStep.y = stepHeight;
+                    moveStep.y = stepHeight;  // override gravity for this frame
 
                     // Clear this axis collision since we stepped over it
                     hitBBs.clear();
@@ -125,15 +120,7 @@ CollisionInfo AABBCollider::collide(glm::vec3& moveStep, const glm::vec3& positi
     }
     return info;
 }
-//info.grounded = bb.max.y + m_groundedHeight >= m_aabb->min.y;
 
-// if (res.axis == 1 && moveStep[res.axis] <= 0.0f) {  // y axis
-//     AABB extendedBB = bb;
-//     extendedBB.max.y += m_groundedHeight;
-//     if (extendedBB.intersects(*m_aabb))
-//         info.grounded = true;
-// }
-// continue;
 void AABBCollider::updateAABBCache(const glm::vec3& velocity, const glm::vec3& position) {
     glm::ivec3 newPos = glm::floor(position);
 
@@ -283,32 +270,25 @@ float AABBCollider::tryStepUp(const glm::vec3& horizontalMove, const AABB* colli
     if (m_stepHeight <= 0.0f)
         return -1.0f;
 
-    // Calculate exact step height needed (just above the block)
     float colHeight = collidingBB->max.y;
     float feetHeight = m_aabb->min.y;
     float stepHeight = colHeight - feetHeight + s_epsGap;
     
-    // Check if step height is valid
     if (stepHeight <= 0.0f || stepHeight > m_stepHeight)
         return -1.0f;
 
-    // Temporarily move AABB up to test
+    // Temp move up
     m_aabb->moveAxis(1, stepHeight);
 
     bool canStep = true;
     
-    // Test if we can move horizontally at this height
     for (const AABB& aabb : m_aabbCache) {
-        // Skip the block we're stepping over
-        if (&aabb == collidingBB)
-            continue;
-            
         SweptResult res = swept(horizontalMove, aabb);
 
-        // If we still collide on the horizontal axis at the beginning, can't step
+        // Maybe we collide but there is a ledge? Check absolute amount for 1/16th of a block
         if (res.axis != 1 && res.time != 1.0f) {
             float absMove = horizontalMove[res.axis] * res.time;
-            if (absMove < 1/16.f){
+            if (absMove < 1/16.f) { 
                 canStep = false;
                 break;
             }
@@ -321,7 +301,6 @@ float AABBCollider::tryStepUp(const glm::vec3& horizontalMove, const AABB* colli
         }
     }
 
-    // Restore AABB position
     m_aabb->moveAxis(1, -stepHeight);
 
     return canStep ? stepHeight : -1.0f;

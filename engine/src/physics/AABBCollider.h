@@ -5,14 +5,16 @@
 #include <memory>
 #include <vector>
 
-#include "../Globals.h"
-
 namespace engine {
 
     class World;
     struct AABB;
 
     struct CollisionInfo {
+        static constexpr int AXIS_X_MASK = 1;
+        static constexpr int AXIS_Y_MASK = 2;
+        static constexpr int AXIS_Z_MASK = 4;
+
         /// @brief The position correction that was applied during the collision resolution, so the AABB stops touching any other AABB.
         glm::vec3 correction{0.f};
 

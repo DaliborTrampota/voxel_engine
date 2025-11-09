@@ -75,6 +75,8 @@ void InputSystem::keyboardEvent(KeyboardEvent* pEvent) {
     }
 
     Key key = fromGLFW(pEvent->key);
+    if (key == Key::Unknown)
+        return;
     m_keyStates[key] = state;
 
     float sideways = getAxis(Axis::Sideways);
