@@ -81,8 +81,8 @@ namespace engine {
         std::unordered_map<ChunkID, std::unique_ptr<Chunk>> m_chunks;
         std::unordered_set<ChunkID> m_loadedChunks;
         std::unique_ptr<ITerrainGenerator> m_generator = nullptr;
-        gl::Material m_material;
 
+        gl::Material m_material;
         Skybox m_skybox;
 
         ThreadPool m_genPool;

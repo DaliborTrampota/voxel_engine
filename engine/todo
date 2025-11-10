@@ -6,6 +6,8 @@
     - basic ui elements @done
     - input elements
     - fallback for bindless textures
+    - option to specify font quality (scale)
+    - option to make asynchronous loading of labels
 - get rid of engine namespace in lwgl events
 - vulcan?
 - texture keep track of bound units and warn if two textures are bound to the same unit at the same time

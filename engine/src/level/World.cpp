@@ -105,9 +105,7 @@ void World::unloadChunks(const glm::vec3& from, const glm::vec3& to) {
 
 void World::unloadAllChunks(const std::vector<ChunkID>& except) {
     if (except.empty()) {
-        for (auto it = m_loadedChunks.begin(); it != m_loadedChunks.end();) {
-            it = m_loadedChunks.erase(it);
-        }
+        m_loadedChunks.clear();
     } else {
         for (auto it = m_loadedChunks.begin(); it != m_loadedChunks.end();) {
             if (std::find(except.begin(), except.end(), *it) == except.end()) {
@@ -182,7 +180,8 @@ bool World::canSeeFace(const Block& curBlock, Layer layer, glm::vec3 pos, glm::i
 
     bool sameBlock = block.getID() == curBlock.getID();
     if (layer == Layers::ANY)
-        return sameBlock || (block.isSolid() && curBlock.isSolid());
+        return sameBlock ||
+               (block.isSolid() && curBlock.isSolid());  //TODO opaque instead of solid?
     return sameBlock;
 }
 
