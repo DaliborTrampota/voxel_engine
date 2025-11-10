@@ -1,11 +1,13 @@
 #include "MyWorld.h"
 
-#include "../Player.h"
-#include "CoordUtils.h"
-#include "level/Chunk.h"
-
-#include <render/Engine.h>
+#include <iostream>
 #include <algorithm>
+
+#include "../Player.h"
+
+#include <CoordUtils.h>
+#include <level/Chunk.h>
+#include <render/Engine.h>
 #include <glm/gtx/norm.hpp>
 
 using namespace engine;
@@ -23,14 +25,15 @@ void MyWorld::render(Engine& engine, const Camera* camera, int pass) {
     );
     // clang-format on
 
-    //for(const ChunkID& pos : renderOrder) {// Opaque front to back
-    //    m_chunks.at(pos)->render(engine, 1);
-    //}
-
-    //std::reverse(renderOrder.begin(), renderOrder.end());
-    for (const ChunkID& pos : renderOrder) {
-        m_chunks.at(pos)->render(engine, camera, 0);
+    for (const ChunkID& pos : renderOrder) {  // Opaque front to back
+        m_chunks.at(pos)->render(engine, camera, 1);
     }
+
+    std::reverse(renderOrder.begin(), renderOrder.end());
+    for (const ChunkID& pos : renderOrder) {
+        m_chunks.at(pos)->render(engine, camera, 2);
+    }
+    std::cout << "Rendered chunks: " << renderOrder.size() << "\n";
 }
 
 void MyWorld::setPlayer(std::shared_ptr<Player> player) {

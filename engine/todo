@@ -12,3 +12,4 @@
 - get rid of gl::texture namespace @done
 - move textureprivate to detail @done
 - glfw callbacks using window user pointer
+- fix touching blocks when stepping up

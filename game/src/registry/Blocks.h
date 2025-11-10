@@ -36,7 +36,7 @@ void RegisterBlocks() {
         .material(Material()
             .add(FaceTag::Top, texMgr.texture("grass_block_top"))
             .add(FaceTag::Bottom, texMgr.texture("dirt"))
-            .add(FaceTag::Side, texMgr.texture("dirt"))
+            .add(FaceTag::Side, texMgr.texture("grass_block_side"))
         );
     
     auto STONE = Block(3, &geometries.get("cube"))

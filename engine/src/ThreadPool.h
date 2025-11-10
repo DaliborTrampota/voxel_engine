@@ -13,6 +13,11 @@
 #include <mutex>
 #include <thread>
 
+#ifdef _WIN32
+#define NOMINMAX
+#include <windows.h>
+#endif
+
 using Job = std::function<void()>;
 class ThreadPool {
   public:
@@ -73,6 +78,9 @@ class ThreadPool {
 
   private:
     void loop() {
+#ifdef _WIN32
+        SetThreadDescription(GetCurrentThread(), L"ThreadPool");
+#endif
         while (true) {
             Job job;
             {

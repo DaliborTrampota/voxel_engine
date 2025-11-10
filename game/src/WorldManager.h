@@ -2,6 +2,9 @@
 
 #include <memory>
 #include <unordered_map>
+#include <future>
+
+#include <glm/glm.hpp>
 
 namespace engine {
     class World;
@@ -13,6 +16,8 @@ class WorldManager {
     ~WorldManager();
 
     std::shared_ptr<engine::World> activeWorld();
+
+    std::future<void> prepareWorldForSpawn(glm::vec3 pos, glm::ivec3 ranges);
 
 
   private:
