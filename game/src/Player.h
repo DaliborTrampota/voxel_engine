@@ -2,11 +2,12 @@
 
 #include <glm/glm.hpp>
 #include <memory>
-#include <thread>
 
 #include <Controls.h>
+#include <level/Chunk.h>
 #include <physics/AABBCollider.h>
 #include <scene/Updateable.h>
+
 
 namespace engine {
     class World;
@@ -24,10 +25,13 @@ class Player : public engine::Updateable {
 
     void spawn(std::shared_ptr<engine::World> world);
 
+    void updateViewDistance(engine::ChunkID center, bool waitTillLoaded);
+
     void update(float dt) override;
 
-    void move(glm::vec3 key, float dt);
+    void move(glm::vec3 lDir, float dt);
     void rotate(float dx, float dy, bool constrainPitch = true);
+    void move(glm::vec3 position);
 
     engine::Camera* getCamera() { return m_camera.get(); }
     glm::vec3 position() const { return m_position; }
@@ -43,8 +47,8 @@ class Player : public engine::Updateable {
     float m_stepStartY = 0.0f;
     float m_stepTargetY = 0.0f;
 
-    std::thread m_viewDistThread;
     engine::Chunk* m_currentChunk;
+    std::shared_ptr<engine::World> m_world;
 
     std::shared_ptr<engine::AABB> m_aabb;
     engine::AABBCollider m_collider;

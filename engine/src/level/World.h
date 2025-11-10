@@ -1,5 +1,6 @@
 #pragma once
 
+#include <future>
 #include <glm/glm.hpp>
 #include <memory>
 #include <shared_mutex>
@@ -36,7 +37,10 @@ namespace engine {
 
         /// @brief Loads chunks in the given range.
         /// @param unloadRest If true, all chunks outside the range will be unloaded.
-        void loadChunks(const glm::vec3& from, const glm::vec3& to, bool unloadRest = false);
+        /// @return A shared_future that becomes ready when all chunks are loaded and generated
+        std::future<void> loadChunks(
+            const glm::vec3& from, const glm::vec3& to, bool unloadRest = false
+        );
 
         /// @brief Unloads chunks in the given range.
         void unloadChunks(const glm::vec3& from, const glm::vec3& to);
@@ -51,6 +55,7 @@ namespace engine {
         /// @section Block management
 
         /// @brief Gets the block ID at the given position.
+        /// @param 
         /// @return the block ID or engine::INVALID_BLOCK if:
         ///         - The position is out of bounds (eg less than or greater than Chunk::Dims)
         ///         - The chunk is not generated

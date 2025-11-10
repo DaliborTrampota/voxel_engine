@@ -1,6 +1,9 @@
 #pragma once
 
+#include <atomic>
 #include <concepts>
+#include <future>
+#include <memory>
 #include <queue>
 #include <vector>
 
@@ -31,6 +34,24 @@ class ThreadPool {
         m_cv.notify_one();  // Notifying only one because only one job is added so
                             // only one thread can be working on it?
         // clang-format on
+    }
+
+    std::future<void> addBatch(std::vector<Job> batch) {
+        auto promise = std::make_shared<std::promise<void>>();
+        auto remainingJobs = std::make_shared<std::atomic<int>>(batch.size());
+        std::future<void> future = promise->get_future();
+
+        for (const auto& job : batch) {
+            add([job, promise, remainingJobs]() {
+                job();
+
+                if (remainingJobs->fetch_sub(1) == 1) {
+                    promise->set_value();
+                }
+            });
+        }
+
+        return future;
     }
 
     void stop() {

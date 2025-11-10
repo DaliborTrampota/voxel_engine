@@ -1,6 +1,8 @@
 #include "Player.h"
 
+#include <future>
 #include <memory>
+
 
 #include <CoordUtils.h>
 #include <InputSystem.h>
@@ -21,6 +23,7 @@ using namespace engine;
 
 Player::Player()
     : m_currentChunk(nullptr),
+      m_world(nullptr),
       m_position(0, 0, 0),
       m_aabb(
           std::make_shared<AABB>(AABB({
@@ -28,37 +31,45 @@ Player::Player()
               glm::vec3(0.4f, 1.8f, 0.4f),
           }))
       ),
-      m_collider(m_aabb, 1.05f) {
+      m_collider(m_aabb, 0.51f) {
     CameraOptions opts;
     opts.fov = glm::radians(45.0f);
     opts.aspectRatio = 800.0f / 600.0f;
     m_camera = std::make_unique<Camera>(Camera::ProjectionType::Perspective, opts);
 }
 
-Player::~Player() {
-    if (m_viewDistThread.joinable())
-        m_viewDistThread.join();
-}
+Player::~Player() {}
 
 void Player::spawn(std::shared_ptr<World> world) {
-    m_position = glm::vec3(Chunk::Dims.x / 2, 20, Chunk::Dims.z / 2);
-    m_camera->position(m_position);
+    move(glm::vec3(Chunk::Dims.x / 2, 20, Chunk::Dims.z / 2));
     m_camera->lookAt(glm::vec3(Chunk::Dims.x / 2, 0, Chunk::Dims.z / 2));
-
-    m_aabb->transform(glm::translate(glm::mat4(1.0f), glm::vec3(m_position)));
+    m_world = world;
+    m_collider.setWorld(world);
 
     printf("Spawning player at %.2f %.2f %.2f\n", m_position.x, m_position.y, m_position.z);
+    ChunkID id = getChunkID(m_position);
+    updateViewDistance(id, true);
+    m_currentChunk = world->getChunk(id);
+}
 
-    m_collider.setWorld(world);
-    glm::vec3 pos = m_position;
-    ChunkID coords = extractChunkCoords(pos);
-    glm::ivec3 from = coords - ViewDistance;
-    glm::ivec3 to = coords + ViewDistance;
-    world->loadChunks(from, to);
-    //m_viewDistThread = std::thread(&World::updateViewDistance, world, m_position);
+void Player::updateViewDistance(ChunkID center, bool waitTillLoaded) {
+    glm::ivec3 from = center - ViewDistance;
+    glm::ivec3 to = center + ViewDistance;
+    std::future<void> future = m_world->loadChunks(from, to, true);
+    if (waitTillLoaded)
+        future.wait();
 }
 
 void Player::update(float dt) {
+    //if (!m_world)
+    //printf("Player pos %.2f %.2f %.2f\n", m_position.x, m_position.y, m_position.z);
+    ChunkID curChunkID = getChunkID(m_position);
+    if (m_currentChunk->id() != curChunkID) {
+        updateViewDistance(curChunkID, false);
+        m_currentChunk = m_world->getChunk(curChunkID);
+    }
+
+
     auto input = GameServices::getInputSystem();
     float mouseX = input->getAxis(Axis::MouseX);
     float mouseY = input->getAxis(Axis::MouseY);
@@ -167,4 +178,10 @@ void Player::move(glm::vec3 lDir, float dt) {
 
 void Player::rotate(float dx, float dy, bool constrainPitch) {
     m_camera->rotate(dx, dy, constrainPitch);
+}
+
+void Player::move(glm::vec3 position) {
+    m_position = position;
+    m_aabb->position(position);
+    m_camera->position(position);
 }

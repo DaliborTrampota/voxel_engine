@@ -50,30 +50,43 @@ World::~World() {
     // }
 }
 
-void World::loadChunks(const glm::vec3& from, const glm::vec3& to, bool unloadRest) {
+std::future<void> World::loadChunks(const glm::vec3& from, const glm::vec3& to, bool unloadRest) {
     // ChunkID chunkCoords = engine::extractChunkCoords(pos);
+    m_genPool.pause();
     if (unloadRest) {
-        for (const ChunkID& id : m_loadedChunks) {
+        for (auto it = m_loadedChunks.begin(); it != m_loadedChunks.end();) {
+            const ChunkID& id = *it;
             if (id.x < from.x || id.x > to.x || id.y < from.y || id.y > to.y || id.z < from.z ||
                 id.z > to.z) {
-                m_loadedChunks.erase(id);
+                it = m_loadedChunks.erase(it);
+            } else {
+                ++it;
             }
         }
     }
-    m_genPool.pause();
+
+    std::vector<Job> jobs;
     for (int x = from.x; x < to.x; ++x) {
         for (int y = from.y; y < to.y; ++y) {
             for (int z = from.z; z < to.z; ++z) {
-                ChunkID coord = ChunkID(x, y, z);
-                auto it = m_chunks.find(coord);
-                if (it == m_chunks.end()) {
-                    createChunk(coord, false);
+                ChunkID id = ChunkID(x, y, z);
+                if (m_chunks.contains(id)) {
+                    m_loadedChunks.insert(id);
+                    continue;
                 }
-                m_loadedChunks.insert(coord);
+                m_chunks.emplace(id, std::make_unique<Chunk>(this, id));
+
+                jobs.push_back([this, id] {
+                    Chunk* chunk = m_chunks[id].get();
+                    chunk->generate();
+                    chunk->generateMesh();
+                    m_loadedChunks.insert(id);
+                });
             }
         }
     }
     m_genPool.resume();
+    return m_genPool.addBatch(jobs);
 }
 
 void World::unloadChunks(const glm::vec3& from, const glm::vec3& to) {
@@ -177,6 +190,7 @@ void World::render(Engine& engine, const Camera* camera, int pass) {
     for (const ChunkID& pos : m_loadedChunks) {
         m_chunks[pos]->render(engine, camera, 0);
     }
+    //std::cout << "Rendered chunks: " << m_chunks.size() << "\n";
 }
 
 void World::createChunk(ChunkID id, bool load) {
