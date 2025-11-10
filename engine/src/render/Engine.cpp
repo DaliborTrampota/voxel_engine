@@ -47,7 +47,7 @@ void Engine::gameloop() {
     m_window->setRenderFlags();
 
     float deltaTime = 0.0f;
-    float lastFrame = 0.0f;
+    float lastFrame = m_window->time();
     while (!m_window->shouldClose()) {
         float currentFrame = m_window->time();
         deltaTime = currentFrame - lastFrame;
