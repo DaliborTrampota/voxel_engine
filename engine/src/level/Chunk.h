@@ -56,7 +56,7 @@ namespace engine {
         bool generateMesh();
 
 
-        Block getBlock(glm::ivec3 pos) const;
+        Block getBlock(glm::ivec3 pos, Layer layer = Layers::ANY) const;
 
         /// @return 3D vector of the block data.
         ChunkData& data() { return m_data; }
@@ -71,7 +71,8 @@ namespace engine {
         ChunkID m_coords;
 
         ChunkData m_data;
-        gl::Attributes<Vertex> m_vertexData;
+        gl::Attributes<Vertex> m_opaqueVertData;
+        gl::Attributes<Vertex> m_transparentVertData;
 
         bool m_generated = false;
         std::atomic_bool m_generatingMesh = false;

@@ -1,8 +1,8 @@
 #include "PerlinTerrainGenerator.h"
 
-#include "Chunk.h"
-#include "data/RegistryManager.h"
-#include "glm/gtc/random.hpp"
+#include <data/RegistryManager.h>
+#include <level/Chunk.h>
+#include <glm/gtc/random.hpp>
 
 
 using namespace engine;
@@ -23,15 +23,15 @@ BlockID PerlinTerrainGenerator::voxelAt(const glm::ivec3& pos) {
 
 BlockID PerlinTerrainGenerator::voxelAt(const glm::ivec3& pos, int height) {
     int dirtHeight = static_cast<int>(m_noise.noise2D_01(pos.x * m_scale, pos.y * m_scale) * 2) + 3;
-    if (pos.y == height + 1 && glm::linearRand(.0f, 1.0f) < 0.4f)
-        return m_blockRegistry.get("pyramid").getID();
+    // if (pos.y == height + 1 && glm::linearRand(.0f, 1.0f) < 0.4f)
+    //     return m_blockRegistry.get("pyramid").getID();
 
     if (pos.y > height)
         return 0;
 
     unsigned int blockID;
     if (pos.y == height || pos.y == height - 1)
-        blockID = m_blockRegistry.get("sand").getID();
+        blockID = m_blockRegistry.get("grass").getID();
     else if (pos.y > dirtHeight)
         blockID = m_blockRegistry.get("dirt").getID();
     else
@@ -51,7 +51,11 @@ void PerlinTerrainGenerator::populate(Chunk& chunk) {
                 BlockID blockID = voxelAt(glm::ivec3(x, y, z) + chunkCoords, h);
                 if (blockID != 0) {
                     // For now, all blocks are opaque. Later you can determine transparency per block type.
-                    data.setBlock(x, y, z, blockID, Layers::OPAQUE);
+                    Block block = m_blockRegistry.get(blockID);
+
+                    data.setBlock(
+                        x, y, z, blockID, block.isOpaque() ? Layers::OPAQUE : Layers::TRANSPARENT
+                    );
                 }
             }
         }

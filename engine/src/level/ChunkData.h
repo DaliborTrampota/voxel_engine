@@ -52,6 +52,27 @@ namespace engine {
             return getBlock(pos.x, pos.y, pos.z);
         }
 
+        inline BlockID getBlockAndLayer(int x, int y, int z, Layer& layer) const {
+            uint32_t blockData = data[index(x, y, z)];
+            layer = blockData & LAYER_MASK;
+            return (blockData & BLOCK_MASK) >> BLOCK_SHIFT;
+        }
+
+        inline BlockID getBlockAndLayer(const glm::ivec3& pos, Layer& layer) const {
+            return getBlockAndLayer(pos.x, pos.y, pos.z, layer);
+        }
+
+        inline BlockID getBlockFromLayer(int x, int y, int z, Layer layer) const {
+            if (layer == Layers::ANY) {
+                return getBlock(x, y, z);
+            }
+            uint32_t blockData = data[index(x, y, z)];
+            if ((blockData & LAYER_MASK) == layer) {
+                return (blockData & BLOCK_MASK) >> BLOCK_SHIFT;
+            }
+            return 0;
+        }
+
         // Layer access (lower 8 bits)
         inline Layer getLayer(int x, int y, int z) const {
             return data[index(x, y, z)] & LAYER_MASK;
@@ -76,16 +97,6 @@ namespace engine {
 
         inline void setBlockOnly(const glm::ivec3& pos, BlockID block) {
             setBlockOnly(pos.x, pos.y, pos.z, block);
-        }
-
-        // Convenience: set layer only (preserves block)
-        inline void setLayerOnly(int x, int y, int z, Layer layer) {
-            size_t idx = index(x, y, z);
-            data[idx] = (data[idx] & BLOCK_MASK) | layer;
-        }
-
-        inline void setLayerOnly(const glm::ivec3& pos, Layer layer) {
-            setLayerOnly(pos.x, pos.y, pos.z, layer);
         }
 
         // Clear voxel (set to 0)

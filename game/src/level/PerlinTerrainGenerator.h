@@ -2,13 +2,13 @@
 
 #include <glm/glm.hpp>
 
-#include "ITerrainGenerator.h"
+#include <level/ITerrainGenerator.h>
 
-#include "block/Block.h"
-#include "data/Registry.h"
-#include "tools/PerlinNoise.h"
+#include <block/Block.h>
+#include <data/Registry.h>
+#include <tools/PerlinNoise.h>
 
-namespace engine {
+using namespace engine;
 
     class PerlinTerrainGenerator : public ITerrainGenerator {
       public:
@@ -27,4 +27,3 @@ namespace engine {
         float m_scale = 0.1f;
         float m_minHeight = 5.0f;
     };
-}  // namespace engine

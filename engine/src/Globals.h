@@ -13,7 +13,8 @@ namespace engine {
 
     // Render layer constants
     namespace Layers {
-        constexpr Layer OPAQUE = 0;
-        constexpr Layer TRANSPARENT = 1;
+        constexpr Layer ANY = 0;
+        constexpr Layer OPAQUE = 1;
+        constexpr Layer TRANSPARENT = 2;
     }  // namespace Layers
 }  // namespace engine

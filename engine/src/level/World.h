@@ -45,6 +45,8 @@ namespace engine {
         /// @param except Chunks to keep loaded.
         void unloadAllChunks(const std::vector<ChunkID>& except = {});
 
+        Chunk* getChunk(const ChunkID& id);
+        const Chunk* getChunk(const ChunkID& id) const;
 
         /// @section Block management
 
@@ -52,9 +54,15 @@ namespace engine {
         /// @return the block ID or engine::INVALID_BLOCK if:
         ///         - The position is out of bounds (eg less than or greater than Chunk::Dims)
         ///         - The chunk is not generated
-        BlockID getBlockID(const ChunkID& chID, const glm::ivec3& pos);
+        BlockID getBlockID(const ChunkID& chID, const glm::ivec3& pos, bool fallbackToGenerator);
+        BlockID getBlockID(glm::vec3 pos, bool fallbackToGenerator);
 
-        bool checkBlock(glm::vec3 pos, Block& curBlock, glm::ivec3 dir) const;
+        /// @brief Checks if the face of current block facing given direction can be seen and thus should be rendered.
+        /// @param curBlock The current block.
+        /// @param pos The position of the current block.
+        /// @param dir The direction from which the face is being checked.
+        /// @return true if the face can be seen (face should be rendered), false otherwise.
+        bool canSeeFace(const Block& curBlock, Layer layer, glm::vec3 pos, glm::ivec3 dir) const;
 
 
         const std::unordered_set<ChunkID>& loadedChunks() const { return m_loadedChunks; }

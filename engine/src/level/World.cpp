@@ -106,43 +106,71 @@ void World::unloadAllChunks(const std::vector<ChunkID>& except) {
     }
 }
 
-BlockID World::getBlockID(const ChunkID& chID, const glm::ivec3& pos) {
-    if (glm::any(glm::lessThan(pos, glm::ivec3(0))) ||
-        glm::any(glm::greaterThan(pos, Chunk::Dims))) {
-        std::cerr << "Position out of bounds\n";  // TODO add debug macros
-        return INVALID_BLOCK;
+Chunk* World::getChunk(const ChunkID& id) {
+    auto it = m_chunks.find(id);
+    if (it == m_chunks.end()) {
+        return nullptr;
     }
+    return it->second.get();
+}
+
+const Chunk* World::getChunk(const ChunkID& id) const {
+    auto it = m_chunks.find(id);
+    if (it == m_chunks.end()) {
+        return nullptr;
+    }
+    return it->second.get();
+}
+
+BlockID World::getBlockID(const ChunkID& chID, const glm::ivec3& pos, bool fallbackToGenerator) {
     auto chunk = m_chunks.find(chID);
     if (chunk == m_chunks.end() || !chunk->second->generated()) {
-        //std::cerr << "Chunk not found or not generated\n";
+        if (fallbackToGenerator)
+            return m_generator->voxelAt(pos);
         return INVALID_BLOCK;
     }
 
     return chunk->second->m_data.getBlock(pos);
 }
 
-bool World::checkBlock(glm::vec3 pos, Block& curBlock, glm::ivec3 dir) const {
-    ChunkID chunkCoords = engine::extractChunkCoords(pos);
-    // std::cout << "chunkCoords = " << chunkCoords.x << ", " << chunkCoords.y << ", " << chunkCoords.z << "\n";
+BlockID World::getBlockID(glm::vec3 pos, bool fallbackToGenerator) {
+    ChunkID chID = extractChunkCoords(pos);
+    auto chunk = m_chunks.find(chID);
+    if (chunk == m_chunks.end() || !chunk->second->generated()) {
+        if (fallbackToGenerator)
+            return m_generator->voxelAt(pos);
+        return INVALID_BLOCK;
+    }
+
+    return chunk->second->m_data.getBlock(pos);
+}
+
+bool World::canSeeFace(const Block& curBlock, Layer layer, glm::vec3 pos, glm::ivec3 dir) const {
+    glm::vec3 neighborPos = pos + glm::vec3(dir);
+    ChunkID chunkCoords = engine::extractChunkCoords(neighborPos);
     if (!m_chunks.contains(chunkCoords))
         return false;
 
-    const Chunk* chunk = m_chunks.at(chunkCoords).get();
-    if (!chunk)  // todo check from generator?
+    const Chunk* chunk = getChunk(chunkCoords);
+    if (!chunk)  // Chunk not generated
         return false;
 
-    Block block = chunk->getBlock(pos);
+    Block block = chunk->getBlock(neighborPos, layer);
 
-    if (!curBlock.isVoxel() && block.isVoxel() || curBlock.isVoxel() && !block.isVoxel()) {
-        dir = -dir;
+    // ) || (curBlock.isVoxel() && !block.isVoxel())
+    if (!curBlock.isVoxel() && block.isVoxel()) {
+        dir = -dir;  // Reverse dir to find face facing the current block
         for (const auto& f : block.geometry()->faces()) {
-            if (f.cullDir == dir)
+            if (f.cullDir == dir)  // todo check if the faces are on the same plane
                 return true;
         }
         return false;
     }
 
-    return block.getID() == curBlock.getID() || block.isSolid() && curBlock.isSolid();
+    bool sameBlock = block.getID() == curBlock.getID();
+    if (layer == Layers::ANY)
+        return sameBlock || (block.isSolid() && curBlock.isSolid());
+    return sameBlock;
 }
 
 void World::render(Engine& engine, const Camera* camera, int pass) {
