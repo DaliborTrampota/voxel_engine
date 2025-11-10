@@ -10,17 +10,22 @@
 #include <LWGL/render/Material.h>
 #include <UI/Renderer.h>
 
+#include <scene/Updateable.h>
+
 struct GLFWcursor;
 
 namespace ui {
     class Renderer;
-}
+    class Label;
+}  // namespace ui
 
-class UIManager : public GLEventSite {
+class UIManager : public GLEventSite,
+                  public engine::Updateable {
   public:
     UIManager(glm::ivec2 screenSize);
     ~UIManager() = default;
 
+    void update(float dt) override;
     void render();
 
   protected:
@@ -35,6 +40,13 @@ class UIManager : public GLEventSite {
     unsigned int m_vboID = 0;
 
     glm::ivec2 m_lastMousePos = {-1, -1};
+
+    std::shared_ptr<ui::Label> m_fpsLabel;
+    int samples = 0;
+    float fps = 0.f;
+    int fpsMax = 0;
+    int fpsMin = 10'000;
+
 
     inline static GLFWcursor* s_currentCursor = nullptr;
 };

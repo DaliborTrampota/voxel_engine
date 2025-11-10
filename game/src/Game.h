@@ -59,5 +59,5 @@ class Game : public engine::Engine {
     Camera* m_plrCamera;
     WorldManager m_worldManager;
 
-    std::unique_ptr<UIManager> m_uiManager;
+    std::shared_ptr<UIManager> m_uiManager;
 };
