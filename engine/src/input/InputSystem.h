@@ -39,7 +39,7 @@ namespace engine {
 
         template <KeyState state>
         bool isKey(GLFWKey k) const {
-            static_assert("Invalid key state");
+            static_assert(false, "Invalid key state");
             return false;
         }
         KeyState getKeyState(GLFWKey k) const;

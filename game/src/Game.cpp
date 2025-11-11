@@ -44,7 +44,6 @@ void Game::processInput() {
 }
 
 void Game::render(double dt) {
-    printf("%f\n", dt);
     processInput();
     fireUpdate(dt);
 
