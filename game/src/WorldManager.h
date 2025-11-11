@@ -3,7 +3,6 @@
 #include <future>
 #include <memory>
 #include <unordered_map>
-#include <future>
 
 #include <glm/glm.hpp>
 
