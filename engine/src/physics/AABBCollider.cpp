@@ -276,7 +276,7 @@ float AABBCollider::tryStepUp(const glm::vec3& horizontalMove, const AABB* colli
         // Maybe we collide but there is a ledge? Check absolute amount for 1/16th of a block
         if (res.axis != 1 && res.time != 1.0f) {
             float absMove = horizontalMove[res.axis] * res.time;
-            if (absMove < 1/16.f) { 
+            if (absMove < 1.f/16.f) { 
                 canStep = false;
                 break;
             }

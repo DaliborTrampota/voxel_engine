@@ -55,7 +55,7 @@ namespace engine {
         /// @section Block management
 
         /// @brief Gets the block ID at the given position.
-        /// @param 
+        /// @param
         /// @return the block ID or engine::INVALID_BLOCK if:
         ///         - The position is out of bounds (eg less than or greater than Chunk::Dims)
         ///         - The chunk is not generated
