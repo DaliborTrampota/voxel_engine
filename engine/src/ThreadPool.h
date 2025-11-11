@@ -1,6 +1,9 @@
 #pragma once
 
+#include <atomic>
 #include <concepts>
+#include <future>
+#include <memory>
 #include <queue>
 #include <vector>
 
@@ -9,6 +12,11 @@
 #include <condition_variable>
 #include <mutex>
 #include <thread>
+
+#ifdef _WIN32
+#define NOMINMAX
+#include <windows.h>
+#endif
 
 using Job = std::function<void()>;
 class ThreadPool {
@@ -33,6 +41,24 @@ class ThreadPool {
         // clang-format on
     }
 
+    std::future<void> addBatch(std::vector<Job> batch) {
+        auto promise = std::make_shared<std::promise<void>>();
+        auto remainingJobs = std::make_shared<std::atomic<int>>(batch.size());
+        std::future<void> future = promise->get_future();
+
+        for (const auto& job : batch) {
+            add([job, promise, remainingJobs]() {
+                job();
+
+                if (remainingJobs->fetch_sub(1) == 1) {
+                    promise->set_value();
+                }
+            });
+        }
+
+        return future;
+    }
+
     void stop() {
         {
             std::unique_lock lock(m_mutex);
@@ -52,6 +78,9 @@ class ThreadPool {
 
   private:
     void loop() {
+#ifdef _WIN32
+        SetThreadDescription(GetCurrentThread(), L"ThreadPool");
+#endif
         while (true) {
             Job job;
             {

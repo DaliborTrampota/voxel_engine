@@ -15,5 +15,10 @@ if "%1" == "-vs" (
     exit
 )
 
-cmake -B build -S .
+if "%1" == "-conf" (
+    cmake --preset vs2022
+    exit
+)
+
+cmake --preset vs2022
 start build/voxel_engine.sln

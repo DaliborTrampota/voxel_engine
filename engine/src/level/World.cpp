@@ -19,8 +19,6 @@
 #include <glm/gtx/norm.hpp>
 #include <iostream>
 
-namespace fs = std::filesystem;
-
 using namespace engine;
 
 World::World(std::unique_ptr<ITerrainGenerator> gen, uint32_t genThreads)
@@ -47,35 +45,48 @@ World::~World() {
     printf("World deleted\n");
     m_genPool.stop();
 
-    for (auto& [pos, chunk] : m_chunks) {
-        delete chunk;
-    }
+    // for (auto& [pos, chunk] : m_chunks) {
+    //     delete chunk;
+    // }
 }
 
-void World::loadChunks(const glm::vec3& from, const glm::vec3& to, bool unloadRest) {
+std::future<void> World::loadChunks(const glm::vec3& from, const glm::vec3& to, bool unloadRest) {
     // ChunkID chunkCoords = engine::extractChunkCoords(pos);
+    m_genPool.pause();
     if (unloadRest) {
-        for (const ChunkID& id : m_loadedChunks) {
+        for (auto it = m_loadedChunks.begin(); it != m_loadedChunks.end();) {
+            const ChunkID& id = *it;
             if (id.x < from.x || id.x > to.x || id.y < from.y || id.y > to.y || id.z < from.z ||
                 id.z > to.z) {
-                m_loadedChunks.erase(id);
+                it = m_loadedChunks.erase(it);
+            } else {
+                ++it;
             }
         }
     }
-    m_genPool.pause();
+
+    std::vector<Job> jobs;
     for (int x = from.x; x < to.x; ++x) {
         for (int y = from.y; y < to.y; ++y) {
             for (int z = from.z; z < to.z; ++z) {
-                ChunkID coord = ChunkID(x, y, z);
-                auto it = m_chunks.find(coord);
-                if (it == m_chunks.end()) {
-                    createChunk(coord, false);
+                ChunkID id = ChunkID(x, y, z);
+                if (m_chunks.contains(id)) {
+                    m_loadedChunks.insert(id);
+                    continue;
                 }
-                m_loadedChunks.insert(coord);
+                m_chunks.emplace(id, std::make_unique<Chunk>(this, id));
+
+                jobs.push_back([this, id] {
+                    Chunk* chunk = m_chunks[id].get();
+                    chunk->generate();
+                    chunk->generateMesh();
+                    m_loadedChunks.insert(id);
+                });
             }
         }
     }
     m_genPool.resume();
+    return m_genPool.addBatch(jobs);
 }
 
 void World::unloadChunks(const glm::vec3& from, const glm::vec3& to) {
@@ -94,9 +105,7 @@ void World::unloadChunks(const glm::vec3& from, const glm::vec3& to) {
 
 void World::unloadAllChunks(const std::vector<ChunkID>& except) {
     if (except.empty()) {
-        for (auto it = m_loadedChunks.begin(); it != m_loadedChunks.end();) {
-            it = m_loadedChunks.erase(it);
-        }
+        m_loadedChunks.clear();
     } else {
         for (auto it = m_loadedChunks.begin(); it != m_loadedChunks.end();) {
             if (std::find(except.begin(), except.end(), *it) == except.end()) {
@@ -108,59 +117,89 @@ void World::unloadAllChunks(const std::vector<ChunkID>& except) {
     }
 }
 
-BlockID World::getBlockID(const ChunkID& chID, const glm::ivec3& pos) {
-    if (glm::any(glm::lessThan(pos, glm::ivec3(0))) ||
-        glm::any(glm::greaterThan(pos, Chunk::Dims))) {
-        std::cerr << "Position out of bounds\n";  // TODO add debug macros
-        return INVALID_BLOCK;
+Chunk* World::getChunk(const ChunkID& id) {
+    auto it = m_chunks.find(id);
+    if (it == m_chunks.end()) {
+        return nullptr;
     }
-    auto chunk = m_chunks.find(chID);
-    if (chunk == m_chunks.end() || !chunk->second->generated()) {
-        //std::cerr << "Chunk not found or not generated\n";
-        return INVALID_BLOCK;
-    }
-
-    return chunk->second->m_data[pos.x][pos.y][pos.z];
+    return it->second.get();
 }
 
-bool World::checkBlock(glm::vec3 pos, Block& curBlock, glm::ivec3 dir) const {
-    ChunkID chunkCoords = engine::extractChunkCoords(pos);
-    // std::cout << "chunkCoords = " << chunkCoords.x << ", " << chunkCoords.y << ", " << chunkCoords.z << "\n";
+const Chunk* World::getChunk(const ChunkID& id) const {
+    auto it = m_chunks.find(id);
+    if (it == m_chunks.end()) {
+        return nullptr;
+    }
+    return it->second.get();
+}
+
+BlockID World::getBlockID(const ChunkID& chID, const glm::ivec3& pos, bool fallbackToGenerator) {
+    auto chunk = m_chunks.find(chID);
+    if (chunk == m_chunks.end() || !chunk->second->generated()) {
+        if (fallbackToGenerator)
+            return m_generator->voxelAt(pos);
+        return INVALID_BLOCK;
+    }
+
+    return chunk->second->m_data.getBlock(pos);
+}
+
+BlockID World::getBlockID(glm::vec3 pos, bool fallbackToGenerator) {
+    ChunkID chID = extractChunkCoords(pos);
+    auto chunk = m_chunks.find(chID);
+    if (chunk == m_chunks.end() || !chunk->second->generated()) {
+        if (fallbackToGenerator)
+            return m_generator->voxelAt(pos);
+        return INVALID_BLOCK;
+    }
+
+    return chunk->second->m_data.getBlock(pos);
+}
+
+bool World::canSeeFace(const Block& curBlock, Layer layer, glm::vec3 pos, glm::ivec3 dir) const {
+    glm::vec3 neighborPos = pos + glm::vec3(dir);
+    ChunkID chunkCoords = engine::extractChunkCoords(neighborPos);
     if (!m_chunks.contains(chunkCoords))
         return false;
 
-    Chunk* chunk = m_chunks.at(chunkCoords);
-    if (!chunk)
+    const Chunk* chunk = getChunk(chunkCoords);
+    if (!chunk)  // Chunk not generated
         return false;
-    Block block = chunk->getBlock(pos);
 
+    Block block = chunk->getBlock(neighborPos, layer);
 
-    if (!curBlock.isVoxel() && block.isVoxel() || curBlock.isVoxel() && !block.isVoxel()) {
-        dir = -dir;
+    // ) || (curBlock.isVoxel() && !block.isVoxel())
+    if (!curBlock.isVoxel() && block.isVoxel()) {
+        dir = -dir;  // Reverse dir to find face facing the current block
         for (const auto& f : block.geometry()->faces()) {
-            if (f.cullDir == dir)
+            if (f.cullDir == dir)  // todo check if the faces are on the same plane
                 return true;
         }
         return false;
     }
 
-    return block.getID() == curBlock.getID() || block.isSolid() && curBlock.isSolid();
+    bool sameBlock = block.getID() == curBlock.getID();
+    if (layer == Layers::ANY)
+        return sameBlock ||
+               (block.isSolid() && curBlock.isSolid());  //TODO opaque instead of solid?
+    return sameBlock;
 }
 
 void World::render(Engine& engine, const Camera* camera, int pass) {
     for (const ChunkID& pos : m_loadedChunks) {
         m_chunks[pos]->render(engine, camera, 0);
     }
+    //std::cout << "Rendered chunks: " << m_chunks.size() << "\n";
 }
 
 void World::createChunk(ChunkID id, bool load) {
-    Chunk* chunk = new Chunk(this, id);
-    m_chunks[id] = chunk;
+    m_chunks.emplace(id, std::make_unique<Chunk>(this, id));
 
-    m_genPool.add([this, chunk, load] {
+    m_genPool.add([this, id, load] {
+        Chunk* chunk = m_chunks[id].get();
         chunk->generate();
         chunk->generateMesh();
         if (load)
-            m_loadedChunks.insert(chunk->id());
+            m_loadedChunks.insert(id);
     });
 }

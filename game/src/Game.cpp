@@ -60,7 +60,7 @@ void Game::render(double dt) {
 
 void Game::afterRender() {
     // Render UI AFTER flush() so it draws on top of everything
-    //m_uiManager->render();
+    m_uiManager->render();
 }
 
 void Game::start() {
@@ -74,6 +74,7 @@ void Game::start() {
     m_player->spawn(activeWorld());
 
     subscribeUpdate(m_player);
+    subscribeUpdate(m_uiManager);
 
     // uncomment this call to draw in wireframe polygons.
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

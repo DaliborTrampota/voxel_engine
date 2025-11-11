@@ -22,7 +22,11 @@ void FlatTerrainGenerator::populate(Chunk& chunk) {
     for (int x = 0; x < Chunk::Dims.x; ++x) {
         for (int y = 0; y < Chunk::Dims.y; ++y) {
             for (int z = 0; z < Chunk::Dims.z; ++z) {
-                data[x][y][z] = voxelAt(glm::ivec3(x, y, z) + chunkCoords);
+                BlockID blockID = voxelAt(glm::ivec3(x, y, z) + chunkCoords);
+                if (blockID != 0) {
+                    // For now, all blocks are opaque. Later you can determine transparency per block type.
+                    data.setBlock(x, y, z, blockID, Layers::OPAQUE);
+                }
             }
         }
     }

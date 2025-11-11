@@ -28,6 +28,19 @@ void AABB::move(const glm::vec3& offset) {
     max += offset;
 }
 
+void AABB::moveAxis(int axis, float amount) {
+    if (axis == 0) {
+        min.x += amount;
+        max.x += amount;
+    } else if (axis == 1) {
+        min.y += amount;
+        max.y += amount;
+    } else if (axis == 2) {
+        min.z += amount;
+        max.z += amount;
+    }
+}
+
 void AABB::position(const glm::vec3& pos) {
     glm::vec3 center = this->center();
     center.y = max.y;

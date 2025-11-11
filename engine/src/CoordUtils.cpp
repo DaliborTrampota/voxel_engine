@@ -19,6 +19,10 @@ namespace engine {
         return chunkCoords;
     }
 
+    ChunkID getChunkID(const glm::vec3& pos) {
+        return ChunkID(static_cast<glm::ivec3>(glm::floor(pos / glm::vec3(Chunk::Dims))));
+    }
+
     glm::ivec3 floorToInt(const glm::vec3& vec) {
         return static_cast<glm::ivec3>(vec);
     }
