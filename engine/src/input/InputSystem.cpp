@@ -28,16 +28,16 @@ void InputSystem::beginFrame() {
 }
 
 float InputSystem::getAxis(Axis axis) {
-    float value = m_axisStates[static_cast<size_t>(axis)];
+    float value = m_axisStates[static_cast<int>(axis)];
     if (axis == Axis::MouseX || axis == Axis::MouseY) {
         // Reset mouse axis after reading
-        m_axisStates[static_cast<size_t>(axis)] = 0.0f;
+        m_axisStates[static_cast<int>(axis)] = 0.0f;
     }
     return value;
 }
 
 void InputSystem::setAxis(Axis axis, float value) {
-    m_axisStates[static_cast<size_t>(axis)] = value;
+    m_axisStates[static_cast<int>(axis)] = value;
 }
 
 void InputSystem::registerCallbacks() {
@@ -65,12 +65,6 @@ void InputSystem::registerCallbacks() {
         }
     );
 
-    // glfwSetFramebufferSizeCallback(window, [](GLFWwindow* w, int width, int height) {
-    //     InputSystem* api = static_cast<InputSystem*>(glfwGetWindowUserPointer(w));
-    //     ResizeEvent ev{width, height};
-    //     api->fireWindowResizeEvent(&ev);
-    // });
-
     glfwSetKeyCallback(m_window, [](GLFWwindow* w, int key, int scancode, int action, int mods) {
         InputSystem* input = static_cast<InputSystem*>(glfwGetWindowUserPointer(w));
         KeyboardEvent ev{key, scancode, action, mods};
@@ -81,25 +75,18 @@ void InputSystem::registerCallbacks() {
                                                      : KeyState::Held;
         input->m_keyStates[input->keyIndex(key)] = state;
 
-        float sideways = input->getAxis(Axis::Sideways);
-        float forward = input->getAxis(Axis::Forward);
 
-        int multiplier = ev.action == GLFW_RELEASE ? -1
-                         : ev.action == GLFW_PRESS ? 1
-                                                   : 0;  // TODO press or hold?
+        float sideways = 0.f;
+        float forward = 0.f;
 
-        if (key == GLFW_KEY_A)
-            sideways -= 1.0f * multiplier;
-
-        if (key == GLFW_KEY_D)
-            sideways += 1.0f * multiplier;
-
-        if (key == GLFW_KEY_W)
-            forward -= 1.0f * multiplier;  // OpenGL -Z is forward
-
-        if (key == GLFW_KEY_S)
-            forward += 1.0f * multiplier;
-
+        if (glfwGetKey(w, GLFW_KEY_A) == GLFW_PRESS)
+            sideways -= 1.0f;
+        if (glfwGetKey(w, GLFW_KEY_D) == GLFW_PRESS)
+            sideways += 1.0f;
+        if (glfwGetKey(w, GLFW_KEY_W) == GLFW_PRESS)
+            forward -= 1.0f;
+        if (glfwGetKey(w, GLFW_KEY_S) == GLFW_PRESS)
+            forward += 1.0f;
 
         input->setAxis(Axis::Sideways, sideways);
         input->setAxis(Axis::Forward, forward);
