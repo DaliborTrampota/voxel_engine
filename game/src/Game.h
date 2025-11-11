@@ -4,9 +4,6 @@
 #include <unordered_map>
 
 #include <LWGL/buffer/UBO.h>
-#include <LWGL/events/GLEventSite.h>
-
-#include <InputSystem.h>
 #include <render/Engine.h>
 
 #include "Player.h"
@@ -25,14 +22,8 @@ using namespace engine;
 
 namespace engine {
     class Camera;
-}
-
-struct MouseState {
-    MouseState() = delete;
-    MouseState(glm::ivec2 dims) : lastX(dims.x / 2.0f), lastY(dims.y / 2.0f), firstMouse(true) {}
-    float lastX, lastY;
-    bool firstMouse;
-};
+    class InputSystem;
+}  // namespace engine
 
 class Game : public engine::Engine {
   public:
@@ -51,7 +42,6 @@ class Game : public engine::Engine {
 
   private:
     std::unique_ptr<InputSystem> m_inputSystem;
-    MouseState m_mouseState;
 
     gl::UBO m_commonUBO;
 

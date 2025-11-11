@@ -100,6 +100,8 @@ void Player::update(float dt) {
     }
 
     if (input->isKey(Down, Key::L)) {
+    //if (input->get)
+
         auto dir = m_camera->lookDirection();
         printf("Look direction: %.1f, %.1f, %.1f\n", dir.x, dir.y, dir.z);
         printf("Position: %.1f, %.1f, %.1f\n", m_position.x, m_position.y, m_position.z);
