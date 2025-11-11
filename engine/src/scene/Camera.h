@@ -4,7 +4,6 @@
 #include <glm/gtc/quaternion.hpp>
 
 #include "../Globals.h"
-#include "Controls.h"
 
 
 namespace engine {

@@ -7,12 +7,8 @@
 #include <UI/elements/Label.h>
 #include <UI/elements/Panel.h>
 
-#include <LWGL/events/GLEventSource.h>
-#include <LWGL/events/GLEvents.h>
-
-
 #include <GLFW/glfw3.h>
-#include <glad/glad.h>
+#include <glad/glad.h>  // TODO remove?
 
 
 using namespace ui;
@@ -241,8 +237,6 @@ void UIManager::render() {
 }
 
 void UIManager::mouseMoveEvent(::MouseEvent* pEvent) {
-    if (pEvent->clearEvent())
-        return;
     ui::MouseEvent event{
         .button = ui::MouseBtn::None, .action = ui::Action::Move, .pos = {pEvent->x, pEvent->y}
     };

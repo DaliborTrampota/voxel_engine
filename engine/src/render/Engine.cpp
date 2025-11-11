@@ -15,7 +15,7 @@
 
 using namespace engine;
 
-Engine::Engine(std::unique_ptr<gl::Window> window) : m_window(std::move(window)) {}
+Engine::Engine(std::unique_ptr<Window> window) : m_window(std::move(window)) {}
 
 void Engine::submitRender(RenderContext&& ctx, bool immediate) {
     if (!immediate) {
@@ -44,7 +44,13 @@ void Engine::flush() {
 }
 
 void Engine::gameloop() {
-    m_window->setRenderFlags();
+    //TODO
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    //glDisable(GL_CULL_FACE);
+    //glDisable(GL_DEPTH_TEST);
+    glCullFace(GL_BACK);
+
 
     float deltaTime = 0.0f;
     float lastFrame = m_window->time();
@@ -53,7 +59,7 @@ void Engine::gameloop() {
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        m_window->beginFrame();
+        beginFrame();
 
         beforeRender();
         render(deltaTime);
@@ -64,7 +70,7 @@ void Engine::gameloop() {
         while ((err = glGetError()) != GL_NO_ERROR)
             printf("OpenGL error: %d\n", err);
 
-        m_window->endFrame();
+        endFrame();
     }
 }
 
@@ -99,6 +105,14 @@ void Engine::subscribeUpdate(std::shared_ptr<Updateable> updateable) {
     m_updateSubscribers.push_back(updateable);
 }
 
+void Engine::beginFrame() {
+    m_window->clearScreen();
+}
+
+void Engine::endFrame() {
+    m_window->swapBuffers();
+    glfwPollEvents();
+}
 // void Engine::subscribeInputSystem(engine::InputSystem* inputSystem) {
 //     m_window->graphicsAPI()->subscribe(inputSystem);
 // }

@@ -55,11 +55,20 @@ namespace engine {
         /// @section Block management
 
         /// @brief Gets the block ID at the given position.
-        /// @param
+        /// @param chID The chunk to query the block from
+        /// @param pos The position of the block within the chunk (0 to Chunk::Dims)
+        /// @param fallbackToGenerator If true, the generator will be used to get the block ID if the chunk is not generated
         /// @return the block ID or engine::INVALID_BLOCK if:
         ///         - The position is out of bounds (eg less than or greater than Chunk::Dims)
         ///         - The chunk is not generated
         BlockID getBlockID(const ChunkID& chID, const glm::ivec3& pos, bool fallbackToGenerator);
+
+        /// @brief Gets the block ID at the given position.
+        /// @param pos The position of the block in world space
+        /// @param fallbackToGenerator If true, the generator will be used to get the block ID if the chunk is not generated
+        /// @return the block ID or engine::INVALID_BLOCK if:
+        ///         - The position is out of bounds (eg less than or greater than Chunk::Dims)
+        ///         - The chunk is not generated
         BlockID getBlockID(glm::vec3 pos, bool fallbackToGenerator);
 
         /// @brief Checks if the face of current block facing given direction can be seen and thus should be rendered.

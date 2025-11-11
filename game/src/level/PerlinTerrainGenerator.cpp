@@ -50,7 +50,6 @@ void PerlinTerrainGenerator::populate(Chunk& chunk) {
             for (int y = 0; y < Chunk::Dims.y; y++) {
                 BlockID blockID = voxelAt(glm::ivec3(x, y, z) + chunkCoords, h);
                 if (blockID != 0) {
-                    // For now, all blocks are opaque. Later you can determine transparency per block type.
                     Block block = m_blockRegistry.get(blockID);
 
                     data.setBlock(

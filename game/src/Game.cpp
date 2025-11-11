@@ -4,17 +4,17 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <LWGL/events/GLEvents.h>
-#include <LWGL/gl/GraphicsAPI.h>
-
 #include <UI/Renderer.h>
 #include <UI/elements/Panel.h>
 
-
 #include <data/TextureLoader.h>
 #include <level/World.h>
+#include <render/Window.h>
 #include <scene/Camera.h>
 #include <scene/Updateable.h>
+
+
+#include <input/InputSystem.h>
 
 #include "GameServices.h"
 #include "registry/Blocks.h"
@@ -23,15 +23,13 @@
 using namespace engine;
 
 
-Game::Game(std::unique_ptr<gl::Window> window, glm::ivec2 dims)
-    : Engine(std::move(window)),
-      m_mouseState(dims) {
+Game::Game(std::unique_ptr<Window> window, glm::ivec2 dims) : Engine(std::move(window)) {
+    this->window()->makeCurrent();
     m_inputSystem = std::make_unique<engine::InputSystem>();
-    this->window()->graphicsAPI()->subscribe(m_inputSystem.get());
+    this->window()->setUserPointer(m_inputSystem.get());
 
-    m_uiManager = std::make_unique<UIManager>(this->window()->size());
-    this->window()->graphicsAPI()->subscribe(m_uiManager.get());
-
+    m_uiManager = std::make_unique<UIManager>(dims);
+    m_inputSystem->subscribe(m_uiManager.get());
 
     GameServices::setGame(this);
     GameServices::setInputSystem(m_inputSystem.get());
@@ -41,8 +39,8 @@ Game::~Game() {}
 
 
 void Game::processInput() {
-    if (m_inputSystem->getKeyState(Key::Esc) == KeyState::Pressed)
-        window()->close();
+    if (m_inputSystem->isKey<Down>(GLFW_KEY_ESCAPE))
+        window()->setShouldClose();
 }
 
 void Game::render(double dt) {
@@ -61,6 +59,7 @@ void Game::render(double dt) {
 void Game::afterRender() {
     // Render UI AFTER flush() so it draws on top of everything
     m_uiManager->render();
+    m_inputSystem->beginFrame();  // TODO proper name or placement
 }
 
 void Game::start() {

@@ -6,6 +6,8 @@
 
 #include <glm/glm.hpp>
 
+#include <glm/glm.hpp>
+
 namespace engine {
     class World;
 }

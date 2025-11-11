@@ -5,7 +5,7 @@
 
 
 #include <CoordUtils.h>
-#include <InputSystem.h>
+#include <input/InputSystem.h>
 #include <level/Chunk.h>
 #include <level/World.h>
 #include <physics/AABB.h>
@@ -79,7 +79,7 @@ void Player::update(float dt) {
     float forward = input->getAxis(Axis::Forward);
     float sideways = input->getAxis(Axis::Sideways);
 
-    if (m_onGround && input->isKey(Pressed, Key::Space)) {
+    if (m_onGround && input->isKey<Pressed>(GLFW_KEY_SPACE)) {
         m_velocity.y += 5.f;
     }
     float upDown = 0;
@@ -90,7 +90,7 @@ void Player::update(float dt) {
     else
         move(glm::vec3(0), dt);
 
-    if (input->isKey(Down, Key::P)) {
+    if (input->isKey<Pressed>(GLFW_KEY_P)) {
         m_position = glm::vec3(Chunk::Dims.x / 2, 20, Chunk::Dims.z / 2);
         m_velocity = glm::vec3(0.f);
         m_camera->position(m_position);
@@ -99,7 +99,9 @@ void Player::update(float dt) {
         m_aabb->position(m_position);
     }
 
-    if (input->isKey(Down, Key::L)) {
+    //if (input->get)
+
+    if (input->isKey<Pressed>(GLFW_KEY_L)) {
         auto dir = m_camera->lookDirection();
         printf("Look direction: %.1f, %.1f, %.1f\n", dir.x, dir.y, dir.z);
         printf("Position: %.1f, %.1f, %.1f\n", m_position.x, m_position.y, m_position.z);

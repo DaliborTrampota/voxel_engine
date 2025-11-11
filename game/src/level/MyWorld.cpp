@@ -1,14 +1,15 @@
 #include "MyWorld.h"
 
 #include <algorithm>
+#include <glm/gtx/norm.hpp>
 #include <iostream>
+
 
 #include "../Player.h"
 
 #include <CoordUtils.h>
 #include <level/Chunk.h>
 #include <render/Engine.h>
-#include <glm/gtx/norm.hpp>
 
 using namespace engine;
 
@@ -33,7 +34,9 @@ void MyWorld::render(Engine& engine, const Camera* camera, int pass) {
     for (const ChunkID& pos : renderOrder) {
         m_chunks.at(pos)->render(engine, camera, 2);
     }
+#ifdef NDEBUG
     std::cout << "Rendered chunks: " << renderOrder.size() << "\n";
+#endif
 }
 
 void MyWorld::setPlayer(std::shared_ptr<Player> player) {

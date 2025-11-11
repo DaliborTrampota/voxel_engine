@@ -7,6 +7,9 @@
 #include "level/PerlinTerrainGenerator.h"
 
 
+#include "level/PerlinTerrainGenerator.h"
+
+
 WorldManager::WorldManager() {
     m_currentWorld = 0;
     m_worlds[0] =

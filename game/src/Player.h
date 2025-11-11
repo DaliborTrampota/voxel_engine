@@ -3,7 +3,6 @@
 #include <glm/glm.hpp>
 #include <memory>
 
-#include <Controls.h>
 #include <level/Chunk.h>
 #include <physics/AABBCollider.h>
 #include <scene/Updateable.h>
