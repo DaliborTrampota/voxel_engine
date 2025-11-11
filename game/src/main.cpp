@@ -1,6 +1,6 @@
-#include <LWGL/Window.h>
-#include <LWGL/gl/GraphicsAPI.h>
+#include <iostream>
 
+#include <render/Window.h>
 #include "Game.h"
 
 // Force dedicated GPU (Windows only)
@@ -12,9 +12,12 @@ __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;    // for am
 #endif
 
 int gameEntry() {
-    std::unique_ptr<gl::Window> window =
-        std::make_unique<gl::Window>(std::make_unique<gl::GraphicsAPI>());
-    Game game(std::move(window), window->size());
+    std::unique_ptr<engine::Window> window = std::make_unique<engine::Window>();
+    if (!window->init(2304, 1440, "Super Survival")) {
+        std::cerr << "Failed to initialize window" << std::endl;
+        return -1;
+    }
+    Game game(std::move(window), window->windowSize());
     game.start();
 
     return 0;

@@ -1,8 +1,5 @@
 #pragma once
 
-#include <deque>
-#include <unordered_map>
-
 #include <LWGL/buffer/UBO.h>
 #include <render/Engine.h>
 
@@ -10,25 +7,22 @@
 #include "WorldManager.h"
 #include "ui/UIManager.h"
 
-namespace gl {
-    class Window;
-}
+using namespace engine;
 
 namespace ui {
     class Renderer;
 }
 
-using namespace engine;
-
 namespace engine {
     class Camera;
     class InputSystem;
+    class Window;
 }  // namespace engine
 
 class Game : public engine::Engine {
   public:
     Game() = delete;
-    Game(std::unique_ptr<gl::Window> window, glm::ivec2 dims);
+    Game(std::unique_ptr<Window> window, glm::ivec2 dims);
     ~Game();
 
     void start();

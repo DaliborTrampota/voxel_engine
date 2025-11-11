@@ -9,6 +9,7 @@
 
 #include <data/TextureLoader.h>
 #include <level/World.h>
+#include <render/Window.h>
 #include <scene/Camera.h>
 #include <scene/Updateable.h>
 
@@ -22,13 +23,9 @@
 using namespace engine;
 
 
-Game::Game(std::unique_ptr<gl::Window> window, glm::ivec2 dims)
-    : Engine(std::move(window)),
-      m_mouseState(dims) {
+Game::Game(std::unique_ptr<Window> window, glm::ivec2 dims) : Engine(std::move(window)) {
+    this->window()->makeCurrent();
     m_inputSystem = std::make_unique<engine::InputSystem>();
-
-    m_uiManager = std::make_unique<UIManager>(this->window()->size());
-    this->window()->graphicsAPI()->subscribe(m_uiManager.get());
     this->window()->setUserPointer(m_inputSystem.get());
 
     m_uiManager = std::make_unique<UIManager>(dims);
@@ -42,11 +39,12 @@ Game::~Game() {}
 
 
 void Game::processInput() {
-        window()->close();
     if (m_inputSystem->isKey<Down>(GLFW_KEY_ESCAPE))
+        window()->setShouldClose();
 }
 
 void Game::render(double dt) {
+    printf("%f\n", dt);
     processInput();
     fireUpdate(dt);
 
