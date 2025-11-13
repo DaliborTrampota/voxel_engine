@@ -10,6 +10,8 @@
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>  // TODO remove?
 
+#include <render/EngineEvents.h>
+
 
 using namespace ui;
 
@@ -236,6 +238,10 @@ void UIManager::render() {
     glDepthMask(GL_TRUE);
 }
 
+void UIManager::windowResizeEvent(ResizeEvent* ev) {
+    m_renderer.setViewportSize(glm::ivec2{ev->width, ev->height});
+}
+
 void UIManager::mouseMoveEvent(::MouseEvent* pEvent) {
     ui::MouseEvent event{
         .button = ui::MouseBtn::None, .action = ui::Action::Move, .pos = {pEvent->x, pEvent->y}
@@ -245,7 +251,7 @@ void UIManager::mouseMoveEvent(::MouseEvent* pEvent) {
     m_renderer.mouseEvent(event);
 }
 
-void UIManager::mouseButtonEvent(::MouseButtonEvent* pEvent) {
+void UIManager::mouseButtonEvent(MouseButtonEvent* pEvent) {
     ui::MouseBtn btn;
     switch (pEvent->button) {
         case GLFW_MOUSE_BUTTON_LEFT: btn = ui::MouseBtn::LMB; break;

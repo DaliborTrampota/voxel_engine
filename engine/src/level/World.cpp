@@ -189,6 +189,7 @@ void World::render(Engine& engine, const Camera* camera, int pass) {
     for (const ChunkID& pos : m_loadedChunks) {
         m_chunks[pos]->render(engine, camera, 0);
     }
+    m_skybox.render(engine, camera);
     //std::cout << "Rendered chunks: " << m_chunks.size() << "\n";
 }
 

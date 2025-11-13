@@ -7,6 +7,8 @@
 #include "WorldManager.h"
 #include "ui/UIManager.h"
 
+#include <GLFWUserPointer.h>
+
 using namespace engine;
 
 namespace ui {
@@ -36,6 +38,7 @@ class Game : public engine::Engine {
 
   private:
     std::unique_ptr<InputSystem> m_inputSystem;
+    GLFWUserPointer m_pointer;
 
     gl::UBO m_commonUBO;
 

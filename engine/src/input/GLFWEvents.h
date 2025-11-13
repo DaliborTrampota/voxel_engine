@@ -1,12 +1,12 @@
 #pragma once
 
-#include <utility/Event.h>
+#include "utility/Event.h"
 
 class MouseEvent : public engine::Event {
   public:
-    MouseEvent(double x, double y) : x(x), y(y) {}
+    MouseEvent(double x, double y) : x(static_cast<float>(x)), y(static_cast<float>(y)) {}
 
-    double x, y;
+    float x, y;
 };
 
 class MouseButtonEvent : public engine::Event {

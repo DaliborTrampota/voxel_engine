@@ -1,6 +1,7 @@
 #include "InputSystem.h"
 
 #include "GLFWEvents.h"
+#include "GLFWUserPointer.h"
 
 using namespace engine;
 
@@ -42,31 +43,34 @@ void InputSystem::setAxis(Axis axis, float value) {
 
 void InputSystem::registerCallbacks() {
     glfwSetCursorPosCallback(m_window, [](GLFWwindow* w, double x, double y) -> void {
-        InputSystem* input = static_cast<InputSystem*>(glfwGetWindowUserPointer(w));
+        InputSystem* input = static_cast<GLFWUserPointer*>(glfwGetWindowUserPointer(w))->input;
         MouseEvent ev{x, y};
 
-        float dx = x - input->m_mouseX;
+        float dx = ev.x - input->m_mouseX;
         float dy = input->m_mouseY - ev.y;  // reversed since y-coordinates go from bottom to top
 
         input->setAxis(Axis::MouseX, dx);
         input->setAxis(Axis::MouseY, dy);
 
-        input->m_mouseX = x;
-        input->m_mouseY = y;
+        input->m_mouseX = ev.x;
+        input->m_mouseY = ev.y;
 
         input->fireMouseMoveEvent(&ev);
     });
 
     glfwSetMouseButtonCallback(
         m_window, [](GLFWwindow* w, int button, int action, int mods) -> void {
-            InputSystem* api = static_cast<InputSystem*>(glfwGetWindowUserPointer(w));
+            InputSystem* input = static_cast<GLFWUserPointer*>(glfwGetWindowUserPointer(w))->input;
             MouseButtonEvent ev{button, action, mods};
-            api->fireMouseButtonEvent(&ev);
+            input->fireMouseButtonEvent(&ev);
         }
     );
 
     glfwSetKeyCallback(m_window, [](GLFWwindow* w, int key, int scancode, int action, int mods) {
-        InputSystem* input = static_cast<InputSystem*>(glfwGetWindowUserPointer(w));
+        if (key == GLFW_KEY_UNKNOWN)
+            return;
+
+        InputSystem* input = static_cast<GLFWUserPointer*>(glfwGetWindowUserPointer(w))->input;
         KeyboardEvent ev{key, scancode, action, mods};
 
 

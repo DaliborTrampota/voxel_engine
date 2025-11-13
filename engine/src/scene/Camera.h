@@ -4,7 +4,7 @@
 #include <glm/gtc/quaternion.hpp>
 
 #include "../Globals.h"
-
+#include "render/EngineEventSite.h"
 
 namespace engine {
 
@@ -16,7 +16,7 @@ namespace engine {
         float orthoHeight;
     };
 
-    class Camera {
+    class Camera : public EngineEventSite {
       public:
         enum class ProjectionType {
             Perspective,
@@ -24,6 +24,8 @@ namespace engine {
         };
 
         Camera(ProjectionType type, CameraOptions opts);
+
+        void windowResizeEvent(ResizeEvent* ev) override;
 
         void position(const glm::vec3& pos) { m_position = pos; }
         const glm::vec3& position() const { return m_position; }
@@ -52,6 +54,11 @@ namespace engine {
 
         glm::mat4 m_projection;
         ProjectionType m_type;
+
+        // Store original projection parameters for resize
+        float m_fov = glm::radians(45.0f);
+        float m_zNear = 0.1f;
+        float m_zFar = 10000.0f;
 
         void updateVectors();
     };

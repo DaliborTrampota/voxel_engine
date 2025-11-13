@@ -14,6 +14,7 @@
 #include <scene/Updateable.h>
 
 
+#include <GLFWUserPointer.h>
 #include <input/InputSystem.h>
 
 #include "GameServices.h"
@@ -24,15 +25,20 @@ using namespace engine;
 
 
 Game::Game(std::unique_ptr<Window> window, glm::ivec2 dims) : Engine(std::move(window)) {
-    this->window()->makeCurrent();
+    m_window->makeCurrent();
     m_inputSystem = std::make_unique<engine::InputSystem>();
-    this->window()->setUserPointer(m_inputSystem.get());
+
 
     m_uiManager = std::make_unique<UIManager>(dims);
     m_inputSystem->subscribe(m_uiManager.get());
 
+    m_window->subscribe(m_uiManager.get());
+
     GameServices::setGame(this);
     GameServices::setInputSystem(m_inputSystem.get());
+
+    m_pointer = GLFWUserPointer{m_inputSystem.get(), m_window.get()};
+    m_window->setUserPointer(&m_pointer);
 }
 
 Game::~Game() {}
@@ -50,10 +56,9 @@ void Game::render(double dt) {
     // m_commonUBO.setSubData(1, glm::value_ptr(m_plrCamera->getView()));
     auto world = m_worldManager.activeWorld();
     world->getMaterial().use();
+    world->getMaterial().setMat4("projection", m_player->getCamera()->getProjection());
     world->getMaterial().setMat4("view", m_player->getCamera()->getView());
     world->render(*this, m_plrCamera);
-
-    world->getSkybox().render(*this, m_plrCamera);
 }
 
 void Game::afterRender() {
@@ -81,6 +86,7 @@ void Game::start() {
 
     m_plrCamera = m_player->getCamera();
     m_plrCamera->lookAt(glm::vec3(0, 0, 0));
+    m_window->subscribe(m_plrCamera);
 
 
     // glm::mat4 commonData[2] = {

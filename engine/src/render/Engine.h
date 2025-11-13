@@ -40,12 +40,12 @@ namespace engine {
 
       protected:
         std::vector<RenderContext> m_renderQueue;
+        std::unique_ptr<Window> m_window;
 
         void beginFrame();
         void endFrame();
 
       private:
-        std::unique_ptr<Window> m_window;
         std::vector<std::weak_ptr<Updateable>> m_updateSubscribers;
 
 
