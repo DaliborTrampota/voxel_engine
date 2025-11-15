@@ -21,9 +21,9 @@ using namespace engine;
 Chunk::Chunk(World* world, ChunkID coords)
     : m_world(world),
       m_coords(coords),
+      m_data(Chunk::Dims),
       m_opaqueVertData(GL_DYNAMIC_DRAW),
-      m_transparentVertData(GL_DYNAMIC_DRAW),
-      m_data(Chunk::Dims) {
+      m_transparentVertData(GL_DYNAMIC_DRAW) {
     m_opaqueVertData.create();
     m_transparentVertData.create();
 }
@@ -127,11 +127,6 @@ void Chunk::render(Engine& engine, const Camera* camera, int pass) {
         ctx.material = &m_world->m_material;
         engine.submitRender(std::move(ctx));
     }
-}
-
-
-bool ChunkID::operator()(const ChunkID& a, const ChunkID& b) const {
-    return a.x == b.x && a.y == b.y && a.z == b.z;
 }
 
 bool ChunkID::operator==(const ChunkID& other) const {

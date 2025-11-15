@@ -28,7 +28,7 @@ void TextureLoader::load(const char* path, gl::ArraySettings settings) {
     }
 
     try {
-        for (const fs::directory_entry entry : fs::directory_iterator(path)) {
+        for (const fs::directory_entry& entry : fs::directory_iterator(path)) {
             if (!entry.is_regular_file()) {
                 printf("%s is not a regular file\n", entry.path().string().c_str());
                 continue;
@@ -71,7 +71,7 @@ void TextureLoader::bind() const {
 }
 
 std::string TextureLoader::getTextureName(const std::string& path) {
-    int idx = path.find_last_of("/") + 1;
-    int count = path.find_last_of(".") - idx;
+    size_t idx = path.find_last_of("/") + 1;
+    size_t count = path.find_last_of(".") - idx;
     return path.substr(idx, count);
 }

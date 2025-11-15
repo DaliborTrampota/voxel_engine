@@ -63,8 +63,6 @@ UIManager::UIManager(glm::ivec2 screenSize)
     );
     mainPanel->addChild(m_fpsLabel);
 
-    // std::shared_ptr<Panel> childPanel = std::make_shared<Panel>(
-    //     Pos<Abs, Rel>{0.f, 0.0f},
     //     Size<Rel, Rel>{0.5f, 0.5f},
     //     Style<Panel>{
     //         .backgroundColor = {0.f, 1.0f, .0f, 0.8f},

@@ -16,7 +16,7 @@
 
 using namespace engine;
 
-AABBCollider::AABBCollider(std::shared_ptr<AABB> aabb, float stepHeight, float groundedHeight)
+AABBCollider::AABBCollider(std::shared_ptr<AABB> aabb, float stepHeight)
     : m_aabb(aabb),
       m_lastPosition(0.f),
       m_cacheDirection(0.f),

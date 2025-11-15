@@ -3,14 +3,12 @@
 #include <future>
 #include <glm/glm.hpp>
 #include <memory>
-#include <shared_mutex>
 #include <unordered_map>
 #include <unordered_set>
 
 #include "Chunk.h"
 #include "ITerrainGenerator.h"
 #include "ThreadPool.h"
-#include "block/Vertex.h"
 #include "render/Renderable.h"
 #include "scene/Skybox.h"
 
@@ -39,11 +37,11 @@ namespace engine {
         /// @param unloadRest If true, all chunks outside the range will be unloaded.
         /// @return A shared_future that becomes ready when all chunks are loaded and generated
         std::future<void> loadChunks(
-            const glm::vec3& from, const glm::vec3& to, bool unloadRest = false
+            const glm::ivec3& from, const glm::ivec3& to, bool unloadRest = false
         );
 
         /// @brief Unloads chunks in the given range.
-        void unloadChunks(const glm::vec3& from, const glm::vec3& to);
+        void unloadChunks(const glm::ivec3& from, const glm::ivec3& to);
 
         /// @brief Unloads all chunks except the given ones.
         /// @param except Chunks to keep loaded.

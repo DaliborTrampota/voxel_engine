@@ -43,7 +43,7 @@ class ThreadPool {
 
     std::future<void> addBatch(std::vector<Job> batch) {
         auto promise = std::make_shared<std::promise<void>>();
-        auto remainingJobs = std::make_shared<std::atomic<int>>(batch.size());
+        auto remainingJobs = std::make_shared<std::atomic<size_t>>(batch.size());
         std::future<void> future = promise->get_future();
 
         for (const auto& job : batch) {
