@@ -9,11 +9,18 @@
 namespace engine {
 
     struct CameraOptions {
-        float zNear = 0.1f, zFar = 10000.0f;
-        float fov = glm::radians(45.0f);
+        float zNear = 0.1f;
+        float zFar = 10000.0f;
+    };
+
+    struct OrthoOptions : public CameraOptions {
+        float width;
+        float height;
+    };
+
+    struct PerspectiveOptions : public CameraOptions {
+        float fov;
         float aspectRatio;
-        float orthoWidth;
-        float orthoHeight;
     };
 
     class Camera : public EngineEventSite {
@@ -23,7 +30,8 @@ namespace engine {
             Orthographic
         };
 
-        Camera(ProjectionType type, CameraOptions opts);
+        Camera(OrthoOptions opts);
+        Camera(PerspectiveOptions opts);
 
         void windowResizeEvent(ResizeEvent* ev) override;
 
@@ -55,8 +63,7 @@ namespace engine {
         glm::mat4 m_projection;
         ProjectionType m_type;
 
-        // Store original projection parameters for resize
-        float m_fov = glm::radians(45.0f);
+        float m_fov = 0.0f;
         float m_zNear = 0.1f;
         float m_zFar = 10000.0f;
 

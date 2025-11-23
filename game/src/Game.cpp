@@ -27,18 +27,16 @@ using namespace engine;
 Game::Game(std::unique_ptr<Window> window, glm::ivec2 dims) : Engine(std::move(window)) {
     m_window->makeCurrent();
     m_inputSystem = std::make_unique<engine::InputSystem>();
-
-
     m_uiManager = std::make_unique<UIManager>(dims);
-    m_inputSystem->subscribe(m_uiManager.get());
 
+    m_pointer = GLFWUserPointer{m_inputSystem.get(), m_window.get()};
+    m_window->setUserPointer(&m_pointer);
+
+    m_inputSystem->subscribe(m_uiManager.get());
     m_window->subscribe(m_uiManager.get());
 
     GameServices::setGame(this);
     GameServices::setInputSystem(m_inputSystem.get());
-
-    m_pointer = GLFWUserPointer{m_inputSystem.get(), m_window.get()};
-    m_window->setUserPointer(&m_pointer);
 }
 
 Game::~Game() {}
