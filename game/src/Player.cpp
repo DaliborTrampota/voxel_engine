@@ -32,10 +32,10 @@ Player::Player()
           }))
       ),
       m_collider(m_aabb, 0.51f) {
-    CameraOptions opts;
+    PerspectiveOptions opts;
     opts.fov = glm::radians(45.0f);
     opts.aspectRatio = 800.0f / 600.0f;
-    m_camera = std::make_unique<Camera>(Camera::ProjectionType::Perspective, opts);
+    m_camera = std::make_unique<Camera>(opts);
 }
 
 Player::~Player() {}
