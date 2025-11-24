@@ -8,9 +8,10 @@
 
 #include "Chunk.h"
 #include "ITerrainGenerator.h"
-#include "ThreadPool.h"
 #include "render/Renderable.h"
 #include "scene/Skybox.h"
+#include "utility/ThreadPool.h"
+
 
 #include <LWGL/render/Material.h>
 
