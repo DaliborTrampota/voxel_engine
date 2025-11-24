@@ -50,7 +50,7 @@ void TextureLoader::load(const char* path, gl::ArraySettings settings) {
     }
 
 
-    settings.layers = images.size();
+    settings.layers = static_cast<unsigned>(images.size());
     settings.width = width;
     settings.height = height;
     settings.format = gl::ImageFormat::RGBA;

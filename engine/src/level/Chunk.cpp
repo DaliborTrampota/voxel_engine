@@ -97,8 +97,7 @@ Block Chunk::getBlock(glm::ivec3 pos, Layer layer) const {
 
 
 void Chunk::render(Engine& engine, const Camera* camera, int pass) {
-    size_t verts = m_opaqueVertData.length() + m_transparentVertData.length();
-    if (verts == 0 || !m_generated) {
+    if (!m_generated) {
         return;
     }
 
@@ -107,24 +106,32 @@ void Chunk::render(Engine& engine, const Camera* camera, int pass) {
     if (pass == 0) {
         ctx.attributes = &m_opaqueVertData;
         ctx.material = &m_world->m_material;
+        ctx.camera = camera;
         engine.submitRender(std::move(ctx));
 
         RenderContext ctxTransparent;
         ctxTransparent.setModelMatrix(m_coords * Chunk::Dims);
         ctxTransparent.attributes = &m_transparentVertData;
         ctxTransparent.material = &m_world->m_material;
+        ctxTransparent.camera = camera;
         engine.submitRender(std::move(ctxTransparent));
     }
 
     else if (pass == 1) {  // Opaque front to back
+        if (!m_opaqueVertData.length())
+            return;
         ctx.attributes = &m_opaqueVertData;
         ctx.material = &m_world->m_material;
+        ctx.camera = camera;
         engine.submitRender(std::move(ctx));
     }
 
     else if (pass == 2) {  // Transparent back to front
+        if (!m_transparentVertData.length())
+            return;
         ctx.attributes = &m_transparentVertData;
         ctx.material = &m_world->m_material;
+        ctx.camera = camera;
         engine.submitRender(std::move(ctx));
     }
 }

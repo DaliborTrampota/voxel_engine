@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <LWGL/buffer/FBO.h>
 #include <LWGL/render/Material.h>
 
 #include "level/Chunk.h"
@@ -23,22 +24,26 @@ void Engine::submitRender(RenderContext&& ctx, bool immediate) {
         return;
     }
 
-    size_t n = ctx.attributes->length();
-    if (n == 0)
+    render(ctx);
+}
+
+void Engine::submitRender(GroupRenderContext&& ctx, bool immediate) {
+    if (!immediate) {
+        m_renderQueue.push_back(std::move(ctx));
         return;
+    }
 
-    ctx.material->use();
-    ctx.material->setMat4("model", ctx.modelMatrix);
-    // if(ctx.viewMatrixOverride)
-    //     ctx.material->setMat4("view", ctx.viewMatrixOverride);
-
-    ctx.attributes->bind();
-    glDrawArrays(GL_TRIANGLES, 0, n);
+    render(ctx);
 }
 
 void Engine::flush() {
-    for (auto& ctx : m_renderQueue) {
-        render(ctx);
+    for (auto& ctxVariant : m_renderQueue) {
+        std::visit(
+            [this, pass](auto& ctx) {
+                this->render(ctx);
+            },
+            ctxVariant
+        );
     }
     m_renderQueue.clear();
 }
@@ -79,15 +84,73 @@ void Engine::render(RenderContext& ctx) const {
     if (n == 0)
         return;
 
-    ctx.material->use();
-    ctx.material->setMat4("model", ctx.modelMatrix);
-    if (ctx.camera) {
-        ctx.material->setMat4("view", ctx.camera->getView());
-        ctx.material->setMat4("projection", ctx.camera->getProjection());
+    // Apply override if set
+    const gl::Material* material =
+        m_renderOverride.material ? m_renderOverride.material : ctx.material;
+    const gl::FBO* fbo = m_renderOverride.fbo ? m_renderOverride.fbo : ctx.fbo;
+
+    if (fbo) {
+        fbo->bind();
+    } else {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+
+    material->use();
+    material->setMat4("model", ctx.matrices.model);
+
+    if (ctx.matrices.view.has_value()) {
+        material->setMat4("view", ctx.matrices.view.value());
+    } else if (ctx.camera) {
+        material->setMat4("view", ctx.camera->getView());
+    }
+
+    if (ctx.matrices.projection.has_value()) {
+        material->setMat4("projection", ctx.matrices.projection.value());
+    } else if (ctx.camera) {
+        material->setMat4("projection", ctx.camera->getProjection());
     }
 
     ctx.attributes->bind();
-    glDrawArrays(GL_TRIANGLES, 0, n);
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(n));
+}
+
+void Engine::render(GroupRenderContext& ctx) const {
+    if (ctx.drawCalls.empty())
+        return;
+
+    // Apply override if set
+    const gl::Material* material =
+        m_renderOverride.material ? m_renderOverride.material : ctx.material;
+    const gl::FBO* fbo = m_renderOverride.fbo ? m_renderOverride.fbo : ctx.fbo;
+
+    if (fbo) {
+        fbo->bind();
+    }
+
+    material->use();
+
+    if (ctx.matrices.view.has_value()) {
+        material->setMat4("view", ctx.matrices.view.value());
+    } else if (ctx.camera) {
+        material->setMat4("view", ctx.camera->getView());
+    }
+
+    if (ctx.matrices.projection.has_value()) {
+        material->setMat4("projection", ctx.matrices.projection.value());
+    } else if (ctx.camera) {
+        material->setMat4("projection", ctx.camera->getProjection());
+    }
+
+    // Render all draw calls with only model matrix and attributes changing
+    for (const auto& drawCall : ctx.drawCalls) {
+        size_t n = drawCall.attributes->length();
+        if (n == 0)
+            continue;
+
+        material->setMat4("model", drawCall.model);
+        drawCall.attributes->bind();
+        glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(n));
+    }
 }
 
 void Engine::fireUpdate(float dt) {

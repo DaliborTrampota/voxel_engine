@@ -17,6 +17,7 @@
 #include <GLFWUserPointer.h>
 #include <input/InputSystem.h>
 
+
 #include "GameServices.h"
 #include "registry/Blocks.h"
 
@@ -51,12 +52,15 @@ void Game::render(double dt) {
     processInput();
     fireUpdate(dt);
 
-    // m_commonUBO.setSubData(1, glm::value_ptr(m_plrCamera->getView()));
     auto world = m_worldManager.activeWorld();
-    world->getMaterial().use();
-    world->getMaterial().setMat4("projection", m_player->getCamera()->getProjection());
-    world->getMaterial().setMat4("view", m_player->getCamera()->getView());
-    world->render(*this, m_plrCamera);
+    for (int pass = 1; pass <= 3; pass++) {
+        world->render(*this, m_plrCamera, pass);
+    }
+    // world->render(*this, m_plrCamera, 0);
+    // m_commonUBO.setSubData(1, glm::value_ptr(m_plrCamera->getView()));
+    // world->getMaterial().use();
+    // world->getMaterial().setMat4("projection", m_player->getCamera()->getProjection());
+    // world->getMaterial().setMat4("view", m_player->getCamera()->getView());
 }
 
 void Game::afterRender() {
@@ -98,11 +102,11 @@ void Game::start() {
     // m_worldManager.activeWorld()->getMaterial().bindUBO(m_commonUBO);
     // m_worldManager.activeWorld()->getMaterial().setInt("texArray", texSlot);
 
-    const gl::Material& mat = m_worldManager.activeWorld()->getMaterial();
-    mat.use();
-    mat.setMat4("projection", m_player->getCamera()->getProjection());
-    mat.setMat4("view", m_player->getCamera()->getView());
+    //const gl::Material& mat = m_worldManager.activeWorld()->getMaterial();
+    //mat.use();
+    //mat.setMat4("projection", m_player->getCamera()->getProjection());
+    //mat.setMat4("view", m_player->getCamera()->getView());
 
-    window()->mouseLock(true);
+    // window()->mouseLock(true);
     gameloop();
 }
