@@ -87,7 +87,7 @@ int Window::init(int w, int h, const char* name) {
     setResizeCallback([](GLFWwindow* window, int width, int height) {
         GLFWUserPointer* pointer = static_cast<GLFWUserPointer*>(glfwGetWindowUserPointer(window));
         ResizeEvent event(width, height);
-        glViewport(0, 0, width, height);
+        glViewport(0, 0, width, height);  // TODO: maybe users responsibility?
         pointer->window->fireWindowResizeEvent(&event);
     });
     return 1;

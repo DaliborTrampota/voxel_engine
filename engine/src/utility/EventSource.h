@@ -19,7 +19,7 @@ namespace engine {
             for (EventSite* site : m_sources) {
                 TEventSite* appSite = dynamic_cast<TEventSite*>(
                     site
-                );  // TODO I dont like the dynamic cast and virtual inheritance of EventClass (right now only because of UI manager)
+                );  // TODO I dont like the dynamic cast and virtual inheritance of EventClass (right now only because of UI manager diamond inheritance)
                 if (appSite) {
                     (appSite->*fire)(event);
                 }
