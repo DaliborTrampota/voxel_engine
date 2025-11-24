@@ -33,9 +33,9 @@ namespace engine {
 
     struct Face {
         FaceTag tag;
-        glm::ivec3 cullDir;
+        std::vector<Vertex> vertices{};
+        glm::ivec3 cullDir = {0, 0, 0};
         bool cull = false;
-        std::vector<Vertex> vertices;
 
         void translate(glm::vec3 t);
         void data(int textureID, int ao);

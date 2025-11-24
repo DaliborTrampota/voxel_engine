@@ -4,6 +4,7 @@
 
 #include <input/GLFWEventSite.h>
 #include <input/GLFWEvents.h>
+#include <render/EngineEventSite.h>
 
 #include <glm/glm.hpp>
 
@@ -20,6 +21,7 @@ namespace ui {
 }  // namespace ui
 
 class UIManager : public GLFWEventSite,
+                  public EngineEventSite,
                   public engine::Updateable {
   public:
     UIManager(glm::ivec2 screenSize);
@@ -29,8 +31,9 @@ class UIManager : public GLFWEventSite,
     void render();
 
   protected:
-    void mouseMoveEvent(MouseEvent* pEvent) override;
+    void mouseMoveEvent(::MouseEvent* pEvent) override;
     void mouseButtonEvent(MouseButtonEvent* pEvent) override;
+    void windowResizeEvent(ResizeEvent* ev) override;
 
 
   private:

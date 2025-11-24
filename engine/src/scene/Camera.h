@@ -4,26 +4,36 @@
 #include <glm/gtc/quaternion.hpp>
 
 #include "../Globals.h"
-
+#include "render/EngineEventSite.h"
 
 namespace engine {
 
     struct CameraOptions {
-        float zNear = 0.1f, zFar = 10000.0f;
-        float fov = glm::radians(45.0f);
-        float aspectRatio;
-        float orthoWidth;
-        float orthoHeight;
+        float zNear = 0.1f;
+        float zFar = 10000.0f;
     };
 
-    class Camera {
+    struct OrthoOptions : public CameraOptions {
+        float width;
+        float height;
+    };
+
+    struct PerspectiveOptions : public CameraOptions {
+        float fov;
+        float aspectRatio;
+    };
+
+    class Camera : public EngineEventSite {
       public:
         enum class ProjectionType {
             Perspective,
             Orthographic
         };
 
-        Camera(ProjectionType type, CameraOptions opts);
+        Camera(OrthoOptions opts);
+        Camera(PerspectiveOptions opts);
+
+        void windowResizeEvent(ResizeEvent* ev) override;
 
         void position(const glm::vec3& pos) { m_position = pos; }
         const glm::vec3& position() const { return m_position; }
@@ -52,6 +62,10 @@ namespace engine {
 
         glm::mat4 m_projection;
         ProjectionType m_type;
+
+        float m_fov = 0.0f;
+        float m_zNear = 0.1f;
+        float m_zFar = 10000.0f;
 
         void updateVectors();
     };

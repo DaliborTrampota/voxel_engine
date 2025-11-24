@@ -10,6 +10,8 @@
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>  // TODO remove?
 
+#include <render/EngineEvents.h>
+
 
 using namespace ui;
 
@@ -61,8 +63,6 @@ UIManager::UIManager(glm::ivec2 screenSize)
     );
     mainPanel->addChild(m_fpsLabel);
 
-    // std::shared_ptr<Panel> childPanel = std::make_shared<Panel>(
-    //     Pos<Abs, Rel>{0.f, 0.0f},
     //     Size<Rel, Rel>{0.5f, 0.5f},
     //     Style<Panel>{
     //         .backgroundColor = {0.f, 1.0f, .0f, 0.8f},
@@ -236,6 +236,10 @@ void UIManager::render() {
     glDepthMask(GL_TRUE);
 }
 
+void UIManager::windowResizeEvent(ResizeEvent* ev) {
+    m_renderer.setViewportSize(glm::ivec2{ev->width, ev->height});
+}
+
 void UIManager::mouseMoveEvent(::MouseEvent* pEvent) {
     ui::MouseEvent event{
         .button = ui::MouseBtn::None, .action = ui::Action::Move, .pos = {pEvent->x, pEvent->y}
@@ -245,7 +249,7 @@ void UIManager::mouseMoveEvent(::MouseEvent* pEvent) {
     m_renderer.mouseEvent(event);
 }
 
-void UIManager::mouseButtonEvent(::MouseButtonEvent* pEvent) {
+void UIManager::mouseButtonEvent(MouseButtonEvent* pEvent) {
     ui::MouseBtn btn;
     switch (pEvent->button) {
         case GLFW_MOUSE_BUTTON_LEFT: btn = ui::MouseBtn::LMB; break;

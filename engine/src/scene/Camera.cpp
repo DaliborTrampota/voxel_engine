@@ -2,27 +2,41 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "render/EngineEvents.h"
+
 using namespace engine;
 
-Camera::Camera(ProjectionType type, CameraOptions opts)
-    : m_type(type),
+Camera::Camera(OrthoOptions opts)
+    : m_type(ProjectionType::Orthographic),
       m_front(FORWARD),
       m_position(0),
       m_yaw(-90.0f),
-      m_pitch(0.0f) {
-    if (type == ProjectionType::Orthographic) {
-        m_projection = glm::ortho(
-            -opts.orthoWidth / 2,
-            opts.orthoWidth / 2,
-            -opts.orthoHeight / 2,
-            opts.orthoHeight / 2,
-            opts.zNear,
-            opts.zFar
-        );
-    } else {
-        m_projection = glm::perspective(opts.fov, opts.aspectRatio, opts.zNear, opts.zFar);
-    }
+      m_pitch(0.0f),
+      m_zNear(opts.zNear),
+      m_zFar(opts.zFar),
+      m_fov(0.0f) {
+    m_projection = glm::ortho(
+        -opts.width / 2, opts.width / 2, -opts.height / 2, opts.height / 2, opts.zNear, opts.zFar
+    );
     updateVectors();
+}
+
+Camera::Camera(PerspectiveOptions opts)
+    : m_type(ProjectionType::Perspective),
+      m_front(FORWARD),
+      m_position(0),
+      m_yaw(-90.0f),
+      m_pitch(0.0f),
+      m_zNear(opts.zNear),
+      m_zFar(opts.zFar),
+      m_fov(opts.fov) {
+    m_projection = glm::perspective(opts.fov, opts.aspectRatio, opts.zNear, opts.zFar);
+    updateVectors();
+}
+
+
+void Camera::windowResizeEvent(ResizeEvent* ev) {
+    resize(ev->width, ev->height);
 }
 
 void Camera::lookAt(const glm::vec3& target) {
@@ -48,8 +62,11 @@ void Camera::rotate(float dx, float dy, bool constrainPitch) {
 }
 
 void Camera::resize(int width, int height) {
-    m_projection =
-        glm::perspective(glm::radians(45.0f), float(width) / float(height), 0.1f, 10000.0f);
+    if (m_type == ProjectionType::Perspective) {
+        m_projection = glm::perspective(
+            m_fov, static_cast<float>(width) / static_cast<float>(height), m_zNear, m_zFar
+        );
+    }
 }
 
 glm::mat4 Camera::getView() const {

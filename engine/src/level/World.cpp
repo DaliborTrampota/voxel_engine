@@ -50,7 +50,7 @@ World::~World() {
     // }
 }
 
-std::future<void> World::loadChunks(const glm::vec3& from, const glm::vec3& to, bool unloadRest) {
+std::future<void> World::loadChunks(const glm::ivec3& from, const glm::ivec3& to, bool unloadRest) {
     // ChunkID chunkCoords = engine::extractChunkCoords(pos);
     m_genPool.pause();
     if (unloadRest) {
@@ -89,7 +89,7 @@ std::future<void> World::loadChunks(const glm::vec3& from, const glm::vec3& to, 
     return m_genPool.addBatch(jobs);
 }
 
-void World::unloadChunks(const glm::vec3& from, const glm::vec3& to) {
+void World::unloadChunks(const glm::ivec3& from, const glm::ivec3& to) {
     for (int x = from.x; x < to.x; ++x) {
         for (int y = from.y; y < to.y; ++y) {
             for (int z = from.z; z < to.z; ++z) {
@@ -189,6 +189,7 @@ void World::render(Engine& engine, const Camera* camera, int pass) {
     for (const ChunkID& pos : m_loadedChunks) {
         m_chunks[pos]->render(engine, camera, 0);
     }
+    m_skybox.render(engine, camera);
     //std::cout << "Rendered chunks: " << m_chunks.size() << "\n";
 }
 

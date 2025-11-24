@@ -41,9 +41,7 @@ namespace engine {
 
     class AABBCollider {
       public:
-        AABBCollider(
-            std::shared_ptr<AABB> aabb, float stepHeight = 0.0f, float groundedHeight = 0.1f
-        );
+        AABBCollider(std::shared_ptr<AABB> aabb, float stepHeight = 0.0f);
 
         /// @brief Sets the world for this collider.
         void setWorld(std::shared_ptr<World> world);

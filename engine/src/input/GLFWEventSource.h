@@ -1,6 +1,6 @@
 #pragma once
 
-#include <utility/GLEventSource.h>
+#include "utility/EventSource.h"
 
 class MouseEvent;
 class MouseButtonEvent;

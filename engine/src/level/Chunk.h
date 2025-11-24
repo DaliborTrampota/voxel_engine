@@ -29,7 +29,6 @@ namespace engine {
         ChunkID(int x, int y, int z) : glm::ivec3(x, y, z) {}
         ChunkID(const glm::ivec3& vec) : glm::ivec3(vec) {}
 
-        bool operator()(const ChunkID& a, const ChunkID& b) const;
         bool operator==(const ChunkID& other) const;
     };
 

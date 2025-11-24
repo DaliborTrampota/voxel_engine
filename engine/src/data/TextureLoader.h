@@ -10,6 +10,10 @@ namespace engine {
       public:
         TextureLoader(int slot);
 
+        /// @brief Load textures from a directory
+        /// @param dirPath Path to the directory containing the textures
+        /// @param settings Settings for the texture array
+        /// @note No need to specify the width, height, layer count and format, they will be automatically determined from the images in the directory
         void load(const char* dirPath, gl::ArraySettings settings = gl::ArraySettings::Pixelated());
         void bind() const;
 

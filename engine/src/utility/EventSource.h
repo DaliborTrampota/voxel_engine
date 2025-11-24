@@ -1,3 +1,6 @@
+
+#pragma once
+
 #include <unordered_set>
 
 namespace engine {
@@ -14,8 +17,12 @@ namespace engine {
         template <typename TEventSite, typename TEvent>
         void fireEvent(void (TEventSite::*fire)(TEvent* event), TEvent* event) {
             for (EventSite* site : m_sources) {
-                TEventSite* appSite = static_cast<TEventSite*>(site);
-                (appSite->*fire)(event);
+                TEventSite* appSite = dynamic_cast<TEventSite*>(
+                    site
+                );  // TODO I dont like the dynamic cast and virtual inheritance of EventClass (right now only because of UI manager diamond inheritance)
+                if (appSite) {
+                    (appSite->*fire)(event);
+                }
             }
         }
 

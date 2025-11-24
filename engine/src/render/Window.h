@@ -2,8 +2,11 @@
 
 #include <LWGL/Context.h>
 
+#include "EngineEventSource.h"
+
 namespace engine {
-    class Window : public gl::Context {
+    class Window : public gl::Context,
+                   public EngineEventSource {
       public:
         Window(gl::Context* share = nullptr);
         ~Window();

@@ -1,12 +1,12 @@
 #pragma once
 
-#include <utility/GLEventSite.h>
+#include "utility/EventSite.h"
 
 class MouseEvent;
 class MouseButtonEvent;
 class KeyboardEvent;
 
-class GLFWEventSite : public engine::EventSite {
+class GLFWEventSite : public virtual engine::EventSite {
     friend class GLFWEventSource;
 
   protected:

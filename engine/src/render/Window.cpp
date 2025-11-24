@@ -1,9 +1,10 @@
 #include "Window.h"
 
 #include <glad/glad.h>
-
 #include <stdexcept>
 
+#include "EngineEvents.h"
+#include "GLFWUserPointer.h"
 
 namespace {
     const char* getDebugSource(GLenum source) {
@@ -84,9 +85,10 @@ int Window::init(int w, int h, const char* name) {
     );
 
     setResizeCallback([](GLFWwindow* window, int width, int height) {
-        // m_size.x = pEvent->width;
-        // m_size.y = pEvent->height;
-        // m_api->setWindowSize(m_size.x, m_size.y);
+        GLFWUserPointer* pointer = static_cast<GLFWUserPointer*>(glfwGetWindowUserPointer(window));
+        ResizeEvent event(width, height);
+        glViewport(0, 0, width, height);  // TODO: maybe users responsibility?
+        pointer->window->fireWindowResizeEvent(&event);
     });
     return 1;
 }
