@@ -4,15 +4,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <LWGL/buffer/FBO.h>
-#include <LWGL/render/Material.h>
 
 #include "level/Chunk.h"
 #include "level/World.h"
-#include "render/RenderContext.h"
+#include "render/Material.h"
 #include "render/Renderable.h"
 #include "scene/Camera.h"
+#include "scene/Sun.h"
 #include "scene/Updateable.h"
-
 
 using namespace engine;
 
@@ -28,7 +27,7 @@ void Engine::submitRender(RenderContext&& ctx, bool immediate) {
         return;
     }
 
-    render(ctx);
+    render(ctx, RenderPass::Scene);
 }
 
 void Engine::submitRender(GroupRenderContext&& ctx, bool immediate) {
@@ -37,7 +36,7 @@ void Engine::submitRender(GroupRenderContext&& ctx, bool immediate) {
         return;
     }
 
-    render(ctx);
+    render(ctx, RenderPass::Scene);
 }
 
 void Engine::flush() {
@@ -52,7 +51,7 @@ void Engine::flush() {
                 [this, &pass](auto& ctx) {
                     if ((ctx.passMask & pass.id) == 0)
                         return;
-                    this->render(ctx);
+                    this->render(ctx, pass.id);
                 },
                 ctxVariant
             );
@@ -126,14 +125,13 @@ void Engine::gameloop() {
     }
 }
 
-void Engine::render(RenderContext& ctx) const {
+void Engine::render(RenderContext& ctx, RenderPass::ID renderPass) const {
     size_t n = ctx.attributes->length();
     if (n == 0)
         return;
 
     // Apply override if set
-    const gl::Material* material =
-        m_renderOverride.material ? m_renderOverride.material : ctx.material;
+    const Material* material = m_renderOverride.material ? m_renderOverride.material : ctx.material;
     const gl::FBO* fbo = m_renderOverride.fbo ? m_renderOverride.fbo : ctx.fbo;
 
     if (fbo) {
@@ -144,6 +142,16 @@ void Engine::render(RenderContext& ctx) const {
 
     material->use();
     material->setMat4("model", ctx.matrices.model);
+
+    if (material->supportsShadows()) {
+        material->setMat4(
+            "lightSpaceTransform", m_directionalLightSource->getLightSpaceTransform()
+        );
+        material->setVec3("lightPos", m_directionalLightSource->lightPosition());
+        material->setVec3("lightColor", m_directionalLightSource->lightColor());
+        material->setVec3("viewPos", ctx.camera->position());
+        material->setInt("shadowMap", m_directionalLightSource->shadowMapTexture());
+    }
 
     if (!m_renderOverride.material) {
         if (ctx.matrices.view.has_value()) {
@@ -164,13 +172,12 @@ void Engine::render(RenderContext& ctx) const {
     glDrawArrays(GL_TRIANGLES, 0, n);
 }
 
-void Engine::render(GroupRenderContext& ctx) const {
+void Engine::render(GroupRenderContext& ctx, RenderPass::ID renderPass) const {
     if (ctx.drawCalls.empty())
         return;
 
     // Apply override if set
-    const gl::Material* material =
-        m_renderOverride.material ? m_renderOverride.material : ctx.material;
+    const Material* material = m_renderOverride.material ? m_renderOverride.material : ctx.material;
     const gl::FBO* fbo = m_renderOverride.fbo ? m_renderOverride.fbo : ctx.fbo;
 
     if (fbo) {

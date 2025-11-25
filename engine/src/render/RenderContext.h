@@ -13,13 +13,13 @@
 // #include <glad/glad.h>
 
 namespace gl {
-    class Material;
     class FBO;
 }  // namespace gl
 
 namespace engine {
 
     class Camera;
+    class Material;
 
     // Represents OpenGL render state that can be batched
     // struct RenderState {
@@ -45,7 +45,7 @@ namespace engine {
 
     struct RenderContext {
         gl::IBuffer* attributes;
-        const gl::Material* material;
+        const Material* material;
         const Camera* camera = nullptr;
         const gl::FBO* fbo = nullptr;
         RenderPass::ID passMask = RenderPass::Scene;
@@ -81,7 +81,7 @@ namespace engine {
     // - Best for batching 10+ draw calls with shared state
     // - For very large batches (1000+), consider splitting into multiple groups
     struct GroupRenderContext {
-        const gl::Material* material;
+        const Material* material;
         const Camera* camera = nullptr;
         const gl::FBO* fbo = nullptr;
         RenderPass::ID passMask = RenderPass::Scene;

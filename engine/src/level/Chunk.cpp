@@ -4,7 +4,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <LWGL/buffer/Attributes.h>
-#include <LWGL/render/Material.h>
 
 #include "World.h"
 #include "block/Block.h"

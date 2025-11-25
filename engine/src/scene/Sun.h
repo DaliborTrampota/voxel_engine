@@ -3,37 +3,55 @@
 #include <glm/glm.hpp>
 
 #include <LWGL/buffer/FBO.h>
-#include <LWGL/render/Material.h>
 
-#include "render/Renderable.h"
+#include "render/Material.h"
+#include "render/RenderPass.h"
+#include "scene/Updateable.h"
+
 
 namespace engine {
 
     class Engine;
     class Camera;
 
-    class Sun : public Renderable {
+    class Sun : public Updateable {
       public:
-        enum Type {
-            Static,
-            Moving
-        };
+        Sun(Engine* engine,
+            glm::ivec2 resolution,
+            const glm::vec3* targetPosition,
+            const glm::vec3& direction = glm::vec3(0.0f, -1.0f, 0.0f));
 
-        Sun(glm::ivec2 resolution);
+        void setTargetPosition(const glm::vec3* position);
+        void setDirection(const glm::vec3& direction);
+        void setLightColor(const glm::vec3& color, float intensity);
 
-        void render(Engine& engine, const Camera* camera, int pass) override;
+        glm::vec3 lightPosition() const { return *m_targetPosition - m_direction * 10.f; }
+        glm::vec3 direction() const { return m_direction; }
+        glm::vec3 lightColor() const { return m_lightColor; }
+        float lightIntensity() const { return m_lightIntensity; }
 
+        void update(float dt) override;
+
+        glm::mat4 getLightSpaceTransform() const;
+        unsigned shadowMapTexture() const;
 
       protected:
         glm::ivec2 m_resolution;
 
-        glm::vec3 m_position;
+        const glm::vec3* m_targetPosition;
         glm::vec3 m_direction;
 
         glm::mat4 m_view;
         glm::mat4 m_projection;
 
         gl::FBO m_depthFBO;
-        gl::Material m_depthShader;
+        Material m_depthShader;
+
+        glm::vec3 m_lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+        float m_lightIntensity = 1.0f;
+
+      private:
+        Engine* m_engine;
+        RenderPass::ID m_directionalShadowPass;
     };
 }  // namespace engine

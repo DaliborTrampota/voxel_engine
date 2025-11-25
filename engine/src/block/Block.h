@@ -1,9 +1,9 @@
 #pragma once
 
-#include <string>
-
+#include "BlockMaterial.h"
 #include "Globals.h"
-#include "Material.h"
+
+// #include "render/BlockMaterial.h"
 
 namespace engine {
     class Geometry;
@@ -11,7 +11,7 @@ namespace engine {
     class Block {
       public:
         Block(BlockID id, const Geometry* geo);
-        Block(BlockID id, const Geometry* geo, const Material& mat);
+        Block(BlockID id, const Geometry* geo, const BlockMaterial& mat);
 
         static Block& air();
 
@@ -37,11 +37,11 @@ namespace engine {
             return *this;
         }
 
-        Block& material(const Material& mat) {
+        Block& material(const BlockMaterial& mat) {
             m_material = mat;
             return *this;
         }
-        Material& material() { return m_material; }
+        BlockMaterial& material() { return m_material; }
 
       private:
         BlockID m_id;
@@ -50,6 +50,6 @@ namespace engine {
         bool m_isVoxel;
 
         const Geometry* m_geometry;
-        Material m_material;
+        BlockMaterial m_material;
     };
 }  // namespace engine

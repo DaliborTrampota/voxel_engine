@@ -6,9 +6,12 @@
 
 
 namespace gl {
-    class Material;
     class FBO;
 }  // namespace gl
+
+namespace engine {
+    class Material;
+}  // namespace engine
 
 namespace engine::RenderPass {
     using ID = uint16_t;
@@ -17,7 +20,7 @@ namespace engine::RenderPass {
     /// @note Material and FBO overrides are applied to all contexts in the pass.
     struct Config {
         ID id;
-        const gl::Material* materialOverride = nullptr;
+        const Material* materialOverride = nullptr;
         gl::FBO* fboOverride = nullptr;
         std::optional<glm::ivec2> viewportSize = std::nullopt;
     };

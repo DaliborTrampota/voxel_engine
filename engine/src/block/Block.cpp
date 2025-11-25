@@ -11,7 +11,7 @@ Block::Block(BlockID id, const Geometry* geo)
       m_isVoxel(false),
       m_geometry(geo) {}
 
-engine::Block::Block(BlockID id, const Geometry* geo, const Material& mat) : Block(id, geo) {
+engine::Block::Block(BlockID id, const Geometry* geo, const BlockMaterial& mat) : Block(id, geo) {
     m_material = mat;
 }
 

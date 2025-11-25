@@ -37,7 +37,7 @@ World::World(std::unique_ptr<ITerrainGenerator> gen, uint32_t genThreads)
     m_skybox.loadFace(gl::CubeFace::Left, gl::ImageData("resources/skybox/left.jpg"));
     m_skybox.loadFace(gl::CubeFace::Right, gl::ImageData("resources/skybox/right.jpg"));
 
-
+    m_material.setShadowSupport(true);
     printf("World created\n");
 }
 

@@ -12,7 +12,6 @@
 namespace gl {
     class ShaderPipeline;
     class GraphicsAPI;
-    class Material;
     class FBO;
 }  // namespace gl
 
@@ -20,8 +19,10 @@ namespace engine {
     class Chunk;
     class World;
     class Camera;
+    class Material;
     class Updateable;
     class Renderable;
+    class Sun;
 
 
     class Engine {
@@ -52,18 +53,29 @@ namespace engine {
 
         Window* window() const { return m_window.get(); }
 
+        void setDirectionalLightSource(std::shared_ptr<engine::Sun> lightSource) {
+            m_directionalLightSource = lightSource;
+        }
+        std::shared_ptr<engine::Sun> directionalLightSource() const {
+            return m_directionalLightSource;
+        }
+
+
       protected:
+        std::shared_ptr<engine::Sun> m_directionalLightSource;
+
         struct {
-            const gl::Material* material = nullptr;
+            const Material* material = nullptr;
             const gl::FBO* fbo = nullptr;
         } m_renderOverride;
+
         std::vector<std::variant<RenderContext, GroupRenderContext>> m_renderQueue;
         std::unique_ptr<Window> m_window;
 
         void beginFrame();
         void endFrame();
 
-        void setRenderOverride(const gl::Material* material, gl::FBO* fbo) {
+        void setRenderOverride(const Material* material, gl::FBO* fbo) {
             m_renderOverride.material = material;
             m_renderOverride.fbo = fbo;
         }
@@ -78,7 +90,7 @@ namespace engine {
         std::vector<std::weak_ptr<Updateable>> m_updateSubscribers;
 
 
-        void render(RenderContext& ctx) const;
-        void render(GroupRenderContext& ctx) const;
+        void render(RenderContext& ctx, RenderPass::ID renderPass) const;
+        void render(GroupRenderContext& ctx, RenderPass::ID renderPass) const;
     };
 }  // namespace engine

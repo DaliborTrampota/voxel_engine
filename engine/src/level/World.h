@@ -8,12 +8,11 @@
 
 #include "Chunk.h"
 #include "ITerrainGenerator.h"
+#include "render/Material.h"
 #include "render/Renderable.h"
 #include "scene/Skybox.h"
 #include "utility/ThreadPool.h"
 
-
-#include <LWGL/render/Material.h>
 
 namespace gl {
     class ShaderPipeline;
@@ -82,7 +81,7 @@ namespace engine {
 
 
         virtual void render(Engine& engine, const Camera* camera, int pass = 0) override;
-        const gl::Material& getMaterial() const { return m_material; }
+        const Material& getMaterial() const { return m_material; }
         Skybox& getSkybox() { return m_skybox; }
 
       protected:
@@ -90,7 +89,7 @@ namespace engine {
         std::unordered_set<ChunkID> m_loadedChunks;
         std::unique_ptr<ITerrainGenerator> m_generator = nullptr;
 
-        gl::Material m_material;
+        Material m_material;
         Skybox m_skybox;
 
         ThreadPool m_genPool;

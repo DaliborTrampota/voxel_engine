@@ -7,13 +7,13 @@
 
 namespace engine {
 
-    struct Material {
+    struct BlockMaterial {
         std::array<TexID, static_cast<size_t>(FaceTag::Count)> m_textures{};
         // std::unordered_map<std::string, TexID> textures;
 
         TexID forTag(FaceTag tag) const { return m_textures[static_cast<size_t>(tag)]; }
 
-        Material& add(FaceTag tag, TexID texture) {
+        BlockMaterial& add(FaceTag tag, TexID texture) {
             if (tag == FaceTag::All) {
                 for (int i = 0; i < static_cast<size_t>(FaceTag::Count); i++)
                     m_textures[i] = texture;

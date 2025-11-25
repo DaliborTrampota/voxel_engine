@@ -11,6 +11,7 @@
 #include <level/World.h>
 #include <render/Window.h>
 #include <scene/Camera.h>
+#include <scene/Sun.h>
 #include <scene/Updateable.h>
 
 
@@ -21,11 +22,15 @@
 #include "GameServices.h"
 #include "registry/Blocks.h"
 
+
 //#include <tracy/Tracy.hpp>
 using namespace engine;
 
 
-Game::Game(std::unique_ptr<Window> window, glm::ivec2 dims) : Engine(std::move(window)) {
+Game::Game(std::unique_ptr<Window> window, glm::ivec2 dims)
+    : Engine(std::move(window)),
+      m_worldManager(this),
+      m_plrCamera(nullptr) {
     m_window->makeCurrent();
     m_inputSystem = std::make_unique<engine::InputSystem>();
     m_uiManager = std::make_unique<UIManager>(dims);
@@ -79,8 +84,16 @@ void Game::start() {
     m_player = std::make_shared<Player>();
     m_player->spawn(activeWorld());
 
+    setDirectionalLightSource(
+        std::make_shared<engine::Sun>(
+            this, glm::ivec2(1024, 1024), &m_player->position(), glm::vec3(1.0f, -1.0f, 0.0f)
+        )
+    );
+
+
     subscribeUpdate(m_player);
     subscribeUpdate(m_uiManager);
+    subscribeUpdate(m_directionalLightSource);
 
     // uncomment this call to draw in wireframe polygons.
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -102,11 +115,6 @@ void Game::start() {
     // m_worldManager.activeWorld()->getMaterial().bindUBO(m_commonUBO);
     // m_worldManager.activeWorld()->getMaterial().setInt("texArray", texSlot);
 
-    //const gl::Material& mat = m_worldManager.activeWorld()->getMaterial();
-    //mat.use();
-    //mat.setMat4("projection", m_player->getCamera()->getProjection());
-    //mat.setMat4("view", m_player->getCamera()->getView());
-
-    // window()->mouseLock(true);
+    window()->mouseLock(true);
     gameloop();
 }

@@ -20,3 +20,5 @@
 - glfw callbacks using window user pointer @done
 - fix touching blocks when stepping up
 - keybinds manager? like f11 to fullscreen esc callback etc
+- LWGL
+    - remove binds for all methods - consumers responsible for binding
