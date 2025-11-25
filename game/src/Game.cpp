@@ -86,7 +86,7 @@ void Game::start() {
 
     setDirectionalLightSource(
         std::make_shared<engine::Sun>(
-            this, glm::ivec2(1024, 1024), &m_player->position(), glm::vec3(1.0f, -1.0f, 0.0f)
+            this, glm::ivec2(1024, 1024), &m_player->position(), glm::vec3(0.2f, -1.0f, 0.2f)
         )
     );
 

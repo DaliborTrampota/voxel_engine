@@ -48,8 +48,7 @@ void main()
     if (texID == 7u) { // TODO grass coloring
         col.rgb *= vec3(0.4, 0.9, 0.3);
     }
-    vec3 lightCol = vec3(1.0, 1.0, 1.0);
-    vec3 ambientCol = 0.15 * lightCol;
+    vec3 ambientCol = 0.15 * lightColor;
     //diffuse
     vec3 lightDir = normalize(lightPos - shadowData.fragPos);
     float diff = max(dot(lightDir, normal), 0.0);
@@ -68,6 +67,6 @@ void main()
 
     // vec3 colData = col.xyz * max(0.5, dot(normal, sunDir));
     //FragColor = vec4(uv.x, 0, uv.y, 1.0);//col;
-    //FragColor = vec4(lightCol, 1.0);
+    //FragColor = vec4(lightColor, 1.0);
     FragColor = vec4(lighting, col.a);
 }

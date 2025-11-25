@@ -42,6 +42,14 @@ void Engine::submitRender(GroupRenderContext&& ctx, bool immediate) {
 void Engine::flush() {
     for (const auto& pass : m_renderPasses) {
         setRenderOverride(pass.materialOverride, pass.fboOverride);
+
+        // Clear the FBO if it's bound
+        if (pass.fboOverride) {
+            pass.fboOverride->bind();
+
+            pass.fboOverride->clearDepth(1.0f);
+        }
+
         if (pass.viewportSize.has_value()) {
             glm::ivec2 res = pass.viewportSize.value();
             glViewport(0, 0, res.x, res.y);

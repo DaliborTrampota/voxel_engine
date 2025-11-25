@@ -105,6 +105,7 @@ void Chunk::render(Engine& engine, const Camera* camera, int pass) {
     if (pass == 0) {
         ctx.attributes = &m_opaqueVertData;
         ctx.material = &m_world->m_material;
+        ctx.passMask = RenderPass::Scene | RenderPass::DirectionalShadow;
         ctx.camera = camera;
         engine.submitRender(std::move(ctx));
 
@@ -121,6 +122,7 @@ void Chunk::render(Engine& engine, const Camera* camera, int pass) {
             return;
         ctx.attributes = &m_opaqueVertData;
         ctx.material = &m_world->m_material;
+        ctx.passMask = RenderPass::Scene | RenderPass::DirectionalShadow;
         ctx.camera = camera;
         engine.submitRender(std::move(ctx));
     }
@@ -130,6 +132,7 @@ void Chunk::render(Engine& engine, const Camera* camera, int pass) {
             return;
         ctx.attributes = &m_transparentVertData;
         ctx.material = &m_world->m_material;
+        ctx.passMask = RenderPass::Scene | RenderPass::DirectionalShadow;
         ctx.camera = camera;
         engine.submitRender(std::move(ctx));
     }
