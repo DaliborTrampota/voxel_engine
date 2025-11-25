@@ -9,6 +9,7 @@
 
 #include <LWGL/buffer/IBuffer.h>
 
+#include "RenderPass.h"
 // #include <glad/glad.h>
 
 namespace gl {
@@ -47,6 +48,7 @@ namespace engine {
         const gl::Material* material;
         const Camera* camera = nullptr;
         const gl::FBO* fbo = nullptr;
+        RenderPass::ID passMask = RenderPass::Scene;
 
         struct {
             std::optional<glm::mat4> projection;
@@ -82,6 +84,7 @@ namespace engine {
         const gl::Material* material;
         const Camera* camera = nullptr;
         const gl::FBO* fbo = nullptr;
+        RenderPass::ID passMask = RenderPass::Scene;
 
         struct {
             std::optional<glm::mat4> projection;

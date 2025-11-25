@@ -16,7 +16,11 @@
 
 using namespace engine;
 
-Engine::Engine(std::unique_ptr<Window> window) : m_window(std::move(window)) {}
+Engine::Engine(std::unique_ptr<Window> window) : m_window(std::move(window)) {
+    registerRenderPass({RenderPass::DirectionalShadow});
+    // registerRenderPass({RenderPass::OmniShadow});
+    registerRenderPass({RenderPass::Scene});
+}
 
 void Engine::submitRender(RenderContext&& ctx, bool immediate) {
     if (!immediate) {
@@ -37,15 +41,58 @@ void Engine::submitRender(GroupRenderContext&& ctx, bool immediate) {
 }
 
 void Engine::flush() {
-    for (auto& ctxVariant : m_renderQueue) {
-        std::visit(
-            [this, pass](auto& ctx) {
-                this->render(ctx);
-            },
-            ctxVariant
-        );
+    for (const auto& pass : m_renderPasses) {
+        setRenderOverride(pass.materialOverride, pass.fboOverride);
+        if (pass.viewportSize.has_value()) {
+            glm::ivec2 res = pass.viewportSize.value();
+            glViewport(0, 0, res.x, res.y);
+        }
+        for (auto& ctxVariant : m_renderQueue) {
+            std::visit(
+                [this, &pass](auto& ctx) {
+                    if ((ctx.passMask & pass.id) == 0)
+                        return;
+                    this->render(ctx);
+                },
+                ctxVariant
+            );
+        }
+        if (pass.viewportSize.has_value()) {
+            glm::ivec2 res = m_window->windowSize();
+            glViewport(0, 0, res.x, res.y);
+        }
     }
+
+    clearRenderOverride();
     m_renderQueue.clear();
+}
+
+void Engine::registerRenderPass(const RenderPass::Config& config) {
+    int idx = static_cast<int>(glm::log2(static_cast<float>(config.id)));
+    if (idx >= m_renderPasses.size()) {
+        m_renderPasses.push_back(config);
+    } else {
+        m_renderPasses[idx] = config;
+    }
+}
+
+void Engine::setRenderPassOrder(const std::vector<RenderPass::ID>& order) {
+    if (order.size() != m_renderPasses.size()) {
+        throw std::runtime_error("Render pass order size mismatch");
+    }
+    std::vector<RenderPass::Config> newOrder;
+    for (const auto& id : order) {
+        auto it = std::find_if(
+            m_renderPasses.begin(), m_renderPasses.end(), [id](const RenderPass::Config& config) {
+                return config.id == id;
+            }
+        );
+        if (it == m_renderPasses.end()) {
+            throw std::runtime_error("Render pass not found: " + std::to_string(id));
+        }
+        newOrder.push_back(*it);
+    }
+    m_renderPasses = newOrder;
 }
 
 void Engine::gameloop() {
@@ -98,20 +145,23 @@ void Engine::render(RenderContext& ctx) const {
     material->use();
     material->setMat4("model", ctx.matrices.model);
 
-    if (ctx.matrices.view.has_value()) {
-        material->setMat4("view", ctx.matrices.view.value());
-    } else if (ctx.camera) {
-        material->setMat4("view", ctx.camera->getView());
+    if (!m_renderOverride.material) {
+        if (ctx.matrices.view.has_value()) {
+            material->setMat4("view", ctx.matrices.view.value());
+        } else if (ctx.camera) {
+            material->setMat4("view", ctx.camera->getView());
+        }
+
+        if (ctx.matrices.projection.has_value()) {
+            material->setMat4("projection", ctx.matrices.projection.value());
+        } else if (ctx.camera) {
+            material->setMat4("projection", ctx.camera->getProjection());
+        }
     }
 
-    if (ctx.matrices.projection.has_value()) {
-        material->setMat4("projection", ctx.matrices.projection.value());
-    } else if (ctx.camera) {
-        material->setMat4("projection", ctx.camera->getProjection());
-    }
 
     ctx.attributes->bind();
-    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(n));
+    glDrawArrays(GL_TRIANGLES, 0, n);
 }
 
 void Engine::render(GroupRenderContext& ctx) const {
@@ -129,16 +179,18 @@ void Engine::render(GroupRenderContext& ctx) const {
 
     material->use();
 
-    if (ctx.matrices.view.has_value()) {
-        material->setMat4("view", ctx.matrices.view.value());
-    } else if (ctx.camera) {
-        material->setMat4("view", ctx.camera->getView());
-    }
+    if (!m_renderOverride.material) {
+        if (ctx.matrices.view.has_value()) {
+            material->setMat4("view", ctx.matrices.view.value());
+        } else if (ctx.camera) {
+            material->setMat4("view", ctx.camera->getView());
+        }
 
-    if (ctx.matrices.projection.has_value()) {
-        material->setMat4("projection", ctx.matrices.projection.value());
-    } else if (ctx.camera) {
-        material->setMat4("projection", ctx.camera->getProjection());
+        if (ctx.matrices.projection.has_value()) {
+            material->setMat4("projection", ctx.matrices.projection.value());
+        } else if (ctx.camera) {
+            material->setMat4("projection", ctx.camera->getProjection());
+        }
     }
 
     // Render all draw calls with only model matrix and attributes changing
@@ -149,7 +201,7 @@ void Engine::render(GroupRenderContext& ctx) const {
 
         material->setMat4("model", drawCall.model);
         drawCall.attributes->bind();
-        glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(n));
+        glDrawArrays(GL_TRIANGLES, 0, n);
     }
 }
 

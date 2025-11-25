@@ -53,7 +53,6 @@ void Skybox::render(Engine& engine, const Camera* camera, int pass) {
     RenderContext ctx;
     ctx.material = &m_material;
     ctx.attributes = &m_buffer;
-    ctx.castsShadows = false;
     ctx.matrices.projection = camera->getProjection();
     ctx.matrices.view = glm::mat4(glm::mat3(camera->getView()));
     ctx.matrices.model = glm::mat4(1.0f);
