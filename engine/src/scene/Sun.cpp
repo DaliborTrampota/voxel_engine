@@ -39,7 +39,7 @@ Sun::Sun(
     assert(m_depthFBO.checkCompleteness() == 0);
     m_depthFBO.unbind();
 
-    m_projection = glm::ortho(-10.f, 10.f, -10.f, 10.f, 0.1f, 1000.f);
+    m_projection = glm::ortho(-32.f, 32.f, -32.f, 32.f, 1.f, DistanceFromTarget * 2.f);
     m_depthShader.use();
     m_depthShader.setMat4("projection", m_projection);
 

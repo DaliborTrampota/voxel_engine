@@ -60,7 +60,6 @@ namespace engine {
             return m_directionalLightSource;
         }
 
-
       protected:
         std::shared_ptr<engine::Sun> m_directionalLightSource;
 

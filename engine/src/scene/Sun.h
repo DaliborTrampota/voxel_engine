@@ -16,6 +16,7 @@ namespace engine {
 
     class Sun : public Updateable {
       public:
+        static inline float DistanceFromTarget = 32.0f;
         Sun(Engine* engine,
             glm::ivec2 resolution,
             const glm::vec3* targetPosition,
@@ -25,7 +26,9 @@ namespace engine {
         void setDirection(const glm::vec3& direction);
         void setLightColor(const glm::vec3& color, float intensity);
 
-        glm::vec3 lightPosition() const { return *m_targetPosition - m_direction * 10.f; }
+        glm::vec3 lightPosition() const {
+            return *m_targetPosition - m_direction * DistanceFromTarget;
+        }
         glm::vec3 direction() const { return m_direction; }
         glm::vec3 lightColor() const { return m_lightColor; }
         float lightIntensity() const { return m_lightIntensity; }
