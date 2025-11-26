@@ -26,9 +26,11 @@ Sun::Sun(
       m_direction(direction),
       m_targetPosition(targetPosition),
       m_view(glm::mat4(1)) {
-    m_depthFBO.createTexture(
-        gl::FBOAttachment::Depth, gl::FrameBufferSettings::Depth(resolution.x, resolution.y)
-    );
+    gl::FrameBufferSettings shadowSettings =
+        gl::FrameBufferSettings::Depth(resolution.x, resolution.y);
+    shadowSettings.wrapS = gl::Settings::Wrap::ClampToBorder;
+    shadowSettings.wrapT = gl::Settings::Wrap::ClampToBorder;
+    m_depthFBO.createTexture(gl::FBOAttachment::Depth, shadowSettings);
 
     m_depthFBO.bind();
     glDrawBuffer(GL_NONE);

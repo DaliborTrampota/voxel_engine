@@ -43,12 +43,12 @@ void Engine::flush() {
     for (const auto& pass : m_renderPasses) {
         setRenderOverride(pass.materialOverride, pass.fboOverride);
 
-        // Clear the FBO if it's bound
-        if (pass.fboOverride) {
+        if (pass.id == RenderPass::DirectionalShadow) {
             pass.fboOverride->bind();
-
             pass.fboOverride->clearDepth(1.0f);
+            // glCullFace(GL_FRONT);
         }
+
 
         if (pass.viewportSize.has_value()) {
             glm::ivec2 res = pass.viewportSize.value();
@@ -68,8 +68,14 @@ void Engine::flush() {
             glm::ivec2 res = m_window->windowSize();
             glViewport(0, 0, res.x, res.y);
         }
+
+        // if (pass.id == RenderPass::DirectionalShadow) {
+        //     glCullFace(GL_BACK);
+        // }
     }
 
+    // glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    // glBindProgramPipeline(0);
     clearRenderOverride();
     m_renderQueue.clear();
 }
@@ -158,7 +164,10 @@ void Engine::render(RenderContext& ctx, RenderPass::ID renderPass) const {
         material->setVec3("lightPos", m_directionalLightSource->lightPosition());
         material->setVec3("lightColor", m_directionalLightSource->lightColor());
         material->setVec3("viewPos", ctx.camera->position());
-        material->setInt("shadowMap", m_directionalLightSource->shadowMapTexture());
+
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, m_directionalLightSource->shadowMapTexture());
+        material->setInt("shadowMap", 1);
     }
 
     if (!m_renderOverride.material) {
@@ -243,6 +252,7 @@ void Engine::endFrame() {
     m_window->swapBuffers();
     glfwPollEvents();
 }
+
 // void Engine::subscribeInputSystem(engine::InputSystem* inputSystem) {
 //     m_window->graphicsAPI()->subscribe(inputSystem);
 // }

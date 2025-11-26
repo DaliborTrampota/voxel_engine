@@ -24,11 +24,29 @@ uniform sampler2D shadowMap;
 
 vec3 sunDir = normalize(vec3(0.2, 1, 0.2));
 
+bool ENABLE_PCF = true;
 
-float ShadowCalculation(vec4 fragPosLightSpace)
+
+float PCF(vec3 projCoords, float currentDepth, float bias) {
+    float shadow = 0.0;
+    vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+    for(int x = -1; x <= 1; ++x)
+    {
+        for(int y = -1; y <= 1; ++y)
+        {
+            float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r; 
+            shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;        
+        }    
+    }
+    return shadow /= 9.0;
+}
+
+float ShadowCalculation(vec4 fragPosLightSpace, vec3 lightDir)
 {
     // perform perspective divide
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    if(projCoords.z > 1.0)
+        return 0.0;
     // transform to [0,1] range
     projCoords = projCoords * 0.5 + 0.5;
     // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
@@ -36,15 +54,19 @@ float ShadowCalculation(vec4 fragPosLightSpace)
     // get depth of current fragment from light's perspective
     float currentDepth = projCoords.z;
     // check whether current frag pos is in shadow
-    float shadow = currentDepth > closestDepth  ? 1.0 : 0.0;
 
-    return shadow;
+    float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);  
+
+    return ENABLE_PCF
+        ? PCF(projCoords, currentDepth, bias) 
+        : currentDepth - bias > closestDepth  ? 1.0 : 0.0;
 }  
+
 
 void main()
 {
 	vec4 col = texture(texArray, vec3(uv, texID));
-    vec3 normal = normalize(normal);
+    // vec3 normal = normalize(normal);
     if (texID == 7u) { // TODO grass coloring
         col.rgb *= vec3(0.4, 0.9, 0.3);
     }
@@ -62,7 +84,7 @@ void main()
     vec3 specular = vec3(0.0);// spec * lightColor;  
 
 
-    float shadow = ShadowCalculation(shadowData.fragPosLightSpace);
+    float shadow = ShadowCalculation(shadowData.fragPosLightSpace, lightDir);
     vec3 lighting = (ambientCol + (1.0 - shadow) * (diffuse + specular)) * col.rgb;
 
     // vec3 colData = col.xyz * max(0.5, dot(normal, sunDir));
