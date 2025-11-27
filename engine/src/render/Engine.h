@@ -24,7 +24,6 @@ namespace engine {
     class Renderable;
     class Sun;
 
-
     class Engine {
       public:
         Engine(std::unique_ptr<Window> window);
@@ -85,6 +84,8 @@ namespace engine {
         }
 
       private:
+        void initUtilityShaders();
+
         std::vector<RenderPass::Config> m_renderPasses;
         std::vector<std::weak_ptr<Updateable>> m_updateSubscribers;
 

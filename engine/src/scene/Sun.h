@@ -32,6 +32,7 @@ namespace engine {
         glm::vec3 direction() const { return m_direction; }
         glm::vec3 lightColor() const { return m_lightColor; }
         float lightIntensity() const { return m_lightIntensity; }
+        glm::ivec2 resolution() const { return m_resolution; }
 
         void update(float dt) override;
 

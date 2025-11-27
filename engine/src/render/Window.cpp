@@ -5,6 +5,7 @@
 
 #include "EngineEvents.h"
 #include "GLFWUserPointer.h"
+#include "utility/UtilityShaders.h"
 
 namespace {
     const char* getDebugSource(GLenum source) {
@@ -90,5 +91,7 @@ int Window::init(int w, int h, const char* name) {
         glViewport(0, 0, width, height);  // TODO: maybe users responsibility?
         pointer->window->fireWindowResizeEvent(&event);
     });
+
+    initUtilityShaders();
     return 1;
 }

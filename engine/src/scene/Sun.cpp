@@ -26,24 +26,31 @@ Sun::Sun(
       m_direction(direction),
       m_targetPosition(targetPosition),
       m_view(glm::mat4(1)) {
-    gl::FrameBufferSettings shadowSettings =
+    // VSM: Create RG32F texture for storing depth moments
+    gl::FrameBufferSettings vsmSettings = {
+        gl::Settings(gl::Settings::ClampToBorder, gl::Settings::Linear),
+        resolution.x,
+        resolution.y,
+        gl::ImageFormat::GrayAlpha,
+        gl::ImageDataType::Float
+    };
+    m_depthFBO.createTexture(gl::FBOAttachment::Color, vsmSettings);
+    m_depthFBO.createTexture(gl::FBOAttachment::Color + 1, vsmSettings);  // blur temp texture
+
+    // Create depth buffer for proper depth testing during shadow pass
+    gl::FrameBufferSettings depthSettings =
         gl::FrameBufferSettings::Depth(resolution.x, resolution.y);
-    shadowSettings.wrapS = gl::Settings::Wrap::ClampToBorder;
-    shadowSettings.wrapT = gl::Settings::Wrap::ClampToBorder;
-    m_depthFBO.createTexture(gl::FBOAttachment::Depth, shadowSettings);
+    m_depthFBO.createTexture(gl::FBOAttachment::Depth, depthSettings);
 
     m_depthFBO.bind();
-    glDrawBuffer(GL_NONE);
-    glReadBuffer(GL_NONE);
-    // m_depthFBO.clearDepth();
-    // m_depthFBO.clearDrawBuffers();
-    // m_depthFBO.clearReadBuffer();
+    m_depthFBO.setDrawBuffers({gl::FBOAttachment::Color});
     assert(m_depthFBO.checkCompleteness() == 0);
     m_depthFBO.unbind();
 
     m_projection = glm::ortho(-32.f, 32.f, -32.f, 32.f, 1.f, DistanceFromTarget * 2.f);
     m_depthShader.use();
     m_depthShader.setMat4("projection", m_projection);
+
 
     m_engine->registerRenderPass(
         {m_directionalShadowPass, &m_depthShader, &m_depthFBO, m_resolution}
@@ -87,7 +94,7 @@ glm::mat4 Sun::getLightSpaceTransform() const {
 }
 
 unsigned Sun::shadowMapTexture() const {
-    return m_depthFBO.texture(gl::FBOAttachment::Depth);
+    return m_depthFBO.texture(gl::FBOAttachment::Color);
 }
 
 // void Sun::render(Engine& engine, const Camera* camera, int pass) {

@@ -24,22 +24,37 @@ uniform sampler2D shadowMap;
 
 vec3 sunDir = normalize(vec3(0.2, 1, 0.2));
 
-bool ENABLE_PCF = true;
+bool ENABLE_VSM = true;
 
-
-float PCF(vec3 projCoords, float currentDepth, float bias) {
-    float shadow = 0.0;
-    vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
-    for(int x = -1; x <= 1; ++x)
-    {
-        for(int y = -1; y <= 1; ++y)
-        {
-            float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r; 
-            shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;        
-        }    
-    }
-    return shadow /= 9.0;
+float linstep(float low, float high, float v) {
+    return clamp((v - low) / (high - low), 0.0, 1.0);
 }
+
+float VSM(vec3 projCoords, float currentDepth) {
+    // Read the moments from the VSM shadow map
+    vec2 moments = texture(shadowMap, projCoords.xy).rg;
+    
+    // Surface is fully lit if the current fragment is before the light occluder
+    if (currentDepth <= moments.x)
+        return 0.0;
+    
+    // Calculate variance
+    float variance = moments.y - (moments.x * moments.x);
+    variance = max(variance, 0.00002); // Minimum variance to avoid division by zero
+    
+    // Calculate probabilistic upper bound using Chebyshev's inequality
+    float d = currentDepth - moments.x;
+    float p_max = variance / (variance + d * d);
+    
+    // Reduce light bleeding (lower = softer, more bleeding)
+    float lightBleedReduction = 0.1;
+    p_max = linstep(lightBleedReduction, 1.0, p_max);
+    
+    return 1.0 - p_max;
+}
+
+
+
 
 float ShadowCalculation(vec4 fragPosLightSpace, vec3 lightDir)
 {
@@ -57,9 +72,11 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 lightDir)
 
     float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);  
 
-    return ENABLE_PCF
-        ? PCF(projCoords, currentDepth, bias) 
-        : currentDepth - bias > closestDepth  ? 1.0 : 0.0;
+    if (ENABLE_VSM) {
+        return VSM(projCoords, currentDepth);
+    } else {
+        return currentDepth - bias > closestDepth ? 1.0 : 0.0;
+    }
 }  
 
 
@@ -70,7 +87,7 @@ void main()
     if (texID == 7u) { // TODO grass coloring
         col.rgb *= vec3(0.4, 0.9, 0.3);
     }
-    vec3 ambientCol = 0.15 * lightColor;
+    vec3 ambientCol = 0.3 * lightColor;  // Increased from 0.15 for less dark shadows
     //diffuse
     vec3 lightDir = normalize(lightPos - shadowData.fragPos);
     float diff = max(dot(lightDir, normal), 0.0);

@@ -13,6 +13,8 @@
 #include "scene/Sun.h"
 #include "scene/Updateable.h"
 
+#include "utility/UtilityShaders.h"
+
 using namespace engine;
 
 Engine::Engine(std::unique_ptr<Window> window) : m_window(std::move(window)) {
@@ -45,7 +47,7 @@ void Engine::flush() {
 
         if (pass.id == RenderPass::DirectionalShadow) {
             pass.fboOverride->bind();
-            pass.fboOverride->clearDepth(1.0f);
+            pass.fboOverride->clearActive({1.f, 1.f, 1.f, 1.f}, 1.0f);
             // glCullFace(GL_FRONT);
         }
 
@@ -69,9 +71,18 @@ void Engine::flush() {
             glViewport(0, 0, res.x, res.y);
         }
 
-        // if (pass.id == RenderPass::DirectionalShadow) {
-        //     glCullFace(GL_BACK);
-        // }
+        if (pass.id == RenderPass::DirectionalShadow) {
+            // glCullFace(GL_BACK);
+            glm::ivec2 resolution = m_directionalLightSource->resolution();
+            applyGaussianBlur(
+                *pass.fboOverride,
+                gl::FBOAttachment::Color,
+                gl::FBOAttachment::Color + 1,
+                resolution.x,
+                resolution.y,
+                nullptr
+            );
+        }
     }
 
     // glBindFramebuffer(GL_FRAMEBUFFER, 0);
