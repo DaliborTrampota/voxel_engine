@@ -19,10 +19,9 @@ uniform float time;
 //TODO UBO?
 uniform vec3 lightPos;
 uniform vec3 lightColor;
+uniform vec3 lightDir;
 uniform vec3 viewPos;
 uniform sampler2D shadowMap;
-
-vec3 sunDir = normalize(vec3(0.2, 1, 0.2));
 
 bool ENABLE_VSM = true;
 
@@ -47,7 +46,7 @@ float VSM(vec3 projCoords, float currentDepth) {
     float p_max = variance / (variance + d * d);
     
     // Reduce light bleeding (lower = softer, more bleeding)
-    float lightBleedReduction = 0.1;
+    float lightBleedReduction = 0.2;
     p_max = linstep(lightBleedReduction, 1.0, p_max);
     
     return 1.0 - p_max;
@@ -70,11 +69,11 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 lightDir)
     float currentDepth = projCoords.z;
     // check whether current frag pos is in shadow
 
-    float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);  
 
     if (ENABLE_VSM) {
         return VSM(projCoords, currentDepth);
     } else {
+        float bias = max(0.005 * (1.0 - dot(normal, lightDir)), 0.0005);  
         return currentDepth - bias > closestDepth ? 1.0 : 0.0;
     }
 }  

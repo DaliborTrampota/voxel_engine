@@ -174,6 +174,7 @@ void Engine::render(RenderContext& ctx, RenderPass::ID renderPass) const {
         );
         material->setVec3("lightPos", m_directionalLightSource->lightPosition());
         material->setVec3("lightColor", m_directionalLightSource->lightColor());
+        material->setVec3("lightDir", m_directionalLightSource->direction());
         material->setVec3("viewPos", ctx.camera->position());
 
         glActiveTexture(GL_TEXTURE1);
