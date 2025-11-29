@@ -26,18 +26,17 @@ Sun::Sun(
       m_direction(direction),
       m_targetPosition(targetPosition),
       m_view(glm::mat4(1)) {
-    // VSM: Create RG32F texture for storing depth moments
     gl::FrameBufferSettings vsmSettings = {
-        gl::Settings(gl::Settings::ClampToBorder, gl::Settings::Linear),
+        gl::Settings(gl::Settings::ClampToEdge, gl::Settings::Linear),
         resolution.x,
         resolution.y,
-        gl::ImageFormat::GrayAlpha,
+        gl::ImageFormat::RGBA,
         gl::ImageDataType::Float
     };
-    m_depthFBO.createTexture(gl::FBOAttachment::Color, vsmSettings);
-    m_depthFBO.createTexture(gl::FBOAttachment::Color + 1, vsmSettings);  // blur temp texture
 
-    // Create depth buffer for proper depth testing during shadow pass
+    m_depthFBO.createTexture(gl::FBOAttachment::Color, vsmSettings);
+    m_depthFBO.createTexture(gl::FBOAttachment::Color + 1, vsmSettings);  // for blur
+
     gl::FrameBufferSettings depthSettings =
         gl::FrameBufferSettings::Depth(resolution.x, resolution.y);
     m_depthFBO.createTexture(gl::FBOAttachment::Depth, depthSettings);

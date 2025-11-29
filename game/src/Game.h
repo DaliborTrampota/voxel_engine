@@ -36,6 +36,9 @@ class Game : public engine::Engine {
     void render(double dt) override;
     void afterRender() override;
 
+
+    void renderShadowMapDebug();
+
   private:
     std::unique_ptr<InputSystem> m_inputSystem;
     GLFWUserPointer m_pointer;

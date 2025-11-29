@@ -1,7 +1,7 @@
 #version 330 core
 
 in vec2 uv;
-out vec2 FragColor;
+out vec4 FragColor;
 
 uniform sampler2D inputTex;
 uniform float texelSize; // 1.0 / textureWidth
@@ -28,14 +28,7 @@ vec4 blur(bool horizontal) {
     return result;
 }
 
-float depthWeight(float sampleDepth, float centerDepth)
-{
-    float diff = abs(sampleDepth - centerDepth);
-    float sigma = 0.002;        // tunable: smaller = sharper edges
-    return exp(-(diff * diff) / (2.0 * sigma * sigma));
-}
-
 void main() {
     vec4 result = blur(horizontal);
-    FragColor = result.rg;
+    FragColor = result;
 }

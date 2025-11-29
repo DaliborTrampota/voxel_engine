@@ -1,22 +1,28 @@
 #version 330 core
 
 in vec4 v_position;
+out vec4 FragColor;
 
-out vec2 FragColor;
+float C = 45.0;
 
-void main()
-{
-    // VSM: Store depth and depth squared
-    float depth = v_position.z / v_position.w;
-    depth = depth * 0.5 + 0.5; // Convert to [0,1] range
-    
-    float moment1 = depth;
+vec2 VSM(float depth) {
     float moment2 = depth * depth;
-    
+
     // Partial derivative to reduce shadow acne
     float dx = dFdx(depth);
     float dy = dFdy(depth);
     moment2 += 0.05 * (dx * dx + dy * dy);
-    
-    FragColor = vec2(moment1, moment2);
+    return vec2(depth, moment2);
+}
+
+vec4 EVMS(float depth) {
+    return vec4(exp(C * depth), exp(C * 2 * depth), exp(-C * depth), exp(-C * 2 * depth));
+}
+
+
+void main() {
+    float depth = v_position.z / v_position.w;
+    depth = depth * 0.5 + 0.5;
+
+    FragColor = EVMS(depth);
 }
