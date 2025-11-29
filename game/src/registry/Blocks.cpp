@@ -5,8 +5,8 @@
 #include <data/TextureManager.h>
 
 #include <block/Block.h>
-#include <block/Geometry.h>
 #include <block/BlockMaterial.h>
+#include <block/Geometry.h>
 
 using namespace engine;
 

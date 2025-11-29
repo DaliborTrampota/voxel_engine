@@ -14,7 +14,7 @@ vec2 VSM(float depth) {
     moment2 += 0.05 * (dx * dx + dy * dy);
     return vec2(depth, moment2);
 }
-
+//https://martincap.io/projects/evsm/
 vec4 EVMS(float depth) {
     return vec4(exp(C * depth), exp(C * 2 * depth), exp(-C * depth), exp(-C * 2 * depth));
 }
