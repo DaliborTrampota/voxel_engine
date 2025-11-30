@@ -1,6 +1,5 @@
 #pragma once
 
-#include <concurrencysal.h>
 #include <optional>
 
 #define GLM_ENABLE_EXPERIMENTAL
