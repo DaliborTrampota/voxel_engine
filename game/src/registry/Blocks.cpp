@@ -5,8 +5,8 @@
 #include <data/TextureManager.h>
 
 #include <block/Block.h>
+#include <block/BlockMaterial.h>
 #include <block/Geometry.h>
-#include <block/Material.h>
 
 using namespace engine;
 
@@ -25,13 +25,13 @@ void RegisterBlocks() {
     
     auto DIRT = Block(1, &geometries.get("cube"))
         .isSolid(true)
-        .material(Material()
+        .material(BlockMaterial()
             .add(FaceTag::All, texMgr.texture("dirt"))
         );
     
     auto GRASS = Block(2, &geometries.get("cube"))
         .isSolid(true)
-        .material(Material()
+        .material(BlockMaterial()
             .add(FaceTag::Top, texMgr.texture("grass_block_top"))
             .add(FaceTag::Bottom, texMgr.texture("dirt"))
             .add(FaceTag::Side, texMgr.texture("grass_block_side"))
@@ -39,33 +39,33 @@ void RegisterBlocks() {
     
     auto STONE = Block(3, &geometries.get("cube"))
         .isSolid(true)
-        .material(Material()
+        .material(BlockMaterial()
             .add(FaceTag::All, texMgr.texture("stone"))
         );
 
     auto SAND = Block(4, &geometries.get("cube"))
         .isSolid(true)
-        .material(Material()
+        .material(BlockMaterial()
             .add(FaceTag::All, texMgr.texture("sand"))
         );
     
     auto CYLINDER = Block(5, &geometries.get("cylinder"))
         .isSolid(true)
         .isVoxel(true)
-        .material(Material()
+        .material(BlockMaterial()
             .add(FaceTag::All, texMgr.texture("stone"))
         );
     auto PYRAMID = Block(6, &geometries.get("pyramid"))
         .isSolid(true)
         .isVoxel(true)
-        .material(Material()
+        .material(BlockMaterial()
             .add(FaceTag::All, texMgr.texture("stone"))
         );
 
     // auto GLASS = Block(7, &geometries.get("cube"))
     //     .isSolid(true)
     //     .isOpaque(false)
-    //     .material(Material()
+    //     .material(BlockMaterial()
     //         .add(FaceTag::All, texMgr.texture("glass"))
     //     );
     

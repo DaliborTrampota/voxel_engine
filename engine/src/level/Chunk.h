@@ -9,6 +9,7 @@
 #include "ChunkData.h"
 #include "block/Block.h"
 #include "block/BlockData.h"
+#include "block/Vertex.h"
 #include "render/Renderable.h"
 
 #include <LWGL/buffer/Attributes.h>

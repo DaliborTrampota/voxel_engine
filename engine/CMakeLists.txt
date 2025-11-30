@@ -3,6 +3,12 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/src" PREFIX "Source Files" FILES 
 
 add_library(VoxelEngine STATIC ${SRC_FILES})
 
+# Treat warnings as errors
+# target_compile_options(VoxelEngine PRIVATE
+#     $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
+#     $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-Wall -Wextra -Werror>
+# )
+
 target_link_libraries(VoxelEngine PRIVATE glad)
 target_link_libraries(VoxelEngine PRIVATE glfw)
 

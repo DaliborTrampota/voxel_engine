@@ -3,14 +3,12 @@
 #include <CoordUtils.h>
 #include <level/FlatTerrainGenerator.h>
 #include <level/World.h>
+#include <scene/Sun.h>
 
 #include "level/PerlinTerrainGenerator.h"
 
 
-#include "level/PerlinTerrainGenerator.h"
-
-
-WorldManager::WorldManager() {
+WorldManager::WorldManager(engine::Engine* engine) {
     m_currentWorld = 0;
     m_worlds[0] =
         // std::make_unique<engine::World>(std::make_unique<engine::FlatTerrainGenerator>());

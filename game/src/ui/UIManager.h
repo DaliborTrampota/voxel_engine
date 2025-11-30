@@ -8,7 +8,7 @@
 
 #include <glm/glm.hpp>
 
-#include <LWGL/render/Material.h>
+#include <LWGL/render/ShaderProgram.h>
 #include <UI/Renderer.h>
 
 #include <scene/Updateable.h>
@@ -37,7 +37,7 @@ class UIManager : public GLFWEventSite,
 
 
   private:
-    gl::Material m_fboShader;
+    gl::ShaderProgram m_fboShader;
     ui::Renderer m_renderer;
     unsigned int m_vaoID = 0;
     unsigned int m_vboID = 0;

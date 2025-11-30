@@ -9,12 +9,14 @@
 #include <glm/glm.hpp>
 
 namespace engine {
+    class Engine;
     class World;
-}
+    class Sun;
+}  // namespace engine
 
 class WorldManager {
   public:
-    WorldManager();
+    WorldManager(engine::Engine* engine);
     ~WorldManager();
 
     std::shared_ptr<engine::World> activeWorld();

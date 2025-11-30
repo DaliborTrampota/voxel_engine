@@ -37,7 +37,7 @@ World::World(std::unique_ptr<ITerrainGenerator> gen, uint32_t genThreads)
     m_skybox.loadFace(gl::CubeFace::Left, gl::ImageData("resources/skybox/left.jpg"));
     m_skybox.loadFace(gl::CubeFace::Right, gl::ImageData("resources/skybox/right.jpg"));
 
-
+    m_material.setShadowSupport(true);
     printf("World created\n");
 }
 
@@ -187,7 +187,7 @@ bool World::canSeeFace(const Block& curBlock, Layer layer, glm::vec3 pos, glm::i
 
 void World::render(Engine& engine, const Camera* camera, int pass) {
     for (const ChunkID& pos : m_loadedChunks) {
-        m_chunks[pos]->render(engine, camera, 0);
+        m_chunks[pos]->render(engine, camera, pass);
     }
     m_skybox.render(engine, camera);
     //std::cout << "Rendered chunks: " << m_chunks.size() << "\n";

@@ -11,3 +11,5 @@ CompileFlags:
     - -IP:/Github/VoxelEngine/voxel_engine_cmake/dependencies/lwgl/include
     - -IP:/Github/VoxelEngine/voxel_engine_cmake/dependencies/seuil/include
     - -IP:/Github/VoxelEngine/voxel_engine_cmake/engine/src
+Documentation:
+  CommentFormat: Doxygen

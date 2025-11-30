@@ -26,8 +26,8 @@ AABBCollider::AABBCollider(std::shared_ptr<AABB> aabb, float stepHeight)
         throw std::runtime_error("AABBCollider: AABB height must be greater than 0.");
 
     AABB bb(m_aabb->min - s_checkBox, m_aabb->max + s_checkBox);
-    int volume = glm::compMul(bb.max - bb.min);
-    m_aabbCache.reserve(volume - (m_aabb->max.y - m_aabb->min.y));
+    int volume = static_cast<int>(glm::compMul(bb.max - bb.min));
+    m_aabbCache.reserve(static_cast<size_t>(volume - (m_aabb->max.y - m_aabb->min.y)));
 }
 
 void AABBCollider::setWorld(std::shared_ptr<World> world) {
