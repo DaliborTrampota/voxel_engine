@@ -24,8 +24,8 @@ uniform vec3 lightDir;
 uniform vec3 viewPos;
 uniform sampler2D shadowMap;
 
-bool ENABLE_VSM = true;
-float C = 45.0;
+const bool ENABLE_VSM = true;
+const float C = 45.0;
 
 
 float linstep(float low, float high, float v) {
@@ -76,7 +76,7 @@ float VSM(vec3 projCoords, float currentDepth) {
     return 1.0 - p_max;
 }
 
-float EVMS(vec3 projCoords, float currentDepth) {
+float EVSM(vec3 projCoords, float currentDepth) {
     vec4 moments = texture(shadowMap, projCoords.xy);
 
     float e1 = exp(+C * currentDepth);
@@ -122,8 +122,8 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 lightDirection) {
     float currentDepth = projCoords.z;
 
     if (ENABLE_VSM) {
-        // return VSM(projCoords, currentDepth);
-        return EVMS(projCoords, currentDepth);
+        return VSM(projCoords, currentDepth);
+        // return EVSM(projCoords, currentDepth);
     } else {
         // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
         float closestDepth = texture(shadowMap, projCoords.xy).r;

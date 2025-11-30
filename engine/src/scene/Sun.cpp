@@ -30,7 +30,7 @@ Sun::Sun(
         gl::Settings(gl::Settings::ClampToEdge, gl::Settings::Linear),
         resolution.x,
         resolution.y,
-        gl::ImageFormat::RGBA,
+        gl::ImageFormat::GrayAlpha,
         gl::ImageDataType::Float
     };
 

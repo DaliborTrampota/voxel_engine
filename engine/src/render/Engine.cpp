@@ -48,7 +48,6 @@ void Engine::flush() {
         if (pass.id == RenderPass::DirectionalShadow) {
             pass.fboOverride->bind();
             pass.fboOverride->clearActive({1.f, 1.f, 1.f, 1.f}, 1.0f);
-            // glCullFace(GL_FRONT);
         }
 
 
@@ -72,9 +71,8 @@ void Engine::flush() {
         }
 
         if (pass.id == RenderPass::DirectionalShadow) {
-            // glCullFace(GL_BACK);
             glm::ivec2 resolution = m_directionalLightSource->resolution();
-            applyGaussianBlur(
+            applyLinearSamplingBlur(
                 *pass.fboOverride,
                 gl::FBOAttachment::Color,
                 gl::FBOAttachment::Color + 1,
