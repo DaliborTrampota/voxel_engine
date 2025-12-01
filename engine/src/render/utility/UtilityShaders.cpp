@@ -6,6 +6,8 @@
 #include <LWGL/texture/TextureBase.h>
 #include <render/Material.h>
 
+#include <glad/glad.h>
+
 
 namespace engine {
 
@@ -33,12 +35,12 @@ namespace engine {
 
 
     void applyGaussianBlur(
-        gl::FBO& source,
+        const gl::FBO& source,
         gl::FBOAttachment::Attachment sourceAttachment,
         gl::FBOAttachment::Attachment tempAttachment,
         int width,
         int height,
-        gl::FBO* temp
+        const gl::FBO* temp
     ) {
         int prevViewport[4];
         glGetIntegerv(GL_VIEWPORT, prevViewport);
@@ -79,12 +81,12 @@ namespace engine {
     }
 
     void applyLinearSamplingBlur(
-        gl::FBO& source,
+        const gl::FBO& source,
         gl::FBOAttachment::Attachment sourceAttachment,
         gl::FBOAttachment::Attachment tempAttachment,
         int width,
         int height,
-        gl::FBO* temp
+        const gl::FBO* temp
     ) {
         applyBlur(
             s_linearSamplingBlurMat, source, sourceAttachment, tempAttachment, width, height, temp
@@ -93,12 +95,12 @@ namespace engine {
 
     void applyBlur(
         std::unique_ptr<Material>& blurMat,
-        gl::FBO& source,
+        const gl::FBO& source,
         gl::FBOAttachment::Attachment sourceAttachment,
         gl::FBOAttachment::Attachment tempAttachment,
         int width,
         int height,
-        gl::FBO* temp
+        const gl::FBO* temp
     ) {
         int prevViewport[4];
         glGetIntegerv(GL_VIEWPORT, prevViewport);

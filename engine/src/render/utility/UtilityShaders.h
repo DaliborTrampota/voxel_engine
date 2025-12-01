@@ -22,30 +22,30 @@ namespace engine {
     void initUtilityShaders();
 
     void applyGaussianBlur(
-        gl::FBO& source,  //TODO const, ptr as temp?
+        const gl::FBO& source,  //TODO ptr as temp?
         gl::FBOAttachment::Attachment sourceAttachment,
         gl::FBOAttachment::Attachment tempAttachment,
         int width,
         int height,
-        gl::FBO* temp = nullptr  //TODO const
+        const gl::FBO* temp = nullptr
     );
 
     void applyLinearSamplingBlur(
-        gl::FBO& source,
+        const gl::FBO& source,
         gl::FBOAttachment::Attachment sourceAttachment,
         gl::FBOAttachment::Attachment tempAttachment,
         int width,
         int height,
-        gl::FBO* temp = nullptr
+        const gl::FBO* temp = nullptr
     );
 
     void applyBlur(
         std::unique_ptr<Material>& blurMat,
-        gl::FBO& source,
+        const gl::FBO& source,
         gl::FBOAttachment::Attachment sourceAttachment,
         gl::FBOAttachment::Attachment tempAttachment,
         int width,
         int height,
-        gl::FBO* temp = nullptr
+        const gl::FBO* temp = nullptr
     );
 }  // namespace engine
