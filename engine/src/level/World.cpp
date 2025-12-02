@@ -19,6 +19,15 @@
 #include <glm/gtx/norm.hpp>
 #include <iostream>
 
+#ifdef _WIN32
+#ifdef OPAQUE
+#undef OPAQUE
+#endif
+#ifdef TRANSPARENT
+#undef TRANSPARENT
+#endif
+#endif
+
 using namespace engine;
 
 World::World(std::unique_ptr<ITerrainGenerator> gen, uint32_t genThreads)
@@ -167,6 +176,8 @@ bool World::canSeeFace(const Block& curBlock, Layer layer, glm::vec3 pos, glm::i
         return false;
 
     Block block = chunk->getBlock(neighborPos, layer);
+    if (block.getID() == 0)
+        return true;
 
     // ) || (curBlock.isVoxel() && !block.isVoxel())
     if (!curBlock.isVoxel() && block.isVoxel()) {
@@ -179,10 +190,15 @@ bool World::canSeeFace(const Block& curBlock, Layer layer, glm::vec3 pos, glm::i
     }
 
     bool sameBlock = block.getID() == curBlock.getID();
-    if (layer == Layers::ANY)
-        return sameBlock ||
-               (block.isSolid() && curBlock.isSolid());  //TODO opaque instead of solid?
-    return sameBlock;
+    if (sameBlock)
+        return false;
+
+    switch (layer) {
+        case Layers::OPAQUE: return !block.isOpaque();
+        case Layers::TRANSPARENT: return block.isOpaque();
+        case Layers::ANY: return block.isSolid() && curBlock.isSolid();
+        default: return false;
+    }
 }
 
 void World::render(Engine& engine, const Camera* camera, int pass) {

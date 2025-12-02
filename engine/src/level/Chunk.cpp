@@ -67,7 +67,7 @@ bool Chunk::generateMesh() {
 
                 for (auto f : block.geometry()->faces()) {
                     if (f.cull &&
-                        m_world->canSeeFace(block, blockLayer, pos + chunkBlockCoords, f.cullDir))
+                        !m_world->canSeeFace(block, blockLayer, pos + chunkBlockCoords, f.cullDir))
                         continue;
 
                     f.translate(pos);
