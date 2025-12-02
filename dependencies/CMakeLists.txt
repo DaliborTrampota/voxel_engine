@@ -18,6 +18,7 @@ option(GLFW_INSTALL "Generate installation target" OFF)
 add_subdirectory(glfw)
 add_subdirectory(lwgl)
 add_subdirectory(seuil)
+add_subdirectory(SoLoud)
 
 target_include_directories(tools INTERFACE include/)
 target_include_directories(glad PUBLIC include/)
@@ -26,6 +27,7 @@ set_target_properties(glad PROPERTIES FOLDER "Libraries")
 set_target_properties(glm PROPERTIES FOLDER "Libraries")
 set_target_properties(lwgl PROPERTIES FOLDER "Libraries")
 set_target_properties(seuil PROPERTIES FOLDER "Libraries")
+set_target_properties(soloud PROPERTIES FOLDER "Libraries")
 
 set_target_properties(glfw PROPERTIES FOLDER "Libraries/GLFW3")
 
