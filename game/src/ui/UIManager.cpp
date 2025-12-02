@@ -7,8 +7,11 @@
 #include <UI/elements/Label.h>
 #include <UI/elements/Panel.h>
 
-#include <GLFW/glfw3.h>
+// clang-format off
 #include <glad/glad.h>  // TODO remove?
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
+// clang-format on
 
 #include <render/EngineEvents.h>
 
