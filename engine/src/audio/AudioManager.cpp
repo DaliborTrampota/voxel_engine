@@ -5,6 +5,8 @@
 
 #include <stdexcept>
 
+#include "../Globals.h"
+
 
 using namespace engine;
 using namespace SoLoud;
@@ -93,6 +95,22 @@ void AudioManager::destroyAll() {
     m_effects.clear();
 }
 
-void AudioManager::updatePositionalAudio() {
+void AudioManager::updatePositionalAudio(
+    glm::vec3 listenerPos, glm::vec3 listenerDir, glm::vec3 listenerVel
+) {
+    m_soloud.set3dListenerParameters(
+        listenerPos.x,
+        listenerPos.y,
+        listenerPos.z,
+        listenerDir.x,
+        listenerDir.y,
+        listenerDir.z,
+        UP.x,
+        UP.y,
+        UP.z,
+        listenerVel.x,
+        listenerVel.y,
+        listenerVel.z
+    );
     m_soloud.update3dAudio();
 }

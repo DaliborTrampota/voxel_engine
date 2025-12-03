@@ -120,6 +120,15 @@ void Audio::playWithSettings(const AudioSettings& settings, bool saveSettings) {
 
     } else {
         if (settings.directional) {
+            // Configure 3D attenuation on the source before playing
+            m_source->set3dMinMaxDistance(
+                settings.directionalData.minDistance, settings.directionalData.maxDistance
+            );
+            m_source->set3dAttenuation(
+                settings.directionalData.attenuationModel, settings.directionalData.rolloff
+            );
+
+
             m_handle = m_soloud->play3d(
                 *m_source,
                 settings.directionalData.position.x,

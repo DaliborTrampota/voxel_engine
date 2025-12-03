@@ -34,6 +34,7 @@ class Player : public engine::Updateable {
 
     engine::Camera* getCamera() { return m_camera.get(); }
     const glm::vec3& position() const { return m_position; }
+    const glm::vec3& velocity() const { return m_velocity; }
 
   private:
     glm::vec3 m_velocity{0.f};

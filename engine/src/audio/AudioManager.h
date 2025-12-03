@@ -47,7 +47,9 @@ namespace engine {
         );
 
         void destroyAll();
-        void updatePositionalAudio();
+        void updatePositionalAudio(
+            glm::vec3 listenerPos, glm::vec3 listenerDir, glm::vec3 listenerVel
+        );
 
       private:
         friend class Audio;

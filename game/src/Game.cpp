@@ -73,7 +73,9 @@ void Game::afterRender() {
     // Render UI AFTER flush() so it draws on top of everything
     m_uiManager->render();
     m_inputSystem->beginFrame();  // TODO proper name or placement
-    engine::AudioManager::Get().updatePositionalAudio();
+    engine::AudioManager::Get().updatePositionalAudio(
+        m_player->position(), m_player->getCamera()->lookDirection(), m_player->velocity()
+    );
 }
 
 void Game::start() {
@@ -110,13 +112,16 @@ void Game::start() {
 
     amgr.playEffect("Test2");
 
-    Audio music = amgr.playMusic("Test");
-    music.playWithSettings({
-        .directional = true,
-        .directionalData = {
-            .position = m_player->position(), .acceleration = glm::vec3(0.0f, 0.0f, 0.0f)
-        },
-    });
+    Audio music = amgr.playMusic(
+        "Test",
+        {
+            .volume=0.5f,
+            .directional = true,
+            .directionalData = {
+                .position = m_player->position(), .velocity = glm::vec3(0.0f, 0.0f, 0.0f)
+            },
+        }
+    );
 
     // glm::mat4 commonData[2] = {
     //     m_player->getCamera()->getProjection(),
