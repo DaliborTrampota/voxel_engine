@@ -15,6 +15,7 @@
 
 #ifdef _WIN32
 #define NOMINMAX
+#define NOGDI
 #include <windows.h>
 #endif
 

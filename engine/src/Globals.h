@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+
 // OpenGL Defaults
 #define UP glm::vec3{0, 1, 0}
 #define FORWARD glm::vec3{0, 0, -1}
@@ -13,8 +14,8 @@ namespace engine {
 
     // Render layer constants
     namespace Layers {
-        constexpr Layer ANY = 0;
-        constexpr Layer OPAQUE = 1;
-        constexpr Layer TRANSPARENT = 2;
+        constexpr Layer Any = 0;
+        constexpr Layer Opaque = 1;
+        constexpr Layer Transparent = 2;
     }  // namespace Layers
 }  // namespace engine

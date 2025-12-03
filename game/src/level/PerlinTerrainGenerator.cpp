@@ -1,5 +1,6 @@
 #include "PerlinTerrainGenerator.h"
 
+#include <Globals.h>
 #include <data/RegistryManager.h>
 #include <level/Chunk.h>
 #include <glm/gtc/random.hpp>
@@ -53,7 +54,7 @@ void PerlinTerrainGenerator::populate(Chunk& chunk) {
                     Block block = m_blockRegistry.get(blockID);
 
                     data.setBlock(
-                        x, y, z, blockID, block.isOpaque() ? Layers::OPAQUE : Layers::TRANSPARENT
+                        x, y, z, blockID, block.isOpaque() ? Layers::Opaque : Layers::Transparent
                     );
                 }
             }
