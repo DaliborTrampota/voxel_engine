@@ -115,7 +115,7 @@ void Game::start() {
     Audio music = amgr.playMusic(
         "Test",
         {
-            .volume=0.5f,
+            .volume = 0.5f,
             .directional = true,
             .directionalData = {
                 .position = m_player->position(), .velocity = glm::vec3(0.0f, 0.0f, 0.0f)
