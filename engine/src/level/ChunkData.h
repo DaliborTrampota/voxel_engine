@@ -63,7 +63,7 @@ namespace engine {
         }
 
         inline BlockID getBlockFromLayer(int x, int y, int z, Layer layer) const {
-            if (layer == Layers::ANY) {
+            if (layer == Layers::Any) {
                 return getBlock(x, y, z);
             }
             uint32_t blockData = data[index(x, y, z)];

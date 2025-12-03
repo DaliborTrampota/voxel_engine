@@ -1,32 +1,19 @@
 #include "World.h"
+#include <Globals.h>
 
 #include "CoordUtils.h"
 #include "ITerrainGenerator.h"
 #include "block/Block.h"
 #include "block/Geometry.h"
-#include "data/RegistryManager.h"
 #include "render/Engine.h"
 #include "render/RenderContext.h"
 
 #include <algorithm>
-#include <filesystem>
-#include <mutex>
-#include <queue>
 
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/component_wise.hpp>
 #include <glm/gtx/norm.hpp>
-#include <iostream>
-
-#ifdef _WIN32
-#ifdef OPAQUE
-#undef OPAQUE
-#endif
-#ifdef TRANSPARENT
-#undef TRANSPARENT
-#endif
-#endif
 
 using namespace engine;
 
@@ -194,9 +181,9 @@ bool World::canSeeFace(const Block& curBlock, Layer layer, glm::vec3 pos, glm::i
         return false;
 
     switch (layer) {
-        case Layers::OPAQUE: return !block.isOpaque();
-        case Layers::TRANSPARENT: return block.isOpaque();
-        case Layers::ANY: return block.isSolid() && curBlock.isSolid();
+        case Layers::Opaque: return !block.isOpaque();
+        case Layers::Transparent: return block.isOpaque();
+        case Layers::Any: return block.isSolid() && curBlock.isSolid();
         default: return false;
     }
 }
