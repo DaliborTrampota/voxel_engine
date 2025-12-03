@@ -51,7 +51,7 @@ bool AudioManager::preload(const std::string& path, const std::string& key, Audi
 Audio AudioManager::playEffect(const std::string& key, AudioSettings settings) {
     auto it = m_effects.find(key);
     if (it == m_effects.end())
-        throw std::runtime_error("Audio file not preloaded " + key);
+        throw std::runtime_error("Audio file not preloaded: " + key);
 
     return Audio(&m_soloud, &it->second, AudioType::Effect, settings);
     // Wav& effect = it->second;
@@ -69,7 +69,7 @@ Audio AudioManager::playMusic(const std::string& key, AudioSettings settings) {
 
     auto it = m_music.find(key);
     if (it == m_music.end()) {
-        throw std::runtime_error("Audio file not preloaded " + key);
+        throw std::runtime_error("Audio file not preloaded: " + key);
     }
     return Audio(&m_soloud, &it->second, audioType, settings);
 

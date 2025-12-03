@@ -11,7 +11,7 @@ namespace engine {
         bool directional = false;
         struct {
             glm::vec3 position;
-            glm::vec3 acceleration = {0.0f, 0.0f, 0.0f};
+            glm::vec3 velocity = {0.0f, 0.0f, 0.0f};
         } directionalData;
     };
 

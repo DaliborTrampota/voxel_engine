@@ -85,9 +85,9 @@ void Audio::setPosition(const glm::vec3& position) {
     m_soloud->set3dSourcePosition(m_handle, position.x, position.y, position.z);
 }
 
-void Audio::setAcceleration(const glm::vec3& acceleration) {
-    m_settings.directionalData.acceleration = acceleration;
-    m_soloud->set3dSourceVelocity(m_handle, acceleration.x, acceleration.y, acceleration.z);
+void Audio::setVelocity(const glm::vec3& velocity) {
+    m_settings.directionalData.velocity = velocity;
+    m_soloud->set3dSourceVelocity(m_handle, velocity.x, velocity.y, velocity.z);
 }
 
 void Audio::applySettings(const AudioSettings& settings) {
@@ -95,10 +95,18 @@ void Audio::applySettings(const AudioSettings& settings) {
     m_soloud->setVolume(m_handle, settings.volume);
     m_soloud->setLooping(m_handle, settings.loop);
     if (settings.directional) {
-        glm::vec3 position = settings.directionalData.position;
-        glm::vec3 acceleration = settings.directionalData.acceleration;
-        m_soloud->set3dSourcePosition(m_handle, position.x, position.y, position.z);
-        m_soloud->set3dSourceVelocity(m_handle, acceleration.x, acceleration.y, acceleration.z);
+        m_soloud->set3dSourcePosition(
+            m_handle,
+            settings.directionalData.position.x,
+            settings.directionalData.position.y,
+            settings.directionalData.position.z
+        );
+        m_soloud->set3dSourceVelocity(
+            m_handle,
+            settings.directionalData.velocity.x,
+            settings.directionalData.velocity.y,
+            settings.directionalData.velocity.z
+        );
     }
 }
 
@@ -112,16 +120,14 @@ void Audio::playWithSettings(const AudioSettings& settings, bool saveSettings) {
 
     } else {
         if (settings.directional) {
-            glm::vec3 position = settings.directionalData.position;
-            glm::vec3 acceleration = settings.directionalData.acceleration;
             m_handle = m_soloud->play3d(
                 *m_source,
-                position.x,
-                position.y,
-                position.z,
-                acceleration.x,
-                acceleration.y,
-                acceleration.z,
+                settings.directionalData.position.x,
+                settings.directionalData.position.y,
+                settings.directionalData.position.z,
+                settings.directionalData.velocity.x,
+                settings.directionalData.velocity.y,
+                settings.directionalData.velocity.z,
                 settings.volume
             );
         } else {

@@ -49,7 +49,7 @@ namespace engine {
         void setVolume(float volume);
         void setLooping(bool looping);
         void setPosition(const glm::vec3& position);
-        void setAcceleration(const glm::vec3& acceleration);
+        void setVelocity(const glm::vec3& velocity);
 
         /// @brief Applies the given settings to the audio.
         /// @param settings The settings to apply to the audio.

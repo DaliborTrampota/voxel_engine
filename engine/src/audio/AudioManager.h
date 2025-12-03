@@ -30,20 +30,20 @@ namespace engine {
         bool preload(const std::string& path, const std::string& key, AudioType type);
 
         /// @brief Plays a sound effect. Sound effects are short, one-off sounds.
-        /// @param path The path to the sound effect.
-        /// @param playExisting If true, the sound effect will be played if it already exists.
+        /// @param key The identifier of the audio to play (specified in preload).
+        /// @param settings The settings for the sound effect.
         /// @return The audio object for the sound effect.
         /// @throws std::runtime_error if the audio file is not preloaded.
-        Audio playEffect(const std::string& path, AudioSettings settings = AudioSettings());
+        Audio playEffect(const std::string& key, AudioSettings settings = AudioSettings());
 
-        /// @brief Plays a music track. Music tracks are long, and in case of backround repeating sounds.
-        /// @param path The path to the music track.
-        /// @param background If the music is a background sound, meaning no panning.
+        /// @brief Plays a music track. Music tracks are long, and in case of background repeating sounds.
+        /// @param key The identifier of the audio to play (specified in preload).
+        /// @param settings The settings for the music track.
         /// @return The audio object for the music track.
         /// @throws std::runtime_error if the audio file is not preloaded.
         /// @note If the audio is already playing, it will start from the beginning.
         [[nodiscard]] Audio playMusic(
-            const std::string& path, AudioSettings settings = AudioSettings()
+            const std::string& key, AudioSettings settings = AudioSettings()
         );
 
         void destroyAll();

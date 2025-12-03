@@ -20,7 +20,6 @@ class GameServices {
         m_audioManager = audioManager;
     }
 
-
   private:
     static inline Game* m_game = nullptr;
     static inline engine::InputSystem* m_inputSystem = nullptr;
