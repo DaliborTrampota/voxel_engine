@@ -7,6 +7,7 @@
 #include <UI/Renderer.h>
 #include <UI/elements/Panel.h>
 
+#include <audio/AudioManager.h>
 #include <data/TextureLoader.h>
 #include <level/World.h>
 #include <render/Window.h>
@@ -72,6 +73,7 @@ void Game::afterRender() {
     // Render UI AFTER flush() so it draws on top of everything
     m_uiManager->render();
     m_inputSystem->beginFrame();  // TODO proper name or placement
+    engine::AudioManager::Get().updatePositionalAudio();
 }
 
 void Game::start() {
@@ -102,7 +104,19 @@ void Game::start() {
     m_plrCamera = m_player->getCamera();
     m_plrCamera->lookAt(glm::vec3(0, 0, 0));
     m_window->subscribe(m_plrCamera);
+    engine::AudioManager& amgr = engine::AudioManager::Get();
+    amgr.preload("resources/audio/test2.wav", "Test2", AudioType::Effect);
+    amgr.preload("resources/audio/test.wav", "Test", AudioType::Music);
 
+    amgr.playEffect("Test2");
+
+    Audio music = amgr.playMusic("Test");
+    music.playWithSettings({
+        .directional = true,
+        .directionalData = {
+            .position = m_player->position(), .acceleration = glm::vec3(0.0f, 0.0f, 0.0f)
+        },
+    });
 
     // glm::mat4 commonData[2] = {
     //     m_player->getCamera()->getProjection(),

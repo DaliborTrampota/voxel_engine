@@ -5,6 +5,7 @@ set(SOLOUD_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/soloud)
 
 file(GLOB_RECURSE SOLOUD_SOURCES
     ${SOLOUD_ROOT}/src/audiosource/*.cpp
+    ${SOLOUD_ROOT}/src/audiosource/*.c
     ${SOLOUD_ROOT}/src/backend/miniaudio/*.cpp
     ${SOLOUD_ROOT}/src/core/*.cpp
     ${SOLOUD_ROOT}/src/filter/*.cpp
@@ -19,6 +20,8 @@ target_include_directories(soloud PUBLIC ${SOLOUD_ROOT}/include)
 target_compile_definitions(soloud PUBLIC
     WITH_MINIAUDIO
     MINIAUDIO_IMPLEMENTATION
+    WITH_WAV
+    WITH_OGG
 )
 
 target_compile_features(soloud PUBLIC cxx_std_17)
