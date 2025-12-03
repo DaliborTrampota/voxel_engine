@@ -85,6 +85,8 @@ void Game::start() {
 
     RegisterBlocks();
 
+    m_uiManager->createUI();
+
     m_player = std::make_shared<Player>();
     m_player->spawn(activeWorld());
 

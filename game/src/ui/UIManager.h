@@ -27,6 +27,8 @@ class UIManager : public GLFWEventSite,
     UIManager(glm::ivec2 screenSize);
     ~UIManager() = default;
 
+    void createUI();
+
     void update(float dt) override;
     void render();
 
