@@ -66,6 +66,15 @@ UIManager::UIManager(glm::ivec2 screenSize)
     );
     mainPanel->addChild(m_fpsLabel);
 
+    auto cursor = std::make_shared<Image>(
+        "resources/ui/crosshair.png",
+        Pos<Abs, Abs>{0.f, 0.f},
+        Size<Abs, Abs>{32, 32},
+        Style<Image>{.opacity = 1.f, .pixelated = true},
+        AnchorPoint::Mid
+    );
+    mainPanel->addChild(cursor);
+
     m_renderer.setRoot(mainPanel);
 
     m_fboShader.use();
