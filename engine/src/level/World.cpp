@@ -153,7 +153,7 @@ BlockID World::getBlockID(glm::vec3 pos, bool fallbackToGenerator) {
     return chunk->second->m_data.getBlock(pos);
 }
 
-bool World::canSeeFace(const Block& curBlock, Layer layer, glm::vec3 pos, glm::ivec3 dir) const {
+bool World::canSeeFace(const Block& curBlock, glm::vec3 pos, glm::ivec3 dir) const {
     glm::vec3 neighborPos = pos + glm::vec3(dir);
     ChunkID chunkCoords = engine::extractChunkCoords(neighborPos);
     if (!m_chunks.contains(chunkCoords))
@@ -163,7 +163,7 @@ bool World::canSeeFace(const Block& curBlock, Layer layer, glm::vec3 pos, glm::i
     if (!chunk)  // Chunk not generated
         return false;
 
-    Block block = chunk->getBlock(neighborPos, layer);
+    Block block = chunk->getBlock(neighborPos);
     if (block.getID() == 0)
         return true;
 
@@ -175,15 +175,22 @@ bool World::canSeeFace(const Block& curBlock, Layer layer, glm::vec3 pos, glm::i
                 return true;
         }
         return false;
+    } else if (curBlock.isVoxel() && block.isVoxel()) {
+        // TODO is it worth figuring out which faces should not be rendered?
+        return true;
     }
 
     bool sameBlock = block.getID() == curBlock.getID();
     if (sameBlock)
         return false;
 
-    switch (layer) {
-        case Layers::Opaque: return !block.isOpaque();
-        case Layers::Transparent: return block.isOpaque();
+    switch (curBlock.layer()) {
+        case Layers::Opaque:
+            // Render opaque faces when touching transparent block
+            return block.layer() != Layers::Opaque;
+        case Layers::Transparent:
+            // Render faces when touching different transparent blocks
+            return !sameBlock && block.layer() != Layers::Opaque;
         case Layers::Any: return block.isSolid() && curBlock.isSolid();
         default: return false;
     }

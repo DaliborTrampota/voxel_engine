@@ -23,13 +23,13 @@ void RegisterBlocks() {
     Registry<Block>& blocks = RegistryManager::Blocks();
     TextureManager& texMgr = TextureManager::Get();
     
-    auto DIRT = Block(1, &geometries.get("cube"))
+    auto DIRT = Block(1, Layers::Opaque, &geometries.get("cube"))
         .isSolid(true)
         .material(BlockMaterial()
             .add(FaceTag::All, texMgr.texture("dirt"))
         );
     
-    auto GRASS = Block(2, &geometries.get("cube"))
+    auto GRASS = Block(2, Layers::Opaque, &geometries.get("cube"))
         .isSolid(true)
         .material(BlockMaterial()
             .add(FaceTag::Top, texMgr.texture("grass_block_top"))
@@ -37,38 +37,37 @@ void RegisterBlocks() {
             .add(FaceTag::Side, texMgr.texture("grass_block_side"))
         );
     
-    auto STONE = Block(3, &geometries.get("cube"))
+    auto STONE = Block(3, Layers::Opaque, &geometries.get("cube"))
         .isSolid(true)
         .material(BlockMaterial()
             .add(FaceTag::All, texMgr.texture("stone"))
         );
 
-    auto SAND = Block(4, &geometries.get("cube"))
+    auto SAND = Block(4, Layers::Opaque, &geometries.get("cube"))
         .isSolid(true)
         .material(BlockMaterial()
             .add(FaceTag::All, texMgr.texture("sand"))
         );
     
-    auto CYLINDER = Block(5, &geometries.get("cylinder"))
+    auto CYLINDER = Block(5, Layers::Opaque, &geometries.get("cylinder"))
         .isSolid(true)
         .isVoxel(true)
         .material(BlockMaterial()
             .add(FaceTag::All, texMgr.texture("stone"))
         );
-    auto PYRAMID = Block(6, &geometries.get("pyramid"))
+    auto PYRAMID = Block(6, Layers::Opaque, &geometries.get("pyramid"))
         .isSolid(true)
         .isVoxel(true)
         .material(BlockMaterial()
             .add(FaceTag::All, texMgr.texture("stone"))
         );
 
-    // auto GLASS = Block(7, &geometries.get("cube"))
-    //     .isSolid(true)
-    //     .isOpaque(false)
-    //     .material(BlockMaterial()
-    //         .add(FaceTag::All, texMgr.texture("glass"))
-    //     );
-    
+    auto GLASS = Block(7, Layers::Transparent, &geometries.get("cube"))
+        .isSolid(true)
+        .material(BlockMaterial()
+            .add(FaceTag::All, texMgr.texture("glass"))
+        );
+
     blocks.add(Block::air(), "air");
     blocks.add(DIRT, "dirt");
     blocks.add(GRASS, "grass");
@@ -76,7 +75,7 @@ void RegisterBlocks() {
     blocks.add(SAND, "sand");
     blocks.add(CYLINDER, "cylinder");
     blocks.add(PYRAMID, "pyramid");
-    //blocks.add(GLASS, "glass");
+    blocks.add(GLASS, "glass");
     // clang-format on
 }
 

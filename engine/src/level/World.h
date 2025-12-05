@@ -74,7 +74,7 @@ namespace engine {
         /// @param pos The position of the current block.
         /// @param dir The direction from which the face is being checked.
         /// @return true if the face can be seen (face should be rendered), false otherwise.
-        bool canSeeFace(const Block& curBlock, Layer layer, glm::vec3 pos, glm::ivec3 dir) const;
+        bool canSeeFace(const Block& curBlock, glm::vec3 pos, glm::ivec3 dir) const;
 
 
         const std::unordered_set<ChunkID>& loadedChunks() const { return m_loadedChunks; }

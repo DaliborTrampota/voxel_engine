@@ -43,6 +43,9 @@ bool Chunk::generateMesh() {
         return false;
 
     glm::ivec3 chunkBlockCoords = m_coords * Chunk::Dims;
+    m_opaqueVertData.clear();
+    m_transparentVertData.clear();
+
     m_opaqueVertData.reserve(
         Chunk::Dims.x * Chunk::Dims.y * Chunk::Dims.z * 6
     );  // 16x16x6 faces (6 vertices per face)
@@ -58,16 +61,14 @@ bool Chunk::generateMesh() {
 
                 glm::ivec3 pos(x, y, z);
 
-                Layer blockLayer;
-                BlockID blockID = m_data.getBlockAndLayer(pos, blockLayer);
+                BlockID blockID = m_data.getBlock(pos);
                 Block block = RegistryManager::Blocks().get(blockID);
 
                 gl::Attributes<Vertex>& storage =
-                    block.isOpaque() ? m_opaqueVertData : m_transparentVertData;
+                    block.layer() == Layers::Opaque ? m_opaqueVertData : m_transparentVertData;
 
                 for (auto f : block.geometry()->faces()) {
-                    if (f.cull &&
-                        !m_world->canSeeFace(block, blockLayer, pos + chunkBlockCoords, f.cullDir))
+                    if (f.cull && !m_world->canSeeFace(block, pos + chunkBlockCoords, f.cullDir))
                         continue;
 
                     f.translate(pos);
@@ -87,10 +88,10 @@ bool Chunk::generateMesh() {
     return true;
 }
 
-Block Chunk::getBlock(glm::ivec3 pos, Layer layer) const {
+const Block& Chunk::getBlock(glm::ivec3 pos) const {
     BlockID blockID = !m_data.populated
                           ? m_world->m_generator->voxelAt(pos + m_coords * Chunk::Dims)
-                          : m_data.getBlockFromLayer(pos.x, pos.y, pos.z, layer);
+                          : m_data.getBlock(pos);
     return RegistryManager::Blocks().get(blockID);
 }
 
