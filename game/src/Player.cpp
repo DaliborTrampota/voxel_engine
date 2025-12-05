@@ -112,6 +112,14 @@ void Player::update(float dt) {
             m_camera->position().z
         );
     }
+
+    if (input->isMouse<Pressed>(GLFW_MOUSE_BUTTON_LEFT)) {
+        interact(GLFW_MOUSE_BUTTON_LEFT);
+    }
+
+    if (input->isMouse<Pressed>(GLFW_MOUSE_BUTTON_RIGHT)) {
+        interact(GLFW_MOUSE_BUTTON_RIGHT);
+    }
 }
 
 // w prefixed variables are world space
@@ -186,4 +194,7 @@ void Player::move(glm::vec3 position) {
     m_position = position;
     m_aabb->position(position);
     m_camera->position(position);
+}
+
+void Player::interact(GLFWKey button) {
 }

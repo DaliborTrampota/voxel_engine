@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <memory>
 
+#include <input/InputTypes.h>
 #include <level/Chunk.h>
 #include <physics/AABBCollider.h>
 #include <scene/Updateable.h>
@@ -31,6 +32,8 @@ class Player : public engine::Updateable {
     void move(glm::vec3 lDir, float dt);
     void rotate(float dx, float dy, bool constrainPitch = true);
     void move(glm::vec3 position);
+
+    void interact(engine::GLFWKey button);
 
     engine::Camera* getCamera() { return m_camera.get(); }
     const glm::vec3& position() const { return m_position; }

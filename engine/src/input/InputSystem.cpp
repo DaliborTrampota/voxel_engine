@@ -16,6 +16,13 @@ InputSystem::InputSystem(GLFWwindow* window) : m_window(window) {
 }
 
 void InputSystem::beginFrame() {
+    for (int i = 0; i < m_mouseButtonStates.size(); i++) {
+        if (m_mouseButtonStates[i] == Pressed) {
+            m_mouseButtonStates[i] = Held;
+        } else if (m_mouseButtonStates[i] == Released) {
+            m_mouseButtonStates[i] = None;
+        }
+    }
     for (int i = 0; i < m_keyStates.size(); i++) {
         if (m_keyStates[i] == Pressed) {
             m_keyStates[i] = Held;
@@ -62,6 +69,10 @@ void InputSystem::registerCallbacks() {
         m_window, [](GLFWwindow* w, int button, int action, int mods) -> void {
             InputSystem* input = static_cast<GLFWUserPointer*>(glfwGetWindowUserPointer(w))->input;
             MouseButtonEvent ev{button, action, mods};
+
+            input->m_mouseButtonStates[button] =
+                action == GLFW_PRESS ? KeyState::Pressed : KeyState::Released;
+
             input->fireMouseButtonEvent(&ev);
         }
     );
