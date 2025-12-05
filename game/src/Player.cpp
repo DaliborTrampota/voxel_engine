@@ -9,6 +9,7 @@
 #include <level/World.h>
 #include <physics/AABB.h>
 #include <scene/Camera.h>
+#include <utility/Algorithms.h>
 #include <utility/CoordUtils.h>
 
 #define GLM_ENABLE_EXPERIMENTAL
@@ -18,6 +19,8 @@
 
 #include "GameServices.h"
 #include "Globals.h"
+
+#include <data/RegistryManager.h>
 
 using namespace engine;
 
@@ -197,4 +200,16 @@ void Player::move(glm::vec3 position) {
 }
 
 void Player::interact(GLFWKey button) {
+    if (button == GLFW_MOUSE_BUTTON_LEFT) {
+        DDAResult dda =
+            DDA(*m_world, m_camera->position(), m_camera->lookDirection(), 10.0f, [](Block block) {
+                return block.isSolid();
+            });
+
+        if (dda.block.isAir())
+            return;
+
+        glm::ivec3 placePos = dda.position + dda.face;
+        m_world->setBlock(placePos, RegistryManager::Blocks().get("glass").getID());
+    }
 }

@@ -97,6 +97,10 @@ const Block& Chunk::getBlock(glm::ivec3 pos) const {
 
 
 void Chunk::render(Engine& engine, const Camera* camera, int pass) {
+    if (m_dirty) {
+        generateMesh();
+        m_dirty = false;
+    }
     if (!m_generated) {
         return;
     }
@@ -114,6 +118,7 @@ void Chunk::render(Engine& engine, const Camera* camera, int pass) {
         ctxTransparent.setModelMatrix(m_coords * Chunk::Dims);
         ctxTransparent.attributes = &m_transparentVertData;
         ctxTransparent.material = &m_world->m_material;
+        ctxTransparent.passMask = RenderPass::SceneTransparent | RenderPass::DirectionalShadow;
         ctxTransparent.camera = camera;
         engine.submitRender(std::move(ctxTransparent));
     }
@@ -133,7 +138,7 @@ void Chunk::render(Engine& engine, const Camera* camera, int pass) {
             return;
         ctx.attributes = &m_transparentVertData;
         ctx.material = &m_world->m_material;
-        ctx.passMask = RenderPass::Scene | RenderPass::DirectionalShadow;
+        ctx.passMask = RenderPass::SceneTransparent | RenderPass::DirectionalShadow;
         ctx.camera = camera;
         engine.submitRender(std::move(ctx));
     }

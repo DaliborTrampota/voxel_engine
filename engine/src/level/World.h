@@ -77,6 +77,10 @@ namespace engine {
         bool canSeeFace(const Block& curBlock, glm::vec3 pos, glm::ivec3 dir) const;
 
 
+        void setBlock(const ChunkID& chID, const glm::ivec3& pos, BlockID blockID);
+        void setBlock(glm::ivec3 pos, BlockID blockID);
+
+
         const std::unordered_set<ChunkID>& loadedChunks() const { return m_loadedChunks; }
 
 

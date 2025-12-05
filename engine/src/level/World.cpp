@@ -215,3 +215,13 @@ void World::createChunk(ChunkID id, bool load) {
             m_loadedChunks.insert(id);
     });
 }
+
+void World::setBlock(const ChunkID& chID, const glm::ivec3& pos, BlockID blockID) {
+    m_chunks[chID]->m_data.setBlock(pos, blockID);
+    m_chunks[chID]->m_dirty = true;
+}
+
+void World::setBlock(glm::ivec3 pos, BlockID blockID) {
+    ChunkID chID = extractChunkCoords(pos);
+    setBlock(chID, pos, blockID);
+}
