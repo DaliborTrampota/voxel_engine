@@ -21,5 +21,9 @@
 - fix touching blocks when stepping up
 - keybinds manager? like f11 to fullscreen esc callback etc
 - custom error objects or go error as a value?
+- particle system
+- entity support
+    - instanced rendering
+    - animations
 - LWGL
     - remove binds for all methods - consumers responsible for binding

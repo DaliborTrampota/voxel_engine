@@ -4,12 +4,12 @@
 #include <memory>
 
 
-#include <CoordUtils.h>
 #include <input/InputSystem.h>
 #include <level/Chunk.h>
 #include <level/World.h>
 #include <physics/AABB.h>
 #include <scene/Camera.h>
+#include <utility/CoordUtils.h>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtc/matrix_transform.hpp>

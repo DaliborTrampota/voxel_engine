@@ -2,14 +2,14 @@
 
 #include <algorithm>
 #include <glm/gtx/norm.hpp>
-#include <iostream>
 
 
 #include "../Player.h"
 
-#include <CoordUtils.h>
 #include <level/Chunk.h>
 #include <render/Engine.h>
+#include <utility/CoordUtils.h>
+
 
 using namespace engine;
 

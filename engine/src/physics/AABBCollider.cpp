@@ -4,9 +4,10 @@
 
 #include "../Globals.h"
 #include "AABB.h"
-#include "CoordUtils.h"
 #include "data/RegistryManager.h"
 #include "level/World.h"
+#include "utility/CoordUtils.h"
+
 
 
 #define GLM_ENABLE_EXPERIMENTAL

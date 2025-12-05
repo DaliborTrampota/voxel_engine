@@ -1,12 +1,13 @@
 #include "World.h"
 #include <Globals.h>
 
-#include "CoordUtils.h"
 #include "ITerrainGenerator.h"
 #include "block/Block.h"
 #include "block/Geometry.h"
 #include "render/Engine.h"
 #include "render/RenderContext.h"
+#include "utility/CoordUtils.h"
+
 
 #include <algorithm>
 
