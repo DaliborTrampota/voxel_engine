@@ -73,14 +73,14 @@ namespace engine {
 
         // MAKE_VEC_COMP(bool, isEmpty, data[index(x, y, z)] == 0);
 
-        inline BlockState& getState(int x, int y, int z) {
+        inline BlockState* getState(int x, int y, int z) {
             auto it = states.find(glm::ivec3(x, y, z));
             if (it == states.end()) {
-                return BlockState::Empty();
+                return nullptr;
             }
-            return it->second;
+            return &it->second;
         }
-        inline BlockState& getState(const glm::ivec3& pos) { return getState(pos.x, pos.y, pos.z); }
+        inline BlockState* getState(const glm::ivec3& pos) { return getState(pos.x, pos.y, pos.z); }
 
         inline void setState(int x, int y, int z, const BlockState& state) {
             states[glm::ivec3(x, y, z)] = state;
@@ -91,4 +91,3 @@ namespace engine {
     };
 
 }  // namespace engine
-

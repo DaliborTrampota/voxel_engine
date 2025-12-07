@@ -27,8 +27,8 @@ namespace engine {
         static constexpr bool is_value_type_v = is_variant_member<T, Value>::value;
 
       public:
-        static BlockState& Empty() {
-            static BlockState empty = BlockState();
+        static const BlockState& Empty() {
+            static const BlockState empty = BlockState();
             return empty;
         }
         static BlockState make(glm::vec3 orientation);
