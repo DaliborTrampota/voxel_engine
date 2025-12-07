@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <glm/gtx/norm.hpp>
+#include <iostream>
 
 
 #include "../Player.h"
