@@ -8,7 +8,7 @@ namespace engine {
 
     class TextureLoader {
       public:
-        TextureLoader(int slot);
+        explicit TextureLoader(int slot);
 
         /// @brief Load textures from a directory
         /// @param dirPath Path to the directory containing the textures

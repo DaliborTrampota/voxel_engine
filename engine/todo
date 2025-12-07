@@ -1,10 +1,24 @@
-- geometry shaders
+- geometry and compute shaders
+    - grass/foliage?
+    
 - materials
+    - what did I mean by this?
+    - PBR?
+    
 - lights
-    - sun / directional
-    - point
-    - 
+    - sun / directional @done
+    - point - omnidirectional (using cubemap?
+    - cascaded shadowmaps
+    - somehow achieve hard shadows? - stencil buffer shadows nvidia paper?
+    
 - shadows
+    - texel snap
+    - semitransparent block shadows
+    - colorful shadows?
+
+- transparent block render support
+    - Weighted Blended OIT or Per-Pixel Linked Lists?
+    
 - ui
     - basic ui elements @done
     - input elements
@@ -20,10 +34,11 @@
 - glfw callbacks using window user pointer @done
 - fix touching blocks when stepping up
 - keybinds manager? like f11 to fullscreen esc callback etc
-- custom error objects or go error as a value?
+- custom error objects or go error as a value cpp23 std::expected?
 - particle system
 - entity support
     - instanced rendering
     - animations
 - LWGL
     - remove binds for all methods - consumers responsible for binding
+

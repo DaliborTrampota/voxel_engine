@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <LWGL/buffer/Attributes.h>
 #include <LWGL/buffer/FBO.h>
 
 #include "RenderPass.h"

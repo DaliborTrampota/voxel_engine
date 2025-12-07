@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <limits>
 
 // OpenGL Defaults
 #define UP glm::vec3{0, 1, 0}
@@ -11,6 +12,8 @@ namespace engine {
     using TexID = unsigned int;
     using BlockID = uint32_t;
     using Layer = uint8_t;
+
+    constexpr BlockID InvalidBlockID = std::numeric_limits<BlockID>::max();
 
     // Render layer constants
     namespace Layers {
