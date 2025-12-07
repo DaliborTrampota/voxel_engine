@@ -22,6 +22,7 @@
 
 #include "GameServices.h"
 #include "registry/Blocks.h"
+#include "registry/Geometries.h"
 
 
 //#include <tracy/Tracy.hpp>
@@ -83,6 +84,7 @@ void Game::start() {
     TextureLoader loader(texSlot);
     loader.load("resources/textures/blocks/");  // bind in load
 
+    RegisterGeometries();
     RegisterBlocks();
 
     m_uiManager->createUI();
