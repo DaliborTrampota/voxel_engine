@@ -12,6 +12,9 @@ namespace engine {
         Vertical,
         MouseX,
         MouseY,
+        MouseScroll,
+
+        End
     };
 
     enum KeyState : uint8_t {

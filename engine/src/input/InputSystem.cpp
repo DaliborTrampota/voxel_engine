@@ -33,6 +33,7 @@ void InputSystem::beginFrame() {
 
     setAxis(Axis::MouseX, 0.0f);
     setAxis(Axis::MouseY, 0.0f);
+    setAxis(Axis::MouseScroll, 0.0f);
 }
 
 float InputSystem::getAxis(Axis axis) {
@@ -107,6 +108,11 @@ void InputSystem::registerCallbacks() {
         input->setAxis(Axis::Forward, forward);
 
         input->fireKeyboardEvent(&ev);
+    });
+
+    glfwSetScrollCallback(m_window, [](GLFWwindow* w, double xoffset, double yoffset) {
+        InputSystem* input = static_cast<GLFWUserPointer*>(glfwGetWindowUserPointer(w))->input;
+        input->setAxis(Axis::MouseScroll, yoffset);
     });
 }
 
