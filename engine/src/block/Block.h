@@ -10,24 +10,21 @@ namespace engine {
 
     class Block {
       public:
-        Block(BlockID id, const Geometry* geo);
-        Block(BlockID id, const Geometry* geo, const BlockMaterial& mat);
+        Block(BlockID id, Layer layer, const Geometry* geo);
+        Block(BlockID id, Layer layer, const Geometry* geo, const BlockMaterial& mat);
 
         static Block& air();
+        bool isAir() const { return m_id == 0; }
 
         BlockID getID() const { return m_id; }
 
         const Geometry* geometry() const { return m_geometry; }
 
         bool isSolid() const { return m_isSolid; }
-        bool isOpaque() const { return m_isOpaque; }
         bool isVoxel() const { return m_isVoxel; }
+        Layer layer() const { return m_layer; }
 
 
-        Block& isOpaque(bool opaque) {
-            m_isOpaque = opaque;
-            return *this;
-        }
         Block& isSolid(bool solid) {
             m_isSolid = solid;
             return *this;
@@ -45,9 +42,9 @@ namespace engine {
 
       private:
         BlockID m_id;
-        bool m_isOpaque;
         bool m_isSolid;
         bool m_isVoxel;
+        Layer m_layer;
 
         const Geometry* m_geometry;
         BlockMaterial m_material;

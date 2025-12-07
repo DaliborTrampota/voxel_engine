@@ -53,9 +53,7 @@ void PerlinTerrainGenerator::populate(Chunk& chunk) {
                 if (blockID != 0) {
                     Block block = m_blockRegistry.get(blockID);
 
-                    data.setBlock(
-                        x, y, z, blockID, block.isOpaque() ? Layers::Opaque : Layers::Transparent
-                    );
+                    data.setBlock(x, y, z, blockID);
                 }
             }
         }

@@ -11,6 +11,8 @@ namespace engine {
     ChunkID extractChunkCoords(glm::vec3& pos);
     ChunkID extractChunkCoords(glm::ivec3& pos);
 
+    glm::ivec3 toChunkCoords(const ChunkID& chunkID, const glm::vec3& pos);
+
     ChunkID getChunkID(const glm::vec3& pos);
 
     /// @brief Returns the position floored, so position of the block in world space.

@@ -1,6 +1,8 @@
 
 #include "Vertex.h"
 
+#include <utility/Algorithms.h>
+
 using namespace engine;
 
 Vertex::Vertex(glm::vec3 pos, glm::vec3 n, glm::vec2 uv, int textureID, int ao)
@@ -16,6 +18,11 @@ Vertex::Vertex(glm::vec3 pos, glm::vec3 n, glm::vec2 uv) : Vertex::Vertex(pos, n
 
 void Vertex::translate(glm::vec3 t) {
     pos += t;
+}
+
+void Vertex::rotate(glm::vec3 axis, float angle) {
+    pos = rotatePoint(pos, axis, angle);
+    normal = rotatePoint(normal, axis, angle, {0, 0, 0});
 }
 
 void Vertex::data(int textureID, int ao) {

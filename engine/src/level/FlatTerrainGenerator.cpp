@@ -24,7 +24,7 @@ void FlatTerrainGenerator::populate(Chunk& chunk) {
             for (int z = 0; z < Chunk::Dims.z; ++z) {
                 BlockID blockID = voxelAt(glm::ivec3(x, y, z) + chunkCoords);
                 if (blockID != 0) {
-                    data.setBlock(x, y, z, blockID, Layers::Opaque);
+                    data.setBlock(x, y, z, blockID);
                 }
             }
         }

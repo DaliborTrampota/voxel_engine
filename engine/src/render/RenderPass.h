@@ -27,7 +27,8 @@ namespace engine::RenderPass {
 
     constexpr ID DirectionalShadow = 1 << 0;
     constexpr ID OmniShadow = 1 << 1;
-    constexpr ID Scene = 1 << 2;
+    constexpr ID SceneTransparent = 1 << 2;
+    constexpr ID Scene = 1 << 3;
 
     /// @brief Creates a new render pass configuration.
     /// @return A new RenderPass::Config with id set to the next available ID.
@@ -36,7 +37,7 @@ namespace engine::RenderPass {
     /// @note The render passes are rendered in the order of their creation.
     /// @note It is consumers responsibility to store the render pass ID and use it later.
     [[nodiscard]] inline Config make() {
-        static ID s_passIndex = 3;
+        static ID s_passIndex = 4;
         return {.id = static_cast<ID>(1 << s_passIndex++)};
     }
 

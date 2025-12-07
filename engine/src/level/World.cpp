@@ -1,12 +1,13 @@
 #include "World.h"
 #include <Globals.h>
 
-#include "CoordUtils.h"
 #include "ITerrainGenerator.h"
 #include "block/Block.h"
 #include "block/Geometry.h"
 #include "render/Engine.h"
 #include "render/RenderContext.h"
+#include "utility/CoordUtils.h"
+
 
 #include <algorithm>
 
@@ -152,7 +153,7 @@ BlockID World::getBlockID(glm::vec3 pos, bool fallbackToGenerator) {
     return chunk->second->m_data.getBlock(pos);
 }
 
-bool World::canSeeFace(const Block& curBlock, Layer layer, glm::vec3 pos, glm::ivec3 dir) const {
+bool World::canSeeFace(const Block& curBlock, glm::vec3 pos, glm::ivec3 dir) const {
     glm::vec3 neighborPos = pos + glm::vec3(dir);
     ChunkID chunkCoords = engine::extractChunkCoords(neighborPos);
     if (!m_chunks.contains(chunkCoords))
@@ -162,27 +163,36 @@ bool World::canSeeFace(const Block& curBlock, Layer layer, glm::vec3 pos, glm::i
     if (!chunk)  // Chunk not generated
         return false;
 
-    Block block = chunk->getBlock(neighborPos, layer);
+    Block block = chunk->getBlock(neighborPos);
     if (block.getID() == 0)
         return true;
 
     // ) || (curBlock.isVoxel() && !block.isVoxel())
     if (!curBlock.isVoxel() && block.isVoxel()) {
-        dir = -dir;  // Reverse dir to find face facing the current block
-        for (const auto& f : block.geometry()->faces()) {
-            if (f.cullDir == dir)  // todo check if the faces are on the same plane
-                return true;
-        }
-        return false;
+        return true;
+        // TODO figure out, either ignore and always draw face or its gonna be pain and check if faces are on same plane and if one contains the other and draw only the bigger
+        // dir = -dir;  // Reverse dir to find face facing the current block
+        // for (const auto& f : block.geometry()->faces()) {
+        //     if (f.cullDir == dir)  // todo check if the faces are on the same plane
+        //         return true;
+        // }
+        // return false;
+    } else if (curBlock.isVoxel() && block.isVoxel()) {
+        // TODO is it worth figuring out which faces should not be rendered?
+        return true;
     }
 
     bool sameBlock = block.getID() == curBlock.getID();
     if (sameBlock)
         return false;
 
-    switch (layer) {
-        case Layers::Opaque: return !block.isOpaque();
-        case Layers::Transparent: return block.isOpaque();
+    switch (curBlock.layer()) {
+        case Layers::Opaque:
+            // Render opaque faces when touching transparent block
+            return block.layer() != Layers::Opaque;
+        case Layers::Transparent:
+            // Render faces when touching different transparent blocks
+            return !sameBlock && block.layer() != Layers::Opaque;
         case Layers::Any: return block.isSolid() && curBlock.isSolid();
         default: return false;
     }
@@ -206,4 +216,14 @@ void World::createChunk(ChunkID id, bool load) {
         if (load)
             m_loadedChunks.insert(id);
     });
+}
+
+void World::setBlock(const ChunkID& chID, const glm::ivec3& pos, BlockID blockID) {
+    m_chunks[chID]->m_data.setBlock(pos, blockID);
+    m_chunks[chID]->m_dirty = true;
+}
+
+void World::setBlock(glm::ivec3 pos, BlockID blockID) {
+    ChunkID chID = extractChunkCoords(pos);
+    setBlock(chID, pos, blockID);
 }

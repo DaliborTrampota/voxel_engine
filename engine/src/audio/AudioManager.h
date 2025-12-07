@@ -13,7 +13,6 @@ namespace engine {
 
     class AudioManager {
       public:
-        AudioManager();
         ~AudioManager();
 
         static AudioManager& Get() {
@@ -53,6 +52,7 @@ namespace engine {
 
       private:
         friend class Audio;
+        AudioManager();
         SoLoud::Soloud m_soloud;
 
         // The SoLoud handle index wraps around 1 million (0xfffff).

@@ -51,23 +51,6 @@ UIManager::UIManager(glm::ivec2 screenSize)
         }
     });
 
-
-    std::shared_ptr<Panel> mainPanel =
-        std::make_shared<Panel>(Pos<Rel, Rel>{0.f, 0.f}, Size<Rel, Rel>{1.f, 1.f});
-
-    m_fpsLabel = std::make_shared<Label>(
-        "FPS: 0",
-        Pos<Rel, Rel>{0.f, 0.f},
-        Style<Label>{
-            .color = {1.f, 1.f, 1.f, 1.f}, .font = "resources/fonts/ARIAL.TTF", .fontSize = 50
-        },
-        AnchorPoint::TopLeft,
-        AnchorPoint::TopLeft
-    );
-    mainPanel->addChild(m_fpsLabel);
-
-    m_renderer.setRoot(mainPanel);
-
     m_fboShader.use();
     m_fboShader.setInt("screenTexture", 0);
 
@@ -169,4 +152,33 @@ void UIManager::mouseButtonEvent(MouseButtonEvent* pEvent) {
     };
 
     m_renderer.mouseEvent(event);
+}
+
+void UIManager::createUI() {
+    std::shared_ptr<Panel> mainPanel =
+        std::make_shared<Panel>(Pos<Rel, Rel>{0.f, 0.f}, Size<Rel, Rel>{1.f, 1.f});
+
+    m_fpsLabel = std::make_shared<Label>(
+        "FPS: 0",
+        Pos<Rel, Rel>{0.f, 0.f},
+        Style<Label>{
+            .color = {1.f, 1.f, 1.f, 1.f}, .font = "resources/fonts/ARIAL.TTF", .fontSize = 50
+        },
+        AnchorPoint::TopLeft,
+        AnchorPoint::TopLeft
+    );
+    mainPanel->addChild(m_fpsLabel);
+
+    std::shared_ptr<Image> cross = std::make_shared<Image>(
+        "resources/ui/crosshair.png",
+        Pos<Rel, Rel>{0.f, 0.f},
+        Size<Abs, Abs>{32, 32},
+        Style<Image>{
+            .pixelated = true,
+        },
+        AnchorPoint::Mid
+    );
+    mainPanel->addChild(cross);
+
+    m_renderer.setRoot(mainPanel);
 }

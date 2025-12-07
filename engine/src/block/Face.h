@@ -38,6 +38,7 @@ namespace engine {
         bool cull = false;
 
         void translate(glm::vec3 t);
+        void rotate(glm::vec3 axis, float angle);
         void data(int textureID, int ao);
 
         void setCull(glm::ivec3 dir) {
@@ -80,6 +81,16 @@ namespace engine {
             float r,
             float h,
             int segments,
+            glm::vec3 n,
+            glm::vec2 uvStart,
+            glm::vec2 uvEnd
+        );
+
+        static const Face RectangleFace(
+            FaceTag tag,
+            glm::vec3 start,
+            glm::vec3 end,
+            float length,
             glm::vec3 n,
             glm::vec2 uvStart,
             glm::vec2 uvEnd

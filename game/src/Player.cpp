@@ -4,12 +4,13 @@
 #include <memory>
 
 
-#include <CoordUtils.h>
 #include <input/InputSystem.h>
 #include <level/Chunk.h>
 #include <level/World.h>
 #include <physics/AABB.h>
 #include <scene/Camera.h>
+#include <utility/Algorithms.h>
+#include <utility/CoordUtils.h>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtc/matrix_transform.hpp>
@@ -18,6 +19,8 @@
 
 #include "GameServices.h"
 #include "Globals.h"
+
+#include <data/RegistryManager.h>
 
 using namespace engine;
 
@@ -36,6 +39,19 @@ Player::Player()
     opts.fov = glm::radians(45.0f);
     opts.aspectRatio = 800.0f / 600.0f;
     m_camera = std::make_unique<Camera>(opts);
+
+    m_heldBlocks = {
+        RegistryManager::Blocks().get("log_4").getID(),
+        RegistryManager::Blocks().get("log_6").getID(),
+        RegistryManager::Blocks().get("log_8").getID(),
+        RegistryManager::Blocks().get("log_10").getID(),
+        RegistryManager::Blocks().get("log_12").getID(),
+        RegistryManager::Blocks().get("log_14").getID(),
+        RegistryManager::Blocks().get("log_connector").getID(),
+        RegistryManager::Blocks().get("log_branch").getID(),
+        0,
+        0,
+    };
 }
 
 Player::~Player() {}
@@ -112,6 +128,20 @@ void Player::update(float dt) {
             m_camera->position().z
         );
     }
+
+    if (input->isMouse<Pressed>(GLFW_MOUSE_BUTTON_LEFT)) {
+        interact(GLFW_MOUSE_BUTTON_LEFT);
+    }
+
+    if (input->isMouse<Pressed>(GLFW_MOUSE_BUTTON_RIGHT)) {
+        interact(GLFW_MOUSE_BUTTON_RIGHT);
+    }
+
+    if (input->getAxis(Axis::MouseScroll) > 0) {
+        m_heldBlockIndex++;
+        if (m_heldBlockIndex >= m_heldBlocks.size())
+            m_heldBlockIndex = 0;
+    }
 }
 
 // w prefixed variables are world space
@@ -186,4 +216,34 @@ void Player::move(glm::vec3 position) {
     m_position = position;
     m_aabb->position(position);
     m_camera->position(position);
+}
+
+void Player::interact(GLFWKey button) {
+    if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+        DDAResult dda =
+            DDA(*m_world, m_camera->position(), m_camera->lookDirection(), 10.0f, [](Block block) {
+                return block.isSolid();
+            });
+
+        if (dda.block.isAir())
+            return;
+
+        glm::ivec3 placePos = dda.position + dda.face;
+        if (m_heldBlocks[m_heldBlockIndex] == 0)
+            return;
+        m_world->setBlock(placePos, m_heldBlocks[m_heldBlockIndex]);
+    }
+
+    if (button == GLFW_MOUSE_BUTTON_LEFT) {
+        DDAResult dda =
+            DDA(*m_world, m_camera->position(), m_camera->lookDirection(), 10.0f, [](Block block) {
+                return block.isSolid();
+            });
+
+        if (dda.block.isAir())
+            return;
+
+
+        m_world->setBlock(dda.chunk->id(), toChunkCoords(dda.chunk->id(), dda.position), 0);
+    }
 }

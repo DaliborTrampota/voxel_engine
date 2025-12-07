@@ -136,9 +136,9 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 lightDirection) {
 void main() {
     vec4 col = texture(texArray, vec3(uv, texID));
     // vec3 normal = normalize(normal);
-    if (texID == 7u) {  // TODO grass coloring
-        col.rgb *= vec3(0.4, 0.9, 0.3);
-    }
+    // if (texID == 7u) {  // TODO grass coloring
+    //     col.rgb *= vec3(0.4, 0.9, 0.3);
+    // }
 
     float shadow = ShadowCalculation(shadowData.fragPosLightSpace, lightDir);
     FragColor = vec4(phongLighting(col, shadow), col.a);

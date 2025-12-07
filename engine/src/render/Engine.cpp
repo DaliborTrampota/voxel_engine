@@ -4,8 +4,10 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <LWGL/buffer/Attributes.h>
 #include <LWGL/buffer/FBO.h>
 
+#include "RenderPass.h"
 #include "level/Chunk.h"
 #include "level/World.h"
 #include "render/Material.h"
@@ -22,6 +24,7 @@ Engine::Engine(std::unique_ptr<Window> window) : m_window(std::move(window)) {
     registerRenderPass({RenderPass::DirectionalShadow});
     // registerRenderPass({RenderPass::OmniShadow});
     registerRenderPass({RenderPass::Scene});
+    registerRenderPass({RenderPass::SceneTransparent});
 }
 
 void Engine::submitRender(RenderContext&& ctx, bool immediate) {
@@ -49,6 +52,27 @@ void Engine::flush() {
         if (pass.id == RenderPass::DirectionalShadow) {
             pass.fboOverride->bind();
             pass.fboOverride->clearActive({1.f, 1.f, 1.f, 1.f}, 1.0f);
+        }
+
+
+        if (pass.id == RenderPass::SceneTransparent) {
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            // Two-pass rendering for correct transparency on convex objects:
+            // Pass 1: Render back faces first (cull front)
+            glCullFace(GL_FRONT);
+            for (auto& ctxVariant : m_renderQueue) {
+                std::visit(
+                    [this, &pass](auto& ctx) {
+                        if ((ctx.passMask & pass.id) == 0)
+                            return;
+                        this->render(ctx, pass.id);
+                    },
+                    ctxVariant
+                );
+            }
+            // Pass 2: Render front faces on top (cull back)
+            glCullFace(GL_BACK);
         }
 
 
@@ -81,6 +105,10 @@ void Engine::flush() {
                 resolution.y,
                 nullptr
             );
+        }
+
+        if (pass.id == RenderPass::SceneTransparent) {
+            glDisable(GL_BLEND);
         }
     }
 

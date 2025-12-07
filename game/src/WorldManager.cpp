@@ -1,9 +1,10 @@
 #include "WorldManager.h"
 
-#include <CoordUtils.h>
 #include <level/FlatTerrainGenerator.h>
 #include <level/World.h>
 #include <scene/Sun.h>
+#include <utility/CoordUtils.h>
+
 
 #include "level/PerlinTerrainGenerator.h"
 

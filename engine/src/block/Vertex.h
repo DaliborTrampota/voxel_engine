@@ -9,6 +9,7 @@ namespace engine {
         Vertex(glm::vec3 pos, glm::vec3 n, glm::vec2 uv);
 
         void translate(glm::vec3 t);
+        void rotate(glm::vec3 axis, float angle);
         void data(int textureID, int ao);
 
         glm::vec3 pos, normal;

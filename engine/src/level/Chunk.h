@@ -8,7 +8,7 @@
 
 #include "ChunkData.h"
 #include "block/Block.h"
-#include "block/BlockData.h"
+#include "block/BlockState.h"
 #include "block/Vertex.h"
 #include "render/Renderable.h"
 
@@ -45,6 +45,7 @@ namespace engine {
 
         /// @return ID or coordinates of the chunk in the world.
         const ChunkID& id() const { return m_coords; }
+        glm::ivec3 position() const { return m_coords * Dims; }
 
         /// @brief Generates the chunk data per TerrainGenerator if not generated yet.
         void generate();
@@ -56,7 +57,7 @@ namespace engine {
         bool generateMesh();
 
 
-        Block getBlock(glm::ivec3 pos, Layer layer = Layers::Any) const;
+        const Block& getBlock(glm::ivec3 pos) const;
 
         /// @return 3D vector of the block data.
         ChunkData& data() { return m_data; }
@@ -76,6 +77,7 @@ namespace engine {
 
         bool m_generated = false;
         std::atomic_bool m_generatingMesh = false;
+        bool m_dirty = false;
 
         friend class Engine;
         friend class World;
