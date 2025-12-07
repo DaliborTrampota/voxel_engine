@@ -39,6 +39,19 @@ Player::Player()
     opts.fov = glm::radians(45.0f);
     opts.aspectRatio = 800.0f / 600.0f;
     m_camera = std::make_unique<Camera>(opts);
+
+    m_heldBlocks = {
+        RegistryManager::Blocks().get("log_4").getID(),
+        RegistryManager::Blocks().get("log_6").getID(),
+        RegistryManager::Blocks().get("log_8").getID(),
+        RegistryManager::Blocks().get("log_10").getID(),
+        RegistryManager::Blocks().get("log_12").getID(),
+        RegistryManager::Blocks().get("log_14").getID(),
+        RegistryManager::Blocks().get("log_connector").getID(),
+        RegistryManager::Blocks().get("log_branch").getID(),
+        0,
+        0,
+    };
 }
 
 Player::~Player() {}
@@ -122,6 +135,12 @@ void Player::update(float dt) {
 
     if (input->isMouse<Pressed>(GLFW_MOUSE_BUTTON_RIGHT)) {
         interact(GLFW_MOUSE_BUTTON_RIGHT);
+    }
+
+    if (input->getAxis(Axis::MouseScroll) > 0) {
+        m_heldBlockIndex++;
+        if (m_heldBlockIndex >= m_heldBlocks.size())
+            m_heldBlockIndex = 0;
     }
 }
 

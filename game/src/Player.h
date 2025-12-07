@@ -56,4 +56,7 @@ class Player : public engine::Updateable {
     std::shared_ptr<engine::AABB> m_aabb;
     engine::AABBCollider m_collider;
     std::unique_ptr<engine::Camera> m_camera;
+
+    std::array<engine::BlockID, 10> m_heldBlocks;
+    int m_heldBlockIndex = 0;
 };
