@@ -8,10 +8,17 @@
 namespace engine {
     class Geometry;
 
+    enum class RotationMode {
+        None,
+        AxisY,
+        AnyAxis,
+        AnyAxisAngle,
+    };
+
     class Block {
       public:
         Block(BlockID id, Layer layer, const Geometry* geo);
-        Block(BlockID id, Layer layer, const Geometry* geo, const BlockMaterial& mat);
+        Block(BlockID id, Layer layer, const Geometry* geo, RotationMode rotationMode);
 
         static Block& air();
         bool isAir() const { return m_id == 0; }
@@ -23,30 +30,25 @@ namespace engine {
         bool isSolid() const { return m_isSolid; }
         bool isVoxel() const { return m_isVoxel; }
         Layer layer() const { return m_layer; }
+        RotationMode rotationMode() const { return m_rotationMode; }
 
+        Block& rotationMode(RotationMode mode);
+        Block& isSolid(bool solid);
+        Block& isVoxel(bool voxel);
 
-        Block& isSolid(bool solid) {
-            m_isSolid = solid;
-            return *this;
-        }
-        Block& isVoxel(bool voxel) {
-            m_isVoxel = voxel;
-            return *this;
-        }
+        Block& material(const BlockMaterial& mat);
+        const BlockMaterial& material() const;
 
-        Block& material(const BlockMaterial& mat) {
-            m_material = mat;
-            return *this;
-        }
-        BlockMaterial& material() { return m_material; }
-
-      private:
-        BlockID m_id;
+      protected:
         bool m_isSolid;
         bool m_isVoxel;
         Layer m_layer;
+        RotationMode m_rotationMode = RotationMode::None;
 
         const Geometry* m_geometry;
         BlockMaterial m_material;
+
+      private:
+        BlockID m_id;
     };
 }  // namespace engine
