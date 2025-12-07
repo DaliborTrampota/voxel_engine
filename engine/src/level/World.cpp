@@ -169,12 +169,14 @@ bool World::canSeeFace(const Block& curBlock, glm::vec3 pos, glm::ivec3 dir) con
 
     // ) || (curBlock.isVoxel() && !block.isVoxel())
     if (!curBlock.isVoxel() && block.isVoxel()) {
-        dir = -dir;  // Reverse dir to find face facing the current block
-        for (const auto& f : block.geometry()->faces()) {
-            if (f.cullDir == dir)  // todo check if the faces are on the same plane
-                return true;
-        }
-        return false;
+        return true;
+        // TODO figure out, either ignore and always draw face or its gonna be pain and check if faces are on same plane and if one contains the other and draw only the bigger
+        // dir = -dir;  // Reverse dir to find face facing the current block
+        // for (const auto& f : block.geometry()->faces()) {
+        //     if (f.cullDir == dir)  // todo check if the faces are on the same plane
+        //         return true;
+        // }
+        // return false;
     } else if (curBlock.isVoxel() && block.isVoxel()) {
         // TODO is it worth figuring out which faces should not be rendered?
         return true;
