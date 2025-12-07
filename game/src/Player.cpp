@@ -200,7 +200,7 @@ void Player::move(glm::vec3 position) {
 }
 
 void Player::interact(GLFWKey button) {
-    if (button == GLFW_MOUSE_BUTTON_LEFT) {
+    if (button == GLFW_MOUSE_BUTTON_RIGHT) {
         DDAResult dda =
             DDA(*m_world, m_camera->position(), m_camera->lookDirection(), 10.0f, [](Block block) {
                 return block.isSolid();
@@ -210,6 +210,21 @@ void Player::interact(GLFWKey button) {
             return;
 
         glm::ivec3 placePos = dda.position + dda.face;
-        m_world->setBlock(placePos, RegistryManager::Blocks().get("glass").getID());
+        if (m_heldBlocks[m_heldBlockIndex] == 0)
+            return;
+        m_world->setBlock(placePos, m_heldBlocks[m_heldBlockIndex]);
+    }
+
+    if (button == GLFW_MOUSE_BUTTON_LEFT) {
+        DDAResult dda =
+            DDA(*m_world, m_camera->position(), m_camera->lookDirection(), 10.0f, [](Block block) {
+                return block.isSolid();
+            });
+
+        if (dda.block.isAir())
+            return;
+
+
+        m_world->setBlock(dda.chunk->id(), toChunkCoords(dda.chunk->id(), dda.position), 0);
     }
 }
