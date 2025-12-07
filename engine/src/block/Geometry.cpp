@@ -21,6 +21,13 @@ Geometry::Geometry(std::vector<Face> faces, const AABB& aabb)
     m_id = s_idCounter++;
 }
 
+void Geometry::rotate(glm::vec3 axis, float angle) {
+    for (auto& face : m_faces) {
+        face.rotate(axis, angle);
+    }
+    m_aabb = AABB::fromGeometry(*this);
+}
+
 Geometry Geometry::Cube() {
     Geometry g;
     g.m_faces.insert(g.m_faces.begin(), data::f_faces.begin(), data::f_faces.end());

@@ -23,6 +23,8 @@ namespace engine {
         const std::vector<Face>& faces() const { return m_faces; }
         const AABB& aabb() const { return m_aabb; }
 
+        void rotate(glm::vec3 axis, float angle);
+
         /// @brief Returns the geometry for basic cube. (1x1x1)
         static Geometry Cube();
         static Geometry Cylinder();

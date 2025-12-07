@@ -2,10 +2,15 @@
 #include "CoordUtils.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/common.hpp>
 
+
 #include "block/Block.h"
+#include "block/Face.h"
+#include "block/Geometry.h"
 #include "level/World.h"
+
 
 using namespace engine;
 
@@ -27,7 +32,7 @@ namespace {
 // TODO return the geometry face, not just normal of a cube
 DDAResult engine::DDA(
     const World& world, glm::vec3 start, glm::vec3 direction, float length, UnaryPredicate pred
-) {
+) noexcept {
     if (glm::all(glm::equal(direction, glm::vec3(0.0f)))) {
         return DDAResult{start, glm::vec3(0.0f), Block::air(), 0.f, nullptr};
     }
@@ -101,7 +106,7 @@ DDAResult engine::DDA(
 }
 
 
-float mollerTrumborAlg(Ray& ray, Triangle& t, float& uOut, float& vOut) {
+float engine::rayTriangleIntersection(Ray& ray, Triangle& t, float& uOut, float& vOut) noexcept {
     glm::vec3 e1 = t.p2 - t.p1;
     glm::vec3 e2 = t.p3 - t.p1;
 
@@ -131,4 +136,50 @@ float mollerTrumborAlg(Ray& ray, Triangle& t, float& uOut, float& vOut) {
     uOut = u;
     vOut = v;
     return d_inv * glm::dot(e2, r);
+}
+
+const Face* engine::getAimedFace(Ray& ray, const Geometry& geometry) noexcept {
+    struct {
+        float minT = std::numeric_limits<float>::infinity();
+        const Face* face = nullptr;
+    } best;
+    for (const auto& face : geometry.faces()) {
+        for (int i = 0; i < face.vertices.size(); i += 3) {
+            Triangle trig = {
+                face.vertices[i].pos, face.vertices[i + 1].pos, face.vertices[i + 2].pos
+            };
+            float u, v;
+            float t = rayTriangleIntersection(ray, trig, u, v);
+            if (t < best.minT) {
+                best.minT = t;
+                best.face = &face;
+            }
+        }
+    }
+    return best.face;
+}
+
+
+glm::vec3 engine::rotatePoint(
+    const glm::vec3& point, const glm::vec3& axis, float angle, const glm::vec3& center
+) {
+    glm::mat4 rotation = glm::translate(glm::mat4(1.0f), center) *
+                         glm::rotate(glm::mat4(1.0f), angle, axis) *
+                         glm::translate(glm::mat4(1.0f), -center);
+
+    return glm::vec3(rotation * glm::vec4(point, 1.0f));
+}
+
+std::vector<glm::vec3> engine::rotatePoints(
+    const std::vector<glm::vec3>& points, const glm::vec3& axis, float angle, const glm::vec3& center
+) {
+    glm::mat4 rotation = glm::translate(glm::mat4(1.0f), center) *
+                         glm::rotate(glm::mat4(1.0f), angle, axis) *
+                         glm::translate(glm::mat4(1.0f), -center);
+    std::vector<glm::vec3> rotatedPoints;
+    rotatedPoints.reserve(points.size());
+    for (const auto& point : points) {
+        rotatedPoints.emplace_back(rotation * glm::vec4(point, 1.0f));
+    }
+    return rotatedPoints;
 }

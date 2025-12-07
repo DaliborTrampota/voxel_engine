@@ -2,13 +2,20 @@
 
 #include <glm/gtc/constants.hpp>
 
-#include "data/VertexData.h"
+#include <utility/Algorithms.h>
 
 namespace engine {
 
     void Face::translate(glm::vec3 t) {
         for (auto& v : vertices)
             v.pos += t;
+    }
+
+    void Face::rotate(glm::vec3 axis, float angle) {
+        for (auto& v : vertices) {
+            v.rotate(axis, angle);
+        }
+        cullDir = rotatePoint(cullDir, axis, angle, {0, 0, 0});
     }
 
     void Face::data(int textureID, int ao) {
@@ -69,6 +76,7 @@ namespace engine {
 
         return face;
     }
+
     const Face Face::CircleFace(
         FaceTag tag,
         glm::vec3 center,
@@ -185,6 +193,58 @@ namespace engine {
 
 
         // face.data(texID, 0);
+
+        return face;
+    }
+
+    const Face Face::RectangleFace(
+        FaceTag tag,
+        glm::vec3 p0,
+        glm::vec3 p1,
+        float length,
+        glm::vec3 n,
+        glm::vec2 uvStart,
+        glm::vec2 uvEnd
+    ) {
+        Face face{tag};
+
+        glm::vec3 e1 = p1 - p0;  // first side
+        glm::vec3 N = glm::normalize(n);
+
+        // find a direction perpendicular to both N and e1
+        glm::vec3 e2 = glm::normalize(glm::cross(N, e1)) * length;
+
+        // Compute tentative quad
+        // glm::vec3 a = end + e2;
+        // glm::vec3 b = start;
+        // glm::vec3 c = start + e2;
+
+        // // Check winding: (b - a) × (c - a)
+        // glm::vec3 faceN = glm::normalize(glm::cross(b - a, c - a));
+
+        // // If the face normal opposes N, flip e2
+        // if (glm::dot(faceN, N) < 0.0f)
+        //     e2 = -e2;
+
+
+        glm::vec3 corners[4] = {p1, p0, p1 + e2, p0 + e2};
+
+
+        glm::vec2 uvs[4] = {
+            glm::vec2(uvStart.x, uvEnd.y),
+            uvStart,
+            uvEnd,
+            glm::vec2(uvEnd.x, uvStart.y),
+        };
+
+        int indices[6] = {2, 1, 0, 1, 2, 3};
+
+        for (int i = 0; i < 6; ++i) {
+            face.vertices.emplace_back(corners[indices[i]], n, uvs[indices[i]]);
+        }
+
+        face.setCull(n);
+        face.cull = false;
 
         return face;
     }
