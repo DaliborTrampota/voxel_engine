@@ -9,7 +9,6 @@
 #include "utility/CoordUtils.h"
 
 
-
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/component_wise.hpp>
