@@ -49,6 +49,7 @@ Sun::Sun(
     m_projection = glm::ortho(-32.f, 32.f, -32.f, 32.f, 1.f, DistanceFromTarget * 2.f);
     m_depthShader.use();
     m_depthShader.setMat4("projection", m_projection);
+    m_depthShader.setInt("texArray", 0);  // Block texture array is at slot 0
 
 
     m_engine->registerRenderPass(
