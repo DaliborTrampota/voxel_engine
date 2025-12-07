@@ -16,6 +16,16 @@
         return name(pos.x, pos.y, pos.z); \
     }
 
+namespace std {
+    template <>
+    struct hash<glm::ivec3> {
+        size_t operator()(const glm::ivec3& k) const {
+            return hash<int>()(k.x) ^ hash<int>()(k.y << 1) ^ hash<int>()(k.z << 2);
+        }
+    };
+
+}  // namespace std
+
 namespace engine {
 
     /**
@@ -28,10 +38,7 @@ namespace engine {
         std::unordered_map<glm::ivec3, BlockState> states;
 
         ChunkData() = default;
-        ChunkData(glm::ivec3 dims)
-            : dims(dims),
-              data(dims.x * dims.y * dims.z, 0),
-              states(dims.x * dims.y * dims.z) {}
+        ChunkData(glm::ivec3 dims) : dims(dims), data(dims.x * dims.y * dims.z, 0), states() {}
 
         // 3D to 1D index mapping (Z-Y-X order for cache locality)
         inline size_t index(int x, int y, int z) const { return x + dims.x * (y + dims.y * z); }
@@ -84,3 +91,4 @@ namespace engine {
     };
 
 }  // namespace engine
+

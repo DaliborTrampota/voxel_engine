@@ -34,7 +34,7 @@ namespace engine {
         static BlockState make(glm::vec3 orientation);
 
         BlockState() = default;
-        ~BlockState();
+        ~BlockState() = default;
 
         template <typename T>
             requires is_value_type_v<T>

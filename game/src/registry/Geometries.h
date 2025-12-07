@@ -67,12 +67,11 @@ namespace {
         std::vector<uint8_t> buffer(std::istreambuf_iterator<char>(file), {});
         const ogt_vox_scene* scene = ogt_vox_read_scene(buffer.data(), buffer.size());
 
-        static ogt_voxel_meshify_context* ctx =
-            new ogt_voxel_meshify_context{nullptr, nullptr, nullptr};
+        static ogt_voxel_meshify_context ctx{nullptr, nullptr, nullptr};
 
         const ogt_vox_model* model = scene->models[0];
         ogt_mesh* mesh = ogt_mesh_from_paletted_voxels_greedy(
-            ctx,
+            &ctx,
             model->voxel_data,
             model->size_x,
             model->size_y,
@@ -103,7 +102,7 @@ namespace {
         }
 
 
-        ogt_mesh_destroy(ctx, mesh);
+        ogt_mesh_destroy(&ctx, mesh);
         ogt_vox_destroy_scene(scene);
         return Geometry(faces);
     }
