@@ -8,7 +8,7 @@
 
 #include "ChunkData.h"
 #include "block/Block.h"
-#include "block/BlockData.h"
+#include "block/BlockState.h"
 #include "block/Vertex.h"
 #include "render/Renderable.h"
 
@@ -45,6 +45,7 @@ namespace engine {
 
         /// @return ID or coordinates of the chunk in the world.
         const ChunkID& id() const { return m_coords; }
+        glm::ivec3 position() const { return m_coords * Dims; }
 
         /// @brief Generates the chunk data per TerrainGenerator if not generated yet.
         void generate();
