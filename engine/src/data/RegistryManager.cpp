@@ -6,8 +6,8 @@
 
 
 namespace engine {
-    Registry<Block>& RegistryManager::Blocks() {
-        static Registry<Block> s_instance;
+    Registry<Block, RegistryStoragePolicy::ByPointer>& RegistryManager::Blocks() {
+        static Registry<Block, RegistryStoragePolicy::ByPointer> s_instance;
         return s_instance;
     }
 

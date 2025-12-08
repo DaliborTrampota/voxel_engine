@@ -20,6 +20,6 @@ namespace engine {
         int height(int x, int z) const;
 
       protected:
-        const Registry<Block>& m_blockRegistry;
+        const Registry<Block, RegistryStoragePolicy::ByPointer>& m_blockRegistry;
     };
 }  // namespace engine

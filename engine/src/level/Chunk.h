@@ -57,7 +57,7 @@ namespace engine {
         bool generateMesh();
 
 
-        const Block& getBlock(glm::ivec3 pos) const;
+        const Block* getBlock(glm::ivec3 pos) const;
 
         /// @return 3D vector of the block data.
         ChunkData& data() { return m_data; }

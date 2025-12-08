@@ -163,12 +163,12 @@ bool World::canSeeFace(const Block& curBlock, glm::vec3 pos, glm::ivec3 dir) con
     if (!chunk)  // Chunk not generated
         return false;
 
-    Block block = chunk->getBlock(neighborPos);
-    if (block.getID() == 0)
+    const Block* block = chunk->getBlock(neighborPos);
+    if (block->getID() == 0)
         return true;
 
     // ) || (curBlock.isVoxel() && !block.isVoxel())
-    if (!curBlock.isVoxel() && block.isVoxel()) {
+    if (!curBlock.isVoxel() && block->isVoxel()) {
         return true;
         // TODO figure out, either ignore and always draw face or its gonna be pain and check if faces are on same plane and if one contains the other and draw only the bigger
         // dir = -dir;  // Reverse dir to find face facing the current block
@@ -177,23 +177,23 @@ bool World::canSeeFace(const Block& curBlock, glm::vec3 pos, glm::ivec3 dir) con
         //         return true;
         // }
         // return false;
-    } else if (curBlock.isVoxel() && block.isVoxel()) {
+    } else if (curBlock.isVoxel() && block->isVoxel()) {
         // TODO is it worth figuring out which faces should not be rendered?
         return true;
     }
 
-    bool sameBlock = block.getID() == curBlock.getID();
+    bool sameBlock = block->getID() == curBlock.getID();
     if (sameBlock)
         return false;
 
     switch (curBlock.layer()) {
         case Layers::Opaque:
             // Render opaque faces when touching transparent block
-            return block.layer() != Layers::Opaque;
+            return block->layer() != Layers::Opaque;
         case Layers::Transparent:
             // Render faces when touching different transparent blocks
-            return !sameBlock && block.layer() != Layers::Opaque;
-        case Layers::Any: return block.isSolid() && curBlock.isSolid();
+            return !sameBlock && block->layer() != Layers::Opaque;
+        case Layers::Any: return block->isSolid() && curBlock.isSolid();
         default: return false;
     }
 }

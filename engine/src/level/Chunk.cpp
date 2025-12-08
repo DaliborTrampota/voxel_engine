@@ -62,21 +62,9 @@ bool Chunk::generateMesh() {
                 glm::ivec3 pos(x, y, z);
 
                 BlockID blockID = m_data.getBlock(pos);
-                Block block = RegistryManager::Blocks().get(blockID);
-
-                gl::Attributes<Vertex>& storage =
-                    block.layer() == Layers::Opaque ? m_opaqueVertData : m_transparentVertData;
-
-                for (auto f : block.geometry()->faces()) {
-                    if (f.cull && !m_world->canSeeFace(block, pos + chunkBlockCoords, f.cullDir))
-                        continue;
-
-                    f.translate(pos);
-
-                    for (Vertex v : f.vertices) {
-                        v.data(block.material().forTag(f.tag), 0);
-                        storage.add(v);
-                    }
+                const Block* block = RegistryManager::Blocks().get(blockID);
+                const BlockState* state = m_data.getState(pos);
+                    generateMeshForBlock(block, pos, state, chunkBlockCoords);
                 }
             }
         }
@@ -88,7 +76,7 @@ bool Chunk::generateMesh() {
     return true;
 }
 
-const Block& Chunk::getBlock(glm::ivec3 pos) const {
+const Block* Chunk::getBlock(glm::ivec3 pos) const {
     BlockID blockID = !m_data.populated
                           ? m_world->m_generator->voxelAt(pos + m_coords * Chunk::Dims)
                           : m_data.getBlock(pos);
@@ -146,4 +134,23 @@ void Chunk::render(Engine& engine, const Camera* camera, int pass) {
 
 bool ChunkID::operator==(const ChunkID& other) const {
     return x == other.x && y == other.y && z == other.z;
+}
+
+void Chunk::generateMeshForBlock(
+    const Block* block, glm::ivec3 pos, const BlockState* state, const glm::ivec3& chunkBlockCoords
+) {
+    gl::Attributes<Vertex>& storage =
+        block->layer() == Layers::Opaque ? m_opaqueVertData : m_transparentVertData;
+
+    for (auto f : block->geometry()->faces()) {
+        if (f.cull && !m_world->canSeeFace(*block, pos + chunkBlockCoords, f.cullDir))
+            continue;
+
+        f.translate(pos);
+
+        for (Vertex v : f.vertices) {
+            v.data(block->material().forTag(f.tag), 0);
+            storage.add(v);
+        }
+    }
 }

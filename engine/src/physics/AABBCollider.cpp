@@ -127,10 +127,10 @@ void AABBCollider::updateAABBCache(const glm::vec3& velocity, const glm::vec3& p
                 if (blockID == INVALID_BLOCK || blockID == Block::air().getID())
                     continue;
 
-                const Block& block = RegistryManager::Blocks().get(blockID);
-                if (!block.isSolid())
+                const Block* block = RegistryManager::Blocks().get(blockID);
+                if (!block->isSolid())
                     continue;
-                AABB aabb = block.geometry()->aabb();
+                AABB aabb = block->geometry()->aabb();
                 aabb.transform(glm::translate(glm::mat4(1.0f), glm::vec3(i, j, k)));
                 m_aabbCache.push_back(aabb);
             }

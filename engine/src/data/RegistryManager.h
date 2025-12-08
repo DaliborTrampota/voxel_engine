@@ -8,7 +8,7 @@
 namespace engine {
     class RegistryManager {
       public:
-        static Registry<Block>& Blocks();
+        static Registry<Block, RegistryStoragePolicy::ByPointer>& Blocks();
         static Registry<Geometry>& Geometries();
     };
 }  // namespace engine
