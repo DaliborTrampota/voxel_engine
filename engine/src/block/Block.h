@@ -8,6 +8,14 @@
 namespace engine {
     class Geometry;
 
+    enum class Side {
+        North,
+        South,
+        East,
+        West,
+        Up,
+        Down,
+    };
     enum class RotationMode {
         None,
         AxisY,
@@ -19,6 +27,7 @@ namespace engine {
       public:
         Block(BlockID id, Layer layer, const Geometry* geo);
         Block(BlockID id, Layer layer, const Geometry* geo, RotationMode rotationMode);
+        virtual ~Block() = default;
 
         static Block& air();
         bool isAir() const { return m_id == 0; }
