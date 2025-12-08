@@ -1,7 +1,5 @@
 #include "VariantBlock.h"
 
-#include <algorithm>
-
 using namespace engine;
 
 VariantBlock::VariantBlock(
@@ -24,8 +22,7 @@ VariantBlock& VariantBlock::alwaysUseBaseGeometry(bool alwaysUseBaseGeometry) {
 VariantBlock& VariantBlock::addVariant(
     const Geometry& geometry, std::initializer_list<Condition> conditions
 ) {
-    Variant variant{geometry, {}};
-    std::copy_n(conditions.begin(), std::min(conditions.size(), size_t(6)), variant.conditions);
+    Variant variant{geometry, std::vector<Condition>(conditions)};
     m_variants.push_back(std::move(variant));
     return *this;
 }

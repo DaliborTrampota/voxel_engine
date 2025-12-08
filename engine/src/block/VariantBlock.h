@@ -16,6 +16,8 @@ namespace engine {
     /// @note If
     class VariantBlock : public Block {
       public:
+        ~VariantBlock() override = default;
+
         /// @brief A condition is a direction and a set of block IDs.
         /// @property direction The direction of the condition check
         /// @property blockIDs Possible block IDs for the direction. Only .
@@ -23,6 +25,10 @@ namespace engine {
         struct Condition {
             Side direction;
             std::unordered_set<BlockID> blockIDs;  // TODO set vs vector
+
+            bool operator==(const Condition& other) const {
+                return direction == other.direction && blockIDs == other.blockIDs;
+            }
         };
 
         /// @brief A variant is a specific geometry with a set of conditions.
@@ -31,19 +37,10 @@ namespace engine {
         /// @note All conditions must be met for the variant to be used.
         struct Variant {
             Geometry geometry;
-            Condition conditions[6];
+            std::vector<Condition> conditions;
 
             bool operator==(const Variant& other) const {
-                if (geometry.getID() != other.geometry.getID()) {
-                    return false;
-                }
-                for (int i = 0; i < 6; ++i) {
-                    if (conditions[i].direction != other.conditions[i].direction ||
-                        conditions[i].blockIDs != other.conditions[i].blockIDs) {
-                        return false;
-                    }
-                }
-                return true;
+                return geometry.getID() == other.geometry.getID() && conditions == other.conditions;
             }
         };
 
@@ -88,6 +85,7 @@ namespace engine {
         VariantBlock& addVariant(
             const Geometry& geometry, std::initializer_list<Condition> conditions
         );
+
 
         /// @brief Get a variant that matches the neighbours.
         /// @param neighbours The neighbours of the block.

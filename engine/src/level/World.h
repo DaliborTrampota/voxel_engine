@@ -89,6 +89,7 @@ namespace engine {
             glm::ivec3 pos, BlockID blockID, std::optional<BlockState> state = std::nullopt
         );
 
+        void checkAndUpdateSurroundingChunks(const ChunkID& chID, const glm::ivec3& pos);
 
         const std::unordered_set<ChunkID>& loadedChunks() const { return m_loadedChunks; }
 

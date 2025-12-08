@@ -230,9 +230,26 @@ void World::setBlock(
         m_chunks[chID]->m_data.clearState(pos);
     }
     m_chunks[chID]->m_dirty = true;
+    checkAndUpdateSurroundingChunks(chID, pos);
 }
 
 void World::setBlock(glm::ivec3 pos, BlockID blockID, std::optional<BlockState> state) {
     ChunkID chID = extractChunkCoords(pos);
     setBlock(chID, pos, blockID, state);
+}
+
+void World::checkAndUpdateSurroundingChunks(const ChunkID& chID, const glm::ivec3& pos) {
+    glm::ivec3 surroundingBlocks[] = {
+        {pos.x - 1, pos.y, pos.z},
+        {pos.x + 1, pos.y, pos.z},
+        {pos.x, pos.y - 1, pos.z},
+        {pos.x, pos.y + 1, pos.z},
+        {pos.x, pos.y, pos.z - 1},
+        {pos.x, pos.y, pos.z + 1}
+    };
+    for (const auto& blockPos : surroundingBlocks) {
+        ChunkID blockChID = getChunkID(blockPos);
+        if (blockChID != chID)
+            m_chunks[blockChID]->m_dirty = true;
+    }
 }

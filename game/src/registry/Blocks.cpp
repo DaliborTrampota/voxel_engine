@@ -20,30 +20,28 @@ void RegisterBlocks() {
     Registry<Block, RegistryStoragePolicy::ByPointer>& blocks = RegistryManager::Blocks();
     TextureManager& texMgr = TextureManager::Get();
 
-    auto makeLog = [&geometries, &texMgr](int id, int width, BlockID connectorID) {
-        return VariantBlock(
-                   id,
-                   Layers::Opaque,
-                   &geometries.get(std::format("log_{}", width).c_str()),
-                   RotationMode::AxisXYZSnap,
-                   true,
-                   4
+    auto makeLog = [&geometries, &texMgr](int id, int width, BlockID log4ID) -> VariantBlock {
+        auto log = VariantBlock(
+                       id,
+                       Layers::Opaque,
+                       &geometries.get(std::format("log_{}", width).c_str()),
+                       RotationMode::AxisXYZSnap,
+                       4
         )
-            .addVariant(
-                geometries.get("oak_log_connector"),
-                {{Side::North, {connectorID}},
-                 {Side::South, {connectorID}},
-                 {Side::East, {connectorID}},
-                 {Side::West, {connectorID}}}
-            )
-            .isSolid(true)
-            .isVoxel(true)
-            .material(
-                BlockMaterial()
-                    .add(FaceTag::Side, texMgr.texture("log_oak"))
-                    .add(FaceTag::Top, texMgr.texture("log_oak_top"))
-                    .add(FaceTag::Bottom, texMgr.texture("log_oak_top"))
-            );
+                       .allowMultiple(true)
+                       .alwaysUseBaseGeometry(true)
+                       .addVariant(geometries.get("oak_log_connector"), {{Side::North, {log4ID}}})
+                       .addVariant(geometries.get("oak_log_connector"), {{Side::South, {log4ID}}})
+                       .addVariant(geometries.get("oak_log_connector"), {{Side::East, {log4ID}}})
+                       .addVariant(geometries.get("oak_log_connector"), {{Side::West, {log4ID}}});
+
+        log.isSolid(true).isVoxel(true).material(
+            BlockMaterial()
+                .add(FaceTag::Side, texMgr.texture("log_oak"))
+                .add(FaceTag::Top, texMgr.texture("log_oak_top"))
+                .add(FaceTag::Bottom, texMgr.texture("log_oak_top"))
+        );
+        return log;
     };
 
     // clang-format off
@@ -108,12 +106,12 @@ void RegisterBlocks() {
         );
 
         
-    auto LOG_14 = makeLog(8, 14, LOG_CONNECTOR.getID());
-    auto LOG_12 = makeLog(9, 12, LOG_CONNECTOR.getID());
-    auto LOG_10 = makeLog(10, 10, LOG_CONNECTOR.getID());
-    auto LOG_8 = makeLog(11, 8, LOG_CONNECTOR.getID());
-    auto LOG_6 = makeLog(12, 6, LOG_CONNECTOR.getID());
-    auto LOG_4 = makeLog(13, 4, LOG_CONNECTOR.getID());
+    auto LOG_4 = makeLog(13, 4, 13);
+    auto LOG_6 = makeLog(12, 6, LOG_4.getID());
+    auto LOG_8 = makeLog(11, 8, LOG_4.getID());
+    auto LOG_10 = makeLog(10, 10, LOG_4.getID());
+    auto LOG_12 = makeLog(9, 12, LOG_4.getID());
+    auto LOG_14 = makeLog(8, 14, LOG_4.getID());
 
     blocks.add(Block::air(), "air");
     blocks.add(DIRT, "dirt");
