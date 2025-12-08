@@ -31,7 +31,8 @@ namespace engine {
             static const BlockState empty = BlockState();
             return empty;
         }
-        static BlockState make(glm::vec3 orientation);
+        static BlockState makeRotation(glm::vec3 facing);
+        static BlockState makeVariant(uint8_t variantIndex);
 
         BlockState() = default;
         ~BlockState() = default;

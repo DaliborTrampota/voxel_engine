@@ -2,8 +2,10 @@
 
 #include <glm/glm.hpp>
 
+#include <optional>
 #include <unordered_map>
 #include <vector>
+
 
 #include "../Globals.h"
 #include "../block/BlockState.h"
@@ -63,6 +65,14 @@ namespace engine {
             setBlock(pos.x, pos.y, pos.z, block);
         }
 
+        inline void setBlock(int x, int y, int z, BlockID block, BlockState state) {
+            data[index(x, y, z)] = block;
+            states[glm::ivec3(x, y, z)] = state;
+        }
+        inline void setBlock(const glm::ivec3& pos, BlockID block, BlockState state) {
+            setBlock(pos.x, pos.y, pos.z, block, state);
+        }
+
         // Clear voxel (set to 0)
         inline void clear(int x, int y, int z) { data[index(x, y, z)] = 0; }
         inline void clear(const glm::ivec3& pos) { clear(pos.x, pos.y, pos.z); }
@@ -82,12 +92,15 @@ namespace engine {
         }
         inline BlockState* getState(const glm::ivec3& pos) { return getState(pos.x, pos.y, pos.z); }
 
-        inline void setState(int x, int y, int z, const BlockState& state) {
-            states[glm::ivec3(x, y, z)] = state;
+        inline void setState(int x, int y, int z, BlockState&& state) {
+            states[glm::ivec3(x, y, z)] = std::move(state);
         }
-        inline void setState(const glm::ivec3& pos, const BlockState& state) {
-            setState(pos.x, pos.y, pos.z, state);
+        inline void setState(const glm::ivec3& pos, BlockState&& state) {
+            setState(pos.x, pos.y, pos.z, std::move(state));
         }
+
+        inline void clearState(int x, int y, int z) { states.erase(glm::ivec3(x, y, z)); }
+        inline void clearState(const glm::ivec3& pos) { clearState(pos.x, pos.y, pos.z); }
     };
 
 }  // namespace engine

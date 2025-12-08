@@ -218,12 +218,21 @@ void World::createChunk(ChunkID id, bool load) {
     });
 }
 
-void World::setBlock(const ChunkID& chID, const glm::ivec3& pos, BlockID blockID) {
-    m_chunks[chID]->m_data.setBlock(pos, blockID);
+void World::setBlock(
+    const ChunkID& chID, const glm::ivec3& pos, BlockID blockID, std::optional<BlockState> state
+) {
+    if (state.has_value())
+        m_chunks[chID]->m_data.setBlock(pos, blockID, state.value());
+    else
+        m_chunks[chID]->m_data.setBlock(pos, blockID);
+
+    if (blockID == 0) {
+        m_chunks[chID]->m_data.clearState(pos);
+    }
     m_chunks[chID]->m_dirty = true;
 }
 
-void World::setBlock(glm::ivec3 pos, BlockID blockID) {
+void World::setBlock(glm::ivec3 pos, BlockID blockID, std::optional<BlockState> state) {
     ChunkID chID = extractChunkCoords(pos);
-    setBlock(chID, pos, blockID);
+    setBlock(chID, pos, blockID, state);
 }
