@@ -22,7 +22,7 @@ class PerlinTerrainGenerator : public ITerrainGenerator {
 
   protected:
     siv::BasicPerlinNoise<float> m_noise;
-    const Registry<Block>& m_blockRegistry;
+    const Registry<Block, RegistryStoragePolicy::ByPointer>& m_blockRegistry;
 
     float m_scale = 0.1f;
     float m_minHeight = 5.0f;

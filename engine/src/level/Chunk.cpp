@@ -7,10 +7,12 @@
 
 #include "World.h"
 #include "block/Block.h"
+#include "block/VariantBlock.h"
 #include "block/Vertex.h"
 #include "data/RegistryManager.h"
 #include "render/Engine.h"
 #include "render/RenderContext.h"
+
 //#include "block/builder/CulledGeometry.h"
 //#include "block/builder/CubeGeometry.h"
 
@@ -64,6 +66,10 @@ bool Chunk::generateMesh() {
                 BlockID blockID = m_data.getBlock(pos);
                 const Block* block = RegistryManager::Blocks().get(blockID);
                 const BlockState* state = m_data.getState(pos);
+
+                if (auto variant = dynamic_cast<const VariantBlock*>(block)) {
+                    generateMeshForBlock(variant, pos, state, chunkBlockCoords);
+                } else {
                     generateMeshForBlock(block, pos, state, chunkBlockCoords);
                 }
             }
@@ -136,21 +142,70 @@ bool ChunkID::operator==(const ChunkID& other) const {
     return x == other.x && y == other.y && z == other.z;
 }
 
+void Chunk::generateMeshForGeometry(
+    const Block* currentBlock,
+    const Geometry* geometry,
+    const BlockMaterial& mat,
+    gl::Attributes<Vertex>& storage,
+    const glm::ivec3& pos,
+    const glm::ivec3& chunkBlockCoords
+) {
+    for (auto f : geometry->faces()) {
+        if (f.cull && !m_world->canSeeFace(*currentBlock, pos + chunkBlockCoords, f.cullDir))
+            continue;
+
+        f.translate(pos);
+
+        for (Vertex v : f.vertices) {
+            v.data(mat.forTag(f.tag), 0);
+            storage.add(v);
+        }
+    }
+}
+
 void Chunk::generateMeshForBlock(
     const Block* block, glm::ivec3 pos, const BlockState* state, const glm::ivec3& chunkBlockCoords
 ) {
     gl::Attributes<Vertex>& storage =
         block->layer() == Layers::Opaque ? m_opaqueVertData : m_transparentVertData;
 
-    for (auto f : block->geometry()->faces()) {
-        if (f.cull && !m_world->canSeeFace(*block, pos + chunkBlockCoords, f.cullDir))
-            continue;
+    generateMeshForGeometry(
+        block, block->geometry(), block->material(), storage, pos, chunkBlockCoords
+    );
 
-        f.translate(pos);
+    // for (auto f : block->geometry()->faces()) {
+    //     if (f.cull && !m_world->canSeeFace(*block, pos + chunkBlockCoords, f.cullDir))
+    //         continue;
 
-        for (Vertex v : f.vertices) {
-            v.data(block->material().forTag(f.tag), 0);
-            storage.add(v);
-        }
+    //     f.translate(pos);
+
+    //     for (Vertex v : f.vertices) {
+    //         v.data(block->material().forTag(f.tag), 0);
+    //         storage.add(v);
+    //     }
+    // }
+}
+
+void Chunk::generateMeshForBlock(
+    const VariantBlock* block,
+    glm::ivec3 pos,
+    const BlockState* state,
+    const glm::ivec3& chunkBlockCoords
+) {
+    VariantBlock::Neighbours neighboringBlocks = {
+        .north = getBlock(pos + INORTH)->getID(),
+        .south = getBlock(pos - INORTH)->getID(),
+        .east = getBlock(pos + IEAST)->getID(),
+        .west = getBlock(pos - IEAST)->getID(),
+        .up = getBlock(pos + IUP)->getID(),
+        .down = getBlock(pos - IUP)->getID(),
+    };
+
+    for (const auto* geo : block->getGeometries(neighboringBlocks)) {
+        // TODO somehow distinguish between opaque and transparent geometries
+        gl::Attributes<Vertex>& storage =
+            block->layer() == Layers::Opaque ? m_opaqueVertData : m_transparentVertData;
+
+        generateMeshForGeometry(block, geo, block->material(), storage, pos, chunkBlockCoords);
     }
 }

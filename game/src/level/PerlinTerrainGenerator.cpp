@@ -32,11 +32,11 @@ BlockID PerlinTerrainGenerator::voxelAt(const glm::ivec3& pos, int height) {
 
     unsigned int blockID;
     if (pos.y == height || pos.y == height - 1)
-        blockID = m_blockRegistry.get("grass").getID();
+        blockID = m_blockRegistry.get("grass")->getID();
     else if (pos.y > dirtHeight)
-        blockID = m_blockRegistry.get("dirt").getID();
+        blockID = m_blockRegistry.get("dirt")->getID();
     else
-        blockID = m_blockRegistry.get("stone").getID();
+        blockID = m_blockRegistry.get("stone")->getID();
 
     return blockID;
 }
@@ -51,7 +51,7 @@ void PerlinTerrainGenerator::populate(Chunk& chunk) {
             for (int y = 0; y < Chunk::Dims.y; y++) {
                 BlockID blockID = voxelAt(glm::ivec3(x, y, z) + chunkCoords, h);
                 if (blockID != 0) {
-                    Block block = m_blockRegistry.get(blockID);
+                    //const Block* block = m_blockRegistry.get(blockID);
 
                     data.setBlock(x, y, z, blockID);
                 }

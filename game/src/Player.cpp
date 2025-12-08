@@ -4,6 +4,7 @@
 #include <memory>
 
 
+#include <Globals.h>
 #include <input/InputSystem.h>
 #include <level/Chunk.h>
 #include <level/World.h>
@@ -41,14 +42,14 @@ Player::Player()
     m_camera = std::make_unique<Camera>(opts);
 
     m_heldBlocks = {
-        RegistryManager::Blocks().get("log_4").getID(),
-        RegistryManager::Blocks().get("log_6").getID(),
-        RegistryManager::Blocks().get("log_8").getID(),
-        RegistryManager::Blocks().get("log_10").getID(),
-        RegistryManager::Blocks().get("log_12").getID(),
-        RegistryManager::Blocks().get("log_14").getID(),
-        RegistryManager::Blocks().get("log_connector").getID(),
-        RegistryManager::Blocks().get("log_branch").getID(),
+        RegistryManager::Blocks().get("log_4")->getID(),
+        RegistryManager::Blocks().get("log_6")->getID(),
+        RegistryManager::Blocks().get("log_8")->getID(),
+        RegistryManager::Blocks().get("log_10")->getID(),
+        RegistryManager::Blocks().get("log_12")->getID(),
+        RegistryManager::Blocks().get("log_14")->getID(),
+        RegistryManager::Blocks().get("log_connector")->getID(),
+        RegistryManager::Blocks().get("log_branch")->getID(),
         0,
         0,
     };
@@ -110,7 +111,8 @@ void Player::update(float dt) {
         m_position = glm::vec3(Chunk::Dims.x / 2, 20, Chunk::Dims.z / 2);
         m_velocity = glm::vec3(0.f);
         m_camera->position(m_position);
-        m_camera->lookAt(glm::vec3(Chunk::Dims.x / 2, 0, Chunk::Dims.z / 2));
+        m_camera->lookDirection(FORWARD);
+        // m_camera->lookAt(glm::vec3(FORWARD));
 
         m_aabb->position(m_position);
     }
@@ -221,26 +223,27 @@ void Player::move(glm::vec3 position) {
 void Player::interact(GLFWKey button) {
     if (button == GLFW_MOUSE_BUTTON_RIGHT) {
         DDAResult dda =
-            DDA(*m_world, m_camera->position(), m_camera->lookDirection(), 10.0f, [](Block block) {
-                return block.isSolid();
+            DDA(*m_world, m_camera->position(), m_camera->lookDirection(), 10.0f, [](const Block* block) {
+                return block->isSolid();
             });
 
-        if (dda.block.isAir())
+        if (dda.block->isAir())
             return;
 
         glm::ivec3 placePos = dda.position + dda.face;
-        if (m_heldBlocks[m_heldBlockIndex] == 0)
+        const Block* block = RegistryManager::Blocks().get(m_heldBlocks[m_heldBlockIndex]);
+        if (block->isAir())
             return;
         m_world->setBlock(placePos, m_heldBlocks[m_heldBlockIndex]);
     }
 
     if (button == GLFW_MOUSE_BUTTON_LEFT) {
         DDAResult dda =
-            DDA(*m_world, m_camera->position(), m_camera->lookDirection(), 10.0f, [](Block block) {
-                return block.isSolid();
+            DDA(*m_world, m_camera->position(), m_camera->lookDirection(), 10.0f, [](const Block* block) {
+                return block->isSolid();
             });
 
-        if (dda.block.isAir())
+        if (dda.block->isAir())
             return;
 
 

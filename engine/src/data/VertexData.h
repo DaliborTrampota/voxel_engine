@@ -4,6 +4,7 @@
 
 #include "block/Face.h"
 
+// todo CRITICAL use Globals.h
 #define NORTH glm::vec3(1, 0, 0)
 #define WEST glm::vec3(0, 0, 1)
 #define UP glm::vec3(0, 1, 0)

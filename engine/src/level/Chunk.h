@@ -21,6 +21,8 @@ namespace gl {
 
 namespace engine {
 
+    class Block;
+    class VariantBlock;
     class World;
     class Engine;
     struct RenderContext;
@@ -67,6 +69,28 @@ namespace engine {
         /// @param pass Pass == 0 will render the whole chunk, pass == 1 will render opaque blocks, pass == 2 will render transparent blocks.
         void render(Engine& engine, const Camera* camera, int pass) override;
 
+      protected:
+        void generateMeshForGeometry(
+            const Block* currentBlock,
+            const Geometry* geometry,
+            const BlockMaterial& mat,
+            gl::Attributes<Vertex>& storage,
+            const glm::ivec3& pos,
+            const glm::ivec3& chunkBlockCoords
+        );
+
+        void generateMeshForBlock(
+            const Block* block,
+            glm::ivec3 pos,
+            const BlockState* state,
+            const glm::ivec3& chunkBlockCoords
+        );
+        void generateMeshForBlock(
+            const VariantBlock* block,
+            glm::ivec3 pos,
+            const BlockState* state,
+            const glm::ivec3& chunkBlockCoords
+        );
       private:
         World* m_world;
         ChunkID m_coords;

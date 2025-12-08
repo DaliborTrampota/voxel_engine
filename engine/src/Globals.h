@@ -4,8 +4,15 @@
 #include <limits>
 
 // OpenGL Defaults
-#define UP glm::vec3{0, 1, 0}
 #define FORWARD glm::vec3{0, 0, -1}
+
+#define UP glm::vec3{0, 1, 0}
+#define NORTH glm::vec3{0, 0, 1}
+#define EAST glm::vec3{1, 0, 0}
+
+#define IUP glm::ivec3{0, 1, 0}
+#define INORTH glm::ivec3{0, 0, 1}
+#define IEAST glm::ivec3{1, 0, 0}
 
 
 namespace engine {
