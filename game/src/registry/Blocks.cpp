@@ -12,12 +12,15 @@
 #include <block/Geometry.h>
 #include <block/VariantBlock.h>
 
+#include <utility/CoordUtils.h>
+
+#include "Geometries.h"
 
 using namespace engine;
 
 void RegisterBlocks() {
-    Registry<Geometry>& geometries = RegistryManager::Geometries();
-    Registry<Block, RegistryStoragePolicy::ByPointer>& blocks = RegistryManager::Blocks();
+    RegistryManager::GeometryRegistryT& geometries = RegistryManager::Geometries();
+    RegistryManager::BlockRegistryT& blocks = RegistryManager::Blocks();
     TextureManager& texMgr = TextureManager::Get();
 
     auto makeLog = [&geometries, &texMgr](int id, int width, BlockID log4ID) -> VariantBlock {
