@@ -89,4 +89,21 @@ namespace engine {
         return visited;
     }
 
+    glm::vec3 sideDirection(Side side) {
+        switch (side) {
+            case Side::North: return NORTH;
+            case Side::South: return -NORTH;
+            case Side::East: return EAST;
+            case Side::West: return -EAST;
+            case Side::Up: return UP;
+            case Side::Down: return -UP;
+        }
+    }
+
+    float getAngleToSide(Side side, glm::vec3 direction) {
+        glm::vec3 sideDir = sideDirection(side);
+        glm::vec3 ref = glm::abs(glm::normalize(glm::cross(direction, sideDir)));
+        return glm::orientedAngle(direction, sideDir, ref);
+    }
+
 }  // namespace engine

@@ -26,4 +26,7 @@ namespace engine {
     /// @brief Returns positions of blocks that intersect the line between start and end.
     std::vector<glm::ivec3> traceLine(glm::vec3 start, glm::vec3 end);
 
+    float getAngleToSide(Side side, glm::vec3 direction);
+    // TODO place elsewhere? connect somehow with Side? I drank over 20 teas from all over the world close to cofein overdose
+    glm::vec3 sideDirection(Side side);
 }  // namespace engine

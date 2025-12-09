@@ -27,6 +27,11 @@ VariantBlock& VariantBlock::addVariant(
     return *this;
 }
 
+VariantBlock& VariantBlock::addVariant(Variant&& variant) {
+    m_variants.push_back(std::move(variant));
+    return *this;
+}
+
 const VariantBlock::Variant* VariantBlock::getVariant(const Neighbours& neighbours) const {
     for (const auto& variant : m_variants) {
         bool allConditionsMet = true;

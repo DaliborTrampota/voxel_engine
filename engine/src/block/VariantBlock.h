@@ -86,6 +86,8 @@ namespace engine {
             const Geometry& geometry, std::initializer_list<Condition> conditions
         );
 
+        VariantBlock& addVariant(Variant&& variant);
+
 
         /// @brief Get a variant that matches the neighbours.
         /// @param neighbours The neighbours of the block.

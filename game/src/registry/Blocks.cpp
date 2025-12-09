@@ -23,7 +23,21 @@ void RegisterBlocks() {
     RegistryManager::BlockRegistryT& blocks = RegistryManager::Blocks();
     TextureManager& texMgr = TextureManager::Get();
 
-    auto makeLog = [&geometries, &texMgr](int id, int width, BlockID log4ID) -> VariantBlock {
+    auto makeLog = [&geometries, &texMgr](
+                       int id, int width, std::unordered_set<BlockID> connectedBlocks
+                   ) -> VariantBlock {
+        auto makeVariant = [&](Side side) -> VariantBlock::Variant {
+            std::string name = std::format("oak_log_connector_{}", static_cast<int>(side));
+            if (!geometries.has(name.c_str())) {
+                Geometry geo = CreateRotatedGeometry(
+                    geometries.get("oak_log_connector"),
+                    {0, 1, 0},
+                    getAngleToSide(side, -NORTH)  // The log geometry is pointing -NORTH
+                );
+                geometries.add(geo, name);
+            }
+            return VariantBlock::Variant(geometries.get(name.c_str()), {{side, connectedBlocks}});
+        };
         auto log = VariantBlock(
                        id,
                        Layers::Opaque,
@@ -33,10 +47,10 @@ void RegisterBlocks() {
         )
                        .allowMultiple(true)
                        .alwaysUseBaseGeometry(true)
-                       .addVariant(geometries.get("oak_log_connector"), {{Side::North, {log4ID}}})
-                       .addVariant(geometries.get("oak_log_connector"), {{Side::South, {log4ID}}})
-                       .addVariant(geometries.get("oak_log_connector"), {{Side::East, {log4ID}}})
-                       .addVariant(geometries.get("oak_log_connector"), {{Side::West, {log4ID}}});
+                       .addVariant(makeVariant(Side::North))
+                       .addVariant(makeVariant(Side::South))
+                       .addVariant(makeVariant(Side::East))
+                       .addVariant(makeVariant(Side::West));
 
         log.isSolid(true).isVoxel(true).material(
             BlockMaterial()
@@ -109,12 +123,13 @@ void RegisterBlocks() {
         );
 
         
-    auto LOG_4 = makeLog(13, 4, 13);
-    auto LOG_6 = makeLog(12, 6, LOG_4.getID());
-    auto LOG_8 = makeLog(11, 8, LOG_4.getID());
-    auto LOG_10 = makeLog(10, 10, LOG_4.getID());
-    auto LOG_12 = makeLog(9, 12, LOG_4.getID());
-    auto LOG_14 = makeLog(8, 14, LOG_4.getID());
+    std::unordered_set<BlockID> logConnectedBlocks = {13, LOG_BRANCH.getID()};
+    auto LOG_4 = makeLog(13, 4, logConnectedBlocks);
+    auto LOG_6 = makeLog(12, 6, logConnectedBlocks);
+    auto LOG_8 = makeLog(11, 8, logConnectedBlocks);
+    auto LOG_10 = makeLog(10, 10, logConnectedBlocks);
+    auto LOG_12 = makeLog(9, 12, logConnectedBlocks);
+    auto LOG_14 = makeLog(8, 14, logConnectedBlocks);
 
     blocks.add(Block::air(), "air");
     blocks.add(DIRT, "dirt");

@@ -42,14 +42,14 @@ Player::Player()
     m_camera = std::make_unique<Camera>(opts);
 
     m_heldBlocks = {
-        RegistryManager::Blocks().get("log_4")->getID(),
         RegistryManager::Blocks().get("log_6")->getID(),
+        RegistryManager::Blocks().get("log_branch")->getID(),
+        RegistryManager::Blocks().get("log_4")->getID(),
         RegistryManager::Blocks().get("log_8")->getID(),
         RegistryManager::Blocks().get("log_10")->getID(),
         RegistryManager::Blocks().get("log_12")->getID(),
         RegistryManager::Blocks().get("log_14")->getID(),
         RegistryManager::Blocks().get("log_connector")->getID(),
-        RegistryManager::Blocks().get("log_branch")->getID(),
         0,
         0,
     };
@@ -223,9 +223,11 @@ void Player::move(glm::vec3 position) {
 void Player::interact(GLFWKey button) {
     if (button == GLFW_MOUSE_BUTTON_RIGHT) {
         DDAResult dda =
-            DDA(*m_world, m_camera->position(), m_camera->lookDirection(), 10.0f, [](const Block* block) {
-                return block->isSolid();
-            });
+            DDA(*m_world,
+                m_camera->position(),
+                m_camera->lookDirection(),
+                10.0f,
+                [](const Block* block) { return block->isSolid(); });
 
         if (dda.block->isAir())
             return;
@@ -239,9 +241,11 @@ void Player::interact(GLFWKey button) {
 
     if (button == GLFW_MOUSE_BUTTON_LEFT) {
         DDAResult dda =
-            DDA(*m_world, m_camera->position(), m_camera->lookDirection(), 10.0f, [](const Block* block) {
-                return block->isSolid();
-            });
+            DDA(*m_world,
+                m_camera->position(),
+                m_camera->lookDirection(),
+                10.0f,
+                [](const Block* block) { return block->isSolid(); });
 
         if (dda.block->isAir())
             return;
