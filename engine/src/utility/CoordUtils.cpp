@@ -1,5 +1,9 @@
 #include "CoordUtils.h"
 
+#include <glm/gtc/constants.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/vector_angle.hpp>
+
 namespace engine {
 
     ChunkID extractChunkCoords(glm::vec3& pos) {
