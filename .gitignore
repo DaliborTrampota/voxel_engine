@@ -14,4 +14,4 @@ build-ninja/
 docs/
 .timetracker
 .cache/
-archive
+archive/
