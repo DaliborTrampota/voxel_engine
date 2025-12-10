@@ -29,10 +29,13 @@ void RegisterBlocks() {
         auto makeVariant = [&](Side side) -> VariantBlock::Variant {
             std::string name = std::format("oak_log_connector_{}", static_cast<int>(side));
             if (!geometries.has(name.c_str())) {
+                glm::vec3 axis;
                 Geometry geo = CreateRotatedGeometry(
                     geometries.get("oak_log_connector"),
                     {0, 1, 0},
-                    getAngleToSide(side, -NORTH)  // The log geometry is pointing -NORTH
+                    getAngleToSide(
+                        side, -NORTH, axis
+                    )  // The log connector geometry is pointing -NORTH
                 );
                 geometries.add(geo, name);
             }
@@ -42,7 +45,7 @@ void RegisterBlocks() {
                        id,
                        Layers::Opaque,
                        &geometries.get(std::format("log_{}", width).c_str()),
-                       RotationMode::AxisXYZSnap,
+                       RotationMode::AxisAlign,
                        4
         )
                        .allowMultiple(true)
@@ -52,7 +55,7 @@ void RegisterBlocks() {
                        .addVariant(makeVariant(Side::East))
                        .addVariant(makeVariant(Side::West));
 
-        log.isSolid(true).isVoxel(true).material(
+        log.isSolid(true).isVoxel(true).facingUp(true).material(
             BlockMaterial()
                 .add(FaceTag::Side, texMgr.texture("log_oak"))
                 .add(FaceTag::Top, texMgr.texture("log_oak_top"))
@@ -108,14 +111,14 @@ void RegisterBlocks() {
             .add(FaceTag::All, texMgr.texture("glass"))
         );
 
-    auto LOG_CONNECTOR = Block(14, Layers::Opaque, &geometries.get("oak_log_connector"))
-        .isSolid(true)
-        .isVoxel(true)
-        .material(BlockMaterial()
-            .add(FaceTag::All, texMgr.texture("log_oak"))
-        );
+    // auto LOG_CONNECTOR = Block(14, Layers::Opaque, &geometries.get("oak_log_connector"))
+    //     .isSolid(true)
+    //     .isVoxel(true)
+    //     .material(BlockMaterial()
+    //         .add(FaceTag::All, texMgr.texture("log_oak"))
+    //     );
 
-    auto LOG_BRANCH = Block(15, Layers::Opaque, &geometries.get("oak_log_branch"))
+    auto LOG_BRANCH = Block(15, Layers::Opaque, &geometries.get("oak_log_branch"), RotationMode::AxisYSnap)
         .isSolid(true)
         .isVoxel(true)
         .material(BlockMaterial()
@@ -145,7 +148,7 @@ void RegisterBlocks() {
     blocks.add(LOG_10, "log_10");
     blocks.add(LOG_12, "log_12");
     blocks.add(LOG_14, "log_14");
-    blocks.add(LOG_CONNECTOR, "log_connector");
+    // blocks.add(LOG_CONNECTOR, "log_connector");
     blocks.add(LOG_BRANCH, "log_branch");
     // clang-format on
 }

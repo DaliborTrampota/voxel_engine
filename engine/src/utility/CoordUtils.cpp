@@ -89,21 +89,87 @@ namespace engine {
         return visited;
     }
 
-    glm::vec3 sideDirection(Side side) {
-        switch (side) {
-            case Side::North: return NORTH;
-            case Side::South: return -NORTH;
-            case Side::East: return EAST;
-            case Side::West: return -EAST;
-            case Side::Up: return UP;
-            case Side::Down: return -UP;
+    glm::vec3 getFacingDirection(glm::vec3 lookDir, RotationMode rot, glm::ivec3 clickedFaceN) {
+        lookDir = -lookDir;  // make the look direction face the player from the block's perspective
+        switch (rot) {
+            case RotationMode::None: return {0, 0, 0};
+            case RotationMode::AxisY: return glm::normalize(glm::vec3{lookDir.x, 0, lookDir.z});
+            case RotationMode::AxisXYZ: return lookDir;
+            case RotationMode::AxisYSnap: {
+                float xDot = glm::dot(lookDir, NORTH);
+                float zDot = glm::dot(lookDir, EAST);
+                if (xDot > zDot) {
+                    return lookDir.x > 0 ? NORTH : -NORTH;
+                } else {
+                    return lookDir.z > 0 ? EAST : -EAST;
+                }
+            }
+            case RotationMode::AxisXYZSnap:
+            case RotationMode::AxisAngleXYZSnap:
+            case RotationMode::AxisAlign: {
+                float northDot = glm::abs(glm::dot(lookDir, NORTH));
+                float upDot = glm::abs(glm::dot(lookDir, UP));
+                float eastDot = glm::abs(glm::dot(lookDir, EAST));
+
+                //TODO change to glm::vec and "round" to closest axis
+                glm::vec3 facingDir = clickedFaceN;
+                static constexpr float DOT_30 = 0.707f;
+                static constexpr float DOT_45 = 0.866f;
+
+                glm::vec3 resultDirection;
+
+                // Determine dominant axis by comparing dot products
+                if (northDot > upDot && northDot > eastDot) {
+                    // Z-axis (NORTH/SOUTH) is dominant
+                    if (northDot <= DOT_30)
+                        resultDirection = lookDir.z > 0 ? NORTH : -NORTH;
+                    else
+                        resultDirection = facingDir;
+                } else if (upDot > northDot && upDot > eastDot) {
+                    // Y-axis (UP/DOWN) is dominant
+                    if (rot == RotationMode::AxisAngleXYZSnap) {
+                        // Calculate the angle in radians between NORTH and lookDir with Y component set to zero
+                        glm::vec3 lookDirXZ = glm::normalize(glm::vec3(lookDir.x, 0.0f, lookDir.z));
+                        float angle =
+                            glm::acos(glm::clamp(glm::dot(NORTH, lookDirXZ), -1.0f, 1.0f));
+
+                        // TODO return pair?
+                    }
+                    if (upDot <= DOT_30)
+                        resultDirection = lookDir.y > 0 ? UP : -UP;
+                    else
+                        resultDirection = facingDir;
+                } else {
+                    // X-axis (EAST/WEST) is dominant
+                    if (eastDot <= DOT_30)
+                        resultDirection = lookDir.x > 0 ? EAST : -EAST;
+                    else
+                        resultDirection = facingDir;
+                }
+
+                if (rot == RotationMode::AxisAlign) {
+                    return glm::abs(resultDirection);
+                } else {
+                    return resultDirection;
+                }
+            }
         }
     }
 
-    float getAngleToSide(Side side, glm::vec3 direction) {
+    // glm::quat getRotationQuat(glm::vec3 lookDir, RotationMode rot, glm::ivec3 clickedFaceN) {
+
+
+    // }
+
+    float getAngleToSide(Side side, glm::vec3 from, glm::vec3& axis) {
         glm::vec3 sideDir = sideDirection(side);
-        glm::vec3 ref = glm::abs(glm::normalize(glm::cross(direction, sideDir)));
-        return glm::orientedAngle(direction, sideDir, ref);
+        axis = glm::abs(glm::normalize(glm::cross(from, sideDir)));
+        return glm::orientedAngle(from, sideDir, axis);
+    }
+
+    float getAngle(glm::vec3 from, glm::vec3 to, glm::vec3& axis) {
+        axis = glm::abs(glm::normalize(glm::cross(from, to)));
+        return glm::orientedAngle(from, to, axis);
     }
 
 }  // namespace engine

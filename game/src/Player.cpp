@@ -49,7 +49,7 @@ Player::Player()
         RegistryManager::Blocks().get("log_10")->getID(),
         RegistryManager::Blocks().get("log_12")->getID(),
         RegistryManager::Blocks().get("log_14")->getID(),
-        RegistryManager::Blocks().get("log_connector")->getID(),
+        //RegistryManager::Blocks().get("log_connector")->getID(),
         0,
         0,
     };
@@ -140,6 +140,17 @@ void Player::update(float dt) {
     }
 
     if (input->getAxis(Axis::MouseScroll) > 0) {
+        m_heldBlockIndex++;
+        if (m_heldBlockIndex >= m_heldBlocks.size())
+            m_heldBlockIndex = 0;
+    }
+
+    if (input->isKey<Pressed>(GLFW_KEY_UP)) {
+        m_heldBlockIndex--;
+        if (m_heldBlockIndex < 0)
+            m_heldBlockIndex = m_heldBlocks.size() - 1;
+    }
+    if (input->isKey<Pressed>(GLFW_KEY_DOWN)) {
         m_heldBlockIndex++;
         if (m_heldBlockIndex >= m_heldBlocks.size())
             m_heldBlockIndex = 0;
@@ -236,7 +247,16 @@ void Player::interact(GLFWKey button) {
         const Block* block = RegistryManager::Blocks().get(m_heldBlocks[m_heldBlockIndex]);
         if (block->isAir())
             return;
-        m_world->setBlock(placePos, m_heldBlocks[m_heldBlockIndex]);
+
+        if (block->rotationMode() != RotationMode::None) {
+            glm::vec3 facingDir =
+                getFacingDirection(m_camera->lookDirection(), block->rotationMode(), dda.face);
+
+            BlockState state = BlockState::makeRotation(facingDir);
+            m_world->setBlock(placePos, block->getID(), state);
+        } else {
+            m_world->setBlock(placePos, block->getID());
+        }
     }
 
     if (button == GLFW_MOUSE_BUTTON_LEFT) {

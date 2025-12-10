@@ -70,14 +70,22 @@ namespace engine {
         void render(Engine& engine, const Camera* camera, int pass) override;
 
       protected:
-        void generateMeshForGeometry(
-            const Block* currentBlock,
-            const Geometry* geometry,
-            const BlockMaterial& mat,
-            gl::Attributes<Vertex>& storage,
-            const glm::ivec3& pos,
-            const glm::ivec3& chunkBlockCoords
-        );
+        struct GeometryState {
+            glm::vec3 axis;
+            float angle;
+        };
+
+        struct MeshGenContext {
+            const Block* block;
+            const Geometry* geometry;
+            GeometryState geometryState;
+            gl::Attributes<Vertex>& storage;
+            glm::ivec3 posInChunk;
+            glm::ivec3 worldPos;
+        };
+
+        GeometryState calculateGeometryState(const Block* block, const BlockState* state) const;
+        void generateMeshForGeometry(const MeshGenContext& ctx);
 
         void generateMeshForBlock(
             const Block* block,

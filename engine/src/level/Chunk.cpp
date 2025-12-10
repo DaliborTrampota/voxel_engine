@@ -7,11 +7,13 @@
 
 #include "World.h"
 #include "block/Block.h"
+#include "block/Side.h"
 #include "block/VariantBlock.h"
 #include "block/Vertex.h"
 #include "data/RegistryManager.h"
 #include "render/Engine.h"
 #include "render/RenderContext.h"
+#include "utility/CoordUtils.h"
 
 //#include "block/builder/CulledGeometry.h"
 //#include "block/builder/CubeGeometry.h"
@@ -138,27 +140,47 @@ void Chunk::render(Engine& engine, const Camera* camera, int pass) {
     }
 }
 
+
+Chunk::GeometryState Chunk::calculateGeometryState(
+    const Block* block, const BlockState* state
+) const {
+    GeometryState geoState{
+        .axis = glm::vec3(0, 1, 0),
+        .angle = 0.0f,
+    };
+    if (state && block->rotationMode() != RotationMode::None) {
+        Side baseSide = block->facingUp() ? Side::Up : Side::North;
+        glm::vec3 baseSideDir = sideDirection(baseSide);
+        const glm::vec3& facing = state->facing();
+
+        geoState.angle = getAngleToSide(baseSide, facing, geoState.axis);
+        // geoState.axis = glm::vec3(0, 1, 0);
+        // if (glm::any(glm::isnan(geoState.axis))) {
+        // } else {
+        // }
+    }
+    return geoState;
+}
+
+
 bool ChunkID::operator==(const ChunkID& other) const {
     return x == other.x && y == other.y && z == other.z;
 }
 
-void Chunk::generateMeshForGeometry(
-    const Block* currentBlock,
-    const Geometry* geometry,
-    const BlockMaterial& mat,
-    gl::Attributes<Vertex>& storage,
-    const glm::ivec3& pos,
-    const glm::ivec3& chunkBlockCoords
-) {
-    for (auto f : geometry->faces()) {
-        if (f.cull && !m_world->canSeeFace(*currentBlock, pos + chunkBlockCoords, f.cullDir))
+void Chunk::generateMeshForGeometry(const MeshGenContext& ctx) {
+    for (auto f : ctx.geometry->faces()) {
+        // Apply rotation if needed
+        if (glm::abs(ctx.geometryState.angle) > std::numeric_limits<float>::epsilon() * 2) {
+            f.rotate(ctx.geometryState.axis, ctx.geometryState.angle);
+        }
+
+        if (f.cull && !m_world->canSeeFace(*ctx.block, ctx.worldPos, f.cullDir))
             continue;
 
-        f.translate(pos);
-
+        f.translate(ctx.posInChunk);
         for (Vertex v : f.vertices) {
-            v.data(mat.forTag(f.tag), 0);
-            storage.add(v);
+            v.data(ctx.block->material().forTag(f.tag), 0);
+            ctx.storage.add(v);
         }
     }
 }
@@ -169,21 +191,15 @@ void Chunk::generateMeshForBlock(
     gl::Attributes<Vertex>& storage =
         block->layer() == Layers::Opaque ? m_opaqueVertData : m_transparentVertData;
 
-    generateMeshForGeometry(
-        block, block->geometry(), block->material(), storage, pos, chunkBlockCoords
-    );
-
-    // for (auto f : block->geometry()->faces()) {
-    //     if (f.cull && !m_world->canSeeFace(*block, pos + chunkBlockCoords, f.cullDir))
-    //         continue;
-
-    //     f.translate(pos);
-
-    //     for (Vertex v : f.vertices) {
-    //         v.data(block->material().forTag(f.tag), 0);
-    //         storage.add(v);
-    //     }
-    // }
+    MeshGenContext ctx{
+        .block = block,
+        .geometry = block->geometry(),
+        .geometryState = calculateGeometryState(block, state),
+        .storage = storage,
+        .posInChunk = pos,
+        .worldPos = pos + chunkBlockCoords,
+    };
+    generateMeshForGeometry(ctx);
 }
 
 void Chunk::generateMeshForBlock(
@@ -201,11 +217,26 @@ void Chunk::generateMeshForBlock(
         .down = getBlock(pos - IUP)->getID(),
     };
 
-    for (const auto* geo : block->getGeometries(neighboringBlocks)) {
-        // TODO somehow distinguish between opaque and transparent geometries
-        gl::Attributes<Vertex>& storage =
-            block->layer() == Layers::Opaque ? m_opaqueVertData : m_transparentVertData;
+    // TODO somehow distinguish between opaque and transparent geometries
+    gl::Attributes<Vertex>& storage =
+        block->layer() == Layers::Opaque ? m_opaqueVertData : m_transparentVertData;
 
-        generateMeshForGeometry(block, geo, block->material(), storage, pos, chunkBlockCoords);
+    GeometryState geoState = calculateGeometryState(block, state);
+    if (geoState.angle != 0.0f) {
+        neighboringBlocks.rotate(
+            block->facingUp() ? Side::Up : Side::North, getSide(state->facing())
+        );
+    }
+
+    for (auto geo : block->getGeometries(neighboringBlocks)) {
+        MeshGenContext ctx{
+            .block = block,
+            .geometry = geo,
+            .geometryState = geoState,
+            .storage = storage,
+            .posInChunk = pos,
+            .worldPos = pos + chunkBlockCoords
+        };
+        generateMeshForGeometry(ctx);
     }
 }

@@ -36,6 +36,11 @@ Block& Block::isVoxel(bool voxel) {
     return *this;
 }
 
+Block& Block::facingUp(bool state) {
+    m_faceUp = state;
+    return *this;
+}
+
 Block& Block::material(const BlockMaterial& mat) {
     m_material = mat;
     return *this;

@@ -60,22 +60,10 @@ namespace engine {
             BlockID up;
             BlockID down;
 
-            BlockID operator[](Side direction) const {
-                if (direction == Side::North)
-                    return north;
-                if (direction == Side::South)
-                    return south;
-                if (direction == Side::East)
-                    return east;
-                if (direction == Side::West)
-                    return west;
-                if (direction == Side::Up)
-                    return up;
-                if (direction == Side::Down)
-                    return down;
-                return InvalidBlockID;  // Default/invalid direction
-            }
+            BlockID operator[](Side direction) const;
+            void rotate(Side from, Side to);
         };
+
         VariantBlock& allowMultiple(bool allowMultiple);
         bool allowMultiple() const { return m_allowMultiple; }
 
