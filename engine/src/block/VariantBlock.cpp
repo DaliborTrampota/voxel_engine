@@ -1,5 +1,7 @@
 #include "VariantBlock.h"
 
+#include <stdexcept>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -38,27 +40,10 @@ void VariantBlock::Neighbours::rotate(Side from, Side to) {
     glm::mat4 rotateMat = glm::rotate(glm::mat4(1.0f), angle, axis);
     auto rotateSide = [&](Side side) -> BlockID {
         glm::vec3 dir = sideDirection(side);
-        // Use w=0 for direction vectors (not positions)
+        // TODO understand why z=0 for direction and 1 for position
         glm::vec3 rotated = glm::vec3(rotateMat * glm::vec4(dir, 0.0f));
 
-        // Round to nearest integer to handle floating-point precision errors
-        // glm::ivec3 roundedDir = glm::round(rotated);
-
         return original[getSide(glm::round(rotated))];
-        // Find the closest cardinal direction after rotation
-        // Side closestSide = Side::North;
-        // float maxDot = -2.0f;
-
-        // for (Side testSide :
-        //      {Side::North, Side::South, Side::East, Side::West, Side::Up, Side::Down}) {
-        //     float dot = glm::dot(rotated, sideDirection(testSide));
-        //     if (dot > maxDot) {
-        //         maxDot = dot;
-        //         closestSide = testSide;
-        //     }
-        // }
-
-        // return original[closestSide];
     };
 
     north = rotateSide(Side::North);
@@ -73,6 +58,12 @@ VariantBlock::VariantBlock(
     BlockID id, Layer layer, const Geometry* baseGeo, RotationMode rotationMode, int variantCount
 )
     : Block(id, layer, baseGeo, rotationMode) {
+    if (!isValidRotationMode(rotationMode)) {
+        throw std::invalid_argument(
+            "VariantBlock does not support RotationMode::AxisY or RotationMode::AxisXYZ. "
+            "Use Snap variants instead."
+        );
+    }
     m_variants.reserve(variantCount);
 }
 

@@ -16,7 +16,11 @@ namespace engine {
     /// @note If
     class VariantBlock : public Block {
       public:
-        ~VariantBlock() override = default;
+        /// @brief Check if a rotation mode is valid for VariantBlock
+        /// @note VariantBlock does not support AxisY and AxisXYZ rotation modes
+        static constexpr bool isValidRotationMode(RotationMode mode) {
+            return mode != RotationMode::AxisY && mode != RotationMode::AxisXYZ;
+        }
 
         /// @brief A condition is a direction and a set of block IDs.
         /// @property direction The direction of the condition check
@@ -44,14 +48,6 @@ namespace engine {
             }
         };
 
-        VariantBlock(
-            BlockID id,
-            Layer layer,
-            const Geometry* baseGeo,
-            RotationMode rotationMode,
-            int variantCount
-        );
-
         struct Neighbours {
             BlockID north;
             BlockID south;
@@ -63,6 +59,16 @@ namespace engine {
             BlockID operator[](Side direction) const;
             void rotate(Side from, Side to);
         };
+
+        VariantBlock(
+            BlockID id,
+            Layer layer,
+            const Geometry* baseGeo,
+            RotationMode rotationMode,
+            int variantCount
+        );
+        ~VariantBlock() override = default;
+
 
         VariantBlock& allowMultiple(bool allowMultiple);
         bool allowMultiple() const { return m_allowMultiple; }
