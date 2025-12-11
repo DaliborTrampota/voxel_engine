@@ -10,6 +10,7 @@ namespace engine {
     class Geometry;
     using UnaryPredicate = std::function<bool(const Block*)>;
 
+    // TODO maybe add state?
     struct DDAResult {
         glm::vec3 position;
         glm::vec3 face;

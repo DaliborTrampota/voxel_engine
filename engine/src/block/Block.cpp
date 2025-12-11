@@ -17,9 +17,15 @@ engine::Block::Block(BlockID id, Layer layer, const Geometry* geo, RotationMode 
 }
 
 Block& engine::Block::air() {
-    static Block airBlock = Block(0, Layers::Any, nullptr).isSolid(false);
+    static Block airBlock = Block(AirID, Layers::Any, nullptr).isSolid(false);
     return airBlock;
 }
+
+Block& Block::multiblock() {
+    static Block multiblockBlock = Block(MultiblockID, Layers::Any, nullptr);
+    return multiblockBlock;
+}
+
 
 Block& Block::rotationMode(RotationMode mode) {
     m_rotationMode = mode;

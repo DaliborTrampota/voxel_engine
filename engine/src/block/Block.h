@@ -28,12 +28,18 @@ namespace engine {
 
     class Block {
       public:
+        static constexpr BlockID AirID = 0;
+        static constexpr BlockID MultiblockID = 1;
+
         Block(BlockID id, Layer layer, const Geometry* geo);
         Block(BlockID id, Layer layer, const Geometry* geo, RotationMode rotationMode);
         virtual ~Block() = default;
 
         static Block& air();
-        bool isAir() const { return m_id == 0; }
+        static Block& multiblock();
+
+        bool isAir() const { return m_id == AirID; }
+        bool isMultiblock() const { return m_id == MultiblockID; }
 
         BlockID getID() const { return m_id; }
 

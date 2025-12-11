@@ -7,6 +7,7 @@
 
 #include "World.h"
 #include "block/Block.h"
+#include "block/MultiBlock.h"
 #include "block/Side.h"
 #include "block/VariantBlock.h"
 #include "block/Vertex.h"
@@ -14,10 +15,6 @@
 #include "render/Engine.h"
 #include "render/RenderContext.h"
 #include "utility/CoordUtils.h"
-
-//#include "block/builder/CulledGeometry.h"
-//#include "block/builder/CubeGeometry.h"
-
 
 using namespace engine;
 
@@ -71,10 +68,19 @@ bool Chunk::generateMesh() {
 
                 BlockID blockID = m_data.getBlock(pos);
                 const Block* block = RegistryManager::Blocks().get(blockID);
+
+                if (!block) {
+                    // Block not found in registry, skip, TODO render pink/black block missing texture?
+                    continue;
+                }
+
                 const BlockState* state = m_data.getState(pos);
 
                 if (auto variant = dynamic_cast<const VariantBlock*>(block)) {
                     generateMeshForBlock(variant, pos, state, chunkBlockCoords);
+                } else if (block->isMultiblock()) {
+                    MultiBlock* multi = m_data.getMultiBlock(pos);
+                    generateMeshForBlock(multi, pos, state, chunkBlockCoords);
                 } else {
                     generateMeshForBlock(block, pos, state, chunkBlockCoords);
                 }
@@ -241,5 +247,21 @@ void Chunk::generateMeshForBlock(
             .worldPos = pos + chunkBlockCoords
         };
         generateMeshForGeometry(ctx);
+    }
+}
+
+void Chunk::generateMeshForBlock(
+    const MultiBlock* block,
+    glm::ivec3 pos,
+    const BlockState* state,
+    const glm::ivec3& chunkBlockCoords
+) {
+    for (auto subBlock : block->blocks()) {
+        generateMeshForBlock(
+            RegistryManager::Blocks().get(subBlock.blockID),
+            pos,
+            subBlock.state.has_value() ? &subBlock.state.value() : nullptr,
+            chunkBlockCoords
+        );
     }
 }

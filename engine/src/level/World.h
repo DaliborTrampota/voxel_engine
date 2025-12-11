@@ -3,6 +3,7 @@
 #include <future>
 #include <glm/glm.hpp>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <unordered_map>
 #include <unordered_set>
@@ -13,6 +14,7 @@
 #include "render/Material.h"
 #include "render/Renderable.h"
 #include "scene/Skybox.h"
+#include "scene/Updateable.h"
 #include "utility/ThreadPool.h"
 
 
@@ -64,19 +66,23 @@ namespace engine {
         /// @brief Gets the block ID at the given position.
         /// @param chID The chunk to query the block from
         /// @param pos The position of the block within the chunk (0 to Chunk::Dims)
+        /// @param state [out] The state of the block
         /// @param fallbackToGenerator If true, the generator will be used to get the block ID if the chunk is not generated
         /// @return the block ID or engine::INVALID_BLOCK if:
         ///         - The position is out of bounds (eg less than or greater than Chunk::Dims)
         ///         - The chunk is not generated
-        BlockID getBlockID(const ChunkID& chID, const glm::ivec3& pos, bool fallbackToGenerator);
+        BlockID getBlockID(
+            const ChunkID& chID, const glm::ivec3& pos, BlockState*& state, bool fallbackToGenerator
+        );
 
         /// @brief Gets the block ID at the given position.
         /// @param pos The position of the block in world space
+        /// @param state [out] The state of the block
         /// @param fallbackToGenerator If true, the generator will be used to get the block ID if the chunk is not generated
         /// @return the block ID or engine::INVALID_BLOCK if:
         ///         - The position is out of bounds (eg less than or greater than Chunk::Dims)
         ///         - The chunk is not generated
-        BlockID getBlockID(glm::vec3 pos, bool fallbackToGenerator);
+        BlockID getBlockID(glm::vec3 pos, BlockState*& state, bool fallbackToGenerator);
 
         /// @brief Checks if the face of current block facing given direction can be seen and thus should be rendered.
         /// @param curBlock The current block.
@@ -96,9 +102,8 @@ namespace engine {
             glm::ivec3 pos, BlockID blockID, std::optional<BlockState> state = std::nullopt
         );
 
-        void checkAndUpdateSurroundingChunks(const ChunkID& chID, const glm::ivec3& pos);
-
-        const std::unordered_set<ChunkID>& loadedChunks() const { return m_loadedChunks; }
+        void setBlock(const ChunkID& chID, const glm::ivec3& pos, MultiBlock&& multiBlock);
+        void setBlock(glm::ivec3 pos, MultiBlock&& multiBlock);
 
 
         virtual void render(Engine& engine, const Camera* camera, int pass = 0) override;

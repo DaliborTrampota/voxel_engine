@@ -23,6 +23,8 @@ namespace engine {
 
     class Block;
     class VariantBlock;
+    class MultiBlock;
+
     class World;
     class Engine;
     struct RenderContext;
@@ -99,6 +101,13 @@ namespace engine {
             const BlockState* state,
             const glm::ivec3& chunkBlockCoords
         );
+        void generateMeshForBlock(
+            const MultiBlock* block,
+            glm::ivec3 pos,
+            const BlockState* state,
+            const glm::ivec3& chunkBlockCoords
+        );
+
       private:
         World* m_world;
         ChunkID m_coords;

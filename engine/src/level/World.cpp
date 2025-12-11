@@ -3,7 +3,6 @@
 
 #include "ITerrainGenerator.h"
 #include "block/Block.h"
-#include "block/Geometry.h"
 #include "render/Engine.h"
 #include "render/RenderContext.h"
 #include "utility/CoordUtils.h"
@@ -128,7 +127,9 @@ const Chunk* World::getChunk(const ChunkID& id) const {
     return it->second.get();
 }
 
-BlockID World::getBlockID(const ChunkID& chID, const glm::ivec3& pos, bool fallbackToGenerator) {
+BlockID World::getBlockID(
+    const ChunkID& chID, const glm::ivec3& pos, BlockState*& state, bool fallbackToGenerator
+) {
     auto chunk = m_chunks.find(chID);
     if (chunk == m_chunks.end() || !chunk->second->generated()) {
         if (fallbackToGenerator)
@@ -136,10 +137,11 @@ BlockID World::getBlockID(const ChunkID& chID, const glm::ivec3& pos, bool fallb
         return INVALID_BLOCK;
     }
 
+    state = chunk->second->m_data.getState(pos);
     return chunk->second->m_data.getBlock(pos);
 }
 
-BlockID World::getBlockID(glm::vec3 pos, bool fallbackToGenerator) {
+BlockID World::getBlockID(glm::vec3 pos, BlockState*& state, bool fallbackToGenerator) {
     ChunkID chID = extractChunkCoords(pos);
     auto chunk = m_chunks.find(chID);
     if (chunk == m_chunks.end() || !chunk->second->generated()) {
@@ -148,6 +150,7 @@ BlockID World::getBlockID(glm::vec3 pos, bool fallbackToGenerator) {
         return INVALID_BLOCK;
     }
 
+    state = chunk->second->m_data.getState(pos);
     return chunk->second->m_data.getBlock(pos);
 }
 
@@ -239,6 +242,17 @@ void World::setBlock(
 void World::setBlock(glm::ivec3 pos, BlockID blockID, std::optional<BlockState> state) {
     ChunkID chID = extractChunkCoords(pos);
     setBlock(chID, pos, blockID, state);
+}
+
+void World::setBlock(const ChunkID& chID, const glm::ivec3& pos, MultiBlock&& multiBlock) {
+    m_chunks[chID]->m_data.setMultiBlock(pos, std::move(multiBlock));
+    m_chunks[chID]->m_dirty = true;
+    checkAndUpdateSurroundingChunks(chID, pos);
+}
+
+void World::setBlock(glm::ivec3 pos, MultiBlock&& multiBlock) {
+    ChunkID chID = extractChunkCoords(pos);
+    setBlock(chID, pos, std::move(multiBlock));
 }
 
 void World::checkAndUpdateSurroundingChunks(const ChunkID& chID, const glm::ivec3& pos) {

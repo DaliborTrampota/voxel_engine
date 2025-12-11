@@ -123,11 +123,14 @@ void AABBCollider::updateAABBCache(const glm::vec3& velocity, const glm::vec3& p
     for (int i = glm::floor(m_aabb->min.x - s_checkBox.x); i <= glm::ceil(m_aabb->max.x + s_checkBox.x); ++i) {
         for (int j = glm::floor(m_aabb->min.y - s_checkBox.y); j <= glm::ceil(m_aabb->max.y + s_checkBox.y); ++j) {
             for (int k = glm::floor(m_aabb->min.z - s_checkBox.z); k <= glm::ceil(m_aabb->max.z + s_checkBox.z); ++k) {
-                BlockID blockID = m_world->getBlockID({ i, j, k }, true);
+                BlockState* state = nullptr; // TODO critical rotation of colliders
+                BlockID blockID = m_world->getBlockID({ i, j, k }, state, true);
                 if (blockID == INVALID_BLOCK || blockID == Block::air().getID())
                     continue;
 
                 const Block* block = RegistryManager::Blocks().get(blockID);
+                if (block->isMultiblock())
+                    continue;
                 if (!block->isSolid())
                     continue;
                 AABB aabb = block->geometry()->aabb();
