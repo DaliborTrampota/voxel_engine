@@ -32,8 +32,6 @@ namespace engine {
 
     template <HasID T, typename IDPolicy>
     class Registry<T, RegistryStoragePolicy::ByValue, IDPolicy> {
-        friend class RegistryManager;
-
       public:
         void add(const T& data, const std::string& name) {
             unsigned int id = getID(data);
@@ -66,14 +64,26 @@ namespace engine {
         bool has(unsigned int id) const { return m_data.find(id) != m_data.end(); }
         bool has(const char* name) const { return m_nameToID.find(name) != m_nameToID.end(); }
 
+        const std::vector<std::reference_wrapper<const T>> all() const {
+            std::vector<std::reference_wrapper<const T>> out;
+            out.reserve(m_data.size());
+            for (const auto& [id, data] : m_data) {
+                out.push_back(std::ref(data));
+            }
+            return out;
+        }
+
+        friend class RegistryManager;
+        // TODO should not be constructible by user, only RegistryManager and the derived classes
+        Registry() = default;  
+
       protected:
         std::unordered_map<unsigned int, T> m_data;
         std::unordered_map<std::string, unsigned int> m_nameToID;
         unsigned int m_idCounter = 0;
 
-      private:
-        Registry() = default;
 
+      private:
         unsigned int getID(const T& data) {
             if constexpr (std::same_as<IDPolicy, RegistryStoragePolicy::UserProvidedID>) {
                 return data.getID();
@@ -117,6 +127,15 @@ namespace engine {
 
         bool has(unsigned int id) const { return m_data.find(id) != m_data.end(); }
         bool has(const char* name) const { return m_nameToID.find(name) != m_nameToID.end(); }
+
+        const std::vector<const T*> all() const {
+            std::vector<const T*> out;
+            out.reserve(m_data.size());
+            for (const auto& [id, data] : m_data) {
+                out.push_back(data.get());
+            }
+            return out;
+        }
 
       protected:
         std::unordered_map<unsigned int, std::unique_ptr<T>> m_data;

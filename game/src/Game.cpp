@@ -86,6 +86,7 @@ void Game::start() {
 
     RegisterGeometries();
     RegisterBlocks();
+    RegisterMultiBlocks();
 
     m_uiManager->createUI();
 

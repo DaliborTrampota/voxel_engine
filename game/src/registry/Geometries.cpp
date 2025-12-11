@@ -19,6 +19,8 @@
 #define OGT_VOXEL_MESHIFY_IMPLEMENTATION
 #include <tools/ogt_vox_meshify.h>
 
+#include "MyRegistryManager.h"
+
 using namespace engine;
 
 
@@ -108,7 +110,7 @@ namespace {
 
 void RegisterGeometries() {
     // clang-format off
-    RegistryManager::GeometryRegistryT& geometries = RegistryManager::Geometries();
+    RegistryManager::GeometryRegistryT& geometries = MyRegistryManager::Geometries();
 
     geometries.add(Geometry::Cube(), "cube");
     geometries.add(Geometry::Cylinder(), "cylinder");

@@ -20,6 +20,7 @@
 
 #include "GameServices.h"
 #include "Globals.h"
+#include "registry/MyRegistryManager.h"
 
 #include <data/RegistryManager.h>
 
@@ -42,9 +43,9 @@ Player::Player()
     m_camera = std::make_unique<Camera>(opts);
 
     m_heldBlocks = {
-        RegistryManager::Blocks().get("log_6")->getID(),
-        RegistryManager::Blocks().get("log_branch")->getID(),
         RegistryManager::Blocks().get("log_4")->getID(),
+        RegistryManager::Blocks().get("leaves")->getID(),
+        RegistryManager::Blocks().get("log_branch")->getID(),
         RegistryManager::Blocks().get("log_8")->getID(),
         RegistryManager::Blocks().get("log_10")->getID(),
         RegistryManager::Blocks().get("log_12")->getID(),
@@ -244,7 +245,18 @@ void Player::interact(GLFWKey button) {
             return;
 
         glm::ivec3 placePos = dda.position + dda.face;
-        const Block* block = RegistryManager::Blocks().get(m_heldBlocks[m_heldBlockIndex]);
+
+
+        BlockState* currentBlockState = nullptr;
+        BlockID currentBlockID = m_world->getBlockID(dda.position, currentBlockState, false);
+        if (currentBlockID != Block::AirID) {
+            if (tryPlaceMultiBlock(dda, currentBlockID, currentBlockState)) {
+                return;
+            }
+        }
+
+        BlockID blockID = m_heldBlocks[m_heldBlockIndex];
+        const Block* block = RegistryManager::Blocks().get(blockID);
         if (block->isAir())
             return;
 
@@ -273,4 +285,60 @@ void Player::interact(GLFWKey button) {
 
         m_world->setBlock(dda.chunk->id(), toChunkCoords(dda.chunk->id(), dda.position), 0);
     }
+}
+
+const MultiBlockCombination* getMultiBlockCombination(std::vector<BlockID> blockIDs) {
+    for (const auto& mbComb : MyRegistryManager::MultiBlockCombinations().all()) {
+        if (mbComb.get().canCombine(blockIDs)) {
+            return &mbComb.get();
+        }
+    }
+    return nullptr;
+    //return &MyRegistryManager::MultiBlockCombinations().get("leaves_branch");
+}
+
+bool Player::tryPlaceMultiBlock(DDAResult dda, BlockID currentBlock, BlockState* currentState) {
+    BlockID heldBlockID = m_heldBlocks[m_heldBlockIndex];
+    const Block* heldBlock = RegistryManager::Blocks().get(heldBlockID);
+    std::optional<BlockState> heldBlockState = std::nullopt;
+
+
+    if (heldBlock->rotationMode() != RotationMode::None) {
+        glm::vec3 facingDir =
+            getFacingDirection(m_camera->lookDirection(), heldBlock->rotationMode(), dda.face);
+        heldBlockState = BlockState::makeRotation(facingDir);
+    }
+
+
+    // TODO wrong if curBlock is multiblock
+    std::vector<BlockID> blockIDs;
+    const MultiBlockCombination* mbComb = nullptr;
+
+    if (currentBlock == Block::MultiblockID) {
+        // TODO update multiblock
+        MultiBlock mb;  //= m_world->
+        blockIDs = mb.blockIDs();
+        blockIDs.push_back(heldBlockID);
+        mbComb = getMultiBlockCombination(blockIDs);
+
+        //if (!mbComb->canCombine(blockIDs))
+        if (!mbComb || !mbComb->canCombine(blockIDs))
+            return false;
+
+        mb.addBlock({heldBlockID, heldBlockState});
+        return true;
+    }
+
+    blockIDs.push_back(currentBlock);
+    blockIDs.push_back(heldBlockID);
+    mbComb = getMultiBlockCombination(blockIDs);
+    // if (!mbComb.canCombine(blockIDs))
+    if (!mbComb || !mbComb->canCombine(blockIDs))
+        return false;
+
+    MultiBlock multiBlock = MultiBlock::fromBlock(currentBlock, currentState);
+    multiBlock.addBlock({heldBlockID, heldBlockState});
+    // we are placing the multi-block at the position of the current block
+    m_world->setBlock(dda.position, std::move(multiBlock));
+    return true;
 }
