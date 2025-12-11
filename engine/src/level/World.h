@@ -28,7 +28,8 @@ namespace engine {
     struct ChunkID;
     struct RenderContext;
 
-    class World : public Renderable {
+    class World : public Renderable,
+                  public Updateable {
       public:
         World(std::unique_ptr<ITerrainGenerator> gen, uint32_t genThreads = 8);
         ~World();
@@ -51,6 +52,12 @@ namespace engine {
 
         Chunk* getChunk(const ChunkID& id);
         const Chunk* getChunk(const ChunkID& id) const;
+        const std::unordered_set<ChunkID>& loadedChunks() const { return m_loadedChunks; }
+
+        /// @brief Checks if the surrounding chunks need to be updated due to a block change.
+        /// @param chID The chunk that was changed.
+        /// @param pos The position of the block that was changed.
+        void checkAndUpdateSurroundingChunks(const ChunkID& chID, const glm::ivec3& pos);
 
         /// @section Block management
 
@@ -95,6 +102,8 @@ namespace engine {
 
 
         virtual void render(Engine& engine, const Camera* camera, int pass = 0) override;
+        virtual void update(float dt) override;
+
         const Material& getMaterial() const { return m_material; }
         Skybox& getSkybox() { return m_skybox; }
 
@@ -112,7 +121,8 @@ namespace engine {
         friend class Engine;
 
       private:
-        void createChunk(ChunkID id, bool load);
+        void updateChunk(ChunkID id);
+        std::mutex m_mutex;
     };
 
 }  // namespace engine

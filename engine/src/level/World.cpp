@@ -8,9 +8,7 @@
 #include "render/RenderContext.h"
 #include "utility/CoordUtils.h"
 
-
 #include <algorithm>
-
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/component_wise.hpp>
@@ -206,15 +204,20 @@ void World::render(Engine& engine, const Camera* camera, int pass) {
     //std::cout << "Rendered chunks: " << m_chunks.size() << "\n";
 }
 
-void World::createChunk(ChunkID id, bool load) {
-    m_chunks.emplace(id, std::make_unique<Chunk>(this, id));
+void World::updateChunk(ChunkID id) {
+    m_genPool.add([this, id] {
+        std::unique_lock<std::mutex> lock(m_mutex);
+        auto it = m_chunks.find(id);
+        if (it == m_chunks.end()) {
+            return;
+        }
+        Chunk* chunk = it->second.get();
+        if (!chunk)
+            return;
 
-    m_genPool.add([this, id, load] {
-        Chunk* chunk = m_chunks[id].get();
-        chunk->generate();
+        lock.unlock();
         chunk->generateMesh();
-        if (load)
-            m_loadedChunks.insert(id);
+        chunk->m_dirty = false;
     });
 }
 
@@ -251,5 +254,13 @@ void World::checkAndUpdateSurroundingChunks(const ChunkID& chID, const glm::ivec
         ChunkID blockChID = getChunkID(blockPos);
         if (blockChID != chID)
             m_chunks[blockChID]->m_dirty = true;
+    }
+}
+
+void World::update(float dt) {
+    for (const ChunkID& pos : m_loadedChunks) {
+        if (m_chunks[pos]->m_dirty) {
+            updateChunk(pos);
+        }
     }
 }

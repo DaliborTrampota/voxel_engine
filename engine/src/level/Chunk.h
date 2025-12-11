@@ -106,6 +106,8 @@ namespace engine {
         ChunkData m_data;
         gl::Attributes<Vertex> m_opaqueVertData;
         gl::Attributes<Vertex> m_transparentVertData;
+        gl::Attributes<Vertex> m_backOpaqueVertData;
+        gl::Attributes<Vertex> m_backTransparentVertData;
 
         bool m_generated = false;
         std::atomic_bool m_generatingMesh = false;
