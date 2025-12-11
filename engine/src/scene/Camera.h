@@ -45,6 +45,14 @@ namespace engine {
         glm::quat rotation(bool ignorePitch) const;
 
         void lookAt(const glm::vec3& target);
+
+        //TODO dev only, remove later
+        void lookDirection(const glm::vec3& direction) {
+            glm::vec3 dir = glm::normalize(direction);
+            m_pitch = glm::degrees(asin(dir.y));
+            m_yaw = glm::degrees(atan2(dir.z, dir.x));
+            updateVectors();
+        }
         void rotate(float dx, float dy, bool constrainPitch = true);
         void resize(int width, int height);
 
