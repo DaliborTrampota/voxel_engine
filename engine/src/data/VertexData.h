@@ -2,12 +2,8 @@
 
 #include <array>
 
+#include "../Globals.h"
 #include "block/Face.h"
-
-// todo CRITICAL use Globals.h
-#define NORTH glm::vec3(1, 0, 0)
-#define WEST glm::vec3(0, 0, 1)
-#define UP glm::vec3(0, 1, 0)
 
 using namespace engine;
 
@@ -58,16 +54,16 @@ namespace engine::data {
 
     const std::array<Face, 6> f_faces = {
         Face::SquareFace(
-            FaceTag::Front, vertices[1], vertices[5], NORTH, glm::vec2(0, 0), glm::vec2(1, 1)
+            FaceTag::Front, vertices[6], vertices[4], NORTH, glm::vec2(0, 0), glm::vec2(1, 1)
         ),  // North
         Face::SquareFace(
-            FaceTag::Left, vertices[6], vertices[4], WEST, glm::vec2(0, 0), glm::vec2(1, 1)
+            FaceTag::Right, vertices[7], vertices[3], -EAST, glm::vec2(0, 0), glm::vec2(1, 1)
         ),  // West
         Face::SquareFace(
-            FaceTag::Back, vertices[7], vertices[3], -NORTH, glm::vec2(0, 0), glm::vec2(1, 1)
+            FaceTag::Back, vertices[0], vertices[2], -NORTH, glm::vec2(0, 0), glm::vec2(1, 1)
         ),  // South
         Face::SquareFace(
-            FaceTag::Right, vertices[0], vertices[2], -WEST, glm::vec2(0, 0), glm::vec2(1, 1)
+            FaceTag::Left, vertices[1], vertices[5], EAST, glm::vec2(0, 0), glm::vec2(1, 1)
         ),  // East
         Face::SquareFace(
             FaceTag::Top, vertices[2], vertices[4], UP, glm::vec2(0, 0), glm::vec2(1, 1)

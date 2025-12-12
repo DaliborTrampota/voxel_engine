@@ -315,24 +315,23 @@ bool Player::tryPlaceMultiBlock(DDAResult dda, BlockID currentBlock, BlockState*
     const MultiBlockCombination* mbComb = nullptr;
 
     if (currentBlock == Block::MultiblockID) {
-        // TODO update multiblock
-        MultiBlock mb;  //= m_world->
-        blockIDs = mb.blockIDs();
+        MultiBlock* mb = m_world->getMultiBlock(dda.position);
+        blockIDs = mb->blockIDs();
         blockIDs.push_back(heldBlockID);
         mbComb = getMultiBlockCombination(blockIDs);
 
-        //if (!mbComb->canCombine(blockIDs))
         if (!mbComb || !mbComb->canCombine(blockIDs))
             return false;
 
-        mb.addBlock({heldBlockID, heldBlockState});
+        // TODO somehow automatically mark chunk as dirty
+        mb->addBlock({heldBlockID, heldBlockState});
         return true;
     }
 
     blockIDs.push_back(currentBlock);
     blockIDs.push_back(heldBlockID);
     mbComb = getMultiBlockCombination(blockIDs);
-    // if (!mbComb.canCombine(blockIDs))
+
     if (!mbComb || !mbComb->canCombine(blockIDs))
         return false;
 
