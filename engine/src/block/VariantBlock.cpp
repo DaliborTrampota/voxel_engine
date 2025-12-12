@@ -1,5 +1,6 @@
 #include "VariantBlock.h"
 
+#include <algorithm>
 #include <stdexcept>
 
 #include <glm/glm.hpp>
