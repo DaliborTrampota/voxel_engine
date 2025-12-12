@@ -25,7 +25,7 @@ void RegisterBlocks() {
     TextureManager& texMgr = TextureManager::Get();
 
     auto makeLog = [&geometries, &texMgr](
-                       int id, int width, std::unordered_set<BlockID> connectedBlocks
+                       int id, int width, std::vector<BlockID> connectedBlocks
                    ) -> VariantBlock {
         auto makeVariant = [&](Side side) -> VariantBlock::Variant {
             std::string name = std::format("oak_log_connector_{}", static_cast<int>(side));
@@ -135,7 +135,7 @@ void RegisterBlocks() {
 
     // clang-format on
 
-    std::unordered_set<BlockID> logConnectedBlocks = {20 /* LOG_4 */, LOG_BRANCH.getID()};
+    std::vector<BlockID> logConnectedBlocks = {20 /* LOG_4 */, LOG_BRANCH.getID()};
     auto LOG_6 = makeLog(19, 6, logConnectedBlocks);
     auto LOG_8 = makeLog(18, 8, logConnectedBlocks);
     auto LOG_10 = makeLog(17, 10, logConnectedBlocks);
