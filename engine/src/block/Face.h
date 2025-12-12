@@ -1,14 +1,12 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include <optional>
-#include <string>
 #include <vector>
 
 #include "Vertex.h"
 
 namespace engine {
-    enum FaceTag {
+    enum class FaceTag {
         All = 0,
         Side,
 

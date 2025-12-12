@@ -18,6 +18,8 @@
 
 #include "utility/UtilityShaders.h"
 
+#include "data/RegistryManager.h"
+
 using namespace engine;
 
 Engine::Engine(std::unique_ptr<Window> window) : m_window(std::move(window)) {
@@ -25,6 +27,17 @@ Engine::Engine(std::unique_ptr<Window> window) : m_window(std::move(window)) {
     // registerRenderPass({RenderPass::OmniShadow});
     registerRenderPass({RenderPass::Scene});
     registerRenderPass({RenderPass::SceneTransparent});
+
+
+    RegistryManager::Blocks().add(Block::air(), "air");
+    RegistryManager::Blocks().add(Block::multiblock(), "multiblock");
+    // RegistryManager::Blocks().add(Block(2, Layers::Any, nullptr), "reserved_block_2");
+    // RegistryManager::Blocks().add(Block(3, Layers::Any, nullptr), "reserved_block_3");
+    // RegistryManager::Blocks().add(Block(4, Layers::Any, nullptr), "reserved_block_4");
+    // RegistryManager::Blocks().add(Block(5, Layers::Any, nullptr), "reserved_block_5");
+    // RegistryManager::Blocks().add(Block(6, Layers::Any, nullptr), "reserved_block_6");
+    // RegistryManager::Blocks().add(Block(7, Layers::Any, nullptr), "reserved_block_7");
+    // RegistryManager::Blocks().add(Block(8, Layers::Any, nullptr), "reserved_block_8");
 }
 
 void Engine::submitRender(RenderContext&& ctx, bool immediate) {

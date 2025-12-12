@@ -8,12 +8,13 @@ namespace engine {
     class Chunk;
     class Face;
     class Geometry;
-    using UnaryPredicate = std::function<bool(Block)>;
+    using UnaryPredicate = std::function<bool(const Block*)>;
 
+    // TODO maybe add state?
     struct DDAResult {
         glm::vec3 position;
         glm::vec3 face;
-        const Block& block;
+        const Block* block;
         float distance;
         const Chunk* chunk;
     };

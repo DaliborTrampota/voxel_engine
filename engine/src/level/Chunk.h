@@ -21,6 +21,10 @@ namespace gl {
 
 namespace engine {
 
+    class Block;
+    class VariantBlock;
+    class MultiBlock;
+
     class World;
     class Engine;
     struct RenderContext;
@@ -57,7 +61,7 @@ namespace engine {
         bool generateMesh();
 
 
-        const Block& getBlock(glm::ivec3 pos) const;
+        const Block* getBlock(glm::ivec3 pos) const;
 
         /// @return 3D vector of the block data.
         ChunkData& data() { return m_data; }
@@ -67,6 +71,43 @@ namespace engine {
         /// @param pass Pass == 0 will render the whole chunk, pass == 1 will render opaque blocks, pass == 2 will render transparent blocks.
         void render(Engine& engine, const Camera* camera, int pass) override;
 
+      protected:
+        struct GeometryState {
+            glm::vec3 axis;
+            float angle;
+        };
+
+        struct MeshGenContext {
+            const Block* block;
+            const Geometry* geometry;
+            GeometryState geometryState;
+            gl::Attributes<Vertex>& storage;
+            glm::ivec3 posInChunk;
+            glm::ivec3 worldPos;
+        };
+
+        GeometryState calculateGeometryState(const Block* block, const BlockState* state) const;
+        void generateMeshForGeometry(const MeshGenContext& ctx);
+
+        void generateMeshForBlock(
+            const Block* block,
+            glm::ivec3 pos,
+            const BlockState* state,
+            const glm::ivec3& chunkBlockCoords
+        );
+        void generateMeshForBlock(
+            const VariantBlock* block,
+            glm::ivec3 pos,
+            const BlockState* state,
+            const glm::ivec3& chunkBlockCoords
+        );
+        void generateMeshForBlock(
+            const MultiBlock* block,
+            glm::ivec3 pos,
+            const BlockState* state,
+            const glm::ivec3& chunkBlockCoords
+        );
+
       private:
         World* m_world;
         ChunkID m_coords;
@@ -74,6 +115,8 @@ namespace engine {
         ChunkData m_data;
         gl::Attributes<Vertex> m_opaqueVertData;
         gl::Attributes<Vertex> m_transparentVertData;
+        gl::Attributes<Vertex> m_backOpaqueVertData;
+        gl::Attributes<Vertex> m_backTransparentVertData;
 
         bool m_generated = false;
         std::atomic_bool m_generatingMesh = false;

@@ -86,6 +86,7 @@ void Game::start() {
 
     RegisterGeometries();
     RegisterBlocks();
+    RegisterMultiBlocks();
 
     m_uiManager->createUI();
 
@@ -102,6 +103,7 @@ void Game::start() {
     subscribeUpdate(m_player);
     subscribeUpdate(m_uiManager);
     subscribeUpdate(m_directionalLightSource);
+    subscribeUpdate(m_worldManager.activeWorld());
 
     // uncomment this call to draw in wireframe polygons.
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

@@ -4,6 +4,7 @@
 #include <memory>
 
 
+#include <Globals.h>
 #include <input/InputSystem.h>
 #include <level/Chunk.h>
 #include <level/World.h>
@@ -19,6 +20,7 @@
 
 #include "GameServices.h"
 #include "Globals.h"
+#include "registry/MyRegistryManager.h"
 
 #include <data/RegistryManager.h>
 
@@ -41,14 +43,14 @@ Player::Player()
     m_camera = std::make_unique<Camera>(opts);
 
     m_heldBlocks = {
-        RegistryManager::Blocks().get("log_4").getID(),
-        RegistryManager::Blocks().get("log_6").getID(),
-        RegistryManager::Blocks().get("log_8").getID(),
-        RegistryManager::Blocks().get("log_10").getID(),
-        RegistryManager::Blocks().get("log_12").getID(),
-        RegistryManager::Blocks().get("log_14").getID(),
-        RegistryManager::Blocks().get("log_connector").getID(),
-        RegistryManager::Blocks().get("log_branch").getID(),
+        RegistryManager::Blocks().get("log_4")->getID(),
+        RegistryManager::Blocks().get("leaves")->getID(),
+        RegistryManager::Blocks().get("log_branch")->getID(),
+        RegistryManager::Blocks().get("log_8")->getID(),
+        RegistryManager::Blocks().get("log_10")->getID(),
+        RegistryManager::Blocks().get("log_12")->getID(),
+        RegistryManager::Blocks().get("log_14")->getID(),
+        //RegistryManager::Blocks().get("log_connector")->getID(),
         0,
         0,
     };
@@ -110,7 +112,8 @@ void Player::update(float dt) {
         m_position = glm::vec3(Chunk::Dims.x / 2, 20, Chunk::Dims.z / 2);
         m_velocity = glm::vec3(0.f);
         m_camera->position(m_position);
-        m_camera->lookAt(glm::vec3(Chunk::Dims.x / 2, 0, Chunk::Dims.z / 2));
+        m_camera->lookDirection(FORWARD);
+        // m_camera->lookAt(glm::vec3(FORWARD));
 
         m_aabb->position(m_position);
     }
@@ -138,6 +141,17 @@ void Player::update(float dt) {
     }
 
     if (input->getAxis(Axis::MouseScroll) > 0) {
+        m_heldBlockIndex++;
+        if (m_heldBlockIndex >= m_heldBlocks.size())
+            m_heldBlockIndex = 0;
+    }
+
+    if (input->isKey<Pressed>(GLFW_KEY_UP)) {
+        m_heldBlockIndex--;
+        if (m_heldBlockIndex < 0)
+            m_heldBlockIndex = m_heldBlocks.size() - 1;
+    }
+    if (input->isKey<Pressed>(GLFW_KEY_DOWN)) {
         m_heldBlockIndex++;
         if (m_heldBlockIndex >= m_heldBlocks.size())
             m_heldBlockIndex = 0;
@@ -221,29 +235,109 @@ void Player::move(glm::vec3 position) {
 void Player::interact(GLFWKey button) {
     if (button == GLFW_MOUSE_BUTTON_RIGHT) {
         DDAResult dda =
-            DDA(*m_world, m_camera->position(), m_camera->lookDirection(), 10.0f, [](Block block) {
-                return block.isSolid();
-            });
+            DDA(*m_world,
+                m_camera->position(),
+                m_camera->lookDirection(),
+                10.0f,
+                [](const Block* block) { return block->isSolid(); });
 
-        if (dda.block.isAir())
+        if (dda.block->isAir())
             return;
 
         glm::ivec3 placePos = dda.position + dda.face;
-        if (m_heldBlocks[m_heldBlockIndex] == 0)
+
+
+        BlockState* currentBlockState = nullptr;
+        BlockID currentBlockID = m_world->getBlockID(dda.position, currentBlockState, false);
+        if (currentBlockID != Block::AirID) {
+            if (tryPlaceMultiBlock(dda, currentBlockID, currentBlockState)) {
+                return;
+            }
+        }
+
+        BlockID blockID = m_heldBlocks[m_heldBlockIndex];
+        const Block* block = RegistryManager::Blocks().get(blockID);
+        if (block->isAir())
             return;
-        m_world->setBlock(placePos, m_heldBlocks[m_heldBlockIndex]);
+
+        if (block->rotationMode() != RotationMode::None) {
+            glm::vec3 facingDir =
+                getFacingDirection(m_camera->lookDirection(), block->rotationMode(), dda.face);
+
+            BlockState state = BlockState::makeRotation(facingDir);
+            m_world->setBlock(placePos, block->getID(), state);
+        } else {
+            m_world->setBlock(placePos, block->getID());
+        }
     }
 
     if (button == GLFW_MOUSE_BUTTON_LEFT) {
         DDAResult dda =
-            DDA(*m_world, m_camera->position(), m_camera->lookDirection(), 10.0f, [](Block block) {
-                return block.isSolid();
-            });
+            DDA(*m_world,
+                m_camera->position(),
+                m_camera->lookDirection(),
+                10.0f,
+                [](const Block* block) { return block->isSolid(); });
 
-        if (dda.block.isAir())
+        if (dda.block->isAir())
             return;
 
 
         m_world->setBlock(dda.chunk->id(), toChunkCoords(dda.chunk->id(), dda.position), 0);
     }
+}
+
+const MultiBlockCombination* getMultiBlockCombination(std::vector<BlockID> blockIDs) {
+    for (const auto& mbComb : MyRegistryManager::MultiBlockCombinations().all()) {
+        if (mbComb.get().canCombine(blockIDs)) {
+            return &mbComb.get();
+        }
+    }
+    return nullptr;
+    //return &MyRegistryManager::MultiBlockCombinations().get("leaves_branch");
+}
+
+bool Player::tryPlaceMultiBlock(DDAResult dda, BlockID currentBlock, BlockState* currentState) {
+    BlockID heldBlockID = m_heldBlocks[m_heldBlockIndex];
+    const Block* heldBlock = RegistryManager::Blocks().get(heldBlockID);
+    std::optional<BlockState> heldBlockState = std::nullopt;
+
+
+    if (heldBlock->rotationMode() != RotationMode::None) {
+        glm::vec3 facingDir =
+            getFacingDirection(m_camera->lookDirection(), heldBlock->rotationMode(), dda.face);
+        heldBlockState = BlockState::makeRotation(facingDir);
+    }
+
+
+    // TODO wrong if curBlock is multiblock
+    std::vector<BlockID> blockIDs;
+    const MultiBlockCombination* mbComb = nullptr;
+
+    if (currentBlock == Block::MultiblockID) {
+        MultiBlock* mb = m_world->getMultiBlock(dda.position);
+        blockIDs = mb->blockIDs();
+        blockIDs.push_back(heldBlockID);
+        mbComb = getMultiBlockCombination(blockIDs);
+
+        if (!mbComb || !mbComb->canCombine(blockIDs))
+            return false;
+
+        // TODO somehow automatically mark chunk as dirty
+        mb->addBlock({heldBlockID, heldBlockState});
+        return true;
+    }
+
+    blockIDs.push_back(currentBlock);
+    blockIDs.push_back(heldBlockID);
+    mbComb = getMultiBlockCombination(blockIDs);
+
+    if (!mbComb || !mbComb->canCombine(blockIDs))
+        return false;
+
+    MultiBlock multiBlock = MultiBlock::fromBlock(currentBlock, currentState);
+    multiBlock.addBlock({heldBlockID, heldBlockState});
+    // we are placing the multi-block at the position of the current block
+    m_world->setBlock(dda.position, std::move(multiBlock));
+    return true;
 }

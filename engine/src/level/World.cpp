@@ -3,14 +3,11 @@
 
 #include "ITerrainGenerator.h"
 #include "block/Block.h"
-#include "block/Geometry.h"
 #include "render/Engine.h"
 #include "render/RenderContext.h"
 #include "utility/CoordUtils.h"
 
-
 #include <algorithm>
-
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/component_wise.hpp>
@@ -130,7 +127,9 @@ const Chunk* World::getChunk(const ChunkID& id) const {
     return it->second.get();
 }
 
-BlockID World::getBlockID(const ChunkID& chID, const glm::ivec3& pos, bool fallbackToGenerator) {
+BlockID World::getBlockID(
+    const ChunkID& chID, const glm::ivec3& pos, BlockState*& state, bool fallbackToGenerator
+) {
     auto chunk = m_chunks.find(chID);
     if (chunk == m_chunks.end() || !chunk->second->generated()) {
         if (fallbackToGenerator)
@@ -138,10 +137,11 @@ BlockID World::getBlockID(const ChunkID& chID, const glm::ivec3& pos, bool fallb
         return INVALID_BLOCK;
     }
 
+    state = chunk->second->m_data.getState(pos);
     return chunk->second->m_data.getBlock(pos);
 }
 
-BlockID World::getBlockID(glm::vec3 pos, bool fallbackToGenerator) {
+BlockID World::getBlockID(glm::vec3 pos, BlockState*& state, bool fallbackToGenerator) {
     ChunkID chID = extractChunkCoords(pos);
     auto chunk = m_chunks.find(chID);
     if (chunk == m_chunks.end() || !chunk->second->generated()) {
@@ -150,6 +150,7 @@ BlockID World::getBlockID(glm::vec3 pos, bool fallbackToGenerator) {
         return INVALID_BLOCK;
     }
 
+    state = chunk->second->m_data.getState(pos);
     return chunk->second->m_data.getBlock(pos);
 }
 
@@ -163,12 +164,12 @@ bool World::canSeeFace(const Block& curBlock, glm::vec3 pos, glm::ivec3 dir) con
     if (!chunk)  // Chunk not generated
         return false;
 
-    Block block = chunk->getBlock(neighborPos);
-    if (block.getID() == 0)
+    const Block* block = chunk->getBlock(neighborPos);
+    if (block->getID() == 0)
         return true;
 
     // ) || (curBlock.isVoxel() && !block.isVoxel())
-    if (!curBlock.isVoxel() && block.isVoxel()) {
+    if (!curBlock.isVoxel() && block->isVoxel()) {
         return true;
         // TODO figure out, either ignore and always draw face or its gonna be pain and check if faces are on same plane and if one contains the other and draw only the bigger
         // dir = -dir;  // Reverse dir to find face facing the current block
@@ -177,23 +178,23 @@ bool World::canSeeFace(const Block& curBlock, glm::vec3 pos, glm::ivec3 dir) con
         //         return true;
         // }
         // return false;
-    } else if (curBlock.isVoxel() && block.isVoxel()) {
+    } else if (curBlock.isVoxel() && block->isVoxel()) {
         // TODO is it worth figuring out which faces should not be rendered?
         return true;
     }
 
-    bool sameBlock = block.getID() == curBlock.getID();
+    bool sameBlock = block->getID() == curBlock.getID();
     if (sameBlock)
         return false;
 
     switch (curBlock.layer()) {
         case Layers::Opaque:
             // Render opaque faces when touching transparent block
-            return block.layer() != Layers::Opaque;
+            return block->layer() != Layers::Opaque;
         case Layers::Transparent:
             // Render faces when touching different transparent blocks
-            return !sameBlock && block.layer() != Layers::Opaque;
-        case Layers::Any: return block.isSolid() && curBlock.isSolid();
+            return !sameBlock && block->layer() != Layers::Opaque;
+        case Layers::Any: return block->isSolid() && curBlock.isSolid();
         default: return false;
     }
 }
@@ -206,24 +207,88 @@ void World::render(Engine& engine, const Camera* camera, int pass) {
     //std::cout << "Rendered chunks: " << m_chunks.size() << "\n";
 }
 
-void World::createChunk(ChunkID id, bool load) {
-    m_chunks.emplace(id, std::make_unique<Chunk>(this, id));
+void World::updateChunk(ChunkID id) {
+    m_genPool.add([this, id] {
+        std::unique_lock<std::mutex> lock(m_mutex);
+        auto it = m_chunks.find(id);
+        if (it == m_chunks.end()) {
+            return;
+        }
+        Chunk* chunk = it->second.get();
+        if (!chunk)
+            return;
 
-    m_genPool.add([this, id, load] {
-        Chunk* chunk = m_chunks[id].get();
-        chunk->generate();
+        lock.unlock();
         chunk->generateMesh();
-        if (load)
-            m_loadedChunks.insert(id);
+        chunk->m_dirty = false;
     });
 }
 
-void World::setBlock(const ChunkID& chID, const glm::ivec3& pos, BlockID blockID) {
-    m_chunks[chID]->m_data.setBlock(pos, blockID);
+void World::setBlock(
+    const ChunkID& chID, const glm::ivec3& pos, BlockID blockID, std::optional<BlockState> state
+) {
+    if (state.has_value())
+        m_chunks[chID]->m_data.setBlock(pos, blockID, state.value());
+    else
+        m_chunks[chID]->m_data.setBlock(pos, blockID);
+
+    if (blockID == 0) {
+        m_chunks[chID]->m_data.clearState(pos);
+    }
     m_chunks[chID]->m_dirty = true;
+    checkAndUpdateSurroundingChunks(chID, pos);
 }
 
-void World::setBlock(glm::ivec3 pos, BlockID blockID) {
+void World::setBlock(glm::ivec3 pos, BlockID blockID, std::optional<BlockState> state) {
     ChunkID chID = extractChunkCoords(pos);
-    setBlock(chID, pos, blockID);
+    setBlock(chID, pos, blockID, state);
+}
+
+void World::setBlock(const ChunkID& chID, const glm::ivec3& pos, MultiBlock&& multiBlock) {
+    m_chunks[chID]->m_data.setMultiBlock(pos, std::move(multiBlock));
+    m_chunks[chID]->m_dirty = true;
+    checkAndUpdateSurroundingChunks(chID, pos);
+}
+
+MultiBlock* World::getMultiBlock(const ChunkID& chID, const glm::ivec3& pos) {
+    return m_chunks[chID]->m_data.getMultiBlock(pos);
+}
+
+MultiBlock* World::getMultiBlock(glm::ivec3 pos) {
+    ChunkID chID = extractChunkCoords(pos);
+    return getMultiBlock(chID, pos);
+}
+
+
+void World::setBlock(glm::ivec3 pos, MultiBlock&& multiBlock) {
+    ChunkID chID = extractChunkCoords(pos);
+    setBlock(chID, pos, std::move(multiBlock));
+}
+
+void World::checkAndUpdateSurroundingChunks(const ChunkID& chID, const glm::ivec3& pos) {
+    glm::ivec3 surroundingBlocks[] = {
+        {pos.x - 1, pos.y, pos.z},
+        {pos.x + 1, pos.y, pos.z},
+        {pos.x, pos.y - 1, pos.z},
+        {pos.x, pos.y + 1, pos.z},
+        {pos.x, pos.y, pos.z - 1},
+        {pos.x, pos.y, pos.z + 1}
+    };
+    for (const auto& blockPos : surroundingBlocks) {
+        ChunkID blockChID = getChunkID(blockPos);
+        if (blockChID != chID) {
+            auto it = m_chunks.find(blockChID);
+            if (it != m_chunks.end()) {
+                it->second->m_dirty = true;
+            }
+        }
+    }
+}
+
+void World::update(float dt) {
+    for (const ChunkID& pos : m_loadedChunks) {
+        if (m_chunks[pos]->m_dirty) {
+            updateChunk(pos);
+        }
+    }
 }

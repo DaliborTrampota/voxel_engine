@@ -3,14 +3,18 @@
 #include <future>
 #include <glm/glm.hpp>
 #include <memory>
+#include <mutex>
+#include <optional>
 #include <unordered_map>
 #include <unordered_set>
+
 
 #include "Chunk.h"
 #include "ITerrainGenerator.h"
 #include "render/Material.h"
 #include "render/Renderable.h"
 #include "scene/Skybox.h"
+#include "scene/Updateable.h"
 #include "utility/ThreadPool.h"
 
 
@@ -26,7 +30,8 @@ namespace engine {
     struct ChunkID;
     struct RenderContext;
 
-    class World : public Renderable {
+    class World : public Renderable,
+                  public Updateable {
       public:
         World(std::unique_ptr<ITerrainGenerator> gen, uint32_t genThreads = 8);
         ~World();
@@ -49,25 +54,35 @@ namespace engine {
 
         Chunk* getChunk(const ChunkID& id);
         const Chunk* getChunk(const ChunkID& id) const;
+        const std::unordered_set<ChunkID>& loadedChunks() const { return m_loadedChunks; }
+
+        /// @brief Checks if the surrounding chunks need to be updated due to a block change.
+        /// @param chID The chunk that was changed.
+        /// @param pos The position of the block that was changed.
+        void checkAndUpdateSurroundingChunks(const ChunkID& chID, const glm::ivec3& pos);
 
         /// @section Block management
 
         /// @brief Gets the block ID at the given position.
         /// @param chID The chunk to query the block from
         /// @param pos The position of the block within the chunk (0 to Chunk::Dims)
+        /// @param state [out] The state of the block
         /// @param fallbackToGenerator If true, the generator will be used to get the block ID if the chunk is not generated
         /// @return the block ID or engine::INVALID_BLOCK if:
         ///         - The position is out of bounds (eg less than or greater than Chunk::Dims)
         ///         - The chunk is not generated
-        BlockID getBlockID(const ChunkID& chID, const glm::ivec3& pos, bool fallbackToGenerator);
+        BlockID getBlockID(
+            const ChunkID& chID, const glm::ivec3& pos, BlockState*& state, bool fallbackToGenerator
+        );
 
         /// @brief Gets the block ID at the given position.
         /// @param pos The position of the block in world space
+        /// @param state [out] The state of the block
         /// @param fallbackToGenerator If true, the generator will be used to get the block ID if the chunk is not generated
         /// @return the block ID or engine::INVALID_BLOCK if:
         ///         - The position is out of bounds (eg less than or greater than Chunk::Dims)
         ///         - The chunk is not generated
-        BlockID getBlockID(glm::vec3 pos, bool fallbackToGenerator);
+        BlockID getBlockID(glm::vec3 pos, BlockState*& state, bool fallbackToGenerator);
 
         /// @brief Checks if the face of current block facing given direction can be seen and thus should be rendered.
         /// @param curBlock The current block.
@@ -77,14 +92,26 @@ namespace engine {
         bool canSeeFace(const Block& curBlock, glm::vec3 pos, glm::ivec3 dir) const;
 
 
-        void setBlock(const ChunkID& chID, const glm::ivec3& pos, BlockID blockID);
-        void setBlock(glm::ivec3 pos, BlockID blockID);
+        void setBlock(
+            const ChunkID& chID,
+            const glm::ivec3& pos,
+            BlockID blockID,
+            std::optional<BlockState> state = std::nullopt
+        );
+        void setBlock(
+            glm::ivec3 pos, BlockID blockID, std::optional<BlockState> state = std::nullopt
+        );
 
+        void setBlock(const ChunkID& chID, const glm::ivec3& pos, MultiBlock&& multiBlock);
+        void setBlock(glm::ivec3 pos, MultiBlock&& multiBlock);
 
-        const std::unordered_set<ChunkID>& loadedChunks() const { return m_loadedChunks; }
+        MultiBlock* getMultiBlock(const ChunkID& chID, const glm::ivec3& pos);
+        MultiBlock* getMultiBlock(glm::ivec3 pos);
 
 
         virtual void render(Engine& engine, const Camera* camera, int pass = 0) override;
+        virtual void update(float dt) override;
+
         const Material& getMaterial() const { return m_material; }
         Skybox& getSkybox() { return m_skybox; }
 
@@ -102,7 +129,8 @@ namespace engine {
         friend class Engine;
 
       private:
-        void createChunk(ChunkID id, bool load);
+        void updateChunk(ChunkID id);
+        std::mutex m_mutex;
     };
 
 }  // namespace engine

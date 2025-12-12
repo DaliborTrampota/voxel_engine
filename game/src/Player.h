@@ -9,6 +9,8 @@
 #include <scene/Updateable.h>
 
 
+#include <utility/Algorithms.h>
+
 namespace engine {
     class World;
     class Chunk;
@@ -34,6 +36,9 @@ class Player : public engine::Updateable {
     void move(glm::vec3 position);
 
     void interact(engine::GLFWKey button);
+    bool tryPlaceMultiBlock(
+        engine::DDAResult dda, engine::BlockID blockID, engine::BlockState* state
+    );
 
     engine::Camera* getCamera() { return m_camera.get(); }
     const glm::vec3& position() const { return m_position; }

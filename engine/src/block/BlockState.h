@@ -27,11 +27,10 @@ namespace engine {
         static constexpr bool is_value_type_v = is_variant_member<T, Value>::value;
 
       public:
-        static const BlockState& Empty() {
-            static const BlockState empty = BlockState();
-            return empty;
-        }
-        static BlockState make(glm::vec3 orientation);
+        static BlockState makeRotation(glm::vec3 facing);
+        static BlockState makeVariant(uint8_t variantIndex);
+
+        const glm::vec3& facing() const { return m_facing; }
 
         BlockState() = default;
         ~BlockState() = default;
@@ -55,7 +54,7 @@ namespace engine {
       protected:
         glm::vec3 m_facing;
         /// @note rotation around facing axis
-        float m_rotation;
+        float m_rotation = 0.0f;
         uint8_t m_variant = 0;
 
         std::unordered_map<std::string, Value> m_properties;

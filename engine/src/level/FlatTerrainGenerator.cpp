@@ -10,7 +10,7 @@ FlatTerrainGenerator::FlatTerrainGenerator() : m_blockRegistry(RegistryManager::
 
 BlockID FlatTerrainGenerator::voxelAt(const glm::ivec3& pos) {
     if (pos.y > 0) {
-        return m_blockRegistry.get("air").getID();
+        return m_blockRegistry.get("air")->getID();
     }
 
     return 1;
