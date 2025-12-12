@@ -63,7 +63,8 @@ namespace engine {
 
         // MultiBlock access
         inline MultiBlock* getMultiBlock(int x, int y, int z) {
-            return &multiBlocks[glm::ivec3(x, y, z)];
+            auto it = multiBlocks.find(glm::ivec3(x, y, z));
+            return it != multiBlocks.end() ? &it->second : nullptr;
         }
         inline MultiBlock* getMultiBlock(const glm::ivec3& pos) {
             return getMultiBlock(pos.x, pos.y, pos.z);

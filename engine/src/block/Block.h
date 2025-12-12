@@ -28,6 +28,11 @@ namespace engine {
 
     class Block {
       public:
+        /// @brief Reserved block ID range: 0-8 (inclusive).
+        /// @note Block IDs 0-8 are reserved for engine use:
+        ///   0: Air
+        ///   1: Multiblock
+        ///   2-8: (reserved for future/engine use; see Engine.cpp lines 34-40)
         static constexpr BlockID AirID = 0;
         static constexpr BlockID MultiblockID = 1;
 

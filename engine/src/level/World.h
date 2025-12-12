@@ -105,6 +105,9 @@ namespace engine {
         void setBlock(const ChunkID& chID, const glm::ivec3& pos, MultiBlock&& multiBlock);
         void setBlock(glm::ivec3 pos, MultiBlock&& multiBlock);
 
+        MultiBlock* getMultiBlock(const ChunkID& chID, const glm::ivec3& pos);
+        MultiBlock* getMultiBlock(glm::ivec3 pos);
+
 
         virtual void render(Engine& engine, const Camera* camera, int pass = 0) override;
         virtual void update(float dt) override;

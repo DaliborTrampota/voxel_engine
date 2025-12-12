@@ -117,8 +117,8 @@ namespace engine {
 
                 //TODO change to glm::vec and "round" to closest axis
                 glm::vec3 facingDir = clickedFaceN;
-                static constexpr float DOT_30 = 0.707f;
-                static constexpr float DOT_45 = 0.866f;
+                static constexpr float DOT_30 = 0.866f;
+                static constexpr float DOT_45 = 0.707f;
 
                 glm::vec3 resultDirection;
 

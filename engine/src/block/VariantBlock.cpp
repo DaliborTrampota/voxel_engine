@@ -94,7 +94,11 @@ const VariantBlock::Variant* VariantBlock::getVariant(const Neighbours& neighbou
     for (const auto& variant : m_variants) {
         bool allConditionsMet = true;
         for (const auto& condition : variant.conditions) {
-            if (!condition.blockIDs.contains(neighbours[condition.direction])) {
+            if (std::find(
+                    condition.blockIDs.begin(),
+                    condition.blockIDs.end(),
+                    neighbours[condition.direction]
+                ) == condition.blockIDs.end()) {
                 allConditionsMet = false;
                 break;
             }
@@ -122,7 +126,11 @@ std::vector<const VariantBlock::Variant*> VariantBlock::getVariants(
     for (auto& variant : m_variants) {
         bool allConditionsMet = true;
         for (const auto& condition : variant.conditions) {
-            if (!condition.blockIDs.contains(neighbours[condition.direction])) {
+            if (std::find(
+                    condition.blockIDs.begin(),
+                    condition.blockIDs.end(),
+                    neighbours[condition.direction]
+                ) == condition.blockIDs.end()) {
                 allConditionsMet = false;
                 break;
             }

@@ -1,5 +1,6 @@
 #include "MultiBlockCombination.h"
 
+#include <algorithm>
 
 MultiBlockCombination::MultiBlockCombination(
     std::initializer_list<MultiBlockCombination::SubBlock> blocks

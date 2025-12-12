@@ -28,7 +28,7 @@ namespace engine {
         /// @note The block IDs must be present in the direction for the variant to be used.
         struct Condition {
             Side direction;
-            std::unordered_set<BlockID> blockIDs;  // TODO set vs vector
+            std::vector<BlockID> blockIDs;  // unordered_set is more correct, but vector is faster
 
             bool operator==(const Condition& other) const {
                 return direction == other.direction && blockIDs == other.blockIDs;

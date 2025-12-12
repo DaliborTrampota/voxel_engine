@@ -250,6 +250,16 @@ void World::setBlock(const ChunkID& chID, const glm::ivec3& pos, MultiBlock&& mu
     checkAndUpdateSurroundingChunks(chID, pos);
 }
 
+MultiBlock* World::getMultiBlock(const ChunkID& chID, const glm::ivec3& pos) {
+    return m_chunks[chID]->m_data.getMultiBlock(pos);
+}
+
+MultiBlock* World::getMultiBlock(glm::ivec3 pos) {
+    ChunkID chID = extractChunkCoords(pos);
+    return getMultiBlock(chID, pos);
+}
+
+
 void World::setBlock(glm::ivec3 pos, MultiBlock&& multiBlock) {
     ChunkID chID = extractChunkCoords(pos);
     setBlock(chID, pos, std::move(multiBlock));
@@ -266,8 +276,12 @@ void World::checkAndUpdateSurroundingChunks(const ChunkID& chID, const glm::ivec
     };
     for (const auto& blockPos : surroundingBlocks) {
         ChunkID blockChID = getChunkID(blockPos);
-        if (blockChID != chID)
-            m_chunks[blockChID]->m_dirty = true;
+        if (blockChID != chID) {
+            auto it = m_chunks.find(blockChID);
+            if (it != m_chunks.end()) {
+                it->second->m_dirty = true;
+            }
+        }
     }
 }
 
