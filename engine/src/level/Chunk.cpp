@@ -163,7 +163,7 @@ Chunk::GeometryState Chunk::calculateGeometryState(
         glm::vec3 baseSideDir = sideDirection(baseSide);
         const glm::vec3& facing = state->facing();
 
-        geoState.angle = getAngleToSide(baseSide, facing, geoState.axis);
+        geoState.angle = getAngle(baseSideDir, facing, geoState.axis);
         // geoState.axis = glm::vec3(0, 1, 0);
         // if (glm::any(glm::isnan(geoState.axis))) {
         // } else {

@@ -38,6 +38,7 @@ namespace engine {
     glm::quat getRotationQuat(glm::vec3 lookDir, RotationMode rot, glm::ivec3 clickedFaceN);
 
     float getAngleToSide(Side side, glm::vec3 from, glm::vec3& axis);
+    float getAngleFromSide(Side side, glm::vec3 to, glm::vec3& axis);
     float getAngle(glm::vec3 from, glm::vec3 to, glm::vec3& axis);
 
 

@@ -36,7 +36,7 @@ void VariantBlock::Neighbours::rotate(Side from, Side to) {
     Neighbours original = *this;
 
     glm::vec3 axis;
-    float angle = -getAngleToSide(to, sideDirection(from), axis);
+    float angle = getAngle(sideDirection(from), sideDirection(to), axis);
 
     glm::mat4 rotateMat = glm::rotate(glm::mat4(1.0f), angle, axis);
     auto rotateSide = [&](Side side) -> BlockID {

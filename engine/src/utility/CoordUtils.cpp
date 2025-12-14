@@ -1,6 +1,7 @@
 #include "CoordUtils.h"
 
 #include <glm/gtc/constants.hpp>
+#include "glm/geometric.hpp"
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/vector_angle.hpp>
 
@@ -100,12 +101,12 @@ namespace engine {
             case RotationMode::AxisY: return glm::normalize(glm::vec3{lookDir.x, 0, lookDir.z});
             case RotationMode::AxisXYZ: return lookDir;
             case RotationMode::AxisYSnap: {
-                float xDot = glm::dot(lookDir, NORTH);
-                float zDot = glm::dot(lookDir, EAST);
+                float zDot = glm::abs(glm::dot(lookDir, NORTH));
+                float xDot = glm::abs(glm::dot(lookDir, EAST));
                 if (xDot > zDot) {
-                    return lookDir.x > 0 ? NORTH : -NORTH;
+                    return lookDir.x > 0 ? EAST : -EAST;
                 } else {
-                    return lookDir.z > 0 ? EAST : -EAST;
+                    return lookDir.z > 0 ? NORTH : -NORTH;
                 }
             }
             case RotationMode::AxisXYZSnap:
@@ -167,12 +168,27 @@ namespace engine {
 
     float getAngleToSide(Side side, glm::vec3 from, glm::vec3& axis) {
         glm::vec3 sideDir = sideDirection(side);
-        axis = glm::abs(glm::normalize(glm::cross(from, sideDir)));
+        axis = glm::normalize(glm::cross(sideDir, from));
+        if (glm::all(glm::isnan(axis))) {
+            axis = glm::normalize(glm::vec3(from.y, from.z, from.x));
+        }
         return glm::orientedAngle(from, sideDir, axis);
     }
 
+    float getAngleFromSide(Side side, glm::vec3 to, glm::vec3& axis) {
+        glm::vec3 sideDir = sideDirection(side);
+        axis = glm::normalize(glm::cross(to, sideDir));
+        if (glm::all(glm::isnan(axis))) {
+            axis = glm::normalize(glm::vec3(to.y, to.z, to.x));
+        }
+        return glm::orientedAngle(sideDir, to, axis);
+    }
+
     float getAngle(glm::vec3 from, glm::vec3 to, glm::vec3& axis) {
-        axis = glm::abs(glm::normalize(glm::cross(from, to)));
+        axis = glm::normalize(glm::cross(to, from));
+        if (glm::all(glm::isnan(axis))) {
+            axis = glm::normalize(glm::vec3(from.y, from.z, from.x));
+        }
         return glm::orientedAngle(from, to, axis);
     }
 

@@ -112,8 +112,8 @@ void Player::update(float dt) {
         m_position = glm::vec3(Chunk::Dims.x / 2, 20, Chunk::Dims.z / 2);
         m_velocity = glm::vec3(0.f);
         m_camera->position(m_position);
-        m_camera->lookDirection(FORWARD);
-        // m_camera->lookAt(glm::vec3(FORWARD));
+        m_camera->lookDirection(NORTH);
+        // m_camera->lookAt(glm::vec3(NORTH));
 
         m_aabb->position(m_position);
     }

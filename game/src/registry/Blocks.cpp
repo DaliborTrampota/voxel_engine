@@ -31,13 +31,11 @@ void RegisterBlocks() {
             std::string name = std::format("oak_log_connector_{}", static_cast<int>(side));
             if (!geometries.has(name.c_str())) {
                 glm::vec3 axis;
-                Geometry geo = CreateRotatedGeometry(
-                    geometries.get("oak_log_connector"),
-                    {0, 1, 0},
-                    getAngleToSide(
-                        side, -NORTH, axis
-                    )  // The log connector geometry is pointing -NORTH
-                );
+                float angle = getAngleToSide(
+                    side, NORTH, axis
+                );  // The log connector geometry is pointing -NORTH
+                Geometry geo =
+                    CreateRotatedGeometry(geometries.get("oak_log_connector"), axis, angle);
                 geometries.add(geo, name);
             }
             return VariantBlock::Variant(geometries.get(name.c_str()), {{side, connectedBlocks}});
