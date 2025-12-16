@@ -256,6 +256,7 @@ void World::setBlock(glm::ivec3 pos, MultiBlock&& multiBlock) {
     setBlock(chID, pos, std::move(multiBlock));
 }
 
+//TODO improve
 void World::checkAndUpdateSurroundingChunks(const ChunkID& chID, const glm::ivec3& pos) {
     glm::ivec3 surroundingBlocks[] = {
         {pos.x - 1, pos.y, pos.z},
@@ -265,13 +266,12 @@ void World::checkAndUpdateSurroundingChunks(const ChunkID& chID, const glm::ivec
         {pos.x, pos.y, pos.z - 1},
         {pos.x, pos.y, pos.z + 1}
     };
-    for (const auto& blockPos : surroundingBlocks) {
+    for (auto& blockPos : surroundingBlocks) {
+        blockPos += chID * Chunk::Dims;
         ChunkID blockChID = getChunkID(blockPos);
-        if (blockChID != chID) {
-            auto it = m_chunks.find(blockChID);
-            if (it != m_chunks.end()) {
-                it->second->m_dirty = true;
-            }
+        auto it = m_chunks.find(blockChID);
+        if (it != m_chunks.end()) {
+            it->second->m_dirty = true;
         }
     }
 }
