@@ -12,8 +12,17 @@
 WorldManager::WorldManager(engine::Engine* engine) {
     m_currentWorld = 0;
     m_worlds[0] =
-        // std::make_unique<engine::World>(std::make_unique<engine::FlatTerrainGenerator>());
-        std::make_shared<engine::World>(std::make_unique<PerlinTerrainGenerator>(100));
+        std::make_shared<engine::World>(std::make_unique<BiomeGenerator>(std::move(generator)));
+
+    Skybox::Settings planetSkyboxSettings = {
+        .top = "resources/textures/skybox/v1_top.png",
+        .bottom = "resources/textures/skybox/v1_bottom.png",
+        .front = "resources/textures/skybox/v1_front.png",
+        .back = "resources/textures/skybox/v1_back.png",
+        .left = "resources/textures/skybox/v1_left.png",
+        .right = "resources/textures/skybox/v1_right.png",
+    };
+    m_worlds[0]->getSkybox().load(planetSkyboxSettings);
 }
 
 WorldManager::~WorldManager() {}

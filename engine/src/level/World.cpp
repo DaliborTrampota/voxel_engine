@@ -1,5 +1,6 @@
 #include "World.h"
 #include <Globals.h>
+#include <level/Chunk.h>
 
 #include "ITerrainGenerator.h"
 #include "block/Block.h"
@@ -20,17 +21,7 @@ World::World(std::unique_ptr<ITerrainGenerator> gen, uint32_t genThreads)
       m_genPool(genThreads),
       m_material(
           "resources/shaders/ChunkVert.glsl", "resources/shaders/ChunkFrag.glsl", "ChunkMaterial"
-      ),
-      m_skybox(0) {
-    m_skybox.create(gl::Settings::Cubemap());
-
-    m_skybox.loadFace(gl::CubeFace::Top, gl::ImageData("resources/skybox/top.jpg"));
-    m_skybox.loadFace(gl::CubeFace::Bottom, gl::ImageData("resources/skybox/bottom.jpg"));
-    m_skybox.loadFace(gl::CubeFace::Front, gl::ImageData("resources/skybox/front.jpg"));
-    m_skybox.loadFace(gl::CubeFace::Back, gl::ImageData("resources/skybox/back.jpg"));
-    m_skybox.loadFace(gl::CubeFace::Left, gl::ImageData("resources/skybox/left.jpg"));
-    m_skybox.loadFace(gl::CubeFace::Right, gl::ImageData("resources/skybox/right.jpg"));
-
+      ) {
     m_material.setShadowSupport(true);
     printf("World created\n");
 }

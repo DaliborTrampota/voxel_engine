@@ -30,7 +30,7 @@ class Game : public engine::Engine {
     void start();
 
     const std::weak_ptr<Player> getPlayer() const { return m_player; }
-    std::shared_ptr<World> activeWorld() { return m_worldManager.activeWorld(); }
+    std::shared_ptr<World> activeWorld() { return m_worldManager->activeWorld(); }
 
     void processInput();
     void render(double dt) override;
@@ -47,7 +47,7 @@ class Game : public engine::Engine {
 
     std::shared_ptr<Player> m_player;
     Camera* m_plrCamera;
-    WorldManager m_worldManager;
+    WorldManager* m_worldManager;
 
     std::shared_ptr<UIManager> m_uiManager;
 };

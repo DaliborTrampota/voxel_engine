@@ -59,7 +59,7 @@ Player::Player()
 Player::~Player() {}
 
 void Player::spawn(std::shared_ptr<World> world) {
-    move(glm::vec3(Chunk::Dims.x / 2, 20, Chunk::Dims.z / 2));
+    setPosition(glm::vec3(Chunk::Dims.x / 2, 20, Chunk::Dims.z / 2));
     m_camera->lookAt(glm::vec3(Chunk::Dims.x / 2, 0, Chunk::Dims.z / 2));
     m_world = world;
     m_collider.setWorld(world);
@@ -226,7 +226,7 @@ void Player::rotate(float dx, float dy, bool constrainPitch) {
     m_camera->rotate(dx, dy, constrainPitch);
 }
 
-void Player::move(glm::vec3 position) {
+void Player::setPosition(glm::vec3 position) {
     m_position = position;
     m_aabb->position(position);
     m_camera->position(position);

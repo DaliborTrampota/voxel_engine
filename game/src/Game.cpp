@@ -31,7 +31,7 @@ using namespace engine;
 
 Game::Game(std::unique_ptr<Window> window, glm::ivec2 dims)
     : Engine(std::move(window)),
-      m_worldManager(this),
+      m_worldManager(nullptr),
       m_plrCamera(nullptr) {
     m_window->makeCurrent();
     m_inputSystem = std::make_unique<engine::InputSystem>();
@@ -47,7 +47,9 @@ Game::Game(std::unique_ptr<Window> window, glm::ivec2 dims)
     GameServices::setInputSystem(m_inputSystem.get());
 }
 
-Game::~Game() {}
+Game::~Game() {
+    delete m_worldManager;
+}
 
 
 void Game::processInput() {
@@ -59,7 +61,7 @@ void Game::render(double dt) {
     processInput();
     fireUpdate(dt);
 
-    auto world = m_worldManager.activeWorld();
+    auto world = m_worldManager->activeWorld();
     for (int pass = 1; pass <= 3; pass++) {
         world->render(*this, m_plrCamera, pass);
     }
@@ -103,7 +105,7 @@ void Game::start() {
     subscribeUpdate(m_player);
     subscribeUpdate(m_uiManager);
     subscribeUpdate(m_directionalLightSource);
-    subscribeUpdate(m_worldManager.activeWorld());
+    subscribeUpdate(activeWorld());
 
     // uncomment this call to draw in wireframe polygons.
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
