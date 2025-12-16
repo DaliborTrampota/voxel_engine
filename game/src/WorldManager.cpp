@@ -6,11 +6,32 @@
 #include <utility/CoordUtils.h>
 
 
+#include "level/BiomeGenerator.h"
 #include "level/PerlinTerrainGenerator.h"
+
+
+#include "level/biome/biomes/Desert.h"
+#include "level/biome/biomes/Forest.h"
+#include "level/biome/biomes/Mountains.h"
+#include "level/biome/biomes/Plains.h"
+#include "level/biome/biomes/Swamp.h"
 
 
 WorldManager::WorldManager(engine::Engine* engine) {
     m_currentWorld = 0;
+    // m_worlds[0] =
+    // std::make_unique<engine::World>(std::make_unique<engine::FlatTerrainGenerator>());
+    //std::make_shared<engine::World>(std::make_unique<PerlinTerrainGenerator>(100));
+
+    BiomeGenerator generator(0);
+    generator.add(std::make_unique<PlainsBiome>());
+    generator.add(std::make_unique<MountainBiome>());
+    generator.add(std::make_unique<DesertBiome>());
+    generator.add(std::make_unique<ForestBiome>());
+    generator.add(std::make_unique<SwampBiome>());
+    generator.setBlendRadius(32.0f);
+    generator.setEnableBlending(true);
+
     m_worlds[0] =
         std::make_shared<engine::World>(std::make_unique<BiomeGenerator>(std::move(generator)));
 

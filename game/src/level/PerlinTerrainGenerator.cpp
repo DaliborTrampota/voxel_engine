@@ -5,16 +5,27 @@
 #include <level/Chunk.h>
 #include <glm/gtc/random.hpp>
 
+#include <utility/Random.h>
+
 
 using namespace engine;
 
-PerlinTerrainGenerator::PerlinTerrainGenerator(siv::PerlinNoise::seed_type seed)
+PerlinTerrainGenerator::PerlinTerrainGenerator(
+    siv::PerlinNoise::seed_type seed, float scale, int octaves, float persistence
+)
     : m_noise(seed),
-      m_blockRegistry(RegistryManager::Blocks()) {}
+      m_blockRegistry(RegistryManager::Blocks()),
+      m_scale(scale),
+      m_octaves(octaves),
+      m_persistence(persistence) {}
 
 
 int PerlinTerrainGenerator::height(int x, int z) const {
-    return static_cast<int>(m_noise.noise2D_01(x * m_scale, z * m_scale) * 5) + m_minHeight;
+    return static_cast<int>(
+               m_noise.normalizedOctave2D_01(x * m_scale, z * m_scale, m_octaves, m_persistence) *
+               8.0f
+           ) +
+           m_minHeight;
 }
 
 BlockID PerlinTerrainGenerator::voxelAt(const glm::ivec3& pos) {
@@ -27,6 +38,10 @@ BlockID PerlinTerrainGenerator::voxelAt(const glm::ivec3& pos, int height) {
     // if (pos.y == height + 1 && glm::linearRand(.0f, 1.0f) < 0.4f)
     //     return m_blockRegistry.get("pyramid").getID();
 
+    if (pos.y == height + 1) {
+        if (Random::random2D(pos.x, pos.z) < 0.3f)
+            return m_blockRegistry.get("grass_deco")->getID();
+    }
     if (pos.y > height)
         return 0;
 
