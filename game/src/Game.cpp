@@ -90,7 +90,7 @@ void Game::start() {
 
     m_uiManager->createUI();
 
-    m_worldManager = new WorldManager(this);
+    m_worldManager.setup();
     m_player = std::make_shared<Player>();
     m_player->spawn(activeWorld());
 
