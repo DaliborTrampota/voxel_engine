@@ -13,7 +13,7 @@
 #include <GLFW/glfw3.h>
 // clang-format on
 
-#include <render/EngineEvents.h>
+#include <render/events/EngineEvents.h>
 
 
 using namespace ui;
@@ -116,11 +116,11 @@ void UIManager::render() {
     glDepthMask(GL_TRUE);
 }
 
-void UIManager::windowResizeEvent(ResizeEvent* ev) {
+void UIManager::windowResizeEvent(engine::ResizeEvent* ev) {
     m_renderer.setViewportSize(glm::ivec2{ev->width, ev->height});
 }
 
-void UIManager::mouseMoveEvent(::MouseEvent* pEvent) {
+void UIManager::mouseMoveEvent(engine::MouseEvent* pEvent) {
     if (glfwGetInputMode(glfwGetCurrentContext(), GLFW_CURSOR) != GLFW_CURSOR_NORMAL)
         return;
 
@@ -132,7 +132,7 @@ void UIManager::mouseMoveEvent(::MouseEvent* pEvent) {
     m_renderer.mouseEvent(event);
 }
 
-void UIManager::mouseButtonEvent(MouseButtonEvent* pEvent) {
+void UIManager::mouseButtonEvent(engine::MouseButtonEvent* pEvent) {
     ui::MouseBtn btn;
     switch (pEvent->button) {
         case GLFW_MOUSE_BUTTON_LEFT: btn = ui::MouseBtn::LMB; break;

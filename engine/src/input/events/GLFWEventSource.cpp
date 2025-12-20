@@ -2,6 +2,8 @@
 
 #include "GLFWEventSite.h"
 
+using namespace engine;
+
 void GLFWEventSource::fireMouseMoveEvent(MouseEvent* pEvent) {
     engine::EventSource::fireEvent(&GLFWEventSite::mouseMoveEvent, pEvent);
 }

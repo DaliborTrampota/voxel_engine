@@ -2,9 +2,9 @@
 
 #include <memory>
 
-#include <input/GLFWEventSite.h>
-#include <input/GLFWEvents.h>
-#include <render/EngineEventSite.h>
+#include <input/events/GLFWEventSite.h>
+#include <input/events/GLFWEvents.h>
+#include <render/events/EngineEventSite.h>
 
 #include <glm/glm.hpp>
 
@@ -20,8 +20,8 @@ namespace ui {
     class Label;
 }  // namespace ui
 
-class UIManager : public GLFWEventSite,
-                  public EngineEventSite,
+class UIManager : public engine::GLFWEventSite,
+                  public engine::EngineEventSite,
                   public engine::Updateable {
   public:
     UIManager(glm::ivec2 screenSize);
@@ -33,9 +33,9 @@ class UIManager : public GLFWEventSite,
     void render();
 
   protected:
-    void mouseMoveEvent(::MouseEvent* pEvent) override;
-    void mouseButtonEvent(MouseButtonEvent* pEvent) override;
-    void windowResizeEvent(ResizeEvent* ev) override;
+    void mouseMoveEvent(engine::MouseEvent* pEvent) override;
+    void mouseButtonEvent(engine::MouseButtonEvent* pEvent) override;
+    void windowResizeEvent(engine::ResizeEvent* ev) override;
 
 
   private:

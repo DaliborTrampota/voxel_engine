@@ -3,7 +3,7 @@
 #include <glad/glad.h>
 #include <stdexcept>
 
-#include "EngineEvents.h"
+#include "events/EngineEvents.h"
 #include "GLFWUserPointer.h"
 #include "utility/UtilityShaders.h"
 

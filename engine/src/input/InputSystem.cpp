@@ -1,7 +1,8 @@
 #include "InputSystem.h"
 
-#include "GLFWEvents.h"
 #include "GLFWUserPointer.h"
+#include "events/GLFWEvents.h"
+
 
 using namespace engine;
 
