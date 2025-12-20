@@ -31,11 +31,11 @@ class ThreadPool {
     }
     ~ThreadPool() { stop(); }
 
-    void add(Job job) {
+    void add(Job&& job) {
         // clang-format off
         {
             std::unique_lock lock(m_mutex);
-            m_jobs.push(job);
+            m_jobs.push(std::move(job));
         }
         m_cv.notify_one();  // Notifying only one because only one job is added so
                             // only one thread can be working on it?
@@ -48,13 +48,17 @@ class ThreadPool {
         std::future<void> future = promise->get_future();
 
         for (const auto& job : batch) {
-            add([job, promise, remainingJobs]() {
+            add([job = std::move(job), promise, remainingJobs]() {
                 job();
 
                 if (remainingJobs->fetch_sub(1) == 1) {
                     promise->set_value();
                 }
             });
+        }
+
+        if (batch.size() == 0) {
+            promise->set_value();
         }
 
         return future;
@@ -91,6 +95,11 @@ class ThreadPool {
                 if (m_terminate) {
                     break;
                 }
+
+                if (m_jobs.empty()) {
+                    continue;
+                }
+
                 job = m_jobs.front();
                 m_jobs.pop();
             }
