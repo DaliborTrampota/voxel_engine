@@ -1,9 +1,10 @@
 #include "World.h"
-#include <Globals.h>
-#include <level/Chunk.h>
 
+#include "../Globals.h"
 #include "ITerrainGenerator.h"
 #include "block/Block.h"
+#include "events/LevelEvents.h"
+#include "level/Chunk.h"
 #include "render/Engine.h"
 #include "render/RenderContext.h"
 #include "utility/CoordUtils.h"
@@ -29,20 +30,18 @@ World::World(std::unique_ptr<ITerrainGenerator> gen, uint32_t genThreads)
 World::~World() {
     printf("World deleted\n");
     m_genPool.stop();
-
-    // for (auto& [pos, chunk] : m_chunks) {
-    //     delete chunk;
-    // }
 }
 
 std::future<void> World::loadChunks(const glm::ivec3& from, const glm::ivec3& to, bool unloadRest) {
-    // ChunkID chunkCoords = engine::extractChunkCoords(pos);
     m_genPool.pause();
     if (unloadRest) {
         for (auto it = m_loadedChunks.begin(); it != m_loadedChunks.end();) {
             const ChunkID& id = *it;
             if (id.x < from.x || id.x > to.x || id.y < from.y || id.y > to.y || id.z < from.z ||
                 id.z > to.z) {
+                ChunkUnloadEvent event(m_chunks[id].get());
+                fireChunkUnloadEvent(&event);
+
                 it = m_loadedChunks.erase(it);
             } else {
                 ++it;
@@ -60,6 +59,9 @@ std::future<void> World::loadChunks(const glm::ivec3& from, const glm::ivec3& to
                     continue;
                 }
                 m_chunks.emplace(id, std::make_unique<Chunk>(this, id));
+
+                ChunkBeforeLoadEvent event(m_chunks[id].get());
+                fireChunkBeforeLoadEvent(&event);
 
                 jobs.push_back([this, id] {
                     Chunk* chunk = m_chunks[id].get();
@@ -82,6 +84,9 @@ void World::unloadChunks(const glm::ivec3& from, const glm::ivec3& to) {
                 auto it = m_loadedChunks.find(coord);
                 if (it != m_loadedChunks.end()) {
                     m_loadedChunks.erase(it);
+
+                    ChunkUnloadEvent event(m_chunks[coord].get());
+                    fireChunkUnloadEvent(&event);
                 }
             }
         }
@@ -90,14 +95,30 @@ void World::unloadChunks(const glm::ivec3& from, const glm::ivec3& to) {
 
 void World::unloadAllChunks(const std::vector<ChunkID>& except) {
     if (except.empty()) {
+        for (auto& id : m_loadedChunks) {
+            ChunkUnloadEvent event(m_chunks[id].get());
+            fireChunkUnloadEvent(&event);
+        }
         m_loadedChunks.clear();
     } else {
         for (auto it = m_loadedChunks.begin(); it != m_loadedChunks.end();) {
             if (std::find(except.begin(), except.end(), *it) == except.end()) {
+                ChunkUnloadEvent event(m_chunks[*it].get());
+                fireChunkUnloadEvent(&event);
                 it = m_loadedChunks.erase(it);
             } else {
                 ++it;
             }
+        }
+    }
+}
+
+void World::unloadChunksFromMemory(const std::vector<ChunkID>& ids) {
+    std::unique_lock<std::mutex> lock(m_mutex);
+    for (const ChunkID& id : ids) {
+        auto it = m_chunks.find(id);
+        if (it != m_chunks.end()) {
+            m_chunks.erase(it);
         }
     }
 }

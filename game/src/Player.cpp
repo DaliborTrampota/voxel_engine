@@ -20,6 +20,7 @@
 
 #include "GameServices.h"
 #include "Globals.h"
+#include "WorldManager.h"
 #include "registry/MyRegistryManager.h"
 
 #include <data/RegistryManager.h>
@@ -85,6 +86,8 @@ void Player::update(float dt) {
     if (m_currentChunk->id() != curChunkID) {
         updateViewDistance(curChunkID, false);
         m_currentChunk = m_world->getChunk(curChunkID);
+
+        GameServices::getWorldManager()->cleanupUnloadedChunks(curChunkID, ViewDistance + 1);
     }
 
 

@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "events/LevelEventSource.h"
 
 #include "Chunk.h"
 #include "ITerrainGenerator.h"
@@ -31,7 +32,8 @@ namespace engine {
     struct RenderContext;
 
     class World : public Renderable,
-                  public Updateable {
+                  public Updateable,
+                  public LevelEventSource {
       public:
         World(std::unique_ptr<ITerrainGenerator> gen, uint32_t genThreads = 8);
         ~World();
@@ -46,11 +48,18 @@ namespace engine {
         );
 
         /// @brief Unloads chunks in the given range.
+        /// @note This function fires a ChunkUnloadEvent for each chunk that is unloaded.
         void unloadChunks(const glm::ivec3& from, const glm::ivec3& to);
 
         /// @brief Unloads all chunks except the given ones.
         /// @param except Chunks to keep loaded.
+        /// @note This function fires a ChunkUnloadEvent for each chunk that is unloaded.
         void unloadAllChunks(const std::vector<ChunkID>& except = {});
+
+        /// @brief Unloads given chunks from memory.
+        /// @param ids Chunks to unload.
+        /// @note This function does not fire any events.
+        void unloadChunksFromMemory(const std::vector<ChunkID>& ids);
 
         Chunk* getChunk(const ChunkID& id);
         const Chunk* getChunk(const ChunkID& id) const;

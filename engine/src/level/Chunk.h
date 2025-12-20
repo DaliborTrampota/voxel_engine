@@ -5,6 +5,7 @@
 #include <thread>
 #include <unordered_map>
 #include <vector>
+#include <iostream>
 
 #include "ChunkData.h"
 #include "block/Block.h"
@@ -128,6 +129,9 @@ namespace engine {
 
 
 }  // namespace engine
+
+
+std::ostream& operator<<(std::ostream& os, const engine::ChunkID& chID);
 
 namespace std {
     template <>

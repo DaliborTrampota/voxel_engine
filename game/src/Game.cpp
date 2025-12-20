@@ -31,7 +31,6 @@ using namespace engine;
 
 Game::Game(std::unique_ptr<Window> window, glm::ivec2 dims)
     : Engine(std::move(window)),
-      m_worldManager(nullptr),
       m_plrCamera(nullptr) {
     m_window->makeCurrent();
     m_inputSystem = std::make_unique<engine::InputSystem>();
@@ -45,11 +44,10 @@ Game::Game(std::unique_ptr<Window> window, glm::ivec2 dims)
 
     GameServices::setGame(this);
     GameServices::setInputSystem(m_inputSystem.get());
+    GameServices::setWorldManager(&m_worldManager);
 }
 
-Game::~Game() {
-    delete m_worldManager;
-}
+Game::~Game() {}
 
 
 void Game::processInput() {
@@ -61,7 +59,7 @@ void Game::render(double dt) {
     processInput();
     fireUpdate(dt);
 
-    auto world = m_worldManager->activeWorld();
+    auto world = m_worldManager.activeWorld();
     for (int pass = 1; pass <= 3; pass++) {
         world->render(*this, m_plrCamera, pass);
     }

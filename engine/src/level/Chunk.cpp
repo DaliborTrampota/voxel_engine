@@ -35,7 +35,7 @@ Chunk::Chunk(World* world, ChunkID coords)
 Chunk::~Chunk() {}
 
 void Chunk::generate() {
-    if (m_generated)
+    if (m_generated || m_data.populated)
         return;
 
     m_world->m_generator->populate(*this);
@@ -176,6 +176,11 @@ Chunk::GeometryState Chunk::calculateGeometryState(
 bool ChunkID::operator==(const ChunkID& other) const {
     return x == other.x && y == other.y && z == other.z;
 }
+
+std::ostream& operator<<(std::ostream& os, const ChunkID& chID) {
+    return os << "ChunkID(" << chID.x << ", " << chID.y << ", " << chID.z << ")";
+}
+
 
 void Chunk::generateMeshForGeometry(const MeshGenContext& ctx) {
     for (auto f : ctx.geometry->faces()) {
