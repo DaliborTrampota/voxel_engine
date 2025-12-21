@@ -15,7 +15,7 @@
 #include "data/RegistryManager.h"
 #include "render/Engine.h"
 #include "render/RenderContext.h"
-#include "utility/CoordUtils.h"
+#include "utility/Rotation.h"
 
 using namespace engine;
 
@@ -151,26 +151,17 @@ void Chunk::render(Engine& engine, const Camera* camera, int pass) {
     }
 }
 
-
+// TODO get rid of this now when there is calculateRotationFromState
 Chunk::GeometryState Chunk::calculateGeometryState(
     const Block* block, const BlockState* state
 ) const {
-    GeometryState geoState{
-        .axis = glm::vec3(0, 1, 0),
-        .angle = 0.0f,
+    float angle = 0.0f;
+    glm::vec3 axis = glm::vec3(0, 1, 0);
+    calculateRotationFromState(state, block, angle, axis);
+    return GeometryState{
+        .axis = axis,
+        .angle = angle,
     };
-    if (state && block->rotationMode() != RotationMode::None) {
-        Side baseSide = block->facingUp() ? Side::Up : Side::North;
-        glm::vec3 baseSideDir = sideDirection(baseSide);
-        const glm::vec3& facing = state->facing();
-
-        geoState.angle = getAngle(baseSideDir, facing, geoState.axis);
-        // geoState.axis = glm::vec3(0, 1, 0);
-        // if (glm::any(glm::isnan(geoState.axis))) {
-        // } else {
-        // }
-    }
-    return geoState;
 }
 
 

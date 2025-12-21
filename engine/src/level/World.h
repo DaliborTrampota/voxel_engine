@@ -24,8 +24,6 @@ namespace gl {
 }
 
 namespace engine {
-    static inline constexpr BlockID INVALID_BLOCK = -1;
-
     class Chunk;
     class Engine;
     struct ChunkID;
@@ -77,7 +75,7 @@ namespace engine {
         /// @param pos The position of the block within the chunk (0 to Chunk::Dims)
         /// @param state [out] The state of the block
         /// @param fallbackToGenerator If true, the generator will be used to get the block ID if the chunk is not generated
-        /// @return the block ID or engine::INVALID_BLOCK if:
+        /// @return the block ID or engine::InvalidBlockID if:
         ///         - The position is out of bounds (eg less than or greater than Chunk::Dims)
         ///         - The chunk is not generated
         BlockID getBlockID(
@@ -88,7 +86,7 @@ namespace engine {
         /// @param pos The position of the block in world space
         /// @param state [out] The state of the block
         /// @param fallbackToGenerator If true, the generator will be used to get the block ID if the chunk is not generated
-        /// @return the block ID or engine::INVALID_BLOCK if:
+        /// @return the block ID or engine::InvalidBlockID if:
         ///         - The position is out of bounds (eg less than or greater than Chunk::Dims)
         ///         - The chunk is not generated
         BlockID getBlockID(glm::vec3 pos, BlockState*& state, bool fallbackToGenerator);

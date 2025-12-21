@@ -6,7 +6,7 @@
 #include "AABB.h"
 #include "data/RegistryManager.h"
 #include "level/World.h"
-#include "utility/CoordUtils.h"
+#include "utility/Rotation.h"
 
 
 #define GLM_ENABLE_EXPERIMENTAL
@@ -39,6 +39,9 @@ void AABBCollider::setAABB(std::shared_ptr<AABB> aabb) {
 }
 
 CollisionInfo AABBCollider::collide(glm::vec3& moveStep, const glm::vec3& position) {
+    if (!m_world)
+        return CollisionInfo();
+
     updateAABBCache(moveStep, position);
 
     CollisionInfo info;
@@ -114,8 +117,8 @@ CollisionInfo AABBCollider::collide(glm::vec3& moveStep, const glm::vec3& positi
 void AABBCollider::updateAABBCache(const glm::vec3& velocity, const glm::vec3& position) {
     glm::ivec3 newPos = glm::floor(position);
 
-    if (m_lastPosition == newPos)
-        return;
+    // if (m_lastPosition == newPos)
+    //     return;
 
     m_lastPosition = newPos;
     m_aabbCache.clear();
@@ -123,19 +126,40 @@ void AABBCollider::updateAABBCache(const glm::vec3& velocity, const glm::vec3& p
     for (int i = glm::floor(m_aabb->min.x - s_checkBox.x); i <= glm::ceil(m_aabb->max.x + s_checkBox.x); ++i) {
         for (int j = glm::floor(m_aabb->min.y - s_checkBox.y); j <= glm::ceil(m_aabb->max.y + s_checkBox.y); ++j) {
             for (int k = glm::floor(m_aabb->min.z - s_checkBox.z); k <= glm::ceil(m_aabb->max.z + s_checkBox.z); ++k) {
-                BlockState* state = nullptr; // TODO critical rotation of colliders
+                BlockState* state = nullptr;
                 BlockID blockID = m_world->getBlockID({ i, j, k }, state, true);
-                if (blockID == INVALID_BLOCK || blockID == Block::air().getID())
+                if (blockID == InvalidBlockID || blockID == Block::AirID)
                     continue;
 
-                const Block* block = RegistryManager::Blocks().get(blockID);
-                if (block->isMultiblock())
-                    continue;
-                if (!block->isSolid())
-                    continue;
-                AABB aabb = block->geometry()->aabb();
-                aabb.transform(glm::translate(glm::mat4(1.0f), glm::vec3(i, j, k)));
-                m_aabbCache.push_back(aabb);
+                const Block* block = RegistryManager::Blocks().get(blockID);                
+                if (block->isMultiblock()) [[unlikely]] {
+                    MultiBlock* multi = m_world->getMultiBlock({ i, j, k });
+                    for (const MultiBlock::SubBlock& subBlock : multi->blocks()) {
+                        const Block* subBlockBlock = RegistryManager::Blocks().get(subBlock.blockID);
+                        if (!subBlockBlock->isSolid())
+                            continue;
+                        AABB aabb = subBlockBlock->geometry()->aabb();
+
+                        float angle = 0.0f;
+                        glm::vec3 axis = glm::vec3(0, 1, 0);
+                        if (subBlock.state.has_value()) {
+                            calculateRotationFromState(&subBlock.state.value(), subBlockBlock, angle, axis);
+                        }
+                        aabb.transform(transformMatrix(glm::vec3(i, j, k), axis, angle));
+                        // aabb.transform(glm::translate(glm::mat4(1.0f), glm::vec3(i, j, k)));
+                        m_aabbCache.push_back(aabb);
+                    }
+                } else if (block->isSolid()) {
+                    AABB aabb = block->geometry()->aabb();
+                    
+                    float angle = 0.0f;
+                    glm::vec3 axis = glm::vec3(0, 1, 0);
+                    calculateRotationFromState(state, block, angle, axis);
+
+                    aabb.transform(transformMatrix(glm::vec3(i, j, k), axis, angle));
+                    // aabb.transform(glm::translate(glm::mat4(1.0f), glm::vec3(i, j, k)));
+                    m_aabbCache.push_back(aabb);
+                }
             }
         }
     }
@@ -309,7 +333,7 @@ float AABBCollider::tryStepUp(const glm::vec3& horizontalMove, const AABB* colli
 //         pos.y += h + 1 > m_height ? m_height : h;
 
 //         BlockID blockID = m_world->getBlockID(extractChunkCoords(pos), pos);
-//         if(blockID == INVALID_BLOCK || blockID == Block::air().getID())
+//         if(blockID == InvalidBlockID || blockID == Block::AirID)
 //             continue;
 
 //         const Block& block = RegistryManager::Blocks().get(blockID)

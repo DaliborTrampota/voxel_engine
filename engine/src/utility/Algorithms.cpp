@@ -113,6 +113,7 @@ float engine::rayTriangleIntersection(Ray& ray, Triangle& t, float& uOut, float&
     glm::vec3 p = glm::cross(ray.direction, e2);
     float det = glm::dot(e1, p);
 
+    // TODO
 #if CULL_BACKFACES
     if (det < epsilon) {
         return std::numeric_limits<float>::infinity();

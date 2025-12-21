@@ -12,7 +12,7 @@
 #include <block/Geometry.h>
 #include <block/VariantBlock.h>
 
-#include <utility/CoordUtils.h>
+#include <utility/Rotation.h>
 
 #include "Geometries.h"
 #include "MyRegistryManager.h"

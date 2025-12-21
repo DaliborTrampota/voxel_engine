@@ -7,7 +7,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "utility/Algorithms.h"
-#include "utility/CoordUtils.h"
+#include "utility/Rotation.h"
 
 
 using namespace engine;
