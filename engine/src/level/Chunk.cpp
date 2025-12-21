@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <ranges>
 
 #include <LWGL/buffer/Attributes.h>
 
@@ -192,9 +193,18 @@ void Chunk::generateMeshForGeometry(const MeshGenContext& ctx) {
             continue;
 
         f.translate(ctx.posInChunk);
+
+        const int material = ctx.block->material().forTag(f.tag);
         for (Vertex v : f.vertices) {
-            v.data(ctx.block->material().forTag(f.tag), 0);
+            v.data(material, 0);
             ctx.storage.add(v);
+        }
+
+        if (f.doubleSided) [[unlikely]] {
+            for (Vertex v : f.vertices | std::views::reverse) {
+                v.data(material, 0);
+                ctx.storage.add(v);
+            }
         }
     }
 }

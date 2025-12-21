@@ -34,6 +34,7 @@ namespace engine {
         std::vector<Vertex> vertices{};
         glm::ivec3 cullDir = {0, 0, 0};
         bool cull = false;
+        bool doubleSided = false;  // When true, renders both sides (disables backface culling)
 
         void translate(glm::vec3 t);
         void rotate(glm::vec3 axis, float angle);
@@ -42,6 +43,11 @@ namespace engine {
         void setCull(glm::ivec3 dir) {
             cull = true;
             cullDir = dir;
+        }
+
+        void setDoubleSided(bool enabled = true) {
+            doubleSided = enabled;
+            cull = false;
         }
 
         static const Face TriangleFace(

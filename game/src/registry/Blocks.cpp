@@ -33,7 +33,7 @@ void RegisterBlocks() {
                 glm::vec3 axis;
                 float angle = getAngleToSide(
                     side, NORTH, axis
-                );  // The log connector geometry is pointing -NORTH
+                );  // The log connector geometry is pointing NORTH
                 Geometry geo =
                     CreateRotatedGeometry(geometries.get("oak_log_connector"), axis, angle);
                 geometries.add(geo, name);
@@ -144,6 +144,23 @@ void RegisterBlocks() {
         20, 4, {20, LOG_6.getID(), LOG_8.getID(), LOG_10.getID(), LOG_12.getID(), LOG_14.getID()}
     );
 
+    auto VEGETATION_CROSS =
+        Block(25, Layers::Opaque, &geometries.get("vegetation_cross"))
+            .isSolid(true)
+            .isVoxel(true)
+            .material(BlockMaterial().add(FaceTag::All, texMgr.texture("calcite")));
+    auto VEGETATION_SQUARE =
+        Block(26, Layers::Opaque, &geometries.get("vegetation_square"))
+            .isSolid(true)
+            .isVoxel(true)
+            .material(BlockMaterial().add(FaceTag::All, texMgr.texture("calcite")));
+    auto VEGETATION_HASH =
+        Block(27, Layers::Opaque, &geometries.get("vegetation_hash"))
+            .isSolid(true)
+            .isVoxel(true)
+            .material(BlockMaterial().add(FaceTag::All, texMgr.texture("calcite")));
+
+
     blocks.add(DIRT, "dirt");
     blocks.add(GRASS, "grass");
     blocks.add(STONE, "stone");
@@ -160,6 +177,9 @@ void RegisterBlocks() {
     // blocks.add(LOG_CONNECTOR, "log_connector");
     blocks.add(LOG_BRANCH, "log_branch");
     blocks.add(LEAVES, "leaves");
+    blocks.add(VEGETATION_CROSS, "vegetation_cross");
+    blocks.add(VEGETATION_SQUARE, "vegetation_square");
+    blocks.add(VEGETATION_HASH, "vegetation_hash");
 }
 
 /*Blocks->add(Block(2, "grass_block", Geometry::CubeT("grass_top", "dirt")));
