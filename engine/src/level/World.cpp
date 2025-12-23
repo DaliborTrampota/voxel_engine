@@ -50,9 +50,9 @@ std::future<void> World::loadChunks(const glm::ivec3& from, const glm::ivec3& to
     }
 
     std::vector<Job> jobs;
-    for (int x = from.x; x < to.x; ++x) {
-        for (int y = from.y; y < to.y; ++y) {
-            for (int z = from.z; z < to.z; ++z) {
+    for (int x = from.x; x <= to.x; ++x) {
+        for (int y = from.y; y <= to.y; ++y) {
+            for (int z = from.z; z <= to.z; ++z) {
                 ChunkID id = ChunkID(x, y, z);
                 if (m_chunks.contains(id)) {
                     m_loadedChunks.insert(id);
