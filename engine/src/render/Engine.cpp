@@ -1,13 +1,16 @@
 #include "Engine.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <memory>
 
 #include <LWGL/buffer/Attributes.h>
 #include <LWGL/buffer/FBO.h>
 
 #include "RenderPass.h"
+#include "data/RegistryManager.h"
 #include "level/Chunk.h"
 #include "level/World.h"
 #include "render/Material.h"
@@ -15,20 +18,16 @@
 #include "scene/Camera.h"
 #include "scene/Sun.h"
 #include "scene/Updateable.h"
-
 #include "utility/UtilityShaders.h"
 
-#include "data/RegistryManager.h"
+#include "concrete/DirectionalShadowPass.h"
+#include "concrete/ScenePass.h"
+#include "concrete/TransparentPass.h"
+
 
 using namespace engine;
 
 Engine::Engine(std::unique_ptr<Window> window) : m_window(std::move(window)) {
-    registerRenderPass({RenderPass::DirectionalShadow});
-    // registerRenderPass({RenderPass::OmniShadow});
-    registerRenderPass({RenderPass::Scene});
-    registerRenderPass({RenderPass::SceneTransparent});
-
-
     RegistryManager::Blocks().add(Block::air(), "air");
     RegistryManager::Blocks().add(Block::multiblock(), "multiblock");
     // RegistryManager::Blocks().add(Block(2, Layers::Any, nullptr), "reserved_block_2");
@@ -46,7 +45,15 @@ void Engine::submitRender(RenderContext&& ctx, bool immediate) {
         return;
     }
 
-    render(ctx, RenderPass::Scene);
+    for (const auto& pass : m_renderPasses) {
+        if ((ctx.passMask & pass->id()) != 0) {
+            for (uint8_t subPass = 0; subPass < pass->passes(); subPass++) {
+                pass->beforeRender(*this, subPass);
+                render(ctx, pass.get());
+                pass->afterRender(*this, subPass);
+            }
+        }
+    }
 }
 
 void Engine::submitRender(GroupRenderContext&& ctx, bool immediate) {
@@ -55,109 +62,64 @@ void Engine::submitRender(GroupRenderContext&& ctx, bool immediate) {
         return;
     }
 
-    render(ctx, RenderPass::Scene);
+    for (const auto& pass : m_renderPasses) {
+        if ((ctx.passMask & pass->id()) != 0) {
+            for (uint8_t subPass = 0; subPass < pass->passes(); subPass++) {
+                pass->beforeRender(*this, subPass);
+                render(ctx, pass.get());
+                pass->afterRender(*this, subPass);
+            }
+        }
+    }
 }
 
 void Engine::flush() {
+    //printf("Flush %zu\n", m_renderQueue.size());
     for (const auto& pass : m_renderPasses) {
-        setRenderOverride(pass.materialOverride, pass.fboOverride);
+        for (uint8_t subPass = 0; subPass < pass->passes(); subPass++) {
+            pass->beforeRender(*this, subPass);
 
-        if (pass.id == RenderPass::DirectionalShadow) {
-            pass.fboOverride->bind();
-            pass.fboOverride->clearActive({1.f, 1.f, 1.f, 1.f}, 1.0f);
-        }
-
-
-        if (pass.id == RenderPass::SceneTransparent) {
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            // Two-pass rendering for correct transparency on convex objects:
-            // Pass 1: Render back faces first (cull front)
-            glCullFace(GL_FRONT);
             for (auto& ctxVariant : m_renderQueue) {
                 std::visit(
                     [this, &pass](auto& ctx) {
-                        if ((ctx.passMask & pass.id) == 0)
+                        if ((ctx.passMask & pass->id()) == 0)
                             return;
-                        this->render(ctx, pass.id);
+                        this->render(ctx, pass.get());
                     },
                     ctxVariant
                 );
             }
-            // Pass 2: Render front faces on top (cull back)
-            glCullFace(GL_BACK);
-        }
 
-
-        if (pass.viewportSize.has_value()) {
-            glm::ivec2 res = pass.viewportSize.value();
-            glViewport(0, 0, res.x, res.y);
-        }
-        for (auto& ctxVariant : m_renderQueue) {
-            std::visit(
-                [this, &pass](auto& ctx) {
-                    if ((ctx.passMask & pass.id) == 0)
-                        return;
-                    this->render(ctx, pass.id);
-                },
-                ctxVariant
-            );
-        }
-        if (pass.viewportSize.has_value()) {
-            glm::ivec2 res = m_window->windowSize();
-            glViewport(0, 0, res.x, res.y);
-        }
-
-        if (pass.id == RenderPass::DirectionalShadow) {
-            glm::ivec2 resolution = m_directionalLightSource->resolution();
-            applyLinearSamplingBlur(
-                *pass.fboOverride,
-                gl::FBOAttachment::Color,
-                gl::FBOAttachment::Color + 1,
-                resolution.x,
-                resolution.y,
-                nullptr
-            );
-        }
-
-        if (pass.id == RenderPass::SceneTransparent) {
-            glDisable(GL_BLEND);
+            pass->afterRender(*this, subPass);
         }
     }
 
     // glBindFramebuffer(GL_FRAMEBUFFER, 0);
     // glBindProgramPipeline(0);
-    clearRenderOverride();
     m_renderQueue.clear();
 }
 
-void Engine::registerRenderPass(const RenderPass::Config& config) {
-    int idx = static_cast<int>(glm::log2(static_cast<float>(config.id)));
-    if (idx >= m_renderPasses.size()) {
-        m_renderPasses.push_back(config);
-    } else {
-        m_renderPasses[idx] = config;
+void Engine::registerRenderPass(std::unique_ptr<RenderPass> pass, uint8_t position) {
+    position = glm::min(position, static_cast<uint8_t>(m_renderPasses.size()));
+    m_renderPasses.insert(m_renderPasses.begin() + position, std::move(pass));
+}
+
+void Engine::registerDefaultRenderPasses() {
+    registerRenderPass(ScenePass::create(), 0);
+    registerRenderPass(TransparentPass::create(), 1);
+
+    if (m_directionalLightSource) {
+        registerRenderPass(
+            DirectionalShadowPass::create(
+                m_directionalLightSource->shadowMaterial(),
+                m_directionalLightSource->shadowFBO(),
+                m_directionalLightSource->resolution()
+            ),
+            0
+        );
     }
 }
 
-void Engine::setRenderPassOrder(const std::vector<RenderPass::ID>& order) {
-    if (order.size() != m_renderPasses.size()) {
-        throw std::runtime_error("Render pass order size mismatch");
-    }
-    std::vector<RenderPass::Config> newOrder;
-    for (const auto& id : order) {
-        auto it = std::find_if(
-            m_renderPasses.begin(), m_renderPasses.end(), [id](const RenderPass::Config& config) {
-                return config.id == id;
-            }
-        );
-        if (it == m_renderPasses.end()) {
-            throw std::runtime_error("Render pass not found: " + std::to_string(id));
-        }
-        newOrder.push_back(*it);
-    }
-    m_renderPasses = newOrder;
-}
 
 void Engine::gameloop() {
     //TODO
@@ -190,14 +152,14 @@ void Engine::gameloop() {
     }
 }
 
-void Engine::render(RenderContext& ctx, RenderPass::ID renderPass) const {
+void Engine::render(RenderContext& ctx, const RenderPass* renderPass) const {
     size_t n = ctx.attributes->length();
     if (n == 0)
         return;
 
     // Apply override if set
-    const Material* material = m_renderOverride.material ? m_renderOverride.material : ctx.material;
-    const gl::FBO* fbo = m_renderOverride.fbo ? m_renderOverride.fbo : ctx.fbo;
+    const Material* material = renderPass->material ? renderPass->material : ctx.material;
+    const gl::FBO* fbo = renderPass->fbo ? renderPass->fbo : ctx.fbo;
 
     if (fbo) {
         fbo->bind();
@@ -222,7 +184,7 @@ void Engine::render(RenderContext& ctx, RenderPass::ID renderPass) const {
         material->setInt("shadowMap", 1);
     }
 
-    if (!m_renderOverride.material) {
+    if (!renderPass->material) {
         if (ctx.matrices.view.has_value()) {
             material->setMat4("view", ctx.matrices.view.value());
         } else if (ctx.camera) {
@@ -241,13 +203,13 @@ void Engine::render(RenderContext& ctx, RenderPass::ID renderPass) const {
     glDrawArrays(GL_TRIANGLES, 0, n);
 }
 
-void Engine::render(GroupRenderContext& ctx, RenderPass::ID renderPass) const {
+void Engine::render(GroupRenderContext& ctx, const RenderPass* renderPass) const {
     if (ctx.drawCalls.empty())
         return;
 
     // Apply override if set
-    const Material* material = m_renderOverride.material ? m_renderOverride.material : ctx.material;
-    const gl::FBO* fbo = m_renderOverride.fbo ? m_renderOverride.fbo : ctx.fbo;
+    const Material* material = renderPass->material ? renderPass->material : ctx.material;
+    const gl::FBO* fbo = renderPass->fbo ? renderPass->fbo : ctx.fbo;
 
     if (fbo) {
         fbo->bind();
@@ -255,7 +217,7 @@ void Engine::render(GroupRenderContext& ctx, RenderPass::ID renderPass) const {
 
     material->use();
 
-    if (!m_renderOverride.material) {
+    if (!renderPass->material) {
         if (ctx.matrices.view.has_value()) {
             material->setMat4("view", ctx.matrices.view.value());
         } else if (ctx.camera) {
@@ -305,6 +267,24 @@ void Engine::endFrame() {
     glfwPollEvents();
 }
 
-// void Engine::subscribeInputSystem(engine::InputSystem* inputSystem) {
-//     m_window->graphicsAPI()->subscribe(inputSystem);
-// }
+void Engine::setDirectionalLightSource(
+    std::shared_ptr<engine::Sun> lightSource, uint8_t passPosition
+) {
+    m_directionalLightSource = lightSource;
+    m_renderPasses.erase(
+        std::remove_if(
+            m_renderPasses.begin(),
+            m_renderPasses.end(),
+            [](const auto& pass) { return pass->id() == RenderPass::DirectionalShadow; }
+        ),
+        m_renderPasses.end()
+    );
+
+    // TODO once engine settings is implemented, revisit this (do not register the pass)
+    registerRenderPass(
+        DirectionalShadowPass::create(
+            lightSource->shadowMaterial(), lightSource->shadowFBO(), lightSource->resolution()
+        ),
+        passPosition
+    );
+}

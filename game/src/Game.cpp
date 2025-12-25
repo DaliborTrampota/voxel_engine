@@ -22,6 +22,8 @@
 #include "registry/Blocks.h"
 #include "registry/Geometries.h"
 
+#include <render/concrete/ScenePass.h>
+
 using namespace engine;
 
 
@@ -90,9 +92,11 @@ void Game::start() {
     m_player = std::make_shared<Player>();
     m_player->spawn(activeWorld());
 
+
+    registerDefaultRenderPasses();
     setDirectionalLightSource(
         std::make_shared<engine::Sun>(
-            this, glm::ivec2(1024, 1024), &m_player->position(), glm::vec3(0.5f, -1.0f, 0.2f)
+            glm::ivec2(1024, 1024), &m_player->position(), glm::vec3(0.5f, -1.0f, 0.2f)
         )
     );
 

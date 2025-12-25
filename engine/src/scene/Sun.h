@@ -17,8 +17,7 @@ namespace engine {
     class Sun : public Updateable {
       public:
         static inline float DistanceFromTarget = 32.0f;
-        Sun(Engine* engine,
-            glm::ivec2 resolution,
+        Sun(glm::ivec2 resolution,
             const glm::vec3* targetPosition,
             const glm::vec3& direction = glm::vec3(0.0f, -1.0f, 0.0f));
 
@@ -39,6 +38,9 @@ namespace engine {
         glm::mat4 getLightSpaceTransform() const;
         unsigned shadowMapTexture() const;
 
+        const gl::FBO* shadowFBO() const { return &m_depthFBO; }
+        const Material* shadowMaterial() const { return &m_depthShader; }
+
       protected:
         glm::ivec2 m_resolution;
 
@@ -53,9 +55,5 @@ namespace engine {
 
         glm::vec3 m_lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
         float m_lightIntensity = 1.0f;
-
-      private:
-        Engine* m_engine;
-        RenderPass::ID m_directionalShadowPass;
     };
 }  // namespace engine
