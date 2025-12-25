@@ -34,109 +34,170 @@ World::~World() {
 
 std::future<void> World::loadChunks(const glm::ivec3& from, const glm::ivec3& to, bool unloadRest) {
     m_genPool.pause();
-    if (unloadRest) {
-        for (auto it = m_loadedChunks.begin(); it != m_loadedChunks.end();) {
-            const ChunkID& id = *it;
-            if (id.x < from.x || id.x > to.x || id.y < from.y || id.y > to.y || id.z < from.z ||
-                id.z > to.z) {
-                ChunkUnloadEvent event(m_chunks[id].get());
-                fireChunkUnloadEvent(&event);
 
-                it = m_loadedChunks.erase(it);
-            } else {
-                ++it;
-            }
-        }
-    }
-
+    std::vector<std::shared_ptr<const Chunk>> unloadEvents;
     std::vector<Job> jobs;
-    for (int x = from.x; x <= to.x; ++x) {
-        for (int y = from.y; y <= to.y; ++y) {
-            for (int z = from.z; z <= to.z; ++z) {
-                ChunkID id = ChunkID(x, y, z);
-                if (m_chunks.contains(id)) {
-                    m_loadedChunks.insert(id);
-                    continue;
+
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+
+        if (unloadRest) {
+            for (auto it = m_loadedChunks.begin(); it != m_loadedChunks.end();) {
+                const ChunkID& id = *it;
+                if (id.x < from.x || id.x > to.x || id.y < from.y || id.y > to.y || id.z < from.z ||
+                    id.z > to.z) {
+                    auto chunkIt = m_chunks.find(id);
+                    if (chunkIt != m_chunks.end()) {
+                        unloadEvents.push_back(chunkIt->second);
+                    }
+
+                    it = m_loadedChunks.erase(it);
+                } else {
+                    ++it;
                 }
-                m_chunks.emplace(id, std::make_unique<Chunk>(this, id));
+            }
+        }
 
-                ChunkBeforeLoadEvent event(m_chunks[id].get());
-                fireChunkBeforeLoadEvent(&event);
+        for (int x = from.x; x <= to.x; ++x) {
+            for (int y = from.y; y <= to.y; ++y) {
+                for (int z = from.z; z <= to.z; ++z) {
+                    ChunkID id = ChunkID(x, y, z);
+                    auto it = m_chunks.find(id);
+                    if (it != m_chunks.end()) {
+                        m_loadedChunks.insert(id);
+                        continue;
+                    }
 
-                jobs.push_back([this, id] {
-                    Chunk* chunk = m_chunks[id].get();
-                    chunk->generate();
-                    chunk->generateMesh();
-                    m_loadedChunks.insert(id);
-                });
+                    auto chunk = std::make_shared<Chunk>(this, id);
+                    m_chunks.emplace(id, chunk);
+
+                    jobs.push_back([this, id, chunk] {
+                        ChunkBeforeLoadEvent event(chunk);
+                        fireChunkBeforeLoadEvent(&event);
+                        chunk->generate();
+                        chunk->generateMesh();
+
+                        std::lock_guard<std::mutex> lock(m_mutex);
+                        m_loadedChunks.insert(id);
+                    });
+                }
             }
         }
     }
+
+    if (!unloadEvents.empty()) {
+        m_genPool.add([this, unloadEvents = std::move(unloadEvents)] {
+            for (auto& chunk : unloadEvents) {
+                ChunkUnloadEvent event(chunk);
+                fireChunkUnloadEvent(&event);
+            }
+        });
+    }
+
     m_genPool.resume();
     return m_genPool.addBatch(jobs);
 }
 
 void World::unloadChunks(const glm::ivec3& from, const glm::ivec3& to) {
-    for (int x = from.x; x < to.x; ++x) {
-        for (int y = from.y; y < to.y; ++y) {
-            for (int z = from.z; z < to.z; ++z) {
-                ChunkID coord = ChunkID(x, y, z);
-                auto it = m_loadedChunks.find(coord);
-                if (it != m_loadedChunks.end()) {
-                    m_loadedChunks.erase(it);
+    std::vector<std::shared_ptr<const Chunk>> unloadEvents;
 
-                    ChunkUnloadEvent event(m_chunks[coord].get());
-                    fireChunkUnloadEvent(&event);
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        for (int x = from.x; x < to.x; ++x) {
+            for (int y = from.y; y < to.y; ++y) {
+                for (int z = from.z; z < to.z; ++z) {
+                    ChunkID coord = ChunkID(x, y, z);
+                    auto it = m_loadedChunks.find(coord);
+                    if (it != m_loadedChunks.end()) {
+                        m_loadedChunks.erase(it);
+
+                        auto chunkIt = m_chunks.find(coord);
+                        if (chunkIt != m_chunks.end()) {
+                            unloadEvents.push_back(chunkIt->second);
+                        }
+                    }
                 }
             }
         }
     }
+
+    if (!unloadEvents.empty()) {
+        m_genPool.add([this, unloadEvents = std::move(unloadEvents)] {
+            for (auto& chunk : unloadEvents) {
+                ChunkUnloadEvent event(chunk);
+                fireChunkUnloadEvent(&event);
+            }
+        });
+    }
 }
 
 void World::unloadAllChunks(const std::vector<ChunkID>& except) {
-    if (except.empty()) {
-        for (auto& id : m_loadedChunks) {
-            ChunkUnloadEvent event(m_chunks[id].get());
-            fireChunkUnloadEvent(&event);
-        }
-        m_loadedChunks.clear();
-    } else {
-        for (auto it = m_loadedChunks.begin(); it != m_loadedChunks.end();) {
-            if (std::find(except.begin(), except.end(), *it) == except.end()) {
-                ChunkUnloadEvent event(m_chunks[*it].get());
-                fireChunkUnloadEvent(&event);
-                it = m_loadedChunks.erase(it);
-            } else {
-                ++it;
+    std::vector<std::shared_ptr<const Chunk>> unloadEvents;
+
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        if (except.empty()) {
+            for (auto& id : m_loadedChunks) {
+                auto it = m_chunks.find(id);
+                if (it != m_chunks.end()) {
+                    unloadEvents.push_back(it->second);
+                }
+            }
+            m_loadedChunks.clear();
+        } else {
+            for (auto it = m_loadedChunks.begin(); it != m_loadedChunks.end();) {
+                if (std::find(except.begin(), except.end(), *it) == except.end()) {
+                    auto chunkIt = m_chunks.find(*it);
+                    if (chunkIt != m_chunks.end()) {
+                        unloadEvents.push_back(chunkIt->second);
+                    }
+                    it = m_loadedChunks.erase(it);
+                } else {
+                    ++it;
+                }
             }
         }
+    }
+
+    // Fire events asynchronously AFTER releasing the lock - prevents blocking
+    if (!unloadEvents.empty()) {
+        m_genPool.add([this, unloadEvents = std::move(unloadEvents)] {
+            for (auto& chunk : unloadEvents) {
+                ChunkUnloadEvent event(chunk);
+                fireChunkUnloadEvent(&event);
+            }
+        });
     }
 }
 
 void World::unloadChunksFromMemory(const std::vector<ChunkID>& ids) {
-    std::unique_lock<std::mutex> lock(m_mutex);
+    m_genPool.pause();
+    std::lock_guard<std::mutex> lock(m_mutex);
     for (const ChunkID& id : ids) {
         auto it = m_chunks.find(id);
         if (it != m_chunks.end()) {
             m_chunks.erase(it);
         }
     }
+    m_genPool.resume();
 }
 
-Chunk* World::getChunk(const ChunkID& id) {
+std::weak_ptr<Chunk> World::getChunk(const ChunkID& id) {
+    std::unique_lock<std::mutex> lock(m_mutex);
     auto it = m_chunks.find(id);
     if (it == m_chunks.end()) {
-        return nullptr;
+        return {};
     }
-    return it->second.get();
+    return it->second;
 }
 
-const Chunk* World::getChunk(const ChunkID& id) const {
+std::weak_ptr<const Chunk> World::getChunk(const ChunkID& id) const {
+    std::unique_lock<std::mutex> lock(m_mutex);
     auto it = m_chunks.find(id);
     if (it == m_chunks.end()) {
-        return nullptr;
+        return {};
     }
-    return it->second.get();
+    return it->second;
 }
 
 BlockID World::getBlockID(
@@ -169,10 +230,8 @@ BlockID World::getBlockID(glm::vec3 pos, BlockState*& state, bool fallbackToGene
 bool World::canSeeFace(const Block& curBlock, glm::vec3 pos, glm::ivec3 dir) const {
     glm::vec3 neighborPos = pos + glm::vec3(dir);
     ChunkID chunkCoords = engine::extractChunkCoords(neighborPos);
-    if (!m_chunks.contains(chunkCoords))
-        return false;
 
-    const Chunk* chunk = getChunk(chunkCoords);
+    std::shared_ptr<const Chunk> chunk = getChunk(chunkCoords).lock();
     if (!chunk)  // Chunk not generated
         return false;
 
@@ -201,19 +260,36 @@ bool World::canSeeFace(const Block& curBlock, glm::vec3 pos, glm::ivec3 dir) con
 
     switch (curBlock.layer()) {
         case Layers::Opaque:
-            // Render opaque faces when touching transparent block
+            // Render opaque faces when touching transparent/translucent block
             return block->layer() != Layers::Opaque;
         case Layers::Transparent:
             // Render faces when touching different transparent blocks
             return !sameBlock && block->layer() != Layers::Opaque;
+        case Layers::Translucent:
+            // Render translucent faces when touching different blocks (always render to show depth effect)
+            return !sameBlock;
         case Layers::Any: return block->isSolid() && curBlock.isSolid();
         default: return false;
     }
 }
 
 void World::render(Engine& engine, const Camera* camera, int pass) {
-    for (const ChunkID& pos : m_loadedChunks) {
-        m_chunks[pos]->render(engine, camera, pass);
+    // Copy chunk pointers while holding lock, then render without lock
+    std::vector<std::shared_ptr<Chunk>> chunksToRender;
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        chunksToRender.reserve(m_loadedChunks.size());
+        for (const ChunkID& pos : m_loadedChunks) {
+            auto it = m_chunks.find(pos);
+            if (it != m_chunks.end()) {
+                chunksToRender.push_back(it->second);
+            }
+        }
+    }
+
+    // Render without lock - shared_ptr keeps chunks alive
+    for (auto& chunk : chunksToRender) {
+        chunk->render(engine, camera, pass);
     }
     m_skybox.render(engine, camera);
     //std::cout << "Rendered chunks: " << m_chunks.size() << "\n";
@@ -239,15 +315,21 @@ void World::updateChunk(ChunkID id) {
 void World::setBlock(
     const ChunkID& chID, const glm::ivec3& pos, BlockID blockID, std::optional<BlockState> state
 ) {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    auto it = m_chunks.find(chID);
+    if (it == m_chunks.end())
+        return;
+
+    Chunk* chunk = it->second.get();
     if (state.has_value())
-        m_chunks[chID]->m_data.setBlock(pos, blockID, state.value());
+        chunk->m_data.setBlock(pos, blockID, state.value());
     else
-        m_chunks[chID]->m_data.setBlock(pos, blockID);
+        chunk->m_data.setBlock(pos, blockID);
 
     if (blockID == 0) {
-        m_chunks[chID]->m_data.clearState(pos);
+        chunk->m_data.clearState(pos);
     }
-    m_chunks[chID]->m_dirty = true;
+    chunk->m_dirty = true;
     checkAndUpdateSurroundingChunks(chID, pos);
 }
 
@@ -257,13 +339,23 @@ void World::setBlock(glm::ivec3 pos, BlockID blockID, std::optional<BlockState> 
 }
 
 void World::setBlock(const ChunkID& chID, const glm::ivec3& pos, MultiBlock&& multiBlock) {
-    m_chunks[chID]->m_data.setMultiBlock(pos, std::move(multiBlock));
-    m_chunks[chID]->m_dirty = true;
+    std::lock_guard<std::mutex> lock(m_mutex);
+    auto it = m_chunks.find(chID);
+    if (it == m_chunks.end())
+        return;
+
+    Chunk* chunk = it->second.get();
+    chunk->m_data.setMultiBlock(pos, std::move(multiBlock));
+    chunk->m_dirty = true;
     checkAndUpdateSurroundingChunks(chID, pos);
 }
 
 MultiBlock* World::getMultiBlock(const ChunkID& chID, const glm::ivec3& pos) {
-    return m_chunks[chID]->m_data.getMultiBlock(pos);
+    std::lock_guard<std::mutex> lock(m_mutex);
+    auto it = m_chunks.find(chID);
+    if (it == m_chunks.end())
+        return nullptr;
+    return it->second->m_data.getMultiBlock(pos);
 }
 
 MultiBlock* World::getMultiBlock(glm::ivec3 pos) {
@@ -279,6 +371,7 @@ void World::setBlock(glm::ivec3 pos, MultiBlock&& multiBlock) {
 
 //TODO improve
 void World::checkAndUpdateSurroundingChunks(const ChunkID& chID, const glm::ivec3& pos) {
+    // Note: This is called from setBlock which already holds the lock
     glm::ivec3 surroundingBlocks[] = {
         {pos.x - 1, pos.y, pos.z},
         {pos.x + 1, pos.y, pos.z},
@@ -298,9 +391,20 @@ void World::checkAndUpdateSurroundingChunks(const ChunkID& chID, const glm::ivec
 }
 
 void World::update(float dt) {
-    for (const ChunkID& pos : m_loadedChunks) {
-        if (m_chunks[pos]->m_dirty) {
-            updateChunk(pos);
+    // Copy dirty chunk IDs while holding lock, then schedule updates without lock
+    std::vector<ChunkID> dirtyChunks;
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        for (const ChunkID& pos : m_loadedChunks) {
+            auto it = m_chunks.find(pos);
+            if (it != m_chunks.end() && it->second->m_dirty) {
+                dirtyChunks.push_back(pos);
+            }
         }
+    }
+
+    // Schedule updates without lock
+    for (const ChunkID& id : dirtyChunks) {
+        updateChunk(id);
     }
 }

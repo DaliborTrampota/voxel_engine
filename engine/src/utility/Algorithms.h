@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <memory>
 
 namespace engine {
     class Block;
@@ -16,7 +17,7 @@ namespace engine {
         glm::vec3 face;
         const Block* block;
         float distance;
-        const Chunk* chunk;
+        std::weak_ptr<const Chunk> chunk;
     };
 
     struct Ray {

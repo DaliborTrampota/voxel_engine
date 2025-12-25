@@ -59,8 +59,8 @@ namespace engine {
         /// @note This function does not fire any events.
         void unloadChunksFromMemory(const std::vector<ChunkID>& ids);
 
-        Chunk* getChunk(const ChunkID& id);
-        const Chunk* getChunk(const ChunkID& id) const;
+        std::weak_ptr<Chunk> getChunk(const ChunkID& id);
+        std::weak_ptr<const Chunk> getChunk(const ChunkID& id) const;
         const std::unordered_set<ChunkID>& loadedChunks() const { return m_loadedChunks; }
 
         /// @brief Checks if the surrounding chunks need to be updated due to a block change.
@@ -123,7 +123,7 @@ namespace engine {
         Skybox& getSkybox() { return m_skybox; }
 
       protected:
-        std::unordered_map<ChunkID, std::unique_ptr<Chunk>> m_chunks;
+        std::unordered_map<ChunkID, std::shared_ptr<Chunk>> m_chunks;
         std::unordered_set<ChunkID> m_loadedChunks;
         std::unique_ptr<ITerrainGenerator> m_generator = nullptr;
 
@@ -137,7 +137,7 @@ namespace engine {
 
       private:
         void updateChunk(ChunkID id);
-        std::mutex m_mutex;
+        mutable std::mutex m_mutex;
     };
 
 }  // namespace engine

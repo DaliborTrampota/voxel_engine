@@ -11,8 +11,9 @@
 #include <physics/AABB.h>
 #include <scene/Camera.h>
 #include <utility/Algorithms.h>
-#include <utility/Rotation.h>
 #include <utility/CoordUtils.h>
+#include <utility/Rotation.h>
+
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtc/matrix_transform.hpp>
@@ -69,7 +70,7 @@ void Player::spawn(std::shared_ptr<World> world) {
     printf("Spawning player at %.2f %.2f %.2f\n", m_position.x, m_position.y, m_position.z);
     ChunkID id = getChunkID(m_position);
     updateViewDistance(id, true);
-    m_currentChunk = world->getChunk(id);
+    m_currentChunk = world->getChunk(id).lock();
 }
 
 void Player::updateViewDistance(ChunkID center, bool waitTillLoaded) {
@@ -86,7 +87,7 @@ void Player::update(float dt) {
     ChunkID curChunkID = getChunkID(m_position);
     if (m_currentChunk->id() != curChunkID) {
         updateViewDistance(curChunkID, false);
-        m_currentChunk = m_world->getChunk(curChunkID);
+        m_currentChunk = m_world->getChunk(curChunkID).lock();
 
         GameServices::getWorldManager()->cleanupUnloadedChunks(curChunkID, ViewDistance + 1);
     }
@@ -287,7 +288,9 @@ void Player::interact(GLFWKey button) {
             return;
 
 
-        m_world->setBlock(dda.chunk->id(), toChunkCoords(dda.chunk->id(), dda.position), 0);
+        m_world->setBlock(
+            dda.chunk.lock()->id(), toChunkCoords(dda.chunk.lock()->id(), dda.position), 0
+        );
     }
 }
 

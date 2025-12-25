@@ -55,7 +55,7 @@ class Player : public engine::Updateable {
     float m_stepStartY = 0.0f;
     float m_stepTargetY = 0.0f;
 
-    engine::Chunk* m_currentChunk;
+    std::shared_ptr<engine::Chunk> m_currentChunk;
     std::shared_ptr<engine::World> m_world;
 
     std::shared_ptr<engine::AABB> m_aabb;

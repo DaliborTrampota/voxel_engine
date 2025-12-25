@@ -2,10 +2,11 @@
 
 #include <glm/glm.hpp>
 
+#include <iostream>
 #include <thread>
 #include <unordered_map>
 #include <vector>
-#include <iostream>
+
 
 #include "ChunkData.h"
 #include "block/Block.h"
@@ -36,6 +37,7 @@ namespace engine {
         ChunkID(const glm::ivec3& vec) : glm::ivec3(vec) {}
 
         bool operator==(const ChunkID& other) const;
+        std::string toString() const;
     };
 
 
@@ -64,8 +66,9 @@ namespace engine {
 
         const Block* getBlock(glm::ivec3 pos) const;
 
-        /// @return 3D vector of the block data.
+        /// @return ChunkData structure containing all the block/terrain data.
         ChunkData& data() { return m_data; }
+        const ChunkData& data() const { return m_data; }
 
 
         /// @brief Renders the chunk.

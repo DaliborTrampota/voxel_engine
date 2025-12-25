@@ -173,6 +173,9 @@ std::ostream& operator<<(std::ostream& os, const ChunkID& chID) {
     return os << "ChunkID(" << chID.x << ", " << chID.y << ", " << chID.z << ")";
 }
 
+std::string ChunkID::toString() const {
+    return std::to_string(x) + "_" + std::to_string(y) + "_" + std::to_string(z);
+}
 
 void Chunk::generateMeshForGeometry(const MeshGenContext& ctx) {
     for (auto f : ctx.geometry->faces()) {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <memory>
 #include "utility/Event.h"
 
 
@@ -9,18 +10,18 @@ namespace engine {
     class Chunk;
 
     struct ChunkUnloadEvent : public Event {
-        ChunkUnloadEvent(const Chunk* _chunk) : chunk(_chunk) {}
+        ChunkUnloadEvent(std::shared_ptr<const Chunk> _chunk) : chunk(_chunk) {}
 
         /// @brief The chunk that is about to be unloaded.
-        const Chunk* chunk;
+        std::shared_ptr<const Chunk> chunk;
     };
 
     struct ChunkBeforeLoadEvent : public Event {
-        ChunkBeforeLoadEvent(Chunk* _chunk) : chunk(_chunk) {}
+        ChunkBeforeLoadEvent(std::shared_ptr<Chunk> _chunk) : chunk(_chunk) {}
 
         /// @brief The chunk that is about to be loaded.
         /// @note Set the chunk->data().populated to true to skip terrain population from generator (eg. for chunk serialization)
-        Chunk* chunk;
+        std::shared_ptr<Chunk> chunk;
     };
 
     struct ChunkRangeUpdatedEvent : public Event {
