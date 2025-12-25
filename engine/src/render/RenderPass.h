@@ -2,44 +2,56 @@
 
 #include <cstdint>
 #include <glm/glm.hpp>
+#include <memory>
 #include <optional>
+#include <string>
 
 
 namespace gl {
     class FBO;
 }  // namespace gl
 
+
 namespace engine {
+    class Engine;
     class Material;
-}  // namespace engine
 
-namespace engine::RenderPass {
-    using ID = uint16_t;
+    class RenderPass {
+      public:
+        using ID = uint16_t;
 
-    /// @brief Configuration for a render pass.
-    /// @note Material and FBO overrides are applied to all contexts in the pass.
-    struct Config {
-        ID id;
-        const Material* materialOverride = nullptr;
-        gl::FBO* fboOverride = nullptr;
+        // Built-in pass IDs
+        static constexpr ID DirectionalShadow = 1 << 0;
+        static constexpr ID OmniShadow = 1 << 1;
+        static constexpr ID SceneTransparent = 1 << 2;
+        static constexpr ID Scene = 1 << 3;
+
+        virtual ~RenderPass() = default;
+
+        virtual void beforeRender(Engine& engine, uint8_t pass) = 0;
+        virtual void afterRender(Engine& engine, uint8_t pass) = 0;
+
+        static std::unique_ptr<RenderPass> create(const std::string& name);
+
+        ID id() const { return m_id; }
+        uint8_t passes() const { return m_passes; }
+
+        const Material* material = nullptr;
+        const gl::FBO* fbo = nullptr;
         std::optional<glm::ivec2> viewportSize = std::nullopt;
+
+      protected:
+        /// @brief Constructs pass with next available ID, use only for custom passes.
+        RenderPass(uint8_t passes = 1) : m_id(1 << s_nextPassIndex++), m_passes(passes) {}
+
+        /// @brief Constructs pass with specific ID, use only for built-in passes.
+        RenderPass(ID id, uint8_t passes = 1) : m_id(id), m_passes(passes) {}
+
+
+      private:
+        ID m_id;
+        uint8_t m_passes;
+        inline static unsigned int s_nextPassIndex = 4;
     };
 
-    constexpr ID DirectionalShadow = 1 << 0;
-    constexpr ID OmniShadow = 1 << 1;
-    constexpr ID SceneTransparent = 1 << 2;
-    constexpr ID Scene = 1 << 3;
-
-    /// @brief Creates a new render pass configuration.
-    /// @return A new RenderPass::Config with id set to the next available ID.
-    /// @note The first three render pass IDs are reserved for shadows and scene.
-    /// @note The maximum number of render passes is 16.
-    /// @note The render passes are rendered in the order of their creation.
-    /// @note It is consumers responsibility to store the render pass ID and use it later.
-    [[nodiscard]] inline Config make() {
-        static ID s_passIndex = 4;
-        return {.id = static_cast<ID>(1 << s_passIndex++)};
-    }
-
-
-}  // namespace engine::RenderPass
+}  // namespace engine

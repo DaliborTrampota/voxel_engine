@@ -32,10 +32,12 @@ namespace engine {
         void submitRender(RenderContext&& ctx, bool immediate = false);
         void submitRender(GroupRenderContext&& ctx, bool immediate = false);
 
-        /// @brief Registers a render pass with optional material and FBO overrides.
-        /// @param config Pass configuration including ID and optional overrides.
-        void registerRenderPass(const RenderPass::Config& config);
-        void setRenderPassOrder(const std::vector<RenderPass::ID>& order);
+        /// @brief Registers a custom render pass at the specified position.
+        /// @param pass The concrete RenderPass instance.
+        /// @param position Where to insert the pass (default: after scene)
+        void registerRenderPass(std::unique_ptr<RenderPass> pass, uint8_t position);
+
+        void registerDefaultRenderPasses();
 
         /// @brief Flushes the render queue; loops over all render passes and renders all contexts.
         /// @note This is called between beforeRender() and afterRender().
@@ -52,9 +54,9 @@ namespace engine {
 
         Window* window() const { return m_window.get(); }
 
-        void setDirectionalLightSource(std::shared_ptr<engine::Sun> lightSource) {
-            m_directionalLightSource = lightSource;
-        }
+        void setDirectionalLightSource(
+            std::shared_ptr<engine::Sun> lightSource, uint8_t passPosition = 0
+        );
         std::shared_ptr<engine::Sun> directionalLightSource() const {
             return m_directionalLightSource;
         }
@@ -62,35 +64,20 @@ namespace engine {
       protected:
         std::shared_ptr<engine::Sun> m_directionalLightSource;
 
-        struct {
-            const Material* material = nullptr;
-            const gl::FBO* fbo = nullptr;
-        } m_renderOverride;
-
         std::vector<std::variant<RenderContext, GroupRenderContext>> m_renderQueue;
         std::unique_ptr<Window> m_window;
 
         void beginFrame();
         void endFrame();
 
-        void setRenderOverride(const Material* material, gl::FBO* fbo) {
-            m_renderOverride.material = material;
-            m_renderOverride.fbo = fbo;
-        }
-
-        void clearRenderOverride() {
-            m_renderOverride.material = nullptr;
-            m_renderOverride.fbo = nullptr;
-        }
-
       private:
         void initUtilityShaders();
 
-        std::vector<RenderPass::Config> m_renderPasses;
+        std::vector<std::unique_ptr<RenderPass>> m_renderPasses;
         std::vector<std::weak_ptr<Updateable>> m_updateSubscribers;
 
 
-        void render(RenderContext& ctx, RenderPass::ID renderPass) const;
-        void render(GroupRenderContext& ctx, RenderPass::ID renderPass) const;
+        void render(RenderContext& ctx, const RenderPass* renderPass) const;
+        void render(GroupRenderContext& ctx, const RenderPass* renderPass) const;
     };
 }  // namespace engine
