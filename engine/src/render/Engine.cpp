@@ -105,8 +105,8 @@ void Engine::registerRenderPass(std::unique_ptr<RenderPass> pass, uint8_t positi
 }
 
 void Engine::registerDefaultRenderPasses() {
-    registerRenderPass(TransparentPass::create(), 0);
-    registerRenderPass(ScenePass::create(), 1);
+    registerRenderPass(ScenePass::create(), 0);
+    registerRenderPass(TransparentPass::create(), 1);
 
     if (m_directionalLightSource) {
         registerRenderPass(

@@ -23,8 +23,8 @@ namespace engine {
         // Built-in pass IDs
         static constexpr ID DirectionalShadow = 1 << 0;
         static constexpr ID OmniShadow = 1 << 1;
-        static constexpr ID SceneTransparent = 1 << 2;
-        static constexpr ID Scene = 1 << 3;
+        static constexpr ID Scene = 1 << 2;
+        static constexpr ID SceneTransparent = 1 << 3;
 
         virtual ~RenderPass() = default;
 
