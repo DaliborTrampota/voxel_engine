@@ -3,8 +3,8 @@
 #include <glad/glad.h>
 #include <stdexcept>
 
-#include "events/EngineEvents.h"
 #include "GLFWUserPointer.h"
+#include "events/EngineEvents.h"
 #include "utility/UtilityShaders.h"
 
 namespace {
