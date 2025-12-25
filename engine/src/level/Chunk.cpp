@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <ranges>
 
 #include <LWGL/buffer/Attributes.h>
 
@@ -14,7 +15,7 @@
 #include "data/RegistryManager.h"
 #include "render/Engine.h"
 #include "render/RenderContext.h"
-#include "utility/CoordUtils.h"
+#include "utility/Rotation.h"
 
 using namespace engine;
 
@@ -35,7 +36,7 @@ Chunk::Chunk(World* world, ChunkID coords)
 Chunk::~Chunk() {}
 
 void Chunk::generate() {
-    if (m_generated)
+    if (m_generated || m_data.populated)
         return;
 
     m_world->m_generator->populate(*this);
@@ -150,31 +151,30 @@ void Chunk::render(Engine& engine, const Camera* camera, int pass) {
     }
 }
 
-
+// TODO get rid of this now when there is calculateRotationFromState
 Chunk::GeometryState Chunk::calculateGeometryState(
     const Block* block, const BlockState* state
 ) const {
-    GeometryState geoState{
-        .axis = glm::vec3(0, 1, 0),
-        .angle = 0.0f,
+    float angle = 0.0f;
+    glm::vec3 axis = glm::vec3(0, 1, 0);
+    calculateRotationFromState(state, block, angle, axis);
+    return GeometryState{
+        .axis = axis,
+        .angle = angle,
     };
-    if (state && block->rotationMode() != RotationMode::None) {
-        Side baseSide = block->facingUp() ? Side::Up : Side::North;
-        glm::vec3 baseSideDir = sideDirection(baseSide);
-        const glm::vec3& facing = state->facing();
-
-        geoState.angle = getAngleToSide(baseSide, facing, geoState.axis);
-        // geoState.axis = glm::vec3(0, 1, 0);
-        // if (glm::any(glm::isnan(geoState.axis))) {
-        // } else {
-        // }
-    }
-    return geoState;
 }
 
 
 bool ChunkID::operator==(const ChunkID& other) const {
     return x == other.x && y == other.y && z == other.z;
+}
+
+std::ostream& operator<<(std::ostream& os, const ChunkID& chID) {
+    return os << "ChunkID(" << chID.x << ", " << chID.y << ", " << chID.z << ")";
+}
+
+std::string ChunkID::toString() const {
+    return std::to_string(x) + "_" + std::to_string(y) + "_" + std::to_string(z);
 }
 
 void Chunk::generateMeshForGeometry(const MeshGenContext& ctx) {
@@ -187,9 +187,18 @@ void Chunk::generateMeshForGeometry(const MeshGenContext& ctx) {
             continue;
 
         f.translate(ctx.posInChunk);
+
+        const int material = ctx.block->material().forTag(f.tag);
         for (Vertex v : f.vertices) {
-            v.data(ctx.block->material().forTag(f.tag), 0);
+            v.data(material, 0);
             ctx.storage.add(v);
+        }
+
+        if (f.doubleSided) [[unlikely]] {
+            for (Vertex v : f.vertices | std::views::reverse) {
+                v.data(material, 0);
+                ctx.storage.add(v);
+            }
         }
     }
 }

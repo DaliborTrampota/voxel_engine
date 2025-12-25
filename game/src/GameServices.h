@@ -1,6 +1,7 @@
 #pragma once
 
 class Game;
+class WorldManager;
 
 namespace engine {
     class InputSystem;
@@ -20,8 +21,12 @@ class GameServices {
         m_audioManager = audioManager;
     }
 
+    static WorldManager* getWorldManager() { return m_worldManager; }
+    static void setWorldManager(WorldManager* worldManager) { m_worldManager = worldManager; }
+
   private:
     static inline Game* m_game = nullptr;
+    static inline WorldManager* m_worldManager = nullptr;
     static inline engine::InputSystem* m_inputSystem = nullptr;
     static inline engine::AudioManager* m_audioManager = nullptr;
 };

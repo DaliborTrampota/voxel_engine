@@ -2,7 +2,7 @@
 
 #include <LWGL/Context.h>
 
-#include "EngineEventSource.h"
+#include "events/EngineEventSource.h"
 
 namespace engine {
     class Window : public gl::Context,

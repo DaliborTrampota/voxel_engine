@@ -2,15 +2,15 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "render/EngineEvents.h"
+#include "render/events/EngineEvents.h"
 
 using namespace engine;
 
 Camera::Camera(OrthoOptions opts)
     : m_type(ProjectionType::Orthographic),
-      m_front(FORWARD),
+      m_front(NORTH),
       m_position(0),
-      m_yaw(-90.0f),
+      m_yaw(90.0f),  // 90 degrees is north
       m_pitch(0.0f),
       m_zNear(opts.zNear),
       m_zFar(opts.zFar),
@@ -23,9 +23,9 @@ Camera::Camera(OrthoOptions opts)
 
 Camera::Camera(PerspectiveOptions opts)
     : m_type(ProjectionType::Perspective),
-      m_front(FORWARD),
+      m_front(NORTH),
       m_position(0),
-      m_yaw(-90.0f),
+      m_yaw(90.0f),  // 90 degrees is north
       m_pitch(0.0f),
       m_zNear(opts.zNear),
       m_zFar(opts.zFar),

@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "events/LevelEventSource.h"
 
 #include "Chunk.h"
 #include "ITerrainGenerator.h"
@@ -23,15 +24,14 @@ namespace gl {
 }
 
 namespace engine {
-    static inline constexpr BlockID INVALID_BLOCK = -1;
-
     class Chunk;
     class Engine;
     struct ChunkID;
     struct RenderContext;
 
     class World : public Renderable,
-                  public Updateable {
+                  public Updateable,
+                  public LevelEventSource {
       public:
         World(std::unique_ptr<ITerrainGenerator> gen, uint32_t genThreads = 8);
         ~World();
@@ -46,14 +46,21 @@ namespace engine {
         );
 
         /// @brief Unloads chunks in the given range.
+        /// @note This function fires a ChunkUnloadEvent for each chunk that is unloaded.
         void unloadChunks(const glm::ivec3& from, const glm::ivec3& to);
 
         /// @brief Unloads all chunks except the given ones.
         /// @param except Chunks to keep loaded.
+        /// @note This function fires a ChunkUnloadEvent for each chunk that is unloaded.
         void unloadAllChunks(const std::vector<ChunkID>& except = {});
 
-        Chunk* getChunk(const ChunkID& id);
-        const Chunk* getChunk(const ChunkID& id) const;
+        /// @brief Unloads given chunks from memory.
+        /// @param ids Chunks to unload.
+        /// @note This function does not fire any events.
+        void unloadChunksFromMemory(const std::vector<ChunkID>& ids);
+
+        std::weak_ptr<Chunk> getChunk(const ChunkID& id);
+        std::weak_ptr<const Chunk> getChunk(const ChunkID& id) const;
         const std::unordered_set<ChunkID>& loadedChunks() const { return m_loadedChunks; }
 
         /// @brief Checks if the surrounding chunks need to be updated due to a block change.
@@ -68,7 +75,7 @@ namespace engine {
         /// @param pos The position of the block within the chunk (0 to Chunk::Dims)
         /// @param state [out] The state of the block
         /// @param fallbackToGenerator If true, the generator will be used to get the block ID if the chunk is not generated
-        /// @return the block ID or engine::INVALID_BLOCK if:
+        /// @return the block ID or engine::InvalidBlockID if:
         ///         - The position is out of bounds (eg less than or greater than Chunk::Dims)
         ///         - The chunk is not generated
         BlockID getBlockID(
@@ -79,7 +86,7 @@ namespace engine {
         /// @param pos The position of the block in world space
         /// @param state [out] The state of the block
         /// @param fallbackToGenerator If true, the generator will be used to get the block ID if the chunk is not generated
-        /// @return the block ID or engine::INVALID_BLOCK if:
+        /// @return the block ID or engine::InvalidBlockID if:
         ///         - The position is out of bounds (eg less than or greater than Chunk::Dims)
         ///         - The chunk is not generated
         BlockID getBlockID(glm::vec3 pos, BlockState*& state, bool fallbackToGenerator);
@@ -116,7 +123,7 @@ namespace engine {
         Skybox& getSkybox() { return m_skybox; }
 
       protected:
-        std::unordered_map<ChunkID, std::unique_ptr<Chunk>> m_chunks;
+        std::unordered_map<ChunkID, std::shared_ptr<Chunk>> m_chunks;
         std::unordered_set<ChunkID> m_loadedChunks;
         std::unique_ptr<ITerrainGenerator> m_generator = nullptr;
 
@@ -130,7 +137,7 @@ namespace engine {
 
       private:
         void updateChunk(ChunkID id);
-        std::mutex m_mutex;
+        mutable std::mutex m_mutex;
     };
 
 }  // namespace engine

@@ -1,8 +1,0 @@
-| Feature                  | How to Add                                                      |
-| ------------------------ | --------------------------------------------------------------- |
-| Instanced Rendering      | Batch contexts with identical VAO + material + transform buffer |
-| View Frustum Culling     | Check AABB vs frustum before calling `submit()`                 |
-| Sorting Transparent Pass | Sort `RenderContext`s by camera-space depth                     |
-| Render to Texture        | Add `Framebuffer*` to context or engine                         |
-
-multicamera support

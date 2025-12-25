@@ -33,7 +33,7 @@ class Player : public engine::Updateable {
 
     void move(glm::vec3 lDir, float dt);
     void rotate(float dx, float dy, bool constrainPitch = true);
-    void move(glm::vec3 position);
+    void setPosition(glm::vec3 position);
 
     void interact(engine::GLFWKey button);
     bool tryPlaceMultiBlock(
@@ -47,7 +47,7 @@ class Player : public engine::Updateable {
   private:
     glm::vec3 m_velocity{0.f};
     glm::vec3 m_position;
-    float m_speed = 5.f;
+    float m_speed = 10.f;
     bool m_onGround = false;
 
     // Smooth step animation
@@ -55,7 +55,7 @@ class Player : public engine::Updateable {
     float m_stepStartY = 0.0f;
     float m_stepTargetY = 0.0f;
 
-    engine::Chunk* m_currentChunk;
+    std::shared_ptr<engine::Chunk> m_currentChunk;
     std::shared_ptr<engine::World> m_world;
 
     std::shared_ptr<engine::AABB> m_aabb;

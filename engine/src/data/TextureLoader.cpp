@@ -1,6 +1,5 @@
 #include "TextureLoader.h"
 
-#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -11,19 +10,18 @@
 
 #include "data/TextureManager.h"
 
-namespace fs = std::filesystem;
 
 using namespace engine;
 
 TextureLoader::TextureLoader(int slot) : m_texArray(slot) {}
 
-void TextureLoader::load(const char* path, gl::ArraySettings settings) {
+void TextureLoader::load(const fs::path& path, gl::ArraySettings settings) {
     int width = 0;
     int height = 0;
     std::vector<gl::ImageData> images;
 
     if (!fs::exists(path)) {
-        printf("Path %s does not exist\n", path);
+        printf("Path %s does not exist\n", path.string().c_str());
         return;
     }
 
@@ -45,7 +43,7 @@ void TextureLoader::load(const char* path, gl::ArraySettings settings) {
     }
 
     if (width == 0 || height == 0) {
-        printf("No valid images found in %s\n", path);
+        printf("No valid images found in %s\n", path.string().c_str());
         return;
     }
 
@@ -70,8 +68,6 @@ void TextureLoader::bind() const {
     m_texArray.bind();
 }
 
-std::string TextureLoader::getTextureName(const std::string& path) {
-    size_t idx = path.find_last_of("/") + 1;
-    size_t count = path.find_last_of(".") - idx;
-    return path.substr(idx, count);
+std::string TextureLoader::getTextureName(const fs::path& path) {
+    return path.filename().replace_extension("").string();
 }

@@ -25,20 +25,4 @@ namespace engine {
 
     /// @brief Returns positions of blocks that intersect the line between start and end.
     std::vector<glm::ivec3> traceLine(glm::vec3 start, glm::vec3 end);
-
-
-    /// @brief Returns the direction the block should face when placed.
-    /// @param lookDir The direction the player is looking
-    /// @param rot The rotation mode of the block
-    /// @param clickedFaceN The normal of the face the player clicked on
-    /// @return The direction the block should face when placed
-    glm::vec3 getFacingDirection(glm::vec3 lookDir, RotationMode rot, glm::ivec3 clickedFaceN);
-
-    // TODO use quaternions for rotations?
-    glm::quat getRotationQuat(glm::vec3 lookDir, RotationMode rot, glm::ivec3 clickedFaceN);
-
-    float getAngleToSide(Side side, glm::vec3 from, glm::vec3& axis);
-    float getAngle(glm::vec3 from, glm::vec3 to, glm::vec3& axis);
-
-
 }  // namespace engine

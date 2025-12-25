@@ -12,6 +12,8 @@
 #include <scene/Camera.h>
 #include <utility/Algorithms.h>
 #include <utility/CoordUtils.h>
+#include <utility/Rotation.h>
+
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtc/matrix_transform.hpp>
@@ -20,6 +22,7 @@
 
 #include "GameServices.h"
 #include "Globals.h"
+#include "WorldManager.h"
 #include "registry/MyRegistryManager.h"
 
 #include <data/RegistryManager.h>
@@ -50,16 +53,16 @@ Player::Player()
         RegistryManager::Blocks().get("log_10")->getID(),
         RegistryManager::Blocks().get("log_12")->getID(),
         RegistryManager::Blocks().get("log_14")->getID(),
-        //RegistryManager::Blocks().get("log_connector")->getID(),
         0,
         0,
+        0
     };
 }
 
 Player::~Player() {}
 
 void Player::spawn(std::shared_ptr<World> world) {
-    move(glm::vec3(Chunk::Dims.x / 2, 20, Chunk::Dims.z / 2));
+    setPosition(glm::vec3(Chunk::Dims.x / 2, 20, Chunk::Dims.z / 2));
     m_camera->lookAt(glm::vec3(Chunk::Dims.x / 2, 0, Chunk::Dims.z / 2));
     m_world = world;
     m_collider.setWorld(world);
@@ -67,7 +70,7 @@ void Player::spawn(std::shared_ptr<World> world) {
     printf("Spawning player at %.2f %.2f %.2f\n", m_position.x, m_position.y, m_position.z);
     ChunkID id = getChunkID(m_position);
     updateViewDistance(id, true);
-    m_currentChunk = world->getChunk(id);
+    m_currentChunk = world->getChunk(id).lock();
 }
 
 void Player::updateViewDistance(ChunkID center, bool waitTillLoaded) {
@@ -84,7 +87,9 @@ void Player::update(float dt) {
     ChunkID curChunkID = getChunkID(m_position);
     if (m_currentChunk->id() != curChunkID) {
         updateViewDistance(curChunkID, false);
-        m_currentChunk = m_world->getChunk(curChunkID);
+        m_currentChunk = m_world->getChunk(curChunkID).lock();
+
+        GameServices::getWorldManager()->cleanupUnloadedChunks(curChunkID, ViewDistance + 1);
     }
 
 
@@ -112,8 +117,8 @@ void Player::update(float dt) {
         m_position = glm::vec3(Chunk::Dims.x / 2, 20, Chunk::Dims.z / 2);
         m_velocity = glm::vec3(0.f);
         m_camera->position(m_position);
-        m_camera->lookDirection(FORWARD);
-        // m_camera->lookAt(glm::vec3(FORWARD));
+        m_camera->lookDirection(NORTH);
+        // m_camera->lookAt(glm::vec3(NORTH));
 
         m_aabb->position(m_position);
     }
@@ -226,7 +231,7 @@ void Player::rotate(float dx, float dy, bool constrainPitch) {
     m_camera->rotate(dx, dy, constrainPitch);
 }
 
-void Player::move(glm::vec3 position) {
+void Player::setPosition(glm::vec3 position) {
     m_position = position;
     m_aabb->position(position);
     m_camera->position(position);
@@ -283,7 +288,9 @@ void Player::interact(GLFWKey button) {
             return;
 
 
-        m_world->setBlock(dda.chunk->id(), toChunkCoords(dda.chunk->id(), dda.position), 0);
+        m_world->setBlock(
+            dda.chunk.lock()->id(), toChunkCoords(dda.chunk.lock()->id(), dda.position), 0
+        );
     }
 }
 

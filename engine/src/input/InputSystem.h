@@ -5,8 +5,9 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
-#include "GLFWEventSource.h"
 #include "InputTypes.h"
+#include "events/GLFWEventSource.h"
+
 
 struct GLFWwindow;
 

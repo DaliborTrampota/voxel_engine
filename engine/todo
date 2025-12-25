@@ -4,6 +4,7 @@
 - materials
     - what did I mean by this?
     - PBR?
+    - color instead of texture support Material class
     
 - lights
     - sun / directional @done
@@ -22,13 +23,14 @@
 - ui
     - basic ui elements @done
     - input elements
-    - fallback for bindless textures
+    - fallback for bindless textures @done
+        - not gonna do: http://opengl.gpuinfo.org/listreports.php?extension=GL_ARB_bindless_texture @done
     - option to specify font quality (scale)
     - option to make asynchronous loading of labels
     - https://github.com/nxp-imx/gtec-demo-framework/blob/master/Doc/FslSimpleUI.md
     - https://behdad.org/text2024/#heading-h.moz5gv4bsvld
 - get rid of engine namespace in lwgl events @done
-- texture keep track of bound units and warn if two textures are bound to the same unit at the same time
+- texture keep track of bound units and warn if two textures are bound to the same unit at the same time?
 - get rid of gl::texture namespace @done
 - move textureprivate to detail @done
 - glfw callbacks using window user pointer @done
@@ -42,3 +44,13 @@
 - LWGL
     - remove binds for all methods - consumers responsible for binding
 
+
+- instanced rendering support
+
+Instanced Rendering - Batch contexts with identical VAO + material + transform buffer
+View Frustum Culling - Check AABB vs frustum before calling `submit()`
+Sorting Transparent Pass - Sort `RenderContext`s by camera-space depth
+multicamera support
+
+- support for variant block neighboring with multiblock
+- support multiblock dda 

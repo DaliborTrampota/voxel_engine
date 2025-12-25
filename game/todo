@@ -1,0 +1,24 @@
+- world generation
+    - random grass rotation
+    - dead planet
+    - dynamic trees
+    - skybox no atmosphere @done
+    - ice areas for water supply
+
+- ui
+    - counter of oxygen
+    - counter of co2/oxygen on planet
+    - aim on valid block - show stats of o2 production
+
+- physics 
+    - floodfill base air supply
+    - water soaking up in blocks
+
+- game loop
+    - explore
+        - find seeds
+    - plant
+        - plant seeds
+        - water them
+        - convert co2 to oxygen
+    - expand base

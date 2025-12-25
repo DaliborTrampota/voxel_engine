@@ -34,7 +34,7 @@ DDAResult engine::DDA(
     const World& world, glm::vec3 start, glm::vec3 direction, float length, UnaryPredicate pred
 ) noexcept {
     if (glm::all(glm::equal(direction, glm::vec3(0.0f)))) {
-        return DDAResult{start, glm::vec3(0.0f), &Block::air(), 0.f, nullptr};
+        return DDAResult{start, glm::vec3(0.0f), &Block::air(), 0.f, {}};
     }
 
     int x = glm::floor(start.x);
@@ -64,8 +64,8 @@ DDAResult engine::DDA(
     // TODO condition should be world bound check
     while (true) {
         glm::ivec3 pos = glm::ivec3(x, y, z);
-        const Chunk* chunk = world.getChunk(extractChunkCoords(pos));
-        const Block* block = chunk->getBlock(pos);
+        std::weak_ptr<const Chunk> chunk = world.getChunk(extractChunkCoords(pos));
+        const Block* block = chunk.lock()->getBlock(pos);
         //TODO check if we are in bounds
         if (pred(block)) {
             return DDAResult{glm::ivec3(x, y, z), face, block, 0.f, chunk};
@@ -102,7 +102,7 @@ DDAResult engine::DDA(
         }
     }  // end while
 
-    return DDAResult{{x, y, z}, face, &Block::air(), length, nullptr};
+    return DDAResult{{x, y, z}, face, &Block::air(), length, {}};
 }
 
 
@@ -113,6 +113,7 @@ float engine::rayTriangleIntersection(Ray& ray, Triangle& t, float& uOut, float&
     glm::vec3 p = glm::cross(ray.direction, e2);
     float det = glm::dot(e1, p);
 
+    // TODO
 #if CULL_BACKFACES
     if (det < epsilon) {
         return std::numeric_limits<float>::infinity();

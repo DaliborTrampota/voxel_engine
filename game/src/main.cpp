@@ -1,9 +1,11 @@
 #include <iostream>
 
 #include <render/Window.h>
+#include "Directory.h"
 #include "Game.h"
 
-// Force dedicated GPU (Windows only)
+
+// Force dedicated GPU (win only) (fixed bindless textures [probably laptop only issue?])
 #ifdef _WIN32
 extern "C" {
 __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;  // for nvidia
@@ -27,11 +29,15 @@ int gameEntry() {
 #include "Windows.h"
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) {
+    char exePath[MAX_PATH];
+    GetModuleFileNameA(nullptr, exePath, MAX_PATH);
+    initDirectories(exePath);
     return gameEntry();
 }
 
 #endif
 
 int main(int argc, char* argv[]) {
+    initDirectories(argv[0]);
     return gameEntry();
 }

@@ -12,7 +12,9 @@ using namespace engine;
 
 class PerlinTerrainGenerator : public ITerrainGenerator {
   public:
-    PerlinTerrainGenerator(siv::PerlinNoise::seed_type seed);
+    PerlinTerrainGenerator(
+        siv::PerlinNoise::seed_type seed, float scale, int octaves, float persistence = 0.5f
+    );
 
     BlockID voxelAt(const glm::ivec3& pos) override;
     void populate(Chunk& chunk) override;
@@ -24,6 +26,8 @@ class PerlinTerrainGenerator : public ITerrainGenerator {
     siv::BasicPerlinNoise<float> m_noise;
     const Registry<Block, RegistryStoragePolicy::ByPointer>& m_blockRegistry;
 
-    float m_scale = 0.1f;
+    float m_scale;
+    int m_octaves;
+    float m_persistence;
     float m_minHeight = 5.0f;
 };
