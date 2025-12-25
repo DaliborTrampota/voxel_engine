@@ -103,9 +103,9 @@ void World::unloadChunks(const glm::ivec3& from, const glm::ivec3& to) {
 
     {
         std::lock_guard<std::mutex> lock(m_mutex);
-        for (int x = from.x; x < to.x; ++x) {
-            for (int y = from.y; y < to.y; ++y) {
-                for (int z = from.z; z < to.z; ++z) {
+        for (int x = from.x; x <= to.x; ++x) {
+            for (int y = from.y; y <= to.y; ++y) {
+                for (int z = from.z; z <= to.z; ++z) {
                     ChunkID coord = ChunkID(x, y, z);
                     auto it = m_loadedChunks.find(coord);
                     if (it != m_loadedChunks.end()) {

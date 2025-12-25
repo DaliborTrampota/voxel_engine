@@ -232,17 +232,26 @@ void RegisterBlocks() {
         );
 
     // clang-format on
-    std::vector<BlockID> logConnectedBlocks = {71 /* LOG_4 */, LOG_BRANCH.getID()};
+    constexpr BlockID LOG_4_ID = 66;
+    constexpr BlockID LOG_6_ID = 67;
+    constexpr BlockID LOG_8_ID = 68;
+    constexpr BlockID LOG_10_ID = 69;
+    constexpr BlockID LOG_12_ID = 70;
+    constexpr BlockID LOG_14_ID = 71;
 
-    auto LOG_6 = makeLog(66, 6, logConnectedBlocks);
-    auto LOG_8 = makeLog(67, 8, logConnectedBlocks);
-    auto LOG_10 = makeLog(68, 10, logConnectedBlocks);
-    auto LOG_12 = makeLog(69, 12, logConnectedBlocks);
-    auto LOG_14 = makeLog(70, 14, logConnectedBlocks);
+    std::vector<BlockID> logConnectedBlocksBase = {LOG_4_ID, LOG_BRANCH.getID()};
 
-    auto LOG_4 = makeLog(
-        71, 4, {70, LOG_6.getID(), LOG_8.getID(), LOG_10.getID(), LOG_12.getID(), LOG_14.getID()}
-    );
+    auto LOG_6 = makeLog(LOG_6_ID, 6, logConnectedBlocksBase);
+    auto LOG_8 = makeLog(LOG_8_ID, 8, logConnectedBlocksBase);
+    auto LOG_10 = makeLog(LOG_10_ID, 10, logConnectedBlocksBase);
+    auto LOG_12 = makeLog(LOG_12_ID, 12, logConnectedBlocksBase);
+    auto LOG_14 = makeLog(LOG_14_ID, 14, logConnectedBlocksBase);
+
+    std::vector<BlockID> log4ConnectedBlocks = {
+        LOG_BRANCH.getID(), LOG_6_ID, LOG_8_ID, LOG_10_ID, LOG_12_ID, LOG_14_ID
+    };
+
+    auto LOG_4 = makeLog(LOG_4_ID, 4, log4ConnectedBlocks);
 
     // auto GRASS_DECO =
     //     Block(23, Layers::Opaque, &geometries.get("grass.vox"), RotationMode::AxisY)
