@@ -60,7 +60,7 @@ namespace {
             buffer[len] = '\0';
             return fs::path(buffer).parent_path();
         }
-        return fs::absolute(argv0).parent_path()
+        return fs::absolute(argv0).parent_path();
 #endif
     }
 }  // namespace

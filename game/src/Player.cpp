@@ -53,9 +53,9 @@ Player::Player()
         RegistryManager::Blocks().get("log_10")->getID(),
         RegistryManager::Blocks().get("log_12")->getID(),
         RegistryManager::Blocks().get("log_14")->getID(),
-         0,
-         0,
-         0
+        0,
+        0,
+        0
     };
 }
 
