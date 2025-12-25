@@ -4,30 +4,25 @@
 
 #include <data/RegistryManager.h>
 
-class DesertBiome : public Biome {
+class MicrobialCrustBiome : public Biome {
   public:
-    DesertBiome() : Biome("Desert", {0.3f, 1.0f}, {-1.0f, -0.3f}, {0.2f, 1.0f}) {
+    MicrobialCrustBiome()
+        : Biome("MicrobialCrust", {-0.3f, -0.1f}, {-1.0f, -0.2f}, ParameterRange::Mid, 10) {
         auto& registry = RegistryManager::Blocks();
 
-        m_descriptor.heightScale = 6.0f;
-        m_descriptor.heightBase = 65.0f;
+        m_descriptor.heightScale = 25.0f;
+        m_descriptor.heightBase = 68.0f;
 
         m_descriptor.layers.push_back(
-            {.palette = {{registry.get("sand")->getID()}, {1}},
-             .depth = 4,
+            {.palette = {{registry.get("microbial_matter")->getID()}, {1}},
+             .depth = 3,
              .features = {}}
         );
-
         m_descriptor.layers.push_back(
-            {.palette = { {registry.get("dirt")->getID()},  {1}},
-             .depth = 6,
-             .features = {}}
+            {.palette = {{registry.get("ash")->getID()}, {1}}, .depth = 6, .features = {}}
         );
-
         m_descriptor.layers.push_back(
-            {.palette = { {registry.get("stone")->getID()},  {1}},
-             .depth = 100,
-             .features = {}}
+            {.palette = {{registry.get("slate")->getID()}, {1}}, .depth = -1, .features = {}}
         );
     }
 

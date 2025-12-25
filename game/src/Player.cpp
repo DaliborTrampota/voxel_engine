@@ -11,6 +11,7 @@
 #include <physics/AABB.h>
 #include <scene/Camera.h>
 #include <utility/Algorithms.h>
+#include <utility/Rotation.h>
 #include <utility/CoordUtils.h>
 
 #define GLM_ENABLE_EXPERIMENTAL
@@ -51,9 +52,9 @@ Player::Player()
         RegistryManager::Blocks().get("log_10")->getID(),
         RegistryManager::Blocks().get("log_12")->getID(),
         RegistryManager::Blocks().get("log_14")->getID(),
-        //RegistryManager::Blocks().get("log_connector")->getID(),
-        0,
-        0,
+         0,
+         0,
+         0
     };
 }
 

@@ -4,10 +4,9 @@
 using namespace engine;
 
 
-float Biome::fitScore(float temperature, float concentration, float altitude) const {
+float Biome::fitScore(float temperature, float concentration) const {
     return glm::sqrt(m_temperature.distance(temperature)) +
-           glm::sqrt(m_concentration.distance(concentration)) +
-           glm::sqrt(m_altitude.distance(altitude));
+           glm::sqrt(m_concentration.distance(concentration));
 }
 
 float Biome::getHeightModifier(int x, int z, float baseHeight) const {
@@ -15,17 +14,16 @@ float Biome::getHeightModifier(int x, int z, float baseHeight) const {
 }
 
 BlockID Biome::getBlockAt(const glm::ivec3& pos, int surfaceHeight) const {
-    int startY = surfaceHeight;
+    int startY;
     int endY = surfaceHeight;
-    TerrainLayer curLayer;
     for (const auto& layer : m_descriptor.layers) {
-        if (layer.depth < 0) {
-            endY = startY;
-            startY = surfaceHeight - layer.depth;
+        startY = endY;
+        if (layer.depth == -1) {
+            endY = std::numeric_limits<int>::min();
         } else {
-            startY = endY;
             endY = startY - layer.depth;
         }
+
         if (pos.y > startY)
             break;
 

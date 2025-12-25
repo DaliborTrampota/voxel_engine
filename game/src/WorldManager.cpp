@@ -11,14 +11,15 @@
 
 
 #include "level/BiomeGenerator.h"
-#include "level/PerlinTerrainGenerator.h"
 
 
-#include "level/biome/biomes/Desert.h"
-#include "level/biome/biomes/Forest.h"
-#include "level/biome/biomes/Mountains.h"
-#include "level/biome/biomes/Plains.h"
-#include "level/biome/biomes/Swamp.h"
+#include "level/biome/biomes/AshPlains.h"
+#include "level/biome/biomes/BasaltPlateaus.h"
+#include "level/biome/biomes/CrystalFlats.h"
+#include "level/biome/biomes/FracturedBasaltFields.h"
+#include "level/biome/biomes/FrozenGasFields.h"
+#include "level/biome/biomes/SilicateSandSeas.h"
+#include "level/biome/biomes/SlateRockFields.h"
 
 #include <level/events/LevelEvents.h>
 
@@ -31,12 +32,16 @@ WorldManager::~WorldManager() {}
 
 void WorldManager::setup() {
     BiomeGenerator generator(0);
-    generator.add(std::make_unique<PlainsBiome>());
-    generator.add(std::make_unique<MountainBiome>());
-    generator.add(std::make_unique<DesertBiome>());
-    generator.add(std::make_unique<ForestBiome>());
-    generator.add(std::make_unique<SwampBiome>());
-    generator.setBlendRadius(32.0f);
+
+    generator.add(std::make_unique<AshPlainsBiome>());
+    generator.add(std::make_unique<BasaltPlateausBiome>());
+    generator.add(std::make_unique<CrystalFlatsBiome>());
+    generator.add(std::make_unique<FracturedBasaltFieldsBiome>());
+    generator.add(std::make_unique<FrozenGasFieldsBiome>());
+    generator.add(std::make_unique<SilicateSandSeasBiome>());
+    generator.add(std::make_unique<SlateRockFieldsBiome>());
+
+    generator.setBlendRadius(16.0f);
     generator.setEnableBlending(true);
 
     m_worlds[0] =
@@ -70,12 +75,12 @@ std::future<void> WorldManager::prepareWorldForSpawn(glm::vec3 pos, glm::ivec3 r
 
 
 void WorldManager::chunkUnloadEvent(engine::ChunkUnloadEvent* event) {
-    m_worldSerializer.serialize(*event->chunk);
+    m_worldSerializer.serialize(event->chunk);
     m_lastUnloadedChunks.push_back(event->chunk->id());
 }
 
 void WorldManager::chunkBeforeLoadEvent(engine::ChunkBeforeLoadEvent* event) {
-    m_worldSerializer.deserialize(*event->chunk);
+    m_worldSerializer.deserialize(event->chunk);
 
     auto it =
         std::find(m_lastUnloadedChunks.begin(), m_lastUnloadedChunks.end(), event->chunk->id());

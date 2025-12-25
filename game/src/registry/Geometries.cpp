@@ -109,12 +109,10 @@ namespace {
 }  // namespace
 
 void RegisterGeometries() {
-    // clang-format off
     RegistryManager::GeometryRegistryT& geometries = MyRegistryManager::Geometries();
 
     geometries.add(Geometry::Cube(), "cube");
-    geometries.add(Geometry::Cylinder(), "cylinder");
-    geometries.add(Pyramid(), "pyramid");
+
     geometries.add(Log(4), "log_4");
     geometries.add(Log(6), "log_6");
     geometries.add(Log(8), "log_8");
@@ -122,17 +120,16 @@ void RegisterGeometries() {
     geometries.add(Log(12), "log_12");
     geometries.add(Log(14), "log_14");
 
-    Geometry conn = loadVOX("resources/models/oak_log_connector.vox");
+    Geometry conn = loadVOX("resources/models/log_connector.vox");
     conn.rotate({0, 1, 0}, glm::pi<float>() / 2);
-    geometries.add(conn, "oak_log_connector");
-    geometries.add(loadVOX("resources/models/oak_log_branch.vox"), "oak_log_branch");
-    geometries.add(loadVOX("resources/models/cube.vox"), "cube_vox");
+
+    geometries.add(conn, "log_connector");
+    geometries.add(loadVOX("resources/models/log_branch.vox"), "log_branch");
+    geometries.add(loadVOX("resources/models/grass.vox"), "grass.vox");
 
     geometries.add(Vegetation(VegetationPattern::Cross, .5f, 1.f), "vegetation_cross");
     geometries.add(Vegetation(VegetationPattern::Square, .5f, 1.f), "vegetation_square");
     geometries.add(Vegetation(VegetationPattern::Hash, .5f, 1.f), "vegetation_hash");
-
-    // clang-format on
 }
 
 Geometry CreateRotatedGeometry(Geometry geo, glm::vec3 axis, float angle) {

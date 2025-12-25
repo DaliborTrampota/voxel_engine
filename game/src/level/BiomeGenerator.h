@@ -10,6 +10,8 @@
 
 #include <level/Chunk.h>
 
+#include "biome/BiomeDescriptor.h"
+
 using namespace engine;
 
 class Biome;
@@ -23,23 +25,17 @@ class BiomeGenerator : public ITerrainGenerator {
   public:
     BiomeGenerator(siv::PerlinNoise::seed_type seed);
 
+    int height(int x, int z);
     BlockID voxelAt(const glm::ivec3& pos) override;
+    Biome* biomeAt(int x, int z);
     void populate(Chunk& chunk) override;
 
-    // Get height at position (blended from nearby biomes)
-    int height(int x, int z) const;
 
-    // Get the dominant biome at a position
-    Biome* biomeAt(int x, int z) const;
+    void add(std::unique_ptr<Biome>&& biome);
 
-    // Get nearby biomes with blend weights (for smooth transitions)
-    std::vector<BiomeBlendData> getBiomeBlend(int x, int z, float blendRadius = 32.0f) const;
-
-    void add(std::unique_ptr<Biome> biome);
-
-    // Control blending behavior
     void setBlendRadius(float radius) { m_blendRadius = radius; }
     void setEnableBlending(bool enable) { m_enableBlending = enable; }
+    std::vector<BiomeBlendData> getBiomeBlend(int x, int z, float blendRadius = 32.0f);
 
   protected:
     PerlinNoise m_height;
@@ -47,11 +43,14 @@ class BiomeGenerator : public ITerrainGenerator {
     PerlinNoise m_concentration;
     PerlinNoise m_altitude;
 
-    //ChunkID m_chunkID;
+    Parameter m_lowAltitude = {-1.0f, -0.15f};
+    Parameter m_highAltitude = {0.35f, 1.0f};
 
-    const Registry<Block, RegistryStoragePolicy::ByPointer>& m_blockRegistry;
+    Registry<Block, RegistryStoragePolicy::ByPointer>& m_blockRegistry;
 
     std::vector<std::unique_ptr<Biome>> m_biomes;
+
+    std::vector<int> m_biomeMap;
 
     float m_blendRadius = 32.0f;
     bool m_enableBlending = true;

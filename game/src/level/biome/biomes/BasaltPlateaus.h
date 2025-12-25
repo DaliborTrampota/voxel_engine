@@ -4,16 +4,17 @@
 
 #include <data/RegistryManager.h>
 
-class MountainBiome : public Biome {
+class BasaltPlateausBiome : public Biome {
   public:
-    MountainBiome() : Biome("Mountains", {-1.0f, 0.0f}, {0.0f, 1.0f}, {0.5f, 1.0f}) {
+    BasaltPlateausBiome()
+        : Biome("BasaltPlateaus", {0.0f, 1.0f}, {-1.0f, 0.1f}, ParameterRange::Mid, 0) {
         auto& registry = RegistryManager::Blocks();
 
-        m_descriptor.heightScale = 32.0f;  // High amplitude
-        m_descriptor.heightBase = 80.0f;   // Higher base
+        m_descriptor.heightScale = 5.0f;
+        m_descriptor.heightBase = 62.0f;
 
         m_descriptor.layers.push_back(
-            {.palette = {{registry.get("stone")->getID()}, {1}}, .depth = 100, .features = {}}
+            {.palette = {{registry.get("iron_basalt")->getID()}, {1}}, .depth = -1, .features = {}}
         );
     }
     // float getHeightModifier(int x, int z, float baseHeight) const override {

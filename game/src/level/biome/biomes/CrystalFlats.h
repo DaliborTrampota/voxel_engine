@@ -4,9 +4,10 @@
 
 #include <data/RegistryManager.h>
 
-class PlainsBiome : public Biome {
+class CrystalFlatsBiome : public Biome {
   public:
-    PlainsBiome() : Biome("Plains", {-0.2f, 0.4f}, {-0.3f, 0.4f}, {-0.3f, 0.5f}) {
+    CrystalFlatsBiome()
+        : Biome("CrystalFlats", {0.4f, 1.0f}, {0.3f, 1.0f}, ParameterRange::Low, 80) {
         auto& registry = RegistryManager::Blocks();
 
         m_descriptor.heightScale = 4.0f;
@@ -22,13 +23,10 @@ class PlainsBiome : public Biome {
         // );
 
         m_descriptor.layers.push_back(
-            {.palette = {{registry.get("grass")->getID()}, {1}}, .depth = 1}
+            {.palette = {{registry.get("crystal_crust")->getID()}, {1}}, .depth = 4}
         );
         m_descriptor.layers.push_back(
-            {.palette = {{registry.get("dirt")->getID()}, {1}}, .depth = 4}
-        );
-        m_descriptor.layers.push_back(
-            {.palette = {{registry.get("stone")->getID()}, {1}}, .depth = 100}
+            {.palette = {{registry.get("slate")->getID()}, {1}}, .depth = -1}
         );
     }
 

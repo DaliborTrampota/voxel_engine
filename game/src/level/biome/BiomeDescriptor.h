@@ -60,3 +60,21 @@ struct BiomeDescriptor {
     float heightScale;
     float heightBase;
 };
+
+
+struct Parameter {
+    float min;
+    float max;
+
+    float distance(float val) const {
+        float d1 = val - max;
+        float d2 = min - val;
+        return d1 > 0 ? d1 : glm::max(d2, 0.0f);
+    }
+};
+
+enum class ParameterRange {
+    Low,
+    Mid,
+    High
+};
