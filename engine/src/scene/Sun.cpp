@@ -7,22 +7,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "../Globals.h"
-#include "../render/Engine.h"
 
 using namespace engine;
 
-Sun::Sun(
-    Engine* engine,
-    glm::ivec2 resolution,
-    const glm::vec3* targetPosition,
-    const glm::vec3& direction
-)
+Sun::Sun(glm::ivec2 resolution, const glm::vec3* targetPosition, const glm::vec3& direction)
     : m_resolution(resolution),
       m_depthShader(
           "resources/shaders/SunVert.glsl", "resources/shaders/SunFrag.glsl", "SunDepthShader"
       ),
-      m_engine(engine),
-      m_directionalShadowPass(RenderPass::DirectionalShadow),
       m_direction(direction),
       m_targetPosition(targetPosition),
       m_view(glm::mat4(1)) {
@@ -50,11 +42,6 @@ Sun::Sun(
     m_depthShader.use();
     m_depthShader.setMat4("projection", m_projection);
     m_depthShader.setInt("texArray", 0);  // Block texture array is at slot 0
-
-
-    m_engine->registerRenderPass(
-        {m_directionalShadowPass, &m_depthShader, &m_depthFBO, m_resolution}
-    );
 }
 
 // todo inline lightPosition()?
