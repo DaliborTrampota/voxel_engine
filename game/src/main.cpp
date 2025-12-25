@@ -19,6 +19,9 @@ int gameEntry() {
         std::cerr << "Failed to initialize window" << std::endl;
         return -1;
     }
+
+    std::cout << "Helo Zem!" << std ::endl;  // Vzkaz od mojí Niky <3
+
     Game game(std::move(window), window->windowSize());
     game.start();
 
