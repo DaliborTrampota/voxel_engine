@@ -95,25 +95,25 @@ void RegisterBlocks() {
                      .material(BlockMaterial().add(FaceTag::All, texMgr.texture("slate")));
 
     auto CRYSTAL_CRUST =
-        Block(14, Layers::Translucent, &geometries.get("cube"))
+        Block(14, Layers::Opaque, &geometries.get("cube"))
             .isSolid(true)
             .material(BlockMaterial().add(FaceTag::All, texMgr.texture("crystal_crust")));
 
-    auto MINERAL = Block(15, Layers::Translucent, &geometries.get("cube"))
+    auto MINERAL = Block(15, Layers::Opaque, &geometries.get("cube"))
                        .isSolid(true)
                        .material(BlockMaterial().add(FaceTag::All, texMgr.texture("mineral")));
 
-    auto GAS_ICE = Block(16, Layers::Translucent, &geometries.get("cube"))
+    auto GAS_ICE = Block(16, Layers::Opaque, &geometries.get("cube"))
                        .isSolid(true)
                        .material(BlockMaterial().add(FaceTag::All, texMgr.texture("gas_ice")));
 
     auto CO2_GAS_ICE =
-        Block(17, Layers::Translucent, &geometries.get("cube"))
+        Block(17, Layers::Opaque, &geometries.get("cube"))
             .isSolid(true)
             .material(BlockMaterial().add(FaceTag::All, texMgr.texture("co2_gas_ice")));
 
     auto O2_GAS_ICE =
-        Block(18, Layers::Translucent, &geometries.get("cube"))
+        Block(18, Layers::Opaque, &geometries.get("cube"))
             .isSolid(true)
             .material(BlockMaterial().add(FaceTag::All, texMgr.texture("o2_gas_ice")));
 
