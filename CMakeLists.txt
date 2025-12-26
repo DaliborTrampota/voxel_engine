@@ -17,13 +17,5 @@ if(USE_DEPENDENCIES)
     add_subdirectory(dependencies)
 endif()
 
-
-set(PROJECT_RUNTIME_OUTPUT_DIR "${CMAKE_BINARY_DIR}/Game/$<CONFIG>")
-
 add_subdirectory(engine)
-add_subdirectory(game)
 add_subdirectory(tests)
-
-target_include_directories(Game SYSTEM PUBLIC "${PROJECT_SOURCE_DIR}/engine/src")
-#target_include_directories(Game SYSTEM PUBLIC "${PROJECT_SOURCE_DIR}/")
-# target_include_directories(Game PRIVATE dependencies/include)
