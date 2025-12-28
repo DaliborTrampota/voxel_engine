@@ -5,8 +5,6 @@
 #include "../Globals.h"
 #include "block/Face.h"
 
-using namespace engine;
-
 namespace engine::data {
 
     enum class Side {

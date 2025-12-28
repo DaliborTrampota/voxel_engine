@@ -4,6 +4,8 @@
 #include "Globals.h"
 #include "Side.h"
 
+#include "Contexts.h"
+
 
 // #include "render/BlockMaterial.h"
 
@@ -39,6 +41,8 @@ namespace engine {
         Block(BlockID id, Layer layer, const Geometry* geo);
         Block(BlockID id, Layer layer, const Geometry* geo, RotationMode rotationMode);
         virtual ~Block() = default;
+
+        virtual bool onInteract(InteractContext* context) const { return false; };
 
         static Block& air();
         static Block& multiblock();
