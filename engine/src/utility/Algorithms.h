@@ -3,6 +3,8 @@
 #include <glm/glm.hpp>
 #include <memory>
 
+#include "block/Face.h"
+
 namespace engine {
     class Block;
     class World;
@@ -12,9 +14,11 @@ namespace engine {
     using UnaryPredicate = std::function<bool(const Block*)>;
 
     // TODO maybe add state?
+    // TODO ~change face to facetag or side~ face is now faceNormal, add support for faceTag
     struct DDAResult {
         glm::vec3 position;
-        glm::vec3 face;
+        glm::vec3 faceNormal;
+        // FaceTag faceTag;
         const Block* block;
         float distance;
         std::weak_ptr<const Chunk> chunk;

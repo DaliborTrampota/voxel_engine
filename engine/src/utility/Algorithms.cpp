@@ -57,7 +57,7 @@ DDAResult engine::DDA(
     float tDeltaY = stepY / static_cast<float>(dy);
     float tDeltaZ = stepZ / static_cast<float>(dz);
 
-    glm::vec3 face(0.0f);
+    glm::vec3 faceNormal(0.0f);
 
     length /= glm::sqrt(dx * dx + dy * dy + dz * dz);
 
@@ -68,7 +68,7 @@ DDAResult engine::DDA(
         const Block* block = chunk.lock()->getBlock(pos);
         //TODO check if we are in bounds
         if (pred(block)) {
-            return DDAResult{glm::ivec3(x, y, z), face, block, 0.f, chunk};
+            return DDAResult{glm::ivec3(x, y, z), faceNormal, block, 0.f, chunk};
         }
 
         if (tMaxX < tMaxY) {
@@ -77,13 +77,13 @@ DDAResult engine::DDA(
                     break;
                 x += stepX;
                 tMaxX += tDeltaX;
-                face = glm::vec3(-stepX, 0.0f, 0.0f);
+                faceNormal = glm::vec3(-stepX, 0.0f, 0.0f);
             } else {
                 if (tMaxZ > length)
                     break;
                 z += stepZ;
                 tMaxZ += tDeltaZ;
-                face = glm::vec3(0.0f, 0.0f, -stepZ);
+                faceNormal = glm::vec3(0.0f, 0.0f, -stepZ);
             }
         } else {
             if (tMaxY < tMaxZ) {
@@ -91,18 +91,18 @@ DDAResult engine::DDA(
                     break;
                 y += stepY;
                 tMaxY += tDeltaY;
-                face = glm::vec3(0.0f, -stepY, 0.0f);
+                faceNormal = glm::vec3(0.0f, -stepY, 0.0f);
             } else {
                 if (tMaxZ > length)
                     break;
                 z += stepZ;
                 tMaxZ += tDeltaZ;
-                face = glm::vec3(0.0f, 0.0f, -stepZ);
+                faceNormal = glm::vec3(0.0f, 0.0f, -stepZ);
             }
         }
     }  // end while
 
-    return DDAResult{{x, y, z}, face, &Block::air(), length, {}};
+    return DDAResult{{x, y, z}, faceNormal, &Block::air(), length, {}};
 }
 
 
