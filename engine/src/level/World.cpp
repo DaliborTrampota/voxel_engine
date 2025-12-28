@@ -25,6 +25,8 @@ World::World(std::unique_ptr<ITerrainGenerator> gen, uint32_t genThreads)
       ) {
     m_material.setShadowSupport(true);
     printf("World created\n");
+
+    m_generator->setWorld(this);
 }
 
 World::~World() {
