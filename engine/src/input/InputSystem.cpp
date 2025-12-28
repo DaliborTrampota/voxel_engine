@@ -17,6 +17,7 @@ InputSystem::InputSystem(GLFWwindow* window) : m_window(window) {
 }
 
 void InputSystem::beginFrame() {
+    // TODO figure out how to change state to held after a delay and not next frame
     for (int i = 0; i < m_mouseButtonStates.size(); i++) {
         if (m_mouseButtonStates[i] == Pressed) {
             m_mouseButtonStates[i] = Held;
@@ -32,21 +33,21 @@ void InputSystem::beginFrame() {
         }
     }
 
-    setAxis(Axis::MouseX, 0.0f);
-    setAxis(Axis::MouseY, 0.0f);
-    setAxis(Axis::MouseScroll, 0.0f);
+    setAxis(InputAxis::MouseX, 0.0f);
+    setAxis(InputAxis::MouseY, 0.0f);
+    setAxis(InputAxis::MouseScroll, 0.0f);
 }
 
-float InputSystem::getAxis(Axis axis) {
+float InputSystem::getAxis(InputAxis axis) {
     float value = m_axisStates[static_cast<int>(axis)];
-    if (axis == Axis::MouseX || axis == Axis::MouseY) {
+    if (axis == InputAxis::MouseX || axis == InputAxis::MouseY) {
         // Reset mouse axis after reading
         m_axisStates[static_cast<int>(axis)] = 0.0f;
     }
     return value;
 }
 
-void InputSystem::setAxis(Axis axis, float value) {
+void InputSystem::setAxis(InputAxis axis, float value) {
     m_axisStates[static_cast<int>(axis)] = value;
 }
 
@@ -58,8 +59,8 @@ void InputSystem::registerCallbacks() {
         float dx = ev.x - input->m_mouseX;
         float dy = input->m_mouseY - ev.y;  // reversed since y-coordinates go from bottom to top
 
-        input->setAxis(Axis::MouseX, dx);
-        input->setAxis(Axis::MouseY, dy);
+        input->setAxis(InputAxis::MouseX, dx);
+        input->setAxis(InputAxis::MouseY, dy);
 
         input->m_mouseX = ev.x;
         input->m_mouseY = ev.y;
@@ -105,15 +106,15 @@ void InputSystem::registerCallbacks() {
         if (glfwGetKey(w, GLFW_KEY_S) == GLFW_PRESS)
             forward += 1.0f;
 
-        input->setAxis(Axis::Sideways, sideways);
-        input->setAxis(Axis::Forward, forward);
+        input->setAxis(InputAxis::Sideways, sideways);
+        input->setAxis(InputAxis::Forward, forward);
 
         input->fireKeyboardEvent(&ev);
     });
 
     glfwSetScrollCallback(m_window, [](GLFWwindow* w, double xoffset, double yoffset) {
         InputSystem* input = static_cast<GLFWUserPointer*>(glfwGetWindowUserPointer(w))->input;
-        input->setAxis(Axis::MouseScroll, yoffset);
+        input->setAxis(InputAxis::MouseScroll, yoffset);
     });
 }
 

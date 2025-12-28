@@ -26,7 +26,7 @@ namespace engine {
             return false;
         }
         KeyState getKeyState(GLFWKey k) const;
-        float getAxis(Axis axis);
+        float getAxis(InputAxis axis);
 
         template <KeyState state>
         bool isMouse(GLFWKey k) const {
@@ -39,12 +39,12 @@ namespace engine {
 
         std::array<KeyState, GLFW_KEY_LAST + 1> m_keyStates{KeyState::None};
         std::array<KeyState, GLFW_MOUSE_BUTTON_LAST + 1> m_mouseButtonStates{KeyState::None};
-        std::array<float, static_cast<int>(Axis::End)> m_axisStates{0.0f};
+        std::array<float, static_cast<int>(InputAxis::End)> m_axisStates{0.0f};
 
         float m_mouseX = 0.0f;
         float m_mouseY = 0.0f;
 
-        void setAxis(Axis axis, float value);
+        void setAxis(InputAxis axis, float value);
 
         void registerCallbacks();
         int keyIndex(GLFWKey k) const;
