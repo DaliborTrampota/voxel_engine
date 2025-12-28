@@ -19,6 +19,14 @@ namespace engine {
         float getNormalized(float x, float y) const noexcept;
         float getClamped(float x, float y) const noexcept;
 
+        float get1D(float x) const noexcept;
+        float get1DNormalized(float x) const noexcept;
+        float get1DClamped(float x) const noexcept;
+
+        float get3D(float x, float y, float z) const noexcept;
+        float get3DNormalized(float x, float y, float z) const noexcept;
+        float get3DClamped(float x, float y, float z) const noexcept;
+
 
       private:
         siv::BasicPerlinNoise<float> m_noise;
