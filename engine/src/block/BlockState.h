@@ -54,6 +54,9 @@ namespace engine {
             return std::get<T>(it->second);
         }
 
+        void serialize(std::ostream& out) const;
+        void deserialize(std::istream& in);
+
       protected:
         glm::vec3 m_facing;
         /// @note rotation around facing axis
