@@ -11,14 +11,13 @@ namespace engine {
     class Chunk;
     class Face;
     class Geometry;
-    using UnaryPredicate = std::function<bool(const Block*)>;
+    using UnaryPredicate = std::function<bool(const Block*, const Face*)>;
 
     // TODO maybe add state?
-    // TODO ~change face to facetag or side~ face is now faceNormal, add support for faceTag
     struct DDAResult {
         glm::vec3 position;
         glm::vec3 faceNormal;
-        // FaceTag faceTag;
+        FaceTag faceTag;
         const Block* block;
         float distance;
         std::weak_ptr<const Chunk> chunk;
@@ -38,7 +37,7 @@ namespace engine {
     ) noexcept;
 
 
-    const Face* getAimedFace(Ray& ray, const Geometry& geometry) noexcept;
+    const Face* getAimedFace(const Ray& ray, const Geometry* geometry) noexcept;
 
     /// @brief Compute the intersection of a ray and a triangle
     /// @param ray The ray to intersect
@@ -47,7 +46,7 @@ namespace engine {
     /// @param vOut The v coordinate of the intersection
     /// @return The t parameter of the intersection. ray.origin + ray.direction * t or std::numeric_limits<float>::infinity() if no intersection
     /// @note This function uses the Moller-Trumbor algorithm
-    float rayTriangleIntersection(Ray& ray, Triangle& t, float& uOut, float& vOut) noexcept;
+    float rayTriangleIntersection(const Ray& ray, Triangle& t, float& uOut, float& vOut) noexcept;
 
     glm::vec3 rotatePoint(
         const glm::vec3& point,

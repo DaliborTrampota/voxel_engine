@@ -29,12 +29,11 @@ namespace {
     }
 }  // namespace
 
-// TODO return the geometry face, not just normal of a cube
 DDAResult engine::DDA(
     const World& world, glm::vec3 start, glm::vec3 direction, float length, UnaryPredicate pred
 ) noexcept {
     if (glm::all(glm::equal(direction, glm::vec3(0.0f)))) {
-        return DDAResult{start, glm::vec3(0.0f), &Block::air(), 0.f, {}};
+        return DDAResult{start, glm::vec3(0.0f), FaceTag::All, &Block::air(), 0.f, {}};
     }
 
     int x = glm::floor(start.x);
@@ -63,12 +62,15 @@ DDAResult engine::DDA(
 
     // TODO condition should be world bound check
     while (true) {
-        glm::ivec3 pos = glm::ivec3(x, y, z);
-        std::weak_ptr<const Chunk> chunk = world.getChunk(extractChunkCoords(pos));
-        const Block* block = chunk.lock()->getBlock(pos);
+        glm::ivec3 localPos = glm::ivec3(x, y, z);
+        std::weak_ptr<const Chunk> chunk = world.getChunk(extractChunkCoords(localPos));
+        const Block* block = chunk.lock()->getBlock(localPos);
         //TODO check if we are in bounds
-        if (pred(block)) {
-            return DDAResult{glm::ivec3(x, y, z), faceNormal, block, 0.f, chunk};
+
+        const Face* aimedFace =
+            getAimedFace({start - glm::vec3(x, y, z), direction}, block->geometry());
+        if (pred(block, aimedFace)) {
+            return DDAResult{glm::ivec3(x, y, z), faceNormal, aimedFace->tag, block, 0.f, chunk};
         }
 
         if (tMaxX < tMaxY) {
@@ -102,11 +104,13 @@ DDAResult engine::DDA(
         }
     }  // end while
 
-    return DDAResult{{x, y, z}, faceNormal, &Block::air(), length, {}};
+    return DDAResult{{x, y, z}, faceNormal, FaceTag::All, &Block::air(), length, {}};
 }
 
 
-float engine::rayTriangleIntersection(Ray& ray, Triangle& t, float& uOut, float& vOut) noexcept {
+float engine::rayTriangleIntersection(
+    const Ray& ray, Triangle& t, float& uOut, float& vOut
+) noexcept {
     glm::vec3 e1 = t.p2 - t.p1;
     glm::vec3 e2 = t.p3 - t.p1;
 
@@ -114,15 +118,15 @@ float engine::rayTriangleIntersection(Ray& ray, Triangle& t, float& uOut, float&
     float det = glm::dot(e1, p);
 
     // TODO
-#if CULL_BACKFACES
+    //#if CULL_BACKFACES
     if (det < epsilon) {
         return std::numeric_limits<float>::infinity();
     }
-#else
-    if (glm::abs(det) < epsilon) {
-        return std::numeric_limits<float>::infinity();
-    }
-#endif
+    //#else
+    //    if (glm::abs(det) < epsilon) {
+    //        return std::numeric_limits<float>::infinity();
+    //    }
+    //#endif
     float d_inv = 1.0 / det;
     glm::vec3 q = ray.origin - t.p1;
     float u = d_inv * glm::dot(q, p);
@@ -139,12 +143,14 @@ float engine::rayTriangleIntersection(Ray& ray, Triangle& t, float& uOut, float&
     return d_inv * glm::dot(e2, r);
 }
 
-const Face* engine::getAimedFace(Ray& ray, const Geometry& geometry) noexcept {
+const Face* engine::getAimedFace(const Ray& ray, const Geometry* geometry) noexcept {
+    if (!geometry)
+        return nullptr;
     struct {
         float minT = std::numeric_limits<float>::infinity();
         const Face* face = nullptr;
     } best;
-    for (const auto& face : geometry.faces()) {
+    for (const auto& face : geometry->faces()) {
         for (int i = 0; i < face.vertices.size(); i += 3) {
             Triangle trig = {
                 face.vertices[i].pos, face.vertices[i + 1].pos, face.vertices[i + 2].pos
