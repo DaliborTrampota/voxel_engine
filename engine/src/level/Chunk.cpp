@@ -62,7 +62,7 @@ bool Chunk::generateMesh() {
     for (int x = 0; x < Chunk::Dims.x; x++) {
         for (int y = 0; y < Chunk::Dims.y; y++) {
             for (int z = 0; z < Chunk::Dims.z; z++) {
-                if (m_data(x, y, z) == 0)
+                if (m_data.getBlock({x, y, z}) == Block::AirID)
                     continue;
 
                 glm::ivec3 pos(x, y, z);
@@ -103,6 +103,14 @@ const Block* Chunk::getBlock(glm::ivec3 pos) const {
     BlockID blockID = !m_data.populated
                           ? m_world->m_generator->voxelAt(pos + m_coords * Chunk::Dims)
                           : m_data.getBlock(pos);
+    return RegistryManager::Blocks().get(blockID);
+}
+
+const Block* Chunk::getBlock(glm::ivec3 pos, const BlockState*& state) const {
+    state = nullptr;
+    BlockID blockID = !m_data.populated
+                          ? m_world->m_generator->voxelAt(pos + m_coords * Chunk::Dims)
+                          : m_data.getBlockAndState(pos, state);
     return RegistryManager::Blocks().get(blockID);
 }
 
@@ -188,7 +196,7 @@ void Chunk::generateMeshForGeometry(const MeshGenContext& ctx) {
 
         f.translate(ctx.posInChunk);
 
-        const int material = ctx.block->material().forTag(f.tag);
+        const TexID material = ctx.block->material().forTag(f.tag);
         for (Vertex v : f.vertices) {
             v.data(material, 0);
             ctx.storage.add(v);

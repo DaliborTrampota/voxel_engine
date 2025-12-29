@@ -212,8 +212,7 @@ BlockID World::getBlockID(
         return InvalidBlockID;
     }
 
-    state = chunk->second->m_data.getState(pos);
-    return chunk->second->m_data.getBlock(pos);
+    return chunk->second->m_data.getBlockAndState(pos, state);
 }
 
 BlockID World::getBlockID(glm::vec3 pos, BlockState*& state, bool fallbackToGenerator) {
@@ -225,8 +224,7 @@ BlockID World::getBlockID(glm::vec3 pos, BlockState*& state, bool fallbackToGene
         return InvalidBlockID;
     }
 
-    state = chunk->second->m_data.getState(pos);
-    return chunk->second->m_data.getBlock(pos);
+    return chunk->second->m_data.getBlockAndState(pos, state);
 }
 
 bool World::canSeeFace(const Block& curBlock, glm::vec3 pos, glm::ivec3 dir) const {

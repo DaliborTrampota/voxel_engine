@@ -61,6 +61,7 @@ namespace engine {
 
 
         const Block* getBlock(glm::ivec3 pos) const;
+        const Block* getBlock(glm::ivec3 pos, const BlockState*& state) const;
 
         /// @return ChunkData structure containing all the block/terrain data.
         ChunkData& data() { return m_data; }

@@ -60,7 +60,7 @@ DDAResult engine::DDA(
 
     length /= glm::sqrt(dx * dx + dy * dy + dz * dz);
 
-    // TODO condition should be world bound check
+    // TODO condition should be world bound check, maybe loaded chunks check?
     while (true) {
         glm::ivec3 localPos = glm::ivec3(x, y, z);
         std::weak_ptr<const Chunk> chunk = world.getChunk(extractChunkCoords(localPos));

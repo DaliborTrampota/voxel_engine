@@ -1,3 +1,6 @@
+- rename interface classes to IClass
+- support to register axies in input system
+
 - geometry and compute shaders
     - grass/foliage?
     

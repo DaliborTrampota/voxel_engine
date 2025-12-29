@@ -5,13 +5,24 @@
 #include <string>
 #include <unordered_map>
 
+#include "../Globals.h"
+
 namespace engine {
 
     class TextureManager {
       public:
-        void add(std::string&& name, unsigned int id) { m_textures.emplace(name, id); }
+        void add(std::string&& name, TexID id) { m_textures.emplace(name, id); }
 
-        unsigned int texture(std::string name) { return m_textures.at(name); }
+        TexID texture(std::string name) { return m_textures.at(name); }
+
+        std::string getTextureName(TexID id) {
+            for (const auto& [name, texture] : m_textures) {
+                if (texture == id) {
+                    return name;
+                }
+            }
+            return "";
+        }
 
         static TextureManager& Get() {
             static TextureManager instance;
@@ -20,6 +31,6 @@ namespace engine {
 
       private:
         TextureManager() = default;
-        std::unordered_map<std::string, unsigned int> m_textures;
+        std::unordered_map<std::string, TexID> m_textures;
     };
 }  // namespace engine
