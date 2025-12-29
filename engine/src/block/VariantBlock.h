@@ -4,7 +4,6 @@
 #include <block/Geometry.h>
 
 #include <initializer_list>
-#include <unordered_set>
 #include <vector>
 
 namespace engine {
@@ -25,13 +24,18 @@ namespace engine {
         /// @brief A condition is a direction and a set of block IDs.
         /// @property direction The direction of the condition check
         /// @property blockIDs Possible block IDs for the direction. Only .
+        /// @property requiredFacings Optional set of facing directions that the neighboring block must match.
+        ///           If empty, any rotation is accepted. If set, the neighbor's facing must match one of these.
         /// @note The block IDs must be present in the direction for the variant to be used.
+        /// @note If requiredFacings is set, the neighbor must have a BlockState with a matching facing direction.
         struct Condition {
             Side direction;
             std::vector<BlockID> blockIDs;  // unordered_set is more correct, but vector is faster
+            std::vector<glm::vec3> requiredFacings;  // Optional: if empty, any rotation is valid
 
             bool operator==(const Condition& other) const {
-                return direction == other.direction && blockIDs == other.blockIDs;
+                return direction == other.direction && blockIDs == other.blockIDs &&
+                       requiredFacings == other.requiredFacings;
             }
         };
 
@@ -56,7 +60,15 @@ namespace engine {
             BlockID up;
             BlockID down;
 
+            glm::vec3 northFacing;
+            glm::vec3 southFacing;
+            glm::vec3 eastFacing;
+            glm::vec3 westFacing;
+            glm::vec3 upFacing;
+            glm::vec3 downFacing;
+
             BlockID operator[](Side direction) const;
+            glm::vec3 getFacing(Side direction) const;
             void rotate(Side from, Side to);
         };
 
@@ -107,5 +119,9 @@ namespace engine {
         std::vector<Variant> m_variants;
         bool m_allowMultiple = false;
         bool m_alwaysUseBaseGeometry = false;
+
+        bool checkConditions(
+            const std::vector<Condition>& conditions, const Neighbours& neighbours
+        ) const;
     };
 }  // namespace engine

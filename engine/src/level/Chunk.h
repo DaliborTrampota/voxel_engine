@@ -1,16 +1,12 @@
 #pragma once
 
 #include <glm/glm.hpp>
-
 #include <iostream>
-#include <thread>
-#include <unordered_map>
-#include <vector>
-
 
 #include "ChunkData.h"
 #include "block/Block.h"
 #include "block/BlockState.h"
+#include "block/VariantBlock.h"
 #include "block/Vertex.h"
 #include "render/Renderable.h"
 
@@ -74,6 +70,8 @@ namespace engine {
         /// @brief Renders the chunk.
         /// @param pass Pass == 0 will render the whole chunk, pass == 1 will render opaque blocks, pass == 2 will render transparent blocks.
         void render(Engine& engine, const Camera* camera, int pass) override;
+
+        VariantBlock::Neighbours getNeighbouringBlocks(glm::ivec3 pos) const;
 
       protected:
         struct GeometryState {

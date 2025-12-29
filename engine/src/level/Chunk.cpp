@@ -226,15 +226,7 @@ void Chunk::generateMeshForBlock(
     const BlockState* state,
     const glm::ivec3& chunkBlockCoords
 ) {
-    VariantBlock::Neighbours neighboringBlocks = {
-        .north = getBlock(pos + INORTH)->getID(),
-        .south = getBlock(pos - INORTH)->getID(),
-        .east = getBlock(pos + IEAST)->getID(),
-        .west = getBlock(pos - IEAST)->getID(),
-        .up = getBlock(pos + IUP)->getID(),
-        .down = getBlock(pos - IUP)->getID(),
-    };
-
+    VariantBlock::Neighbours neighboringBlocks = getNeighbouringBlocks(pos);
     // TODO somehow distinguish between opaque and transparent geometries? or just use the base block layer?
     gl::Attributes<Vertex>& storage =
         block->layer() == Layers::Opaque ? m_backOpaqueVertData : m_backTransparentVertData;
@@ -273,4 +265,29 @@ void Chunk::generateMeshForBlock(
             chunkBlockCoords
         );
     }
+}
+
+VariantBlock::Neighbours Chunk::getNeighbouringBlocks(glm::ivec3 pos) const {
+    BlockState* northState = nullptr;
+    BlockState* southState = nullptr;
+    BlockState* eastState = nullptr;
+    BlockState* westState = nullptr;
+    BlockState* upState = nullptr;
+    BlockState* downState = nullptr;
+
+    glm::ivec3 chPos = position();
+    return {
+        .north = m_world->getBlockID(chPos + pos + INORTH, northState, false),
+        .south = m_world->getBlockID(chPos + pos - INORTH, southState, false),
+        .east = m_world->getBlockID(chPos + pos + IEAST, eastState, false),
+        .west = m_world->getBlockID(chPos + pos - IEAST, westState, false),
+        .up = m_world->getBlockID(chPos + pos + IUP, upState, false),
+        .down = m_world->getBlockID(chPos + pos - IUP, downState, false),
+        .northFacing = northState ? northState->facing() : glm::vec3(0.0f),
+        .southFacing = southState ? southState->facing() : glm::vec3(0.0f),
+        .eastFacing = eastState ? eastState->facing() : glm::vec3(0.0f),
+        .westFacing = westState ? westState->facing() : glm::vec3(0.0f),
+        .upFacing = upState ? upState->facing() : glm::vec3(0.0f),
+        .downFacing = downState ? downState->facing() : glm::vec3(0.0f),
+    };
 }
