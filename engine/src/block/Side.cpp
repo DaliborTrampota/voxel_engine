@@ -4,7 +4,7 @@
 
 using namespace engine;
 
-glm::vec3 engine::sideDirection(Side side) {
+glm::ivec3 engine::sideDirection(Side side) {
     switch (side) {
         case Side::North: return NORTH;
         case Side::South: return -NORTH;

@@ -10,12 +10,12 @@ namespace engine {
         All = 0,
         Side,
 
+        Front,
+        Right,
+        Back,
+        Left,
         Top,
         Bottom,
-        Right,
-        Left,
-        Front,
-        Back,
 
         Tag1,
         Tag2,

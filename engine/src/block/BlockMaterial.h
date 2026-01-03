@@ -21,8 +21,8 @@ namespace engine {
             }
 
             if (tag == FaceTag::Side) {
-                for (int i = static_cast<size_t>(FaceTag::Right);
-                     i <= static_cast<size_t>(FaceTag::Back);
+                for (int i = static_cast<size_t>(FaceTag::Front);
+                     i <= static_cast<size_t>(FaceTag::Left);
                      i++)
                     m_textures[i] = texture;
             }

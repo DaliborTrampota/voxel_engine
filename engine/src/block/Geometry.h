@@ -28,6 +28,7 @@ namespace engine {
         /// @brief Returns the geometry for basic cube. (1x1x1)
         static Geometry Cube();
         static Geometry Cylinder();
+        static Geometry Box(glm::vec3 start, glm::vec3 end);
 
       private:
         static inline unsigned int s_idCounter = 0;
