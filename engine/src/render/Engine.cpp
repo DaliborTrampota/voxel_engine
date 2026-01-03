@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <format>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <memory>
@@ -17,6 +18,7 @@
 #include "render/Renderable.h"
 #include "scene/Camera.h"
 #include "scene/Sun.h"
+#include "scene/Tickable.h"
 #include "scene/Updateable.h"
 #include "utility/UtilityShaders.h"
 
@@ -244,12 +246,26 @@ void Engine::render(GroupRenderContext& ctx, const RenderPass* renderPass) const
 }
 
 void Engine::fireUpdate(float dt) {
+    m_tickAccumulator += dt;
+    bool tick = m_tickAccumulator >= TickRate;
+
     for (auto it = m_updateSubscribers.begin(); it != m_updateSubscribers.end();) {
         if (auto subscriber = it->lock()) {
             subscriber->update(dt);
             ++it;
         } else {
             it = m_updateSubscribers.erase(it);  // clean up expired
+        }
+    }
+    if (tick) {
+        m_tickAccumulator -= TickRate;
+        for (auto it = m_tickSubscribers.begin(); it != m_tickSubscribers.end();) {
+            if (auto subscriber = it->lock()) {
+                subscriber->tick(TickRate);
+                ++it;
+            } else {
+                it = m_tickSubscribers.erase(it);  // clean up expired
+            }
         }
     }
 }
