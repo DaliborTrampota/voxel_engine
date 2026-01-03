@@ -43,7 +43,7 @@ void AABB::moveAxis(int axis, float amount) {
 
 void AABB::position(const glm::vec3& pos) {
     glm::vec3 center = this->center();
-    center.y = max.y;
+    center.y = min.y;
     glm::vec3 offset = pos - center;
     move(offset);
 }

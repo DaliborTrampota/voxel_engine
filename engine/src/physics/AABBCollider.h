@@ -52,7 +52,8 @@ namespace engine {
         /// @brief Checks if the AABB collides with any blocks in the world.
         /// @param moveStep The move delta or velocity of the AABB. The components will be modified to reflect the collision response.
         /// @param position The position of the AABB feet. Based on this surrounding AABBs will be generated.
-        CollisionInfo collide(glm::vec3& moveStep, const glm::vec3& position);
+        /// @param dt The delta time since the last collision check.
+        CollisionInfo collide(glm::vec3& moveStep, const glm::vec3& position, float dt);
 
       protected:
         /// @brief The box around the AABB that will be generated, thus checked for collisions against the world.
@@ -64,12 +65,13 @@ namespace engine {
         std::shared_ptr<AABB> m_aabb;
         float m_stepHeight;
         float m_height;
-        //float m_groundedHeight = 0.1f;  // The height at which the AABB is considered grounded.
 
-        std::vector<AABB> m_aabbCache;  // Cached world AABBs around the AABB.
-        glm::ivec3
-            m_lastPosition;  // The last position of the AABB thus where the aabbCache is generated.
-        glm::vec3 m_cacheDirection;  // The direction in which the AABB cache is generated.
+        std::vector<AABB> m_aabbCache;
+        glm::ivec3 m_lastPosition;
+        // TODO remove or implement. Should be indicating the direction/velocity for which the AABB cache is generated.
+        glm::vec3 m_cacheDirection;
+
+        float m_stepUpCooldown = 0.0f;
 
 
         struct SweptResult {
