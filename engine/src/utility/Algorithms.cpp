@@ -64,8 +64,10 @@ DDAResult engine::DDA(
     while (true) {
         glm::ivec3 localPos = glm::ivec3(x, y, z);
         std::weak_ptr<const Chunk> chunk = world.getChunk(extractChunkCoords(localPos));
-        const Block* block = chunk.lock()->getBlock(localPos);
-        //TODO check if we are in bounds
+
+        const BlockState* state;
+        const Block* block = chunk.lock()->getBlock(localPos, state);
+        //TODO check if we are in bounds?
 
         const Face* aimedFace =
             getAimedFace({start - glm::vec3(x, y, z), direction}, block->geometry());

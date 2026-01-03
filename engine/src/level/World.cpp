@@ -70,7 +70,7 @@ std::future<void> World::loadChunks(const glm::ivec3& from, const glm::ivec3& to
                         continue;
                     }
 
-                    auto chunk = std::make_shared<Chunk>(this, id);
+                    auto chunk = createChunk(id);
                     m_chunks.emplace(id, chunk);
 
                     jobs.push_back([this, id, chunk] {
@@ -203,7 +203,7 @@ std::weak_ptr<const Chunk> World::getChunk(const ChunkID& id) const {
 }
 
 BlockID World::getBlockID(
-    const ChunkID& chID, const glm::ivec3& pos, BlockState*& state, bool fallbackToGenerator
+    const ChunkID& chID, const glm::ivec3& pos, bool fallbackToGenerator, BlockState** state
 ) {
     auto chunk = m_chunks.find(chID);
     if (chunk == m_chunks.end() || !chunk->second->generated()) {
@@ -211,11 +211,13 @@ BlockID World::getBlockID(
             return m_generator->voxelAt(pos);
         return InvalidBlockID;
     }
-
-    return chunk->second->m_data.getBlockAndState(pos, state);
+    if (state) {
+        return chunk->second->m_data.getBlockAndState(pos, *state);
+    }
+    return chunk->second->m_data.getBlock(pos);
 }
 
-BlockID World::getBlockID(glm::vec3 pos, BlockState*& state, bool fallbackToGenerator) {
+BlockID World::getBlockID(glm::vec3 pos, bool fallbackToGenerator, BlockState** state) {
     ChunkID chID = extractChunkCoords(pos);
     auto chunk = m_chunks.find(chID);
     if (chunk == m_chunks.end() || !chunk->second->generated()) {
@@ -223,8 +225,10 @@ BlockID World::getBlockID(glm::vec3 pos, BlockState*& state, bool fallbackToGene
             return m_generator->voxelAt(pos);
         return InvalidBlockID;
     }
-
-    return chunk->second->m_data.getBlockAndState(pos, state);
+    if (state) {
+        return chunk->second->m_data.getBlockAndState(pos, *state);
+    }
+    return chunk->second->m_data.getBlock(pos);
 }
 
 bool World::canSeeFace(const Block& curBlock, glm::vec3 pos, glm::ivec3 dir) const {
@@ -404,4 +408,8 @@ void World::update(float dt) {
     for (const ChunkID& id : dirtyChunks) {
         updateChunk(id);
     }
+}
+
+std::shared_ptr<Chunk> World::createChunk(const ChunkID& id) {
+    return std::make_shared<Chunk>(this, id);
 }

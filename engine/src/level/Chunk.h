@@ -74,7 +74,17 @@ namespace engine {
 
         VariantBlock::Neighbours getNeighbouringBlocks(glm::ivec3 pos) const;
 
+        /// @section Events
+
+        virtual void afterGenerated() {}
+
+
       protected:
+        World* m_world;
+        ChunkID m_coords;
+        ChunkData m_data;
+        bool m_dirty = false;
+
         struct GeometryState {
             glm::vec3 axis;
             float angle;
@@ -112,10 +122,6 @@ namespace engine {
         );
 
       private:
-        World* m_world;
-        ChunkID m_coords;
-
-        ChunkData m_data;
         gl::Attributes<Vertex> m_opaqueVertData;
         gl::Attributes<Vertex> m_transparentVertData;
         gl::Attributes<Vertex> m_backOpaqueVertData;
@@ -123,7 +129,6 @@ namespace engine {
 
         bool m_generated = false;
         std::atomic_bool m_generatingMesh = false;
-        bool m_dirty = false;
 
         friend class World;
     };

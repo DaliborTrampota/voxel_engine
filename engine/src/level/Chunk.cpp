@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <iostream>
 #include <ranges>
 
 #include <LWGL/buffer/Attributes.h>
@@ -88,14 +89,16 @@ bool Chunk::generateMesh() {
             }
         }
     }
-    m_generatingMesh = false;
 
     m_backOpaqueVertData.vertexData().shrink_to_fit();
     m_backTransparentVertData.vertexData().shrink_to_fit();
-    m_opaqueVertData = std::move(m_backOpaqueVertData);
-    m_transparentVertData = std::move(m_backTransparentVertData);
+
+    m_opaqueVertData.swapData(m_backOpaqueVertData);
+    m_transparentVertData.swapData(m_backTransparentVertData);
 
     m_generated = true;
+    m_generatingMesh = false;
+    afterGenerated();
     return true;
 }
 
@@ -119,6 +122,13 @@ void Chunk::render(Engine& engine, const Camera* camera, int pass) {
     if (!m_generated) {
         return;
     }
+
+    //TODO chunk culling
+    // ChunkID cameraChunk = getChunkID(camera->position());
+    // glm::vec3 chunkDir = glm::normalize(glm::vec3(cameraChunk - m_coords));
+    // if (glm::dot(chunkDir, camera->lookDirection()) > 0) {
+    //     return;
+    // }
 
     RenderContext ctx;
     ctx.setModelMatrix(m_coords * Chunk::Dims);
@@ -285,12 +295,12 @@ VariantBlock::Neighbours Chunk::getNeighbouringBlocks(glm::ivec3 pos) const {
 
     glm::ivec3 chPos = position();
     return {
-        .north = m_world->getBlockID(chPos + pos + INORTH, northState, false),
-        .south = m_world->getBlockID(chPos + pos - INORTH, southState, false),
-        .east = m_world->getBlockID(chPos + pos + IEAST, eastState, false),
-        .west = m_world->getBlockID(chPos + pos - IEAST, westState, false),
-        .up = m_world->getBlockID(chPos + pos + IUP, upState, false),
-        .down = m_world->getBlockID(chPos + pos - IUP, downState, false),
+        .north = m_world->getBlockID(chPos + pos + INORTH, false, &northState),
+        .south = m_world->getBlockID(chPos + pos - INORTH, false, &southState),
+        .east = m_world->getBlockID(chPos + pos + IEAST, false, &eastState),
+        .west = m_world->getBlockID(chPos + pos - IEAST, false, &westState),
+        .up = m_world->getBlockID(chPos + pos + IUP, false, &upState),
+        .down = m_world->getBlockID(chPos + pos - IUP, false, &downState),
         .northFacing = northState ? northState->facing() : glm::vec3(0.0f),
         .southFacing = southState ? southState->facing() : glm::vec3(0.0f),
         .eastFacing = eastState ? eastState->facing() : glm::vec3(0.0f),
