@@ -125,7 +125,6 @@ namespace engine {
         std::atomic_bool m_generatingMesh = false;
         bool m_dirty = false;
 
-        friend class Engine;
         friend class World;
     };
 

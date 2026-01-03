@@ -115,6 +115,9 @@ namespace engine {
         MultiBlock* getMultiBlock(const ChunkID& chID, const glm::ivec3& pos);
         MultiBlock* getMultiBlock(glm::ivec3 pos);
 
+        /// @brief Gets the terrain generator for this world.
+        /// @return Pointer to the terrain generator.
+        const ITerrainGenerator* getGenerator() const { return m_generator.get(); }
 
         virtual void render(Engine& engine, const Camera* camera, int pass = 0) override;
         virtual void update(float dt) override;
@@ -133,7 +136,6 @@ namespace engine {
         ThreadPool m_genPool;
 
         friend class Chunk;
-        friend class Engine;
 
       private:
         void updateChunk(ChunkID id);

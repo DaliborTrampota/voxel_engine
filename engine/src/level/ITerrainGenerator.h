@@ -13,6 +13,7 @@ namespace engine {
         virtual ~ITerrainGenerator() = default;
 
         virtual BlockID voxelAt(const glm::ivec3& pos) = 0;
+        virtual int height(int x, int z) const = 0;
         virtual void populate(Chunk& chunk) = 0;
 
         void setWorld(World* world) { m_world = world; }
