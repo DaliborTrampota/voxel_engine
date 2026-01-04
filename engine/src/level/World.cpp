@@ -332,6 +332,8 @@ void World::setBlock(
     }
     chunk->m_dirty = true;
     checkAndUpdateSurroundingChunks(chID, pos);
+
+    afterBlockSet(pos, blockID, state.has_value() ? chunk->m_data.getState(pos) : nullptr);
 }
 
 void World::setBlock(glm::ivec3 pos, BlockID blockID, std::optional<BlockState> state) {
@@ -349,6 +351,8 @@ void World::setBlock(const ChunkID& chID, const glm::ivec3& pos, MultiBlock&& mu
     chunk->m_data.setMultiBlock(pos, std::move(multiBlock));
     chunk->m_dirty = true;
     checkAndUpdateSurroundingChunks(chID, pos);
+
+    afterBlockSet(pos, Block::MultiblockID, nullptr);
 }
 
 MultiBlock* World::getMultiBlock(const ChunkID& chID, const glm::ivec3& pos) {

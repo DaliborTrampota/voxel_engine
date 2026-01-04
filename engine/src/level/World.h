@@ -145,6 +145,12 @@ namespace engine {
         const Material& getMaterial() const { return m_material; }
         Skybox& getSkybox() { return m_skybox; }
 
+        /// @section Events
+
+
+        virtual void afterBlockSet(const glm::ivec3& pos, BlockID blockID, const BlockState* state) {
+        }
+
       protected:
         std::unordered_map<ChunkID, std::shared_ptr<Chunk>> m_chunks;
         std::unordered_set<ChunkID> m_loadedChunks;

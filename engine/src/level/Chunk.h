@@ -75,7 +75,7 @@ namespace engine {
         VariantBlock::Neighbours getNeighbouringBlocks(glm::ivec3 pos) const;
 
         /// @section Events
-
+        virtual void afterPopulate() {}
         virtual void afterGenerated() {}
 
 

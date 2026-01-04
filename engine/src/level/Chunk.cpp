@@ -42,6 +42,7 @@ void Chunk::generate() {
 
     m_world->m_generator->populate(*this);
     m_data.populated = true;
+    afterPopulate();
 }
 
 bool Chunk::generateMesh() {
