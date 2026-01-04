@@ -101,4 +101,17 @@ namespace engine {
         );
     };
 
+    constexpr FaceTag IterateFaces[6] = {
+        FaceTag::Front, FaceTag::Right, FaceTag::Back, FaceTag::Left, FaceTag::Top, FaceTag::Bottom
+    };
+
+    constexpr FaceTag IterateXZFaces[4] = {
+        FaceTag::Front,
+        FaceTag::Right,
+        FaceTag::Back,
+        FaceTag::Left,
+    };
+
+    constexpr FaceTag IterateYFaces[2] = {FaceTag::Top, FaceTag::Bottom};
+
 }  // namespace engine
