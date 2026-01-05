@@ -41,6 +41,7 @@ namespace engine {
       public:
         static inline glm::ivec3 Dims{16, 16, 16};
 
+        Chunk(World* world, ChunkID coords, glm::ivec3 dims);
         Chunk(World* world, ChunkID coords);
         Chunk(Chunk&) = delete;
         Chunk(Chunk&&) = delete;
@@ -48,10 +49,15 @@ namespace engine {
 
         /// @return ID or coordinates of the chunk in the world.
         const ChunkID& id() const { return m_coords; }
-        glm::ivec3 position() const { return m_coords * Dims; }
+        glm::ivec3 position() const { return m_coords * m_dims; }
+
+        /// @brief Get the dimensions of this chunk type.
+        /// @return The dimensions (x, y, z) of the chunk.
+        /// @note Override this in derived classes to provide custom chunk dimensions.
+        virtual glm::ivec3 dims() const { return m_dims; }
 
         /// @brief Generates the chunk data per TerrainGenerator if not generated yet.
-        void generate();
+        void populateVoxelData();
         bool generated() const { return m_generated; }
 
         /// @brief Generates the mesh data for the chunk.
@@ -83,6 +89,8 @@ namespace engine {
         World* m_world;
         ChunkID m_coords;
         ChunkData m_data;
+        // TODO duplicate information, its also in world
+        glm::ivec3 m_dims;
         bool m_dirty = false;
 
         struct GeometryState {

@@ -18,10 +18,11 @@ BlockID FlatTerrainGenerator::voxelAt(const glm::ivec3& pos) {
 
 void FlatTerrainGenerator::populate(Chunk& chunk) {
     auto& data = chunk.data();
-    auto chunkCoords = chunk.id() * Chunk::Dims;
-    for (int x = 0; x < Chunk::Dims.x; ++x) {
-        for (int y = 0; y < Chunk::Dims.y; ++y) {
-            for (int z = 0; z < Chunk::Dims.z; ++z) {
+    glm::ivec3 chunkDims = chunk.dims();
+    auto chunkCoords = chunk.id() * chunkDims;
+    for (int x = 0; x < chunkDims.x; ++x) {
+        for (int y = 0; y < chunkDims.y; ++y) {
+            for (int z = 0; z < chunkDims.z; ++z) {
                 BlockID blockID = voxelAt(glm::ivec3(x, y, z) + chunkCoords);
                 if (blockID != 0) {
                     data.setBlock({x, y, z}, blockID);

@@ -34,7 +34,12 @@ namespace engine {
                   public LevelEventSource {
       public:
         World(std::unique_ptr<ITerrainGenerator> gen, uint32_t genThreads = 8);
+        World(std::unique_ptr<ITerrainGenerator> gen, glm::ivec3 chunkDims, uint32_t genThreads = 8);
         ~World();
+
+        /// @brief Get the chunk dimensions for this world.
+        /// @return The dimensions of chunks in this world.
+        glm::ivec3 chunkDims() const { return m_chunkDims; }
 
         /// @section Chunk management
 
@@ -155,6 +160,7 @@ namespace engine {
         std::unordered_map<ChunkID, std::shared_ptr<Chunk>> m_chunks;
         std::unordered_set<ChunkID> m_loadedChunks;
         std::unique_ptr<ITerrainGenerator> m_generator = nullptr;
+        glm::ivec3 m_chunkDims;
 
         Material m_material;
         Skybox m_skybox;

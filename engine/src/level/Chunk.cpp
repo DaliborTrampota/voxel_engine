@@ -20,10 +20,11 @@
 
 using namespace engine;
 
-Chunk::Chunk(World* world, ChunkID coords)
+Chunk::Chunk(World* world, ChunkID coords, glm::ivec3 dims)
     : m_world(world),
       m_coords(coords),
-      m_data(Chunk::Dims),
+      m_data(dims),
+      m_dims(dims),
       m_opaqueVertData(GL_DYNAMIC_DRAW),
       m_transparentVertData(GL_DYNAMIC_DRAW),
       m_backOpaqueVertData(GL_DYNAMIC_DRAW),
@@ -34,9 +35,11 @@ Chunk::Chunk(World* world, ChunkID coords)
     m_backTransparentVertData.create();
 }
 
+Chunk::Chunk(World* world, ChunkID coords) : Chunk(world, coords, Chunk::Dims) {}
+
 Chunk::~Chunk() {}
 
-void Chunk::generate() {
+void Chunk::populateVoxelData() {
     if (m_generated || m_data.populated)
         return;
 
@@ -50,20 +53,20 @@ bool Chunk::generateMesh() {
     if (!m_generatingMesh.compare_exchange_strong(expected, true))
         return false;
 
-    glm::ivec3 chunkBlockCoords = m_coords * Chunk::Dims;
+    glm::ivec3 chunkBlockCoords = m_coords * m_dims;
     m_backOpaqueVertData.clear();
     m_backTransparentVertData.clear();
 
     m_backOpaqueVertData.reserve(
-        Chunk::Dims.x * Chunk::Dims.y * 8 * 6
-    );  // 16x16x8x6 faces (6 vertices per face) the 8 is taking into account height variation
+        m_dims.x * m_dims.y * 8 * 6
+    );  // dims.x*dims.y*8*6 faces (6 vertices per face) the 8 is taking into account height variation
     m_backTransparentVertData.reserve(
-        Chunk::Dims.x * Chunk::Dims.y * 6
-    );  // 16x16x6 faces (6 vertices per face) less transparent blocks
+        m_dims.x * m_dims.y * 6
+    );  // dims.x*dims.y*6 faces (6 vertices per face) less transparent blocks
 
-    for (int x = 0; x < Chunk::Dims.x; x++) {
-        for (int y = 0; y < Chunk::Dims.y; y++) {
-            for (int z = 0; z < Chunk::Dims.z; z++) {
+    for (int x = 0; x < m_dims.x; x++) {
+        for (int y = 0; y < m_dims.y; y++) {
+            for (int z = 0; z < m_dims.z; z++) {
                 if (m_data.getBlock({x, y, z}) == Block::AirID)
                     continue;
 
@@ -104,17 +107,15 @@ bool Chunk::generateMesh() {
 }
 
 const Block* Chunk::getBlock(glm::ivec3 pos) const {
-    BlockID blockID = !m_data.populated
-                          ? m_world->m_generator->voxelAt(pos + m_coords * Chunk::Dims)
-                          : m_data.getBlock(pos);
+    BlockID blockID = !m_data.populated ? m_world->m_generator->voxelAt(pos + m_coords * m_dims)
+                                        : m_data.getBlock(pos);
     return RegistryManager::Blocks().get(blockID);
 }
 
 const Block* Chunk::getBlock(glm::ivec3 pos, const BlockState*& state) const {
     state = nullptr;
-    BlockID blockID = !m_data.populated
-                          ? m_world->m_generator->voxelAt(pos + m_coords * Chunk::Dims)
-                          : m_data.getBlockAndState(pos, state);
+    BlockID blockID = !m_data.populated ? m_world->m_generator->voxelAt(pos + m_coords * m_dims)
+                                        : m_data.getBlockAndState(pos, state);
     return RegistryManager::Blocks().get(blockID);
 }
 
@@ -125,14 +126,14 @@ void Chunk::render(Engine& engine, const Camera* camera, int pass) {
     }
 
     //TODO chunk culling
-    // ChunkID cameraChunk = getChunkID(camera->position());
+    // ChunkID cameraChunk = getChunkID(camera->position(), m_world->chunkDims());
     // glm::vec3 chunkDir = glm::normalize(glm::vec3(cameraChunk - m_coords));
     // if (glm::dot(chunkDir, camera->lookDirection()) > 0) {
     //     return;
     // }
 
     RenderContext ctx;
-    ctx.setModelMatrix(m_coords * Chunk::Dims);
+    ctx.setModelMatrix(m_coords * m_dims);
     if (pass == 0) {
         ctx.attributes = &m_opaqueVertData;
         ctx.material = &m_world->m_material;
@@ -141,7 +142,7 @@ void Chunk::render(Engine& engine, const Camera* camera, int pass) {
         engine.submitRender(std::move(ctx));
 
         RenderContext ctxTransparent;
-        ctxTransparent.setModelMatrix(m_coords * Chunk::Dims);
+        ctxTransparent.setModelMatrix(m_coords * m_dims);
         ctxTransparent.attributes = &m_transparentVertData;
         ctxTransparent.material = &m_world->m_material;
         ctxTransparent.passMask = RenderPass::SceneTransparent | RenderPass::DirectionalShadow;

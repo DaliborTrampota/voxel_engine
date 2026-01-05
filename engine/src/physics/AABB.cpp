@@ -67,3 +67,14 @@ AABB AABB::fromGeometry(const Geometry& geo) {
 
     return aabb;
 }
+
+AABB AABB::fromPoints(const std::vector<glm::vec3>& points) {
+    AABB aabb;
+    aabb.min = glm::vec3(points[0]);
+    aabb.max = aabb.min;
+    for (const auto& point : points) {
+        aabb.min = glm::min(aabb.min, point);
+        aabb.max = glm::max(aabb.max, point);
+    }
+    return aabb;
+}
