@@ -39,7 +39,7 @@ Chunk::Chunk(World* world, ChunkID coords) : Chunk(world, coords, Chunk::Dims) {
 
 Chunk::~Chunk() {}
 
-void Chunk::populateVoxelData() {
+void Chunk::populateTerrainData() {
     if (m_generated || m_data.populated)
         return;
 

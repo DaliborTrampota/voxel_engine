@@ -3,11 +3,6 @@
 #include <cstdint>
 #include <random>
 
-namespace {
-    inline std::random_device s_randomDevice;
-    inline std::mt19937 s_randomEngine(s_randomDevice());
-}  // namespace
-
 namespace engine {
 
     /**
@@ -34,6 +29,8 @@ namespace engine {
         /// @returns Value between [min and max)
         template <typename T>
         static T random(T min = 0.0, T max = 1.0) {
+            static std::random_device s_randomDevice;
+            static std::mt19937 s_randomEngine(s_randomDevice());
             if constexpr (std::is_integral_v<T>) {
                 return std::uniform_int_distribution<T>(min, max)(s_randomEngine);
             } else {

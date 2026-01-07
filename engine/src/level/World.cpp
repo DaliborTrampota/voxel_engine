@@ -81,7 +81,7 @@ std::future<void> World::loadChunks(const glm::ivec3& from, const glm::ivec3& to
                     jobs.push_back([this, id, chunk] {
                         ChunkBeforeLoadEvent event(chunk);
                         fireChunkBeforeLoadEvent(&event);
-                        chunk->populateVoxelData();
+                        chunk->populateTerrainData();
                         chunk->generateMesh();
 
                         std::lock_guard<std::mutex> lock(m_mutex);

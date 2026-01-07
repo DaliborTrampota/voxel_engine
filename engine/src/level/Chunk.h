@@ -57,7 +57,7 @@ namespace engine {
         virtual glm::ivec3 dims() const { return m_dims; }
 
         /// @brief Generates the chunk data per TerrainGenerator if not generated yet.
-        void populateVoxelData();
+        void populateTerrainData();
         bool generated() const { return m_generated; }
 
         /// @brief Generates the mesh data for the chunk.

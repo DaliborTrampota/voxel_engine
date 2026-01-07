@@ -7,15 +7,6 @@
 
 namespace engine::data {
 
-    enum class Side {
-        North,
-        West,
-        South,
-        East,
-        Up,
-        Down
-    };
-
     template <typename T, size_t row, size_t col>
     using array2d = std::array<std::array<T, col>, row>;
 
