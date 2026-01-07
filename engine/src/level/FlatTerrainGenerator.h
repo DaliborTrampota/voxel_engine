@@ -14,10 +14,10 @@ namespace engine {
         FlatTerrainGenerator();
 
         BlockID voxelAt(const glm::ivec3& pos) override;
+        int height(int x, int z) const override;
         void populate(Chunk& chunk) override;
 
         BlockID voxelAt(const glm::ivec3& pos, int height);
-        int height(int x, int z) const;
 
       protected:
         const Registry<Block, RegistryStoragePolicy::ByPointer>& m_blockRegistry;

@@ -14,5 +14,7 @@ namespace engine {
         int init(int w, int h, const char* name) override;
 
         void mouseLock(bool state) const;
+
+        float aspectRatio() const;
     };
 }  // namespace engine

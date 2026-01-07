@@ -22,10 +22,13 @@ namespace engine {
     class Material;
     class Updateable;
     class Renderable;
+    class Tickable;
     class Sun;
 
     class Engine {
       public:
+        static inline float TickRate = 1.0f / 30.0f;
+
         Engine(std::unique_ptr<Window> window);
         ~Engine() = default;
 
@@ -45,6 +48,7 @@ namespace engine {
         virtual void flush();
 
         void subscribeUpdate(std::shared_ptr<Updateable> updateable);
+        void subscribeTick(std::shared_ptr<Tickable> tickable);
         void fireUpdate(float dt);
         void gameloop();
 
@@ -75,6 +79,8 @@ namespace engine {
 
         std::vector<std::unique_ptr<RenderPass>> m_renderPasses;
         std::vector<std::weak_ptr<Updateable>> m_updateSubscribers;
+        std::vector<std::weak_ptr<Tickable>> m_tickSubscribers;
+        float m_tickAccumulator = 0.0f;
 
 
         void render(RenderContext& ctx, const RenderPass* renderPass) const;

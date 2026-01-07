@@ -95,3 +95,8 @@ int Window::init(int w, int h, const char* name) {
     initUtilityShaders();
     return 1;
 }
+
+float Window::aspectRatio() const {
+    glm::ivec2 size = windowSize();
+    return static_cast<float>(size.x) / static_cast<float>(size.y);
+}

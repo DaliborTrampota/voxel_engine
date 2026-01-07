@@ -10,12 +10,12 @@ namespace engine {
         All = 0,
         Side,
 
+        Front,
+        Right,
+        Back,
+        Left,
         Top,
         Bottom,
-        Right,
-        Left,
-        Front,
-        Back,
 
         Tag1,
         Tag2,
@@ -100,5 +100,18 @@ namespace engine {
             glm::vec2 uvEnd
         );
     };
+
+    constexpr FaceTag IterateFaces[6] = {
+        FaceTag::Front, FaceTag::Right, FaceTag::Back, FaceTag::Left, FaceTag::Top, FaceTag::Bottom
+    };
+
+    constexpr FaceTag IterateXZFaces[4] = {
+        FaceTag::Front,
+        FaceTag::Right,
+        FaceTag::Back,
+        FaceTag::Left,
+    };
+
+    constexpr FaceTag IterateYFaces[2] = {FaceTag::Top, FaceTag::Bottom};
 
 }  // namespace engine

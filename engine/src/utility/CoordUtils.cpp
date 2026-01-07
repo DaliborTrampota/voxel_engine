@@ -8,28 +8,44 @@
 namespace engine {
 
     ChunkID extractChunkCoords(glm::vec3& pos) {
-        ChunkID chunkCoords =
-            ChunkID(static_cast<glm::ivec3>(glm::floor(pos / glm::vec3(Chunk::Dims))));
-        pos -= chunkCoords * Chunk::Dims;
-        return chunkCoords;
+        return extractChunkCoords(pos, Chunk::Dims);
     }
 
     ChunkID extractChunkCoords(glm::ivec3& pos) {
+        return extractChunkCoords(pos, Chunk::Dims);
+    }
+
+    ChunkID extractChunkCoords(glm::vec3& pos, const glm::ivec3& chunkDims) {
+        ChunkID chunkCoords =
+            ChunkID(static_cast<glm::ivec3>(glm::floor(pos / glm::vec3(chunkDims))));
+        pos -= chunkCoords * chunkDims;
+        return chunkCoords;
+    }
+
+    ChunkID extractChunkCoords(glm::ivec3& pos, const glm::ivec3& chunkDims) {
         ChunkID chunkCoords = ChunkID(
-            floorDiv(pos.x, Chunk::Dims.x),
-            floorDiv(pos.y, Chunk::Dims.y),
-            floorDiv(pos.z, Chunk::Dims.z)
+            floorDiv(pos.x, chunkDims.x), floorDiv(pos.y, chunkDims.y), floorDiv(pos.z, chunkDims.z)
         );
-        pos -= chunkCoords * Chunk::Dims;
+        pos -= chunkCoords * chunkDims;
         return chunkCoords;
     }
 
     glm::ivec3 toChunkCoords(const ChunkID& chunkID, const glm::vec3& pos) {
-        return static_cast<glm::ivec3>(glm::floor(pos)) - chunkID * Chunk::Dims;
+        return toChunkCoords(chunkID, pos, Chunk::Dims);
+    }
+
+    glm::ivec3 toChunkCoords(
+        const ChunkID& chunkID, const glm::vec3& pos, const glm::ivec3& chunkDims
+    ) {
+        return static_cast<glm::ivec3>(glm::floor(pos)) - chunkID * chunkDims;
     }
 
     ChunkID getChunkID(const glm::vec3& pos) {
-        return ChunkID(static_cast<glm::ivec3>(glm::floor(pos / glm::vec3(Chunk::Dims))));
+        return getChunkID(pos, Chunk::Dims);
+    }
+
+    ChunkID getChunkID(const glm::vec3& pos, const glm::ivec3& chunkDims) {
+        return ChunkID(static_cast<glm::ivec3>(glm::floor(pos / glm::vec3(chunkDims))));
     }
 
     glm::ivec3 floorToInt(const glm::vec3& vec) {

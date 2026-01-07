@@ -34,20 +34,25 @@ namespace engine {
                   public LevelEventSource {
       public:
         World(std::unique_ptr<ITerrainGenerator> gen, uint32_t genThreads = 8);
+        World(std::unique_ptr<ITerrainGenerator> gen, glm::ivec3 chunkDims, uint32_t genThreads = 8);
         ~World();
+
+        /// @brief Get the chunk dimensions for this world.
+        /// @return The dimensions of chunks in this world.
+        glm::ivec3 chunkDims() const { return m_chunkDims; }
 
         /// @section Chunk management
 
         /// @brief Loads chunks in the given range.
         /// @param unloadRest If true, all chunks outside the range will be unloaded.
         /// @return A shared_future that becomes ready when all chunks are loaded and generated
-        std::future<void> loadChunks(
+        virtual std::future<void> loadChunks(
             const glm::ivec3& from, const glm::ivec3& to, bool unloadRest = false
         );
 
         /// @brief Unloads chunks in the given range.
         /// @note This function fires a ChunkUnloadEvent for each chunk that is unloaded.
-        void unloadChunks(const glm::ivec3& from, const glm::ivec3& to);
+        virtual void unloadChunks(const glm::ivec3& from, const glm::ivec3& to);
 
         /// @brief Unloads all chunks except the given ones.
         /// @param except Chunks to keep loaded.
@@ -61,6 +66,24 @@ namespace engine {
 
         std::weak_ptr<Chunk> getChunk(const ChunkID& id);
         std::weak_ptr<const Chunk> getChunk(const ChunkID& id) const;
+
+        /// @brief Gets a chunk and casts it to the specified custom chunk type.
+        /// @tparam T The custom chunk type (must inherit from Chunk).
+        /// @param id The chunk ID to retrieve.
+        /// @return A weak_ptr to the chunk cast to type T. Use .lock() to get a shared_ptr.
+        /// @note This is a convenience method that performs a static_pointer_cast internally.
+        ///       If the chunk doesn't exist, returns an empty weak_ptr.
+        /// @example auto customChunk = world->getChunkAs<MyCustomChunk>(chunkID).lock();
+        template <typename T>
+        std::weak_ptr<T> getChunkAs(const ChunkID& id);
+
+        /// @brief Gets a const chunk and casts it to the specified custom chunk type.
+        /// @tparam T The custom chunk type (must inherit from Chunk).
+        /// @param id The chunk ID to retrieve.
+        /// @return A weak_ptr to the const chunk cast to type T. Use .lock() to get a shared_ptr.
+        template <typename T>
+        std::weak_ptr<const T> getChunkAs(const ChunkID& id) const;
+
         const std::unordered_set<ChunkID>& loadedChunks() const { return m_loadedChunks; }
 
         /// @brief Checks if the surrounding chunks need to be updated due to a block change.
@@ -73,23 +96,25 @@ namespace engine {
         /// @brief Gets the block ID at the given position.
         /// @param chID The chunk to query the block from
         /// @param pos The position of the block within the chunk (0 to Chunk::Dims)
-        /// @param state [out] The state of the block
         /// @param fallbackToGenerator If true, the generator will be used to get the block ID if the chunk is not generated
+        /// @param state [out] The state of the block. If nullptr, the state will not be returned.
         /// @return the block ID or engine::InvalidBlockID if:
         ///         - The position is out of bounds (eg less than or greater than Chunk::Dims)
-        ///         - The chunk is not generated
+        ///         - The chunk is not generated and fallbackToGenerator is false
         BlockID getBlockID(
-            const ChunkID& chID, const glm::ivec3& pos, BlockState*& state, bool fallbackToGenerator
+            const ChunkID& chID,
+            const glm::ivec3& pos,
+            bool fallbackToGenerator,
+            BlockState** state = nullptr
         );
 
         /// @brief Gets the block ID at the given position.
         /// @param pos The position of the block in world space
-        /// @param state [out] The state of the block
         /// @param fallbackToGenerator If true, the generator will be used to get the block ID if the chunk is not generated
+        /// @param state [out] The state of the block. If nullptr, the state will not be returned.
         /// @return the block ID or engine::InvalidBlockID if:
-        ///         - The position is out of bounds (eg less than or greater than Chunk::Dims)
-        ///         - The chunk is not generated
-        BlockID getBlockID(glm::vec3 pos, BlockState*& state, bool fallbackToGenerator);
+        ///         - The chunk is not generated and fallbackToGenerator is false
+        BlockID getBlockID(glm::vec3 pos, bool fallbackToGenerator, BlockState** state = nullptr);
 
         /// @brief Checks if the face of current block facing given direction can be seen and thus should be rendered.
         /// @param curBlock The current block.
@@ -115,6 +140,9 @@ namespace engine {
         MultiBlock* getMultiBlock(const ChunkID& chID, const glm::ivec3& pos);
         MultiBlock* getMultiBlock(glm::ivec3 pos);
 
+        /// @brief Gets the terrain generator for this world.
+        /// @return Pointer to the terrain generator.
+        const ITerrainGenerator* getGenerator() const { return m_generator.get(); }
 
         virtual void render(Engine& engine, const Camera* camera, int pass = 0) override;
         virtual void update(float dt) override;
@@ -122,22 +150,55 @@ namespace engine {
         const Material& getMaterial() const { return m_material; }
         Skybox& getSkybox() { return m_skybox; }
 
+        /// @section Events
+
+
+        virtual void afterBlockSet(const glm::ivec3& pos, BlockID blockID, const BlockState* state) {
+        }
+
       protected:
         std::unordered_map<ChunkID, std::shared_ptr<Chunk>> m_chunks;
         std::unordered_set<ChunkID> m_loadedChunks;
         std::unique_ptr<ITerrainGenerator> m_generator = nullptr;
+        glm::ivec3 m_chunkDims;
 
         Material m_material;
         Skybox m_skybox;
 
         ThreadPool m_genPool;
 
+        /// @brief Factory method for creating chunks. Override this to provide custom Chunk subclasses.
+        /// @param id The chunk coordinates to create the chunk at.
+        /// @return A shared pointer to the newly created chunk.
+        /// @note The default implementation creates a standard Chunk.
+        ///       Custom World subclasses can override this to return custom Chunk types.
+        virtual std::shared_ptr<Chunk> createChunk(const ChunkID& id);
+
         friend class Chunk;
-        friend class Engine;
 
       private:
         void updateChunk(ChunkID id);
         mutable std::mutex m_mutex;
     };
+
+    template <typename T>
+    std::weak_ptr<T> World::getChunkAs(const ChunkID& id) {
+        static_assert(std::is_base_of<Chunk, T>::value, "T must inherit from Chunk");
+        auto chunk = getChunk(id);
+        if (auto locked = chunk.lock()) {
+            return std::static_pointer_cast<T>(locked);
+        }
+        return {};
+    }
+
+    template <typename T>
+    std::weak_ptr<const T> World::getChunkAs(const ChunkID& id) const {
+        static_assert(std::is_base_of<Chunk, T>::value, "T must inherit from Chunk");
+        auto chunk = getChunk(id);
+        if (auto locked = chunk.lock()) {
+            return std::static_pointer_cast<const T>(locked);
+        }
+        return {};
+    }
 
 }  // namespace engine

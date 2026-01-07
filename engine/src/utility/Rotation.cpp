@@ -23,13 +23,12 @@ namespace engine {
                 }
             }
             case RotationMode::AxisXYZSnap:
-            case RotationMode::AxisAngleXYZSnap:
-            case RotationMode::AxisAlign: {
+            case RotationMode::AxisAngleXYZSnap: {
                 float northDot = glm::abs(glm::dot(lookDir, NORTH));
                 float upDot = glm::abs(glm::dot(lookDir, UP));
                 float eastDot = glm::abs(glm::dot(lookDir, EAST));
 
-                //TODO change to glm::vec and "round" to closest axis
+                //TODO change to glm::vec3 and "round" to closest axis
                 glm::vec3 facingDir = clickedFaceN;
                 static constexpr float DOT_30 = 0.866f;
                 static constexpr float DOT_45 = 0.707f;
@@ -70,6 +69,38 @@ namespace engine {
                 } else {
                     return resultDirection;
                 }
+            }
+            case RotationMode::AxisAlign: {
+                float northDot = glm::abs(glm::dot(lookDir, NORTH));
+                float upDot = glm::abs(glm::dot(lookDir, UP));
+                float eastDot = glm::abs(glm::dot(lookDir, EAST));
+
+                //TODO change to glm::vec and "round" to closest axis
+                glm::vec3 facingDir = clickedFaceN;
+                static constexpr float DOT_15 = 0.966f;
+                static constexpr float DOT_30 = 0.866f;
+                static constexpr float DOT_45 = 0.707f;
+
+                glm::vec3 resultDirection;
+
+                // Determine dominant axis by comparing dot products
+                if (northDot > upDot && northDot > eastDot) {
+                    if (northDot >= DOT_30)
+                        resultDirection = NORTH;
+                    else
+                        resultDirection = facingDir;
+                } else if (upDot > northDot && upDot > eastDot) {
+                    if (upDot >= DOT_30)
+                        resultDirection = UP;
+                    else
+                        resultDirection = facingDir;
+                } else {
+                    if (eastDot >= DOT_30)
+                        resultDirection = EAST;
+                    else
+                        resultDirection = facingDir;
+                }
+                return resultDirection;
             }
         }
     }

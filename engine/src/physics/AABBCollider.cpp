@@ -38,7 +38,7 @@ void AABBCollider::setAABB(std::shared_ptr<AABB> aabb) {
     m_aabb = aabb;
 }
 
-CollisionInfo AABBCollider::collide(glm::vec3& moveStep, const glm::vec3& position) {
+CollisionInfo AABBCollider::collide(glm::vec3& moveStep, const glm::vec3& position, float dt) {
     if (!m_world)
         return CollisionInfo();
 
@@ -79,16 +79,18 @@ CollisionInfo AABBCollider::collide(glm::vec3& moveStep, const glm::vec3& positi
             if (requiredStepHeight > 0.0f && requiredStepHeight <= m_stepHeight) {
                 glm::vec3 horizontalMove{moveStep.x, 0, moveStep.z};
 
-                float stepHeight = tryStepUp(horizontalMove, bestRes.bb);
+                if (m_stepUpCooldown == 0.0f) {
+                    float stepHeight = tryStepUp(horizontalMove, bestRes.bb);
 
-                if (stepHeight > 0.0f) {
-                    info.stepHeight = stepHeight;
+                    if (stepHeight > 0.0f) {
+                        info.stepHeight = stepHeight;
 
-                    moveStep.y = stepHeight;  // override gravity for this frame
+                        moveStep.y = stepHeight;  // override gravity for this frame
 
-                    // Clear this axis collision since we stepped over it
-                    hitBBs.clear();
-                    continue;  // Skip the rest and go to next pass
+                        // Clear this axis collision since we stepped over it
+                        hitBBs.clear();
+                        continue;  // Skip the rest and go to next pass
+                    }
                 }
             }
         }
@@ -111,6 +113,10 @@ CollisionInfo AABBCollider::collide(glm::vec3& moveStep, const glm::vec3& positi
         }
         hitBBs.clear();
     }
+    if (!info.grounded && info.stepHeight > 0.125f && m_stepUpCooldown == 0.0f) {
+        m_stepUpCooldown = 0.5f;
+    }
+    m_stepUpCooldown = glm::max(m_stepUpCooldown - dt, 0.0f);
     return info;
 }
 
@@ -127,7 +133,8 @@ void AABBCollider::updateAABBCache(const glm::vec3& velocity, const glm::vec3& p
         for (int j = glm::floor(m_aabb->min.y - s_checkBox.y); j <= glm::ceil(m_aabb->max.y + s_checkBox.y); ++j) {
             for (int k = glm::floor(m_aabb->min.z - s_checkBox.z); k <= glm::ceil(m_aabb->max.z + s_checkBox.z); ++k) {
                 BlockState* state = nullptr;
-                BlockID blockID = m_world->getBlockID({ i, j, k }, state, true);
+                // TODO critical performance issue: should fallback to generator, but it might be slow checking every frame (this is issue for my sample game with biome generator and biome blending where it samples lot of perlin noise)
+                BlockID blockID = m_world->getBlockID({ i, j, k }, false, &state);
                 if (blockID == InvalidBlockID || blockID == Block::AirID)
                     continue;
 

@@ -1,16 +1,12 @@
 #pragma once
 
 #include <glm/glm.hpp>
-
 #include <iostream>
-#include <thread>
-#include <unordered_map>
-#include <vector>
-
 
 #include "ChunkData.h"
 #include "block/Block.h"
 #include "block/BlockState.h"
+#include "block/VariantBlock.h"
 #include "block/Vertex.h"
 #include "render/Renderable.h"
 
@@ -45,6 +41,7 @@ namespace engine {
       public:
         static inline glm::ivec3 Dims{16, 16, 16};
 
+        Chunk(World* world, ChunkID coords, glm::ivec3 dims);
         Chunk(World* world, ChunkID coords);
         Chunk(Chunk&) = delete;
         Chunk(Chunk&&) = delete;
@@ -52,10 +49,15 @@ namespace engine {
 
         /// @return ID or coordinates of the chunk in the world.
         const ChunkID& id() const { return m_coords; }
-        glm::ivec3 position() const { return m_coords * Dims; }
+        glm::ivec3 position() const { return m_coords * m_dims; }
+
+        /// @brief Get the dimensions of this chunk type.
+        /// @return The dimensions (x, y, z) of the chunk.
+        /// @note Override this in derived classes to provide custom chunk dimensions.
+        virtual glm::ivec3 dims() const { return m_dims; }
 
         /// @brief Generates the chunk data per TerrainGenerator if not generated yet.
-        void generate();
+        void populateTerrainData();
         bool generated() const { return m_generated; }
 
         /// @brief Generates the mesh data for the chunk.
@@ -65,6 +67,7 @@ namespace engine {
 
 
         const Block* getBlock(glm::ivec3 pos) const;
+        const Block* getBlock(glm::ivec3 pos, const BlockState*& state) const;
 
         /// @return ChunkData structure containing all the block/terrain data.
         ChunkData& data() { return m_data; }
@@ -75,7 +78,21 @@ namespace engine {
         /// @param pass Pass == 0 will render the whole chunk, pass == 1 will render opaque blocks, pass == 2 will render transparent blocks.
         void render(Engine& engine, const Camera* camera, int pass) override;
 
+        VariantBlock::Neighbours getNeighbouringBlocks(glm::ivec3 pos) const;
+
+        /// @section Events
+        virtual void afterPopulate() {}
+        virtual void afterGenerated() {}
+
+
       protected:
+        World* m_world;
+        ChunkID m_coords;
+        ChunkData m_data;
+        // TODO duplicate information, its also in world
+        glm::ivec3 m_dims;
+        bool m_dirty = false;
+
         struct GeometryState {
             glm::vec3 axis;
             float angle;
@@ -113,10 +130,6 @@ namespace engine {
         );
 
       private:
-        World* m_world;
-        ChunkID m_coords;
-
-        ChunkData m_data;
         gl::Attributes<Vertex> m_opaqueVertData;
         gl::Attributes<Vertex> m_transparentVertData;
         gl::Attributes<Vertex> m_backOpaqueVertData;
@@ -124,9 +137,7 @@ namespace engine {
 
         bool m_generated = false;
         std::atomic_bool m_generatingMesh = false;
-        bool m_dirty = false;
 
-        friend class Engine;
         friend class World;
     };
 

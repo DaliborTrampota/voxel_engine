@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <format>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <memory>
@@ -17,6 +18,7 @@
 #include "render/Renderable.h"
 #include "scene/Camera.h"
 #include "scene/Sun.h"
+#include "scene/Tickable.h"
 #include "scene/Updateable.h"
 #include "utility/UtilityShaders.h"
 
@@ -244,6 +246,9 @@ void Engine::render(GroupRenderContext& ctx, const RenderPass* renderPass) const
 }
 
 void Engine::fireUpdate(float dt) {
+    m_tickAccumulator += dt;
+    bool tick = m_tickAccumulator >= TickRate;
+
     for (auto it = m_updateSubscribers.begin(); it != m_updateSubscribers.end();) {
         if (auto subscriber = it->lock()) {
             subscriber->update(dt);
@@ -252,10 +257,25 @@ void Engine::fireUpdate(float dt) {
             it = m_updateSubscribers.erase(it);  // clean up expired
         }
     }
+    if (tick) {
+        m_tickAccumulator -= TickRate;
+        for (auto it = m_tickSubscribers.begin(); it != m_tickSubscribers.end();) {
+            if (auto subscriber = it->lock()) {
+                subscriber->tick(TickRate);
+                ++it;
+            } else {
+                it = m_tickSubscribers.erase(it);  // clean up expired
+            }
+        }
+    }
 }
 
 void Engine::subscribeUpdate(std::shared_ptr<Updateable> updateable) {
     m_updateSubscribers.push_back(updateable);
+}
+
+void Engine::subscribeTick(std::shared_ptr<Tickable> tickable) {
+    m_tickSubscribers.push_back(tickable);
 }
 
 void Engine::beginFrame() {

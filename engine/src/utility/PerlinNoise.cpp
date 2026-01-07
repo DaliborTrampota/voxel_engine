@@ -32,3 +32,29 @@ float PerlinNoise::getClamped(float x, float y) const noexcept {
     float sampleY = y * m_scale;
     return m_noise.octave2D_11(sampleX + m_offset, sampleY + m_offset, m_octaves, m_persistence);
 }
+
+float PerlinNoise::get1D(float x) const noexcept {
+    return m_noise.octave1D(x + m_offset, m_octaves, m_persistence);
+}
+
+float PerlinNoise::get1DNormalized(float x) const noexcept {
+    return m_noise.normalizedOctave1D(x + m_offset, m_octaves, m_persistence);
+}
+
+float PerlinNoise::get1DClamped(float x) const noexcept {
+    return m_noise.octave1D_11(x + m_offset, m_octaves, m_persistence);
+}
+
+float PerlinNoise::get3D(float x, float y, float z) const noexcept {
+    return m_noise.octave3D(x + m_offset, y + m_offset, z + m_offset, m_octaves, m_persistence);
+}
+
+float PerlinNoise::get3DNormalized(float x, float y, float z) const noexcept {
+    return m_noise.normalizedOctave3D(
+        x + m_offset, y + m_offset, z + m_offset, m_octaves, m_persistence
+    );
+}
+
+float PerlinNoise::get3DClamped(float x, float y, float z) const noexcept {
+    return m_noise.octave3D_11(x + m_offset, y + m_offset, z + m_offset, m_octaves, m_persistence);
+}

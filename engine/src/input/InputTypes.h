@@ -6,7 +6,7 @@ namespace engine {
 
     using GLFWKey = int;
 
-    enum Axis {
+    enum class InputAxis {
         Sideways,
         Forward,
         Vertical,

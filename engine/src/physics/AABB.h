@@ -22,6 +22,7 @@ namespace engine {
         void expand(float amount);
 
         static AABB fromGeometry(const Geometry& geo);
+        static AABB fromPoints(const std::vector<glm::vec3>& points);
     };
 
 }  // namespace engine
