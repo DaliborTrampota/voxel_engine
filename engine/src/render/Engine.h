@@ -48,6 +48,7 @@ namespace engine {
         virtual void flush();
 
         void subscribeUpdate(std::shared_ptr<Updateable> updateable);
+        void subscribeTick(std::shared_ptr<Tickable> tickable);
         void fireUpdate(float dt);
         void gameloop();
 

@@ -274,6 +274,10 @@ void Engine::subscribeUpdate(std::shared_ptr<Updateable> updateable) {
     m_updateSubscribers.push_back(updateable);
 }
 
+void Engine::subscribeTick(std::shared_ptr<Tickable> tickable) {
+    m_tickSubscribers.push_back(tickable);
+}
+
 void Engine::beginFrame() {
     m_window->clearScreen();
 }
