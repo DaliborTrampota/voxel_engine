@@ -96,7 +96,7 @@ bool Chunk::generateMesh() {
             }
         }
     }
-
+    // TODO i dont want switch just copy to the front buffer
     m_backOpaqueVertData.vertexData().shrink_to_fit();
     m_backTransparentVertData.vertexData().shrink_to_fit();
 

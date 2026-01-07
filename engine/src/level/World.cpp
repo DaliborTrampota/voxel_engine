@@ -280,9 +280,9 @@ bool World::canSeeFace(const Block& curBlock, glm::vec3 pos, glm::ivec3 dir) con
         case Layers::Transparent:
             // Render faces when touching different transparent blocks
             return !sameBlock && block->layer() != Layers::Opaque;
-        case Layers::Translucent:
-            // Render translucent faces when touching different blocks (always render to show depth effect)
-            return !sameBlock;
+        // case Layers::Translucent:
+        //     // Render translucent faces when touching different blocks (always render to show depth effect)
+        //     return !sameBlock;
         case Layers::Any: return block->isSolid() && curBlock.isSolid();
         default: return false;
     }
