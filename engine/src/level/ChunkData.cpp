@@ -1,7 +1,8 @@
 #include "ChunkData.h"
 
-using namespace engine;
+#include "block/Block.h"
 
+using namespace engine;
 
 BlockID ChunkData::getBlock(const glm::ivec3& pos) const {
     return data[index(pos)];

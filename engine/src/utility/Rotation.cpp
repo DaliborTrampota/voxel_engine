@@ -7,7 +7,9 @@
 
 namespace engine {
 
-    glm::vec3 getFacingDirection(glm::vec3 lookDir, RotationMode rot, glm::ivec3 clickedFaceN) {
+    glm::vec3 getFacingDirection(
+        glm::vec3 lookDir, RotationMode rot, glm::ivec3 clickedFaceN
+    ) noexcept {
         lookDir = -lookDir;  // make the look direction face the player from the block's perspective
         switch (rot) {
             case RotationMode::None: return {0, 0, 0};
@@ -110,7 +112,7 @@ namespace engine {
 
     // }
 
-    float getAngleToSide(Side side, glm::vec3 from, glm::vec3& axis) {
+    float getAngleToSide(Side side, glm::vec3 from, glm::vec3& axis) noexcept {
         glm::vec3 sideDir = sideDirection(side);
         axis = glm::normalize(glm::cross(sideDir, from));
         if (glm::all(glm::isnan(axis))) {
@@ -119,7 +121,7 @@ namespace engine {
         return glm::orientedAngle(from, sideDir, axis);
     }
 
-    float getAngleFromSide(Side side, glm::vec3 to, glm::vec3& axis) {
+    float getAngleFromSide(Side side, glm::vec3 to, glm::vec3& axis) noexcept {
         glm::vec3 sideDir = sideDirection(side);
         axis = glm::normalize(glm::cross(to, sideDir));
         if (glm::all(glm::isnan(axis))) {
@@ -128,7 +130,7 @@ namespace engine {
         return glm::orientedAngle(sideDir, to, axis);
     }
 
-    float getAngle(glm::vec3 from, glm::vec3 to, glm::vec3& axis) {
+    float getAngle(glm::vec3 from, glm::vec3 to, glm::vec3& axis) noexcept {
         axis = glm::normalize(glm::cross(to, from));
         if (glm::all(glm::isnan(axis))) {
             axis = glm::normalize(glm::vec3(from.y, from.z, from.x));
@@ -137,7 +139,7 @@ namespace engine {
     }
 
     //TODO better name
-    glm::mat4 transformMatrix(glm::vec3 worldPos, glm::vec3 axis, float angle) {
+    glm::mat4 transformMatrix(glm::vec3 worldPos, glm::vec3 axis, float angle) noexcept {
         return glm::translate(glm::mat4(1.0f), worldPos) *
                glm::translate(glm::mat4(1.0f), glm::vec3(0.5f, 0.5f, 0.5f)) *
                glm::rotate(glm::mat4(1.0f), angle, axis) *
@@ -146,7 +148,7 @@ namespace engine {
 
     void calculateRotationFromState(
         const BlockState* state, const Block* block, float& angle, glm::vec3& axis
-    ) {
+    ) noexcept {
         if (state && block->rotationMode() != RotationMode::None) {
             Side baseSide = block->facingUp() ? Side::Up : Side::North;
             glm::vec3 baseSideDir = sideDirection(baseSide);
@@ -160,6 +162,16 @@ namespace engine {
         } else {
             angle = 0.0f;
             axis = glm::vec3(0, 1, 0);
+        }
+    }
+
+    glm::ivec3 closestAxis(glm::vec3 vec) noexcept {
+        if (glm::abs(vec.x) >= glm::abs(vec.y) && glm::abs(vec.x) >= glm::abs(vec.z)) {
+            return glm::ivec3(glm::sign(vec.x), 0, 0);
+        } else if (glm::abs(vec.y) >= glm::abs(vec.z)) {
+            return glm::ivec3(0, glm::sign(vec.y), 0);
+        } else {
+            return glm::ivec3(0, 0, glm::sign(vec.z));
         }
     }
 }  // namespace engine

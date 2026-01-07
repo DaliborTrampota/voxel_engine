@@ -1,5 +1,3 @@
-#pragma once
-
 #include "Block.h"
 
 using namespace engine;

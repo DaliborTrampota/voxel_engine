@@ -15,7 +15,7 @@ namespace engine {
         for (auto& v : vertices) {
             v.rotate(axis, angle);
         }
-        cullDir = rotatePoint(cullDir, axis, angle, {0, 0, 0});
+        cullDir = glm::round(rotatePoint(cullDir, axis, angle, {0, 0, 0}));
     }
 
     void Face::data(int textureID, int ao) {

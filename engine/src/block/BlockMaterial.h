@@ -4,6 +4,7 @@
 
 #include "../Globals.h"
 #include "Face.h"
+#include "Side.h"
 
 namespace engine {
 
@@ -21,10 +22,8 @@ namespace engine {
             }
 
             if (tag == FaceTag::Side) {
-                for (int i = static_cast<size_t>(FaceTag::Front);
-                     i <= static_cast<size_t>(FaceTag::Left);
-                     i++)
-                    m_textures[i] = texture;
+                for (auto face : IterateXZFaces)
+                    m_textures[static_cast<size_t>(face)] = texture;
             }
 
             m_textures[static_cast<size_t>(tag)] = texture;

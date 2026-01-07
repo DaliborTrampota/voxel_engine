@@ -41,20 +41,22 @@ namespace engine {
       public:
         static inline glm::ivec3 Dims{16, 16, 16};
 
-        Chunk(World* world, ChunkID coords, glm::ivec3 dims);
-        Chunk(World* world, ChunkID coords);
+        Chunk(World* world, ChunkID coords, glm::ivec3 dims = Dims);
         Chunk(Chunk&) = delete;
         Chunk(Chunk&&) = delete;
         ~Chunk();
 
         /// @return ID or coordinates of the chunk in the world.
         const ChunkID& id() const { return m_coords; }
-        glm::ivec3 position() const { return m_coords * m_dims; }
+        /// @return Position of the chunk in world space.
+        glm::ivec3 position() const { return m_coords * m_data.dims; }
 
         /// @brief Get the dimensions of this chunk type.
         /// @return The dimensions (x, y, z) of the chunk.
         /// @note Override this in derived classes to provide custom chunk dimensions.
-        virtual glm::ivec3 dims() const { return m_dims; }
+        virtual glm::ivec3 dims() const { return m_data.dims; }
+
+        World* world() const { return m_world; }
 
         /// @brief Generates the chunk data per TerrainGenerator if not generated yet.
         void populateTerrainData();
@@ -66,11 +68,15 @@ namespace engine {
         bool generateMesh();
 
 
-        const Block* getBlock(glm::ivec3 pos) const;
-        const Block* getBlock(glm::ivec3 pos, const BlockState*& state) const;
+        const Block* getBlock(glm::ivec3 pos, BlockState** state = nullptr);
+        void setBlock(const glm::ivec3& pos, BlockID block);
+        void setBlock(const glm::ivec3& pos, BlockID block, BlockState state);
+        void setBlock(const glm::ivec3& pos, MultiBlock&& multiBlock);
+
 
         /// @return ChunkData structure containing all the block/terrain data.
         ChunkData& data() { return m_data; }
+        /// @return const ChunkData structure containing all the block/terrain data.
         const ChunkData& data() const { return m_data; }
 
 
@@ -89,8 +95,6 @@ namespace engine {
         World* m_world;
         ChunkID m_coords;
         ChunkData m_data;
-        // TODO duplicate information, its also in world
-        glm::ivec3 m_dims;
         bool m_dirty = false;
 
         struct GeometryState {

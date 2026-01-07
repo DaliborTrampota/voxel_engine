@@ -30,7 +30,7 @@ namespace {
 }  // namespace
 
 DDAResult engine::DDA(
-    const World& world, glm::vec3 start, glm::vec3 direction, float length, UnaryPredicate pred
+    World& world, glm::vec3 start, glm::vec3 direction, float length, UnaryPredicate pred
 ) noexcept {
     if (glm::all(glm::equal(direction, glm::vec3(0.0f)))) {
         return DDAResult{start, glm::vec3(0.0f), FaceTag::All, &Block::air(), 0.f, {}};
@@ -63,11 +63,11 @@ DDAResult engine::DDA(
     // TODO condition should be world bound check, maybe loaded chunks check?
     while (true) {
         glm::ivec3 localPos = glm::ivec3(x, y, z);
-        std::weak_ptr<const Chunk> chunk =
+        std::shared_ptr<Chunk> chunk =
             world.getChunk(extractChunkCoords(localPos, world.chunkDims()));
 
-        const BlockState* state;
-        const Block* block = chunk.lock()->getBlock(localPos, state);
+        BlockState* state;
+        const Block* block = chunk->getBlock(localPos, &state);
         //TODO check if we are in bounds?
 
         const Face* aimedFace =

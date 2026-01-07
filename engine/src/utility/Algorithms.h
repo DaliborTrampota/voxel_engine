@@ -15,12 +15,13 @@ namespace engine {
 
     // TODO maybe add state?
     struct DDAResult {
+        /// @brief The position of the block in world space.
         glm::vec3 position;
         glm::vec3 faceNormal;
         FaceTag faceTag;
         const Block* block;
         float distance;
-        std::weak_ptr<const Chunk> chunk;
+        std::shared_ptr<Chunk> chunk;
     };
 
     struct Ray {
@@ -33,7 +34,7 @@ namespace engine {
 
     // https://gamedev.stackexchange.com/questions/47362/cast-ray-to-select-block-in-voxel-game/49423#49423
     DDAResult DDA(
-        const World& world, glm::vec3 start, glm::vec3 direction, float length, UnaryPredicate pred
+        World& world, glm::vec3 start, glm::vec3 direction, float length, UnaryPredicate pred
     ) noexcept;
 
 
