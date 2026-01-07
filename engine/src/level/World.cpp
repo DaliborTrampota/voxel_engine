@@ -3,6 +3,7 @@
 #include "../Globals.h"
 #include "ITerrainGenerator.h"
 #include "block/Block.h"
+#include "data/RegistryManager.h"
 #include "events/LevelEvents.h"
 #include "level/Chunk.h"
 #include "render/Engine.h"
@@ -16,7 +17,12 @@
 #include <glm/gtx/component_wise.hpp>
 #include <glm/gtx/norm.hpp>
 
+
 using namespace engine;
+
+namespace {
+    RegistryManager::BlockRegistryT& blocks = RegistryManager::Blocks();
+}
 
 World::World(std::unique_ptr<ITerrainGenerator> gen, uint32_t genThreads)
     : World(std::move(gen), Chunk::Dims, genThreads) {}
@@ -189,20 +195,20 @@ void World::unloadChunksFromMemory(const std::vector<ChunkID>& ids) {
     m_genPool.resume();
 }
 
-std::weak_ptr<Chunk> World::getChunk(const ChunkID& id) {
+std::shared_ptr<Chunk> World::getChunk(const ChunkID& id) {
     std::unique_lock<std::mutex> lock(m_mutex);
     auto it = m_chunks.find(id);
     if (it == m_chunks.end()) {
-        return {};
+        return nullptr;
     }
     return it->second;
 }
 
-std::weak_ptr<const Chunk> World::getChunk(const ChunkID& id) const {
+std::shared_ptr<const Chunk> World::getChunk(const ChunkID& id) const {
     std::unique_lock<std::mutex> lock(m_mutex);
     auto it = m_chunks.find(id);
     if (it == m_chunks.end()) {
-        return {};
+        return nullptr;
     }
     return it->second;
 }
@@ -240,11 +246,11 @@ bool World::canSeeFace(const Block& curBlock, glm::vec3 pos, glm::ivec3 dir) con
     glm::vec3 neighborPos = pos + glm::vec3(dir);
     ChunkID chunkCoords = engine::extractChunkCoords(neighborPos, m_chunkDims);
 
-    std::shared_ptr<const Chunk> chunk = getChunk(chunkCoords).lock();
+    std::shared_ptr<const Chunk> chunk = getChunk(chunkCoords);
     if (!chunk)  // Chunk not generated
         return false;
 
-    const Block* block = chunk->getBlock(neighborPos);
+    const Block* block = RegistryManager::Blocks().get(chunk->m_data.getBlock(neighborPos));
     if (block->getID() == 0)
         return true;
 
@@ -274,6 +280,9 @@ bool World::canSeeFace(const Block& curBlock, glm::vec3 pos, glm::ivec3 dir) con
         case Layers::Transparent:
             // Render faces when touching different transparent blocks
             return !sameBlock && block->layer() != Layers::Opaque;
+        case Layers::Translucent:
+            // Render translucent faces when touching different blocks (always render to show depth effect)
+            return !sameBlock;
         case Layers::Any: return block->isSolid() && curBlock.isSolid();
         default: return false;
     }
@@ -321,24 +330,43 @@ void World::updateChunk(ChunkID id) {
 void World::setBlock(
     const ChunkID& chID, const glm::ivec3& pos, BlockID blockID, std::optional<BlockState> state
 ) {
-    std::lock_guard<std::mutex> lock(m_mutex);
-    auto it = m_chunks.find(chID);
-    if (it == m_chunks.end())
-        return;
+    Chunk* chunk = nullptr;
+    BlockState* storedState = nullptr;
+    BlockState* oldState = nullptr;
+    BlockID oldBlock = Block::AirID;
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        auto it = m_chunks.find(chID);
+        if (it == m_chunks.end())
+            return;
 
-    Chunk* chunk = it->second.get();
-    if (state.has_value())
-        chunk->m_data.setBlock(pos, blockID, state.value());
-    else
-        chunk->m_data.setBlock(pos, blockID);
+        oldBlock = chunk->m_data.getBlock(pos);
+        oldState = chunk->m_data.getState(pos);
 
-    if (blockID == 0) {
-        chunk->m_data.clearState(pos);
+        chunk = it->second.get();
+        if (state.has_value()) {
+            chunk->m_data.setBlock(pos, blockID, state.value());
+            storedState = &state.value();
+        } else {
+            chunk->m_data.setBlock(pos, blockID);
+            storedState = nullptr;
+        }
+
+        if (blockID == Block::AirID) {
+            chunk->m_data.clearState(pos);
+        }
+        chunk->m_dirty = true;
+        checkAndUpdateSurroundingChunks(chID, pos);
     }
-    chunk->m_dirty = true;
-    checkAndUpdateSurroundingChunks(chID, pos);
 
-    afterBlockSet(pos, blockID, state.has_value() ? chunk->m_data.getState(pos) : nullptr);
+    if (oldBlock != Block::AirID)
+        blocks.get(oldBlock)->onDestroyed(
+            BlockSetContext{.chunk = chunk, .position = pos, .state = oldState}
+        );
+    blocks.get(blockID)->onPlaced(
+        BlockSetContext{.chunk = chunk, .position = pos, .state = storedState}
+    );
+    afterBlockSet(pos, blockID, storedState);
 }
 
 void World::setBlock(glm::ivec3 pos, BlockID blockID, std::optional<BlockState> state) {
@@ -357,7 +385,13 @@ void World::setBlock(const ChunkID& chID, const glm::ivec3& pos, MultiBlock&& mu
     chunk->m_dirty = true;
     checkAndUpdateSurroundingChunks(chID, pos);
 
+    // TODO onPlaced?
     afterBlockSet(pos, Block::MultiblockID, nullptr);
+}
+
+void World::setBlock(glm::ivec3 pos, MultiBlock&& multiBlock) {
+    ChunkID chID = extractChunkCoords(pos, m_chunkDims);
+    setBlock(chID, pos, std::move(multiBlock));
 }
 
 MultiBlock* World::getMultiBlock(const ChunkID& chID, const glm::ivec3& pos) {
@@ -373,11 +407,6 @@ MultiBlock* World::getMultiBlock(glm::ivec3 pos) {
     return getMultiBlock(chID, pos);
 }
 
-
-void World::setBlock(glm::ivec3 pos, MultiBlock&& multiBlock) {
-    ChunkID chID = extractChunkCoords(pos, m_chunkDims);
-    setBlock(chID, pos, std::move(multiBlock));
-}
 
 //TODO improve
 void World::checkAndUpdateSurroundingChunks(const ChunkID& chID, const glm::ivec3& pos) {

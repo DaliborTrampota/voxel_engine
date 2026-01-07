@@ -3,7 +3,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
+#include <memory>
 #include <ranges>
+
 
 #include <LWGL/buffer/Attributes.h>
 
@@ -20,11 +22,14 @@
 
 using namespace engine;
 
+namespace {
+    RegistryManager::BlockRegistryT& blocks = RegistryManager::Blocks();
+}
+
 Chunk::Chunk(World* world, ChunkID coords, glm::ivec3 dims)
     : m_world(world),
       m_coords(coords),
       m_data(dims),
-      m_dims(dims),
       m_opaqueVertData(GL_DYNAMIC_DRAW),
       m_transparentVertData(GL_DYNAMIC_DRAW),
       m_backOpaqueVertData(GL_DYNAMIC_DRAW),
@@ -34,8 +39,6 @@ Chunk::Chunk(World* world, ChunkID coords, glm::ivec3 dims)
     m_backOpaqueVertData.create();
     m_backTransparentVertData.create();
 }
-
-Chunk::Chunk(World* world, ChunkID coords) : Chunk(world, coords, Chunk::Dims) {}
 
 Chunk::~Chunk() {}
 
@@ -53,20 +56,20 @@ bool Chunk::generateMesh() {
     if (!m_generatingMesh.compare_exchange_strong(expected, true))
         return false;
 
-    glm::ivec3 chunkBlockCoords = m_coords * m_dims;
+    glm::ivec3 chunkBlockCoords = m_coords * m_data.dims;
     m_backOpaqueVertData.clear();
     m_backTransparentVertData.clear();
 
     m_backOpaqueVertData.reserve(
-        m_dims.x * m_dims.y * 8 * 6
+        m_data.dims.x * m_data.dims.y * 8 * 6
     );  // dims.x*dims.y*8*6 faces (6 vertices per face) the 8 is taking into account height variation
     m_backTransparentVertData.reserve(
-        m_dims.x * m_dims.y * 6
+        m_data.dims.x * m_data.dims.y * 6
     );  // dims.x*dims.y*6 faces (6 vertices per face) less transparent blocks
 
-    for (int x = 0; x < m_dims.x; x++) {
-        for (int y = 0; y < m_dims.y; y++) {
-            for (int z = 0; z < m_dims.z; z++) {
+    for (int x = 0; x < m_data.dims.x; x++) {
+        for (int y = 0; y < m_data.dims.y; y++) {
+            for (int z = 0; z < m_data.dims.z; z++) {
                 if (m_data.getBlock({x, y, z}) == Block::AirID)
                     continue;
 
@@ -106,17 +109,57 @@ bool Chunk::generateMesh() {
     return true;
 }
 
-const Block* Chunk::getBlock(glm::ivec3 pos) const {
-    BlockID blockID = !m_data.populated ? m_world->m_generator->voxelAt(pos + m_coords * m_dims)
-                                        : m_data.getBlock(pos);
+const Block* Chunk::getBlock(glm::ivec3 pos, BlockState** state) {
+    BlockID blockID = !m_data.populated
+                          ? m_world->m_generator->voxelAt(pos + m_coords * m_data.dims)
+                      : state ? m_data.getBlockAndState(pos, *state)
+                              : m_data.getBlock(pos);
     return RegistryManager::Blocks().get(blockID);
 }
 
-const Block* Chunk::getBlock(glm::ivec3 pos, const BlockState*& state) const {
-    state = nullptr;
-    BlockID blockID = !m_data.populated ? m_world->m_generator->voxelAt(pos + m_coords * m_dims)
-                                        : m_data.getBlockAndState(pos, state);
-    return RegistryManager::Blocks().get(blockID);
+void Chunk::setBlock(const glm::ivec3& pos, BlockID block) {
+    BlockState* oldState = m_data.getState(pos);
+    BlockID oldBlock = m_data.getBlock(pos);
+    if (oldBlock != Block::AirID)
+        blocks.get(oldBlock)->onDestroyed(
+            BlockSetContext{.chunk = this, .position = pos, .state = oldState}
+        );
+
+    m_data.setBlock(pos, block);
+    if (block == Block::AirID) {
+        m_data.clearState(pos);
+    }
+
+    blocks.get(block)->onPlaced(BlockSetContext{.chunk = this, .position = pos, .state = nullptr});
+    m_world->afterBlockSet(pos, block, nullptr);
+    m_dirty = true;
+}
+
+void Chunk::setBlock(const glm::ivec3& pos, BlockID block, BlockState state) {
+    BlockState* oldState = m_data.getState(pos);
+    BlockID oldBlock = m_data.getBlock(pos);
+    if (oldBlock != Block::AirID)
+        blocks.get(oldBlock)->onDestroyed(
+            BlockSetContext{.chunk = this, .position = pos, .state = oldState}
+        );
+
+    m_data.setBlock(pos, block, state);
+    if (block == Block::AirID) {
+        m_data.clearState(pos);
+    }
+
+    BlockState* setState = m_data.getState(pos);
+    blocks.get(block)->onPlaced(BlockSetContext{.chunk = this, .position = pos, .state = setState});
+    m_world->afterBlockSet(pos, block, setState);
+    m_dirty = true;
+}
+
+void Chunk::setBlock(const glm::ivec3& pos, MultiBlock&& multiBlock) {
+    m_data.setMultiBlock(pos, std::move(multiBlock));
+
+    // TODO onPlaced?
+    m_world->afterBlockSet(pos, Block::MultiblockID, nullptr);
+    m_dirty = true;
 }
 
 
@@ -133,7 +176,7 @@ void Chunk::render(Engine& engine, const Camera* camera, int pass) {
     // }
 
     RenderContext ctx;
-    ctx.setModelMatrix(m_coords * m_dims);
+    ctx.setModelMatrix(m_coords * m_data.dims);
     if (pass == 0) {
         ctx.attributes = &m_opaqueVertData;
         ctx.material = &m_world->m_material;
@@ -142,7 +185,7 @@ void Chunk::render(Engine& engine, const Camera* camera, int pass) {
         engine.submitRender(std::move(ctx));
 
         RenderContext ctxTransparent;
-        ctxTransparent.setModelMatrix(m_coords * m_dims);
+        ctxTransparent.setModelMatrix(m_coords * m_data.dims);
         ctxTransparent.attributes = &m_transparentVertData;
         ctxTransparent.material = &m_world->m_material;
         ctxTransparent.passMask = RenderPass::SceneTransparent | RenderPass::DirectionalShadow;
@@ -198,6 +241,9 @@ std::string ChunkID::toString() const {
 }
 
 void Chunk::generateMeshForGeometry(const MeshGenContext& ctx) {
+    if (ctx.block->getID() == 83) {
+        int i = 0;
+    }
     for (auto f : ctx.geometry->faces()) {
         if (glm::abs(ctx.geometryState.angle) > std::numeric_limits<float>::epsilon() * 2) {
             f.rotate(ctx.geometryState.axis, ctx.geometryState.angle);

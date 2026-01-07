@@ -64,25 +64,27 @@ namespace engine {
         /// @note This function does not fire any events.
         void unloadChunksFromMemory(const std::vector<ChunkID>& ids);
 
-        std::weak_ptr<Chunk> getChunk(const ChunkID& id);
-        std::weak_ptr<const Chunk> getChunk(const ChunkID& id) const;
+        std::shared_ptr<Chunk> getChunk(const ChunkID& id);
+        std::shared_ptr<const Chunk> getChunk(const ChunkID& id) const;
 
         /// @brief Gets a chunk and casts it to the specified custom chunk type.
         /// @tparam T The custom chunk type (must inherit from Chunk).
         /// @param id The chunk ID to retrieve.
-        /// @return A weak_ptr to the chunk cast to type T. Use .lock() to get a shared_ptr.
+        /// @return A shared_ptr to the chunk cast to type T.
         /// @note This is a convenience method that performs a static_pointer_cast internally.
-        ///       If the chunk doesn't exist, returns an empty weak_ptr.
-        /// @example auto customChunk = world->getChunkAs<MyCustomChunk>(chunkID).lock();
+        ///       If the chunk doesn't exist, returns nullptr.
+        /// @example auto customChunk = world->getChunkAs<MyCustomChunk>(chunkID);
         template <typename T>
-        std::weak_ptr<T> getChunkAs(const ChunkID& id);
+        std::shared_ptr<T> getChunkAs(const ChunkID& id);
 
         /// @brief Gets a const chunk and casts it to the specified custom chunk type.
         /// @tparam T The custom chunk type (must inherit from Chunk).
         /// @param id The chunk ID to retrieve.
-        /// @return A weak_ptr to the const chunk cast to type T. Use .lock() to get a shared_ptr.
+        /// @return A shared_ptr to the const chunk cast to type T.
+        /// @note This is a convenience method that performs a static_pointer_cast internally.
+        ///       If the chunk doesn't exist, returns nullptr.
         template <typename T>
-        std::weak_ptr<const T> getChunkAs(const ChunkID& id) const;
+        std::shared_ptr<const T> getChunkAs(const ChunkID& id) const;
 
         const std::unordered_set<ChunkID>& loadedChunks() const { return m_loadedChunks; }
 
@@ -108,6 +110,22 @@ namespace engine {
             BlockState** state = nullptr
         );
 
+        void setBlock(
+            const ChunkID& chID,
+            const glm::ivec3& pos,
+            BlockID blockID,
+            std::optional<BlockState> state = std::nullopt
+        );
+        void setBlock(const ChunkID& chID, const glm::ivec3& pos, MultiBlock&& multiBlock);
+        MultiBlock* getMultiBlock(const ChunkID& chID, const glm::ivec3& pos);
+
+
+        void setBlock(
+            glm::ivec3 pos, BlockID blockID, std::optional<BlockState> state = std::nullopt
+        );
+        void setBlock(glm::ivec3 pos, MultiBlock&& multiBlock);
+        MultiBlock* getMultiBlock(glm::ivec3 pos);
+
         /// @brief Gets the block ID at the given position.
         /// @param pos The position of the block in world space
         /// @param fallbackToGenerator If true, the generator will be used to get the block ID if the chunk is not generated
@@ -116,45 +134,23 @@ namespace engine {
         ///         - The chunk is not generated and fallbackToGenerator is false
         BlockID getBlockID(glm::vec3 pos, bool fallbackToGenerator, BlockState** state = nullptr);
 
-        /// @brief Checks if the face of current block facing given direction can be seen and thus should be rendered.
-        /// @param curBlock The current block.
-        /// @param pos The position of the current block.
-        /// @param dir The direction from which the face is being checked.
-        /// @return true if the face can be seen (face should be rendered), false otherwise.
-        bool canSeeFace(const Block& curBlock, glm::vec3 pos, glm::ivec3 dir) const;
-
-
-        void setBlock(
-            const ChunkID& chID,
-            const glm::ivec3& pos,
-            BlockID blockID,
-            std::optional<BlockState> state = std::nullopt
-        );
-        void setBlock(
-            glm::ivec3 pos, BlockID blockID, std::optional<BlockState> state = std::nullopt
-        );
-
-        void setBlock(const ChunkID& chID, const glm::ivec3& pos, MultiBlock&& multiBlock);
-        void setBlock(glm::ivec3 pos, MultiBlock&& multiBlock);
-
-        MultiBlock* getMultiBlock(const ChunkID& chID, const glm::ivec3& pos);
-        MultiBlock* getMultiBlock(glm::ivec3 pos);
-
         /// @brief Gets the terrain generator for this world.
         /// @return Pointer to the terrain generator.
         const ITerrainGenerator* getGenerator() const { return m_generator.get(); }
+        const Material& getMaterial() const { return m_material; }
+        Skybox& getSkybox() { return m_skybox; }
 
         virtual void render(Engine& engine, const Camera* camera, int pass = 0) override;
         virtual void update(float dt) override;
 
-        const Material& getMaterial() const { return m_material; }
-        Skybox& getSkybox() { return m_skybox; }
 
         /// @section Events
 
 
-        virtual void afterBlockSet(const glm::ivec3& pos, BlockID blockID, const BlockState* state) {
-        }
+        virtual void afterBlockSet(
+            const glm::ivec3& pos, BlockID blockID, BlockState* state = nullptr
+        ) {}
+        // virtual void multiBlockUpdated(const glm::ivec3& pos, MultiBlock* block) {};
 
       protected:
         std::unordered_map<ChunkID, std::shared_ptr<Chunk>> m_chunks;
@@ -174,6 +170,14 @@ namespace engine {
         ///       Custom World subclasses can override this to return custom Chunk types.
         virtual std::shared_ptr<Chunk> createChunk(const ChunkID& id);
 
+        /// @brief Checks if the face of current block facing given direction can be seen and thus should be rendered.
+        /// @param curBlock The current block.
+        /// @param pos The position of the current block.
+        /// @param dir The direction from which the face is being checked.
+        /// @return true if the face can be seen (face should be rendered), false otherwise.
+        bool canSeeFace(const Block& curBlock, glm::vec3 pos, glm::ivec3 dir) const;
+
+
         friend class Chunk;
 
       private:
@@ -182,23 +186,17 @@ namespace engine {
     };
 
     template <typename T>
-    std::weak_ptr<T> World::getChunkAs(const ChunkID& id) {
+    std::shared_ptr<T> World::getChunkAs(const ChunkID& id) {
         static_assert(std::is_base_of<Chunk, T>::value, "T must inherit from Chunk");
         auto chunk = getChunk(id);
-        if (auto locked = chunk.lock()) {
-            return std::static_pointer_cast<T>(locked);
-        }
-        return {};
+        return std::static_pointer_cast<T>(chunk);
     }
 
     template <typename T>
-    std::weak_ptr<const T> World::getChunkAs(const ChunkID& id) const {
+    std::shared_ptr<const T> World::getChunkAs(const ChunkID& id) const {
         static_assert(std::is_base_of<Chunk, T>::value, "T must inherit from Chunk");
         auto chunk = getChunk(id);
-        if (auto locked = chunk.lock()) {
-            return std::static_pointer_cast<const T>(locked);
-        }
-        return {};
+        return std::static_pointer_cast<const T>(chunk);
     }
 
 }  // namespace engine
