@@ -43,6 +43,8 @@ namespace engine {
         virtual ~Block() = default;
 
         virtual bool onInteract(InteractContext* context) const { return false; };
+        virtual void onDestroyed(const BlockSetContext& context) const {};
+        virtual void onPlaced(const BlockSetContext& context) const {};
 
         static Block& air();
         static Block& multiblock();
