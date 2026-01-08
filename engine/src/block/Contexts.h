@@ -17,8 +17,10 @@ namespace engine {
         glm::vec3 normal;
         FaceTag face;
         GLFWKey button;
+        bool shiftPressed = false;
+        bool ctrlPressed = false;
+        bool altPressed = false;
         void* data = nullptr;
-        // TODO modifiers? (shift, ctrl, etc)
     };
 
     struct BlockSetContext {
