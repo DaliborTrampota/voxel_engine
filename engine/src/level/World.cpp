@@ -340,10 +340,11 @@ void World::setBlock(
         if (it == m_chunks.end())
             return;
 
+        chunk = it->second.get();
+
         oldBlock = chunk->m_data.getBlock(pos);
         oldState = chunk->m_data.getState(pos);
 
-        chunk = it->second.get();
         if (state.has_value()) {
             chunk->m_data.setBlock(pos, blockID, state.value());
             storedState = &state.value();
