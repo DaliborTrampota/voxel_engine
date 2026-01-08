@@ -95,7 +95,7 @@ bool Chunk::generateMesh() {
             }
         }
     }
-    // TODO i dont want switch just copy to the front buffer
+
     m_backOpaqueVertData.vertexData().shrink_to_fit();
     m_backTransparentVertData.vertexData().shrink_to_fit();
 
@@ -213,7 +213,6 @@ void Chunk::render(Engine& engine, const Camera* camera, int pass) {
     }
 }
 
-// TODO get rid of this now when there is calculateRotationFromState
 Chunk::GeometryState Chunk::calculateGeometryState(
     const Block* block, const BlockState* state
 ) const {

@@ -77,8 +77,6 @@ namespace engine {
             return out;
         }
 
-        friend class RegistryManager;
-        // TODO should not be constructible by user, only RegistryManager and the derived classes
         Registry() = default;
 
       protected:
@@ -144,7 +142,6 @@ namespace engine {
             return out;
         }
 
-        // TODO should not be constructible by user? only RegistryManager and the derived classes
         Registry() = default;
 
       protected:
