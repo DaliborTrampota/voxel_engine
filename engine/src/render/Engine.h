@@ -8,22 +8,12 @@
 #include "RenderPass.h"
 #include "Window.h"
 
-
-namespace gl {
-    class ShaderPipeline;
-    class GraphicsAPI;
-    class FBO;
-}  // namespace gl
-
 namespace engine {
-    class Chunk;
-    class World;
-    class Camera;
-    class Material;
     class Updateable;
     class Renderable;
     class Tickable;
     class Sun;
+    class InputSystem;
 
     class Engine {
       public:
@@ -57,16 +47,14 @@ namespace engine {
         virtual void afterRender() {};
 
         Window* window() const { return m_window.get(); }
+        InputSystem* inputSystem() const { return m_inputSystem.get(); }
 
-        void setDirectionalLightSource(
-            std::shared_ptr<engine::Sun> lightSource, uint8_t passPosition = 0
-        );
-        std::shared_ptr<engine::Sun> directionalLightSource() const {
-            return m_directionalLightSource;
-        }
+        void setDirectionalLightSource(std::shared_ptr<Sun> lightSource, uint8_t passPosition = 0);
+        std::shared_ptr<Sun> directionalLightSource() const { return m_directionalLightSource; }
 
       protected:
-        std::shared_ptr<engine::Sun> m_directionalLightSource;
+        std::unique_ptr<InputSystem> m_inputSystem;
+        std::shared_ptr<Sun> m_directionalLightSource;
 
         std::vector<std::variant<RenderContext, GroupRenderContext>> m_renderQueue;
         std::unique_ptr<Window> m_window;

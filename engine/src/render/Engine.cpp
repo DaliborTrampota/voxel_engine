@@ -12,6 +12,7 @@
 
 #include "RenderPass.h"
 #include "data/RegistryManager.h"
+#include "input/InputSystem.h"
 #include "level/Chunk.h"
 #include "level/World.h"
 #include "render/Material.h"
@@ -29,7 +30,9 @@
 
 using namespace engine;
 
-Engine::Engine(std::unique_ptr<Window> window) : m_window(std::move(window)) {
+Engine::Engine(std::unique_ptr<Window> window)
+    : m_window(std::move(window)),
+      m_inputSystem(std::make_unique<InputSystem>()) {
     RegistryManager::Blocks().add(Block::air(), "air");
     RegistryManager::Blocks().add(Block::multiblock(), "multiblock");
     // RegistryManager::Blocks().add(Block(2, Layers::Any, nullptr), "reserved_block_2");
@@ -280,11 +283,12 @@ void Engine::subscribeTick(std::shared_ptr<Tickable> tickable) {
 
 void Engine::beginFrame() {
     m_window->clearScreen();
+    m_inputSystem->beginFrame();
+    glfwPollEvents();
 }
 
 void Engine::endFrame() {
     m_window->swapBuffers();
-    glfwPollEvents();
 }
 
 void Engine::setDirectionalLightSource(
