@@ -309,7 +309,6 @@ float AABBCollider::tryStepUp(const glm::vec3& horizontalMove, const SweptResult
     newHorizontalMove[bestRes.axis] -= moveToWall;
 
     bool canStep = true;
-
     
     for (const AABB& aabb : m_aabbCache) {
         SweptResult res = swept(newHorizontalMove, aabb);
@@ -331,6 +330,7 @@ float AABBCollider::tryStepUp(const glm::vec3& horizontalMove, const SweptResult
     }
 
     m_aabb->moveAxis(1, -stepHeight);
+    m_aabb->moveAxis(bestRes.axis, -moveToWall);
 
     return canStep ? stepHeight : -1.0f;
 }
