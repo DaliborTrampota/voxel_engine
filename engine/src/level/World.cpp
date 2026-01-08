@@ -340,10 +340,11 @@ void World::setBlock(
         if (it == m_chunks.end())
             return;
 
+        chunk = it->second.get();
+
         oldBlock = chunk->m_data.getBlock(pos);
         oldState = chunk->m_data.getState(pos);
 
-        chunk = it->second.get();
         if (state.has_value()) {
             chunk->m_data.setBlock(pos, blockID, state.value());
             storedState = &state.value();
@@ -408,7 +409,6 @@ MultiBlock* World::getMultiBlock(glm::ivec3 pos) {
 }
 
 
-//TODO improve
 void World::checkAndUpdateSurroundingChunks(const ChunkID& chID, const glm::ivec3& pos) {
     glm::ivec3 surroundingBlocks[] = {
         {pos.x - 1, pos.y, pos.z},
@@ -418,12 +418,17 @@ void World::checkAndUpdateSurroundingChunks(const ChunkID& chID, const glm::ivec
         {pos.x, pos.y, pos.z - 1},
         {pos.x, pos.y, pos.z + 1}
     };
+    // Cache chunk pointer to avoid redundant lookups when multiple neighbors are in same chunk
+    Chunk* chunk = nullptr;
     for (auto& blockPos : surroundingBlocks) {
         blockPos += chID * m_chunkDims;
         ChunkID blockChID = getChunkID(blockPos, m_chunkDims);
-        auto it = m_chunks.find(blockChID);
-        if (it != m_chunks.end()) {
-            it->second->m_dirty = true;
+        if (!chunk || blockChID != chunk->id()) {
+            auto it = m_chunks.find(blockChID);
+            if (it != m_chunks.end()) {
+                chunk = it->second.get();
+                chunk->m_dirty = true;
+            }
         }
     }
 }

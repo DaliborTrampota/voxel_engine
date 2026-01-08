@@ -42,10 +42,10 @@ namespace engine {
 
       protected:
         /// @brief Constructs pass with next available ID, use only for custom passes.
-        RenderPass(uint8_t passes = 1) : m_id(1 << s_nextPassIndex++), m_passes(passes) {}
+        explicit RenderPass(uint8_t passes = 1) : m_id(1 << s_nextPassIndex++), m_passes(passes) {}
 
         /// @brief Constructs pass with specific ID, use only for built-in passes.
-        RenderPass(ID id, uint8_t passes = 1) : m_id(id), m_passes(passes) {}
+        explicit RenderPass(ID id, uint8_t passes = 1) : m_id(id), m_passes(passes) {}
 
 
       private:

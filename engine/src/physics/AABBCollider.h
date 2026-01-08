@@ -88,7 +88,7 @@ namespace engine {
         /// @param horizontalMove The horizontal movement vector on the colliding axis
         /// @param collidingBB The AABB that was collided with
         /// @return The step height if stepping is possible, -1.0f otherwise
-        float tryStepUp(const glm::vec3& horizontalMove, const AABB* collidingBB);
+        float tryStepUp(const glm::vec3& horizontalMove, const SweptResult& bestRes);
     };
 
 }  // namespace engine

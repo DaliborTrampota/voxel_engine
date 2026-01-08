@@ -57,7 +57,6 @@ void VariantBlock::Neighbours::rotate(Side from, Side to) {
     glm::mat4 rotateMat = glm::rotate(glm::mat4(1.0f), angle, axis);
     auto rotateSide = [&](Side side) -> BlockID {
         glm::vec3 dir = sideDirection(side);
-        // TODO understand why z=0 for direction and 1 for position
         glm::vec3 rotated = glm::vec3(rotateMat * glm::vec4(dir, 0.0f));
 
         return original[getSide(glm::round(rotated))];

@@ -46,6 +46,10 @@ void Camera::lookAt(const glm::vec3& target) {
     updateVectors();
 }
 
+void Camera::lookDirection(const glm::vec3& direction) {
+    lookAt(m_position + direction);
+}
+
 void Camera::rotate(float dx, float dy, bool constrainPitch) {
     float sens = 0.1f;
     m_yaw += dx * sens;

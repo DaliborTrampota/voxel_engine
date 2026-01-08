@@ -48,7 +48,6 @@ void Chunk::populateTerrainData() {
 
     m_world->m_generator->populate(*this);
     m_data.populated = true;
-    afterPopulate();
 }
 
 bool Chunk::generateMesh() {
@@ -96,12 +95,12 @@ bool Chunk::generateMesh() {
             }
         }
     }
-    // TODO i dont want switch just copy to the front buffer
+
     m_backOpaqueVertData.vertexData().shrink_to_fit();
     m_backTransparentVertData.vertexData().shrink_to_fit();
 
-    m_opaqueVertData.swapData(m_backOpaqueVertData);
-    m_transparentVertData.swapData(m_backTransparentVertData);
+    m_opaqueVertData.moveDataFrom(m_backOpaqueVertData);
+    m_transparentVertData.moveDataFrom(m_backTransparentVertData);
 
     m_generated = true;
     m_generatingMesh = false;
@@ -214,7 +213,6 @@ void Chunk::render(Engine& engine, const Camera* camera, int pass) {
     }
 }
 
-// TODO get rid of this now when there is calculateRotationFromState
 Chunk::GeometryState Chunk::calculateGeometryState(
     const Block* block, const BlockState* state
 ) const {

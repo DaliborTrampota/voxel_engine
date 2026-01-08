@@ -18,7 +18,6 @@ namespace engine {
 
       private:
         // Helper to check if type T is one of the types in the variant (100% AI code :) )
-        // TODO maybe use std::any?
         template <typename T, typename Variant>
         struct is_variant_member;
 

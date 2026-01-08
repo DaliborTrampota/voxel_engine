@@ -94,20 +94,17 @@ namespace engine {
 
         VariantBlock& addVariant(Variant&& variant);
 
-
         /// @brief Get a variant that matches the neighbours.
         /// @param neighbours The neighbours of the block.
         /// @return The variant that matches the neighbours.
         /// @note Should be used if allowMultiple is false.
         const Variant* getVariant(const Neighbours& neighbours) const;
+
         /// @brief Get all variants that match the neighbours.
         /// @param neighbours The neighbours of the block.
         /// @return All variants that match the neighbours.
         /// @note Should be used if allowMultiple is true.
         std::vector<const Variant*> getVariants(const Neighbours& neighbours) const;
-
-        // TODO keep or remove?
-        // const Geometry& getGeometry(const Neighbours& neighbours) const;
 
         /// @brief Get all geometries that match the neighbours and the base geometry if alwaysUseBaseGeometry is true.
         /// @param neighbours The neighbours of the block.

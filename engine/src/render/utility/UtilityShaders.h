@@ -22,7 +22,7 @@ namespace engine {
     void initUtilityShaders();
 
     void applyGaussianBlur(
-        const gl::FBO& source,  //TODO ptr as temp?
+        const gl::FBO& source,
         gl::FBOAttachment::Attachment sourceAttachment,
         gl::FBOAttachment::Attachment tempAttachment,
         int width,
