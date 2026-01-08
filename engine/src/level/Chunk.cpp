@@ -99,8 +99,8 @@ bool Chunk::generateMesh() {
     m_backOpaqueVertData.vertexData().shrink_to_fit();
     m_backTransparentVertData.vertexData().shrink_to_fit();
 
-    m_opaqueVertData.swapData(m_backOpaqueVertData);
-    m_transparentVertData.swapData(m_backTransparentVertData);
+    m_opaqueVertData.moveDataFrom(m_backOpaqueVertData);
+    m_transparentVertData.moveDataFrom(m_backTransparentVertData);
 
     m_generated = true;
     m_generatingMesh = false;
