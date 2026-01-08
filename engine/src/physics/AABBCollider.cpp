@@ -80,7 +80,7 @@ CollisionInfo AABBCollider::collide(glm::vec3& moveStep, const glm::vec3& positi
                 glm::vec3 horizontalMove{moveStep.x, 0, moveStep.z};
 
                 if (m_stepUpCooldown == 0.0f) {
-                    float stepHeight = tryStepUp(horizontalMove, bestRes.bb);
+                    float stepHeight = tryStepUp(horizontalMove, bestRes);
 
                     if (stepHeight > 0.0f) {
                         info.stepHeight = stepHeight;
@@ -288,11 +288,11 @@ float AABBCollider::swept1D(int axis, float velocity, const AABB& other) {
     return entryTime;
 }
 
-float AABBCollider::tryStepUp(const glm::vec3& horizontalMove, const AABB* collidingBB) {
+float AABBCollider::tryStepUp(const glm::vec3& horizontalMove, const SweptResult& bestRes) {
     if (m_stepHeight <= 0.0f)
         return -1.0f;
 
-    float colHeight = collidingBB->max.y;
+    float colHeight = bestRes.bb->max.y;
     float feetHeight = m_aabb->min.y;
     float stepHeight = colHeight - feetHeight + s_epsGap;
     
@@ -302,14 +302,21 @@ float AABBCollider::tryStepUp(const glm::vec3& horizontalMove, const AABB* colli
     // Temp move up
     m_aabb->moveAxis(1, stepHeight);
 
+    float moveToWall = horizontalMove[bestRes.axis] * bestRes.time;
+    // Temp move to the wall
+    m_aabb->moveAxis(bestRes.axis, moveToWall);
+    glm::vec3 newHorizontalMove = horizontalMove;
+    newHorizontalMove[bestRes.axis] -= moveToWall;
+
     bool canStep = true;
+
     
     for (const AABB& aabb : m_aabbCache) {
-        SweptResult res = swept(horizontalMove, aabb);
+        SweptResult res = swept(newHorizontalMove, aabb);
 
         // Maybe we collide but there is a ledge? Check absolute amount for 1/16th of a block
         if (res.axis != 1 && res.time != 1.0f) {
-            float absMove = horizontalMove[res.axis] * res.time;
+            float absMove = glm::abs(newHorizontalMove[res.axis]) * res.time;
             if (absMove < 1.f/16.f) { 
                 canStep = false;
                 break;
