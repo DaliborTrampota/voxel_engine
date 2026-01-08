@@ -87,7 +87,7 @@ namespace engine {
         VariantBlock::Neighbours getNeighbouringBlocks(glm::ivec3 pos) const;
 
         /// @section Events
-        virtual void afterPopulate() {}
+        // TODO probably remove this
         virtual void afterGenerated() {}
 
 
