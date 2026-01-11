@@ -239,9 +239,6 @@ std::string ChunkID::toString() const {
 }
 
 void Chunk::generateMeshForGeometry(const MeshGenContext& ctx) {
-    if (ctx.block->getID() == 83) {
-        int i = 0;
-    }
     for (auto f : ctx.geometry->faces()) {
         if (glm::abs(ctx.geometryState.angle) > std::numeric_limits<float>::epsilon() * 2) {
             f.rotate(ctx.geometryState.axis, ctx.geometryState.angle);

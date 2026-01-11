@@ -96,7 +96,9 @@ std::future<void> World::loadChunks(const glm::ivec3& from, const glm::ivec3& to
                         chunk->generateMesh();
 
                         std::lock_guard<std::mutex> lock(m_mutex);
-                        m_loadedChunks.insert(id);
+                        if (m_chunks.find(id) != m_chunks.end()) {
+                            m_loadedChunks.insert(id);
+                        }
                     });
                 }
             }
