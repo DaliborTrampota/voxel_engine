@@ -4,6 +4,7 @@
 #include "ITerrainGenerator.h"
 #include "block/Block.h"
 #include "data/RegistryManager.h"
+#include "data/TextureManager.h"
 #include "events/LevelEvents.h"
 #include "level/Chunk.h"
 #include "render/Engine.h"
