@@ -19,17 +19,17 @@ void DirectionalShadowPass::beforeRender(Engine& engine, uint8_t pass) {
 }
 
 void DirectionalShadowPass::afterRender(Engine& engine, uint8_t pass) {
-
-    glm::ivec2 resolution = engine.directionalLightSource()->resolution();
-    applyLinearSamplingBlur(
-        *fbo,
-        gl::FBOAttachment::Color,
-        gl::FBOAttachment::Color + 1,
-        resolution.x,
-        resolution.y,
-        nullptr
-    );
     glViewport(0, 0, m_resolution.x, m_resolution.y);
+
+    // glm::ivec2 resolution = engine.directionalLightSource()->resolution();
+    // applyLinearSamplingBlur(
+    //     *fbo,
+    //     gl::FBOAttachment::Color,
+    //     gl::FBOAttachment::Color + 1,
+    //     resolution.x,
+    //     resolution.y,
+    //     nullptr
+    // );
 }
 
 

@@ -1,64 +1,86 @@
 #include "Sun.h"
 
+#include <LWGL/GLTypes.h>
+#include <LWGL/texture/TextureArray.h>
 #include <LWGL/texture/TextureBase.h>
 
 #include <glad/glad.h>
 #include <cassert>
 #include <glm/gtc/matrix_transform.hpp>
+#include <numeric>
 
 #include "../Globals.h"
+#include "data/TextureManager.h"
+#include "physics/AABB.h"
+#include "scene/Camera.h"
+
 
 using namespace engine;
 
-Sun::Sun(glm::ivec2 resolution, const glm::vec3* targetPosition, const glm::vec3& direction)
+Sun::Sun(glm::ivec2 resolution, const Camera* target, const glm::vec3& direction)
     : m_resolution(resolution),
       m_depthShader(
-          "resources/shaders/SunVert.glsl", "resources/shaders/SunFrag.glsl", "SunDepthShader"
+          "resources/shaders/SunVert.glsl",
+          "resources/shaders/SunGeom.glsl",
+          "resources/shaders/SunFrag.glsl",
+          "SunDepthShader"
       ),
-      m_direction(direction),
-      m_targetPosition(targetPosition),
-      m_view(glm::mat4(1)) {
-    gl::FrameBufferSettings vsmSettings = {
+      m_direction(glm::normalize(direction)) {
+    setTarget(target);
+
+    m_lightSpaceUBO = gl::UBO(
+        0,
+        {
+            gl::Type::Mat4,
+            gl::Type::Mat4,
+            gl::Type::Mat4,
+            gl::Type::Mat4,
+        },
+        "LightSpaceMatrices"
+    );
+    m_lightSpaceUBO.create();
+    m_depthShader.bindUBO(m_lightSpaceUBO);
+
+    // gl::FrameBufferSettings vsmSettings = {
+    //     gl::Settings(gl::Settings::ClampToEdge, gl::Settings::Linear),
+    //     resolution.x,
+    //     resolution.y,
+    //     gl::ImageFormat::GrayAlpha,
+    //     gl::ImageDataType::Float
+    // };
+
+    // m_depthFBO.createTexture(gl::FBOAttachment::Color, vsmSettings);
+    // m_depthFBO.createTexture(gl::FBOAttachment::Color + 1, vsmSettings);  // for blur
+
+
+    gl::ArraySettings cmsSettings = {
         gl::Settings(gl::Settings::ClampToEdge, gl::Settings::Linear),
+        static_cast<unsigned>(m_cascadeSplits.size()),
         resolution.x,
         resolution.y,
-        gl::ImageFormat::GrayAlpha,
-        gl::ImageDataType::Float
+        gl::ImageFormat::Depth
     };
+    TextureManager::Get().cascadeShadowMaps()->create(cmsSettings);
+    m_depthFBO.bind();
+    m_depthFBO.bindTexture(gl::FBOAttachment::Depth, TextureManager::Get().cascadeShadowMaps());
 
-    m_depthFBO.createTexture(gl::FBOAttachment::Color, vsmSettings);
-    m_depthFBO.createTexture(gl::FBOAttachment::Color + 1, vsmSettings);  // for blur
-
-    gl::FrameBufferSettings depthSettings =
-        gl::FrameBufferSettings::Depth(resolution.x, resolution.y);
-    m_depthFBO.createTexture(gl::FBOAttachment::Depth, depthSettings);
 
     m_depthFBO.bind();
-    m_depthFBO.setDrawBuffers({gl::FBOAttachment::Color});
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
     assert(m_depthFBO.checkCompleteness() == 0);
     m_depthFBO.unbind();
 
-    m_projection = glm::ortho(-32.f, 32.f, -32.f, 32.f, 1.f, DistanceFromTarget * 2.f);
     m_depthShader.use();
-    m_depthShader.setMat4("projection", m_projection);
-    m_depthShader.setInt("texArray", 0);  // Block texture array is at slot 0
+    m_depthShader.setTexture(0, TextureManager::Get().blockTextures(), "blockTextures");
 }
 
-// todo inline lightPosition()?
-void Sun::setTargetPosition(const glm::vec3* position) {
-    m_targetPosition = position;
-    m_view = glm::lookAt(lightPosition(), *m_targetPosition, UP);
-
-    // m_depthShader.use();
-    // m_depthShader.setMat4("view", m_view);
+void Sun::setTarget(const Camera* target) {
+    m_target = target;
 }
 
 void Sun::setDirection(const glm::vec3& direction) {
     m_direction = glm::normalize(direction);
-    m_view = glm::lookAt(lightPosition(), *m_targetPosition, UP);
-
-    // m_depthShader.use();
-    // m_depthShader.setMat4("view", m_view);
 }
 
 void Sun::setLightColor(const glm::vec3& color, float intensity) {
@@ -70,29 +92,73 @@ void Sun::setLightColor(const glm::vec3& color, float intensity) {
     // m_depthShader.setFloat("lightIntensity", m_lightIntensity);
 }
 
+
+gl::TextureRef Sun::cascadeShadowMaps() const {
+    return m_depthFBO.texture(gl::FBOAttachment::Depth);
+    // return m_depthFBO.texture(gl::FBOAttachment::Color);
+}
+
 void Sun::update(float dt) {
-    m_view = glm::lookAt(lightPosition(), *m_targetPosition, UP);
-    m_depthShader.use();
-    m_depthShader.setMat4("view", m_view);
+    calculateLightSpaceMatrices();
+
+    for (int i = 0; i < m_cascadeSplits.size(); i++) {
+        m_lightSpaceUBO.setSubData(i, &m_cascadeSplits[i].lightSpace);
+    }
 }
 
-glm::mat4 Sun::getLightSpaceTransform() const {
-    return m_projection * m_view;
+void Sun::calculateLightSpaceMatrices() {
+    for (int i = 0; i < m_cascadeSplits.size(); i++) {
+        glm::mat4 cameraPerspective = glm::perspective(
+            m_target->fov(),
+            m_target->aspectRatio(),
+            i == 0 ? m_target->nearPlane() : m_cascadeSplits[i - 1].farPlane,
+            m_cascadeSplits[i].farPlane
+        );
+
+        std::array<glm::vec3, 8> cascadeCorners =
+            Camera::getFrustumCorners(cameraPerspective, m_target->getView());
+
+        glm::vec3 center =
+            std::accumulate(cascadeCorners.begin(), cascadeCorners.end(), glm::vec3(0.0f)) / 8.0f;
+
+        float maxDistance = 0.0f;
+        for (auto& corner : cascadeCorners) {
+            // this returns the distance to a corner in the direction of the light
+            float distance = glm::dot(corner - center, -m_direction);
+            maxDistance = std::max(maxDistance, distance);
+        }
+        maxDistance += 50.0f;  // extra padding
+
+        glm::mat4 lightView = glm::lookAt(center - m_direction * maxDistance, center, UP);
+
+        for (auto& corner : cascadeCorners) {
+            corner = lightView * glm::vec4(corner, 1.0f);
+        }
+
+        AABB frustumAABB =
+            AABB::fromPoints(std::vector<glm::vec3>{cascadeCorners.begin(), cascadeCorners.end()});
+
+        // include blocks that are not visible by the camera but can cast shadows to the area visible by the camera
+        const float shiftFactor = 10.0f;
+        frustumAABB.min.z -= shiftFactor;
+        frustumAABB.max.z += shiftFactor;
+
+        // Shadow stabilization: snap to texel increments to prevent swimming
+        // float worldUnitsPerTexel = (frustumAABB.max.x - frustumAABB.min.x) / m_resolution.x;
+
+        // frustumAABB.min.x = glm::floor(frustumAABB.min.x / worldUnitsPerTexel) * worldUnitsPerTexel;
+        // frustumAABB.max.x = glm::floor(frustumAABB.max.x / worldUnitsPerTexel) * worldUnitsPerTexel;
+        // frustumAABB.min.y = glm::floor(frustumAABB.min.y / worldUnitsPerTexel) * worldUnitsPerTexel;
+        // frustumAABB.max.y = glm::floor(frustumAABB.max.y / worldUnitsPerTexel) * worldUnitsPerTexel;
+
+        m_cascadeSplits[i].lightSpace = glm::ortho(
+                                            frustumAABB.min.x,
+                                            frustumAABB.max.x,
+                                            frustumAABB.min.y,
+                                            frustumAABB.max.y,
+                                            -frustumAABB.max.z,
+                                            -frustumAABB.min.z
+                                        ) *
+                                        lightView;
+    }
 }
-
-unsigned Sun::shadowMapTexture() const {
-    return m_depthFBO.texture(gl::FBOAttachment::Color);
-}
-
-// void Sun::render(Engine& engine, const Camera* camera, int pass) {
-//     if (pass == 1) {
-//         glViewport(0, 0, m_resolution.x, m_resolution.y);
-//         m_depthFBO.bind();
-//         m_depthFBO.clearDepth();
-
-//     } else if (pass == 2) {
-//         glm::ivec2 size = engine.window()->windowSize();
-//         glViewport(0, 0, size.x, size.y);
-//         m_depthFBO.unbind();
-//     }
-// }

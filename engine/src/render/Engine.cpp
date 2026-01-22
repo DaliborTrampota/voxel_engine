@@ -177,17 +177,18 @@ void Engine::render(RenderContext& ctx, const RenderPass* renderPass) const {
     material->setMat4("model", ctx.matrices.model);
 
     if (material->supportsShadows()) {
-        material->setMat4(
-            "lightSpaceTransform", m_directionalLightSource->getLightSpaceTransform()
-        );
-        material->setVec3("lightPos", m_directionalLightSource->lightPosition());
+        // material->setVec3("lightPos", m_directionalLightSource->lightPosition());
         material->setVec3("lightColor", m_directionalLightSource->lightColor());
         material->setVec3("lightDir", m_directionalLightSource->direction());
         material->setVec3("viewPos", ctx.camera->position());
 
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, m_directionalLightSource->shadowMapTexture());
-        material->setInt("shadowMap", 1);
+
+        for (int i = 0; i < m_directionalLightSource->cascadeSplits().size(); i++) {
+            material->setFloat(
+                std::format("cascadePlaneDistances[{}]", i),
+                m_directionalLightSource->cascadeSplits()[i].farPlane
+            );
+        }
     }
 
     if (!renderPass->material) {
@@ -206,6 +207,7 @@ void Engine::render(RenderContext& ctx, const RenderPass* renderPass) const {
 
 
     ctx.attributes->bind();
+    material->bindTextures();
     glDrawArrays(GL_TRIANGLES, 0, n);
 }
 

@@ -32,9 +32,13 @@ namespace engine {
         }
 
         gl::TextureArray* blockTextures() { return &m_blockTextures; }
+        gl::TextureArray* cascadeShadowMaps() { return &m_cascadeShadowMaps; }
+
       private:
         TextureManager() = default;
+
         std::unordered_map<std::string, TexID> m_textures;
         gl::TextureArray m_blockTextures;
+        gl::TextureArray m_cascadeShadowMaps;
     };
 }  // namespace engine
