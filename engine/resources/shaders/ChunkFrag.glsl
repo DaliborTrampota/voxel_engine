@@ -6,7 +6,7 @@ layout(std140) uniform LightSpaceMatrices {
 
 // uniform vec3 lightPos;
 uniform vec3 lightColor;
-uniform vec3 lightDir;
+uniform vec3 lightDir;  // negated before passing to shader (pointing towards light)
 uniform vec3 viewPos;
 uniform vec2 resolution;
 
@@ -42,8 +42,7 @@ float linstep(float low, float high, float v) {
 
 vec3 phongLighting(vec4 baseColor, float shadow) {
     vec3 ambientCol = 0.3 * lightColor;
-    // vec3 fragLightDir = normalize(lightPos - fragPos);
-    float diff = max(dot(-lightDir, normal), 0.0);
+    float diff = max(dot(lightDir, normal), 0.0);
     vec3 diffuse = diff * lightColor;
 
     //specular
@@ -57,7 +56,7 @@ vec3 phongLighting(vec4 baseColor, float shadow) {
 }
 
 float shadowFaceOutside() {
-    return dot(normal, -lightDir) > 0.0 ? 1.0 : 0.0;
+    return dot(normal, lightDir) > 0.0 ? 1.0 : 0.0;
 }
 
 
@@ -83,7 +82,7 @@ float VSM(vec3 projCoords, float currentDepth, int layer) {
 }
 
 
-float ShadowCalculation(vec3 fragPosWorldSpace, vec3 lightDirection) {
+float ShadowCalculation(vec3 fragPosWorldSpace) {
     vec4 fragPosViewSpace = view * vec4(fragPosWorldSpace, 1.0);
     float depthValue = abs(fragPosViewSpace.z);
 
@@ -116,7 +115,7 @@ float ShadowCalculation(vec3 fragPosWorldSpace, vec3 lightDirection) {
     } else {
         // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
         float closestDepth = texture(shadowMap, vec3(projCoords.xy, layer)).r;
-        float bias = max(0.001 * (1.0 - dot(normal, -lightDirection)), 0.0001);
+        float bias = max(0.001 * (1.0 - dot(normal, lightDir)), 0.0001);
         return currentDepth - bias > closestDepth ? 1.0 : 0.0;
     }
 }
@@ -180,7 +179,7 @@ void main() {
     //     col.rgb *= vec3(0.4, 0.9, 0.3);
     // }
 
-    float shadow = ShadowCalculation(fragPos, lightDir);
+    float shadow = ShadowCalculation(fragPos);
     vec3 lighting = phongLighting(col, shadow);
 
     float transmittance = 1.0;
