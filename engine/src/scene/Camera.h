@@ -1,16 +1,19 @@
 #pragma once
 
+#include <array>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
 #include "../Globals.h"
+#include "physics/Plane.h"
 #include "render/events/EngineEventSite.h"
+
 
 namespace engine {
 
     struct CameraOptions {
         float zNear = 0.1f;
-        float zFar = 10000.0f;
+        float zFar = 1200.0f;
     };
 
     struct OrthoOptions : public CameraOptions {
@@ -53,6 +56,26 @@ namespace engine {
         glm::mat4 getView() const;
         glm::mat4 getProjection() const { return m_projection; };
 
+        float farPlane() const { return m_zFar; }
+        float nearPlane() const { return m_zNear; }
+        float fov() const { return m_fov; }
+        float aspectRatio() const { return m_aspectRatio; }
+
+        /// @brief Returns the camera's frustum in world space.
+        /// @note Order of the planes is: left, right, top, bottom, near, far.
+        std::array<Plane, 6> getFrustum() const;
+        /// @brief Returns the camera's frustum corners in world space.
+        /// @note Order of the corners is:
+        ///     [0] near bottom right, [1] near bottom left,
+        ///     [2] near top right,    [3] near top left,
+        ///     [4] far bottom right,  [5] far bottom left,
+        ///     [6] far top right,     [7] far top left.
+        std::array<glm::vec3, 8> getFrustumCorners() const;
+
+        static std::array<glm::vec3, 8> getFrustumCorners(
+            const glm::mat4& projection, const glm::mat4& view
+        );
+
       protected:
         glm::vec3 m_worldUp = UP;
 
@@ -67,7 +90,8 @@ namespace engine {
 
         float m_fov = 0.0f;
         float m_zNear = 0.1f;
-        float m_zFar = 10000.0f;
+        float m_zFar = 1200.0f;
+        float m_aspectRatio = 1.0f;
 
         void updateVectors();
     };

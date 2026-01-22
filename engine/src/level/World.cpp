@@ -8,6 +8,7 @@
 #include "level/Chunk.h"
 #include "render/Engine.h"
 #include "render/RenderContext.h"
+#include "scene/Camera.h"
 #include "utility/CoordUtils.h"
 
 
@@ -302,9 +303,23 @@ void World::render(Engine& engine, const Camera* camera, int pass) {
         }
     }
 
+    std::array<Plane, 6> frustum = camera->getFrustum();
+
     // Render without lock - shared_ptr keeps chunks alive
     for (auto& chunk : chunksToRender) {
-        chunk->render(engine, camera, pass);
+        AABB chunkAABB{
+            .min = glm::vec3(chunk->id() * m_chunkDims),
+            .max = glm::vec3((chunk->id() + 1) * m_chunkDims)
+        };
+        bool visible = true;
+        for (const auto& plane : frustum) {
+            if (chunkAABB.isOutsidePlane(plane)) {
+                visible = false;
+                break;
+            }
+        }
+        if (visible)
+            chunk->render(engine, camera, pass);
     }
     m_skybox.render(engine, camera);
     //std::cout << "Rendered chunks: " << m_chunks.size() << "\n";
