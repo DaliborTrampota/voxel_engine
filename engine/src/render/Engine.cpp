@@ -110,12 +110,15 @@ void Engine::registerRenderPass(std::unique_ptr<RenderPass> pass, uint8_t positi
 }
 
 void Engine::registerDefaultRenderPasses() {
-    registerRenderPass(ScenePass::create(), 0);
-    registerRenderPass(TransparentPass::create(), 1);
+    glm::ivec2 resolution = m_window->windowSize();
+    registerRenderPass(ScenePass::create(resolution), 0);
+    registerRenderPass(TransparentPass::create(resolution), 1);
+    // registerRenderPass(TranslucentPass::create(resolution), 2);
 
     if (m_directionalLightSource) {
         registerRenderPass(
             DirectionalShadowPass::create(
+                resolution,
                 m_directionalLightSource->shadowMaterial(),
                 m_directionalLightSource->shadowFBO(),
                 m_directionalLightSource->resolution()
@@ -130,8 +133,6 @@ void Engine::gameloop() {
     //TODO
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
-    //glDisable(GL_CULL_FACE);
-    //glDisable(GL_DEPTH_TEST);
     glCullFace(GL_BACK);
 
 
@@ -307,7 +308,10 @@ void Engine::setDirectionalLightSource(
     // TODO once engine settings is implemented, revisit this (do not register the pass)
     registerRenderPass(
         DirectionalShadowPass::create(
-            lightSource->shadowMaterial(), lightSource->shadowFBO(), lightSource->resolution()
+            m_window->windowSize(),
+            lightSource->shadowMaterial(),
+            lightSource->shadowFBO(),
+            lightSource->resolution()
         ),
         passPosition
     );
