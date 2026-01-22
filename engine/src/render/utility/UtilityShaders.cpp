@@ -53,8 +53,7 @@ namespace engine {
         source.bind();
         source.setDrawBuffers({tempAttachment});  // draw to temp
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, source.texture(sourceAttachment));  // read from source
+        source.texture(sourceAttachment).activate(0);  // read from source
 
         s_gaussianBlurMat->setInt("inputTex", 0);
         s_gaussianBlurMat->setFloat("texelSize", 1.0f / width);
@@ -65,17 +64,17 @@ namespace engine {
         tempFBO->bind();
         tempFBO->setDrawBuffers({sourceAttachment});  // draw back to source
 
-        glBindTexture(GL_TEXTURE_2D, tempFBO->texture(tempAttachment));  // read from temp
+        tempFBO->texture(tempAttachment).activate(0);  // read from temp
 
         s_gaussianBlurMat->setFloat("texelSize", 1.0f / height);
         s_gaussianBlurMat->setBool("horizontal", false);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, 0);
-        glBindVertexArray(0);  // Unbind VAO
+        gl::TextureBase::unbind(gl::TextureType::Texture2D);
         source.unbind();
+
+        glBindVertexArray(0);  // Unbind VAO
         glViewport(prevViewport[0], prevViewport[1], prevViewport[2], prevViewport[3]);
         glEnable(GL_DEPTH_TEST);
     }
@@ -113,8 +112,7 @@ namespace engine {
         source.bind();
         source.setDrawBuffers({tempAttachment});  // draw to temp
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, source.texture(sourceAttachment));  // read from source
+        source.texture(sourceAttachment).activate(0);  // read from source
 
         blurMat->setInt("inputTex", 0);
         blurMat->setFloat("texelSize", 1.0f / width);
@@ -125,17 +123,16 @@ namespace engine {
         tempFBO->bind();
         tempFBO->setDrawBuffers({sourceAttachment});  // draw back to source
 
-        glBindTexture(GL_TEXTURE_2D, tempFBO->texture(tempAttachment));  // read from temp
+        tempFBO->texture(tempAttachment).activate(0);  // read from temp
 
         blurMat->setFloat("texelSize", 1.0f / height);
         blurMat->setBool("horizontal", false);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, 0);
-        glBindVertexArray(0);
+        gl::TextureBase::unbind(gl::TextureType::Texture2D);
         source.unbind();
 
+        glBindVertexArray(0);
         glViewport(prevViewport[0], prevViewport[1], prevViewport[2], prevViewport[3]);
         glEnable(GL_DEPTH_TEST);
     }

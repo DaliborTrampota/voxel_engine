@@ -1,12 +1,20 @@
-#version 330 core
+#version 460 core
 
-in vec4 vertPosition;
-in vec2 uv;
-flat in uint texID;
+layout(std140) uniform LightSpaceMatrices {
+    mat4 lightSpaceMatrices[4];
+};
+
+uniform sampler2DArray blockTextures;  // unit 0
+
+in Data {
+    vec4 vertPosition;
+    vec2 uv;
+    flat uint texID;
+}
+fs_in;
 
 out vec4 FragColor;
 
-uniform sampler2DArray texArray;
 
 const float C = 45.0;
 const float ALPHA_THRESHOLD = 0.5;
@@ -27,14 +35,21 @@ vec4 EVSM(float depth) {
 }
 
 
+// void main() {
+//     vec4 texColor = texture(blockTextures, vec3(uv, texID));
+//     if (texColor.a < ALPHA_THRESHOLD) {
+//         discard;  // Don't cast shadow for transparent pixels
+//     }
+
+//     float depth = vertPosition.z / vertPosition.w;
+//     depth = depth * 0.5 + 0.5;
+
+//     FragColor = vec4(VSM(depth), 0, 0);
+// }
+
 void main() {
-    vec4 texColor = texture(texArray, vec3(uv, texID));
+    vec4 texColor = texture(blockTextures, vec3(fs_in.uv, fs_in.texID));
     if (texColor.a < ALPHA_THRESHOLD) {
         discard;  // Don't cast shadow for transparent pixels
     }
-
-    float depth = vertPosition.z / vertPosition.w;
-    depth = depth * 0.5 + 0.5;
-
-    FragColor = vec4(VSM(depth), 0, 0);
 }

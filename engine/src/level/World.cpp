@@ -4,10 +4,12 @@
 #include "ITerrainGenerator.h"
 #include "block/Block.h"
 #include "data/RegistryManager.h"
+#include "data/TextureManager.h"
 #include "events/LevelEvents.h"
 #include "level/Chunk.h"
 #include "render/Engine.h"
 #include "render/RenderContext.h"
+#include "scene/Camera.h"
 #include "utility/CoordUtils.h"
 
 
@@ -34,7 +36,10 @@ World::World(std::unique_ptr<ITerrainGenerator> gen, glm::ivec3 chunkDims, uint3
       m_material(
           "resources/shaders/ChunkVert.glsl", "resources/shaders/ChunkFrag.glsl", "ChunkMaterial"
       ) {
+    m_material.use();
     m_material.setShadowSupport(true);
+    m_material.setTexture(0, TextureManager::Get().blockTextures(), "blockTextures");
+    m_material.setTexture(1, TextureManager::Get().cascadeShadowMaps(), "shadowMap");
     printf("World created\n");
 
     m_generator->setWorld(this);
@@ -302,9 +307,23 @@ void World::render(Engine& engine, const Camera* camera, int pass) {
         }
     }
 
+    std::array<Plane, 6> frustum = camera->getFrustum();
+
     // Render without lock - shared_ptr keeps chunks alive
     for (auto& chunk : chunksToRender) {
-        chunk->render(engine, camera, pass);
+        AABB chunkAABB{
+            .min = glm::vec3(chunk->id() * m_chunkDims),
+            .max = glm::vec3((chunk->id() + 1) * m_chunkDims)
+        };
+        bool visible = true;
+        for (const auto& plane : frustum) {
+            if (chunkAABB.isOutsidePlane(plane)) {
+                visible = false;
+                break;
+            }
+        }
+        if (visible)
+            chunk->render(engine, camera, pass);
     }
     m_skybox.render(engine, camera);
     //std::cout << "Rendered chunks: " << m_chunks.size() << "\n";

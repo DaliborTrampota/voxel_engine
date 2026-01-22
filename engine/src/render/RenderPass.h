@@ -41,11 +41,19 @@ namespace engine {
         std::optional<glm::ivec2> viewportSize = std::nullopt;
 
       protected:
+        glm::ivec2 m_resolution;
+
         /// @brief Constructs pass with next available ID, use only for custom passes.
-        explicit RenderPass(uint8_t passes = 1) : m_id(1 << s_nextPassIndex++), m_passes(passes) {}
+        explicit RenderPass(glm::ivec2 resolution, uint8_t passes = 1)
+            : m_id(1 << s_nextPassIndex++),
+              m_passes(passes),
+              m_resolution(resolution) {}
 
         /// @brief Constructs pass with specific ID, use only for built-in passes.
-        explicit RenderPass(ID id, uint8_t passes = 1) : m_id(id), m_passes(passes) {}
+        explicit RenderPass(glm::ivec2 resolution, ID id, uint8_t passes = 1)
+            : m_id(id),
+              m_passes(passes),
+              m_resolution(resolution) {}
 
 
       private:

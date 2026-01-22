@@ -1,6 +1,8 @@
 #include "AABB.h"
 
+#include "Plane.h"
 #include "block/Geometry.h"
+
 
 using namespace engine;
 
@@ -12,6 +14,28 @@ bool AABB::contains(const glm::vec3& point) const {
 bool AABB::intersects(const AABB& other) const {
     return min.x < other.max.x && min.y < other.max.y && min.z < other.max.z &&
            max.x > other.min.x && max.y > other.min.y && max.z > other.min.z;
+}
+
+bool AABB::intersects(const Plane& plane) const {
+    glm::vec3 center = this->center();
+    glm::vec3 extents = max - center;
+
+    float r = extents.x * abs(plane.normal.x) + extents.y * abs(plane.normal.y) +
+              extents.z * abs(plane.normal.z);
+    float s = glm::dot(plane.normal, center) - plane.distance;
+
+    return glm::abs(s) <= r;
+}
+
+bool AABB::isOutsidePlane(const Plane& plane) const {
+    glm::vec3 center = this->center();
+    glm::vec3 extents = max - center;
+
+    float r = extents.x * abs(plane.normal.x) + extents.y * abs(plane.normal.y) +
+              extents.z * abs(plane.normal.z);
+    float s = glm::dot(plane.normal, center) - plane.distance;
+
+    return s < -r;
 }
 
 glm::vec3 AABB::center() const {

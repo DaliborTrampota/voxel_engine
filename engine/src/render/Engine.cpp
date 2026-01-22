@@ -110,12 +110,15 @@ void Engine::registerRenderPass(std::unique_ptr<RenderPass> pass, uint8_t positi
 }
 
 void Engine::registerDefaultRenderPasses() {
-    registerRenderPass(ScenePass::create(), 0);
-    registerRenderPass(TransparentPass::create(), 1);
+    glm::ivec2 resolution = m_window->windowSize();
+    registerRenderPass(ScenePass::create(resolution), 0);
+    registerRenderPass(TransparentPass::create(resolution), 1);
+    // registerRenderPass(TranslucentPass::create(resolution), 2);
 
     if (m_directionalLightSource) {
         registerRenderPass(
             DirectionalShadowPass::create(
+                resolution,
                 m_directionalLightSource->shadowMaterial(),
                 m_directionalLightSource->shadowFBO(),
                 m_directionalLightSource->resolution()
@@ -130,8 +133,6 @@ void Engine::gameloop() {
     //TODO
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
-    //glDisable(GL_CULL_FACE);
-    //glDisable(GL_DEPTH_TEST);
     glCullFace(GL_BACK);
 
 
@@ -176,17 +177,18 @@ void Engine::render(RenderContext& ctx, const RenderPass* renderPass) const {
     material->setMat4("model", ctx.matrices.model);
 
     if (material->supportsShadows()) {
-        material->setMat4(
-            "lightSpaceTransform", m_directionalLightSource->getLightSpaceTransform()
-        );
-        material->setVec3("lightPos", m_directionalLightSource->lightPosition());
+        // material->setVec3("lightPos", m_directionalLightSource->lightPosition());
         material->setVec3("lightColor", m_directionalLightSource->lightColor());
-        material->setVec3("lightDir", m_directionalLightSource->direction());
+        material->setVec3("lightDir", -m_directionalLightSource->direction());
         material->setVec3("viewPos", ctx.camera->position());
 
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, m_directionalLightSource->shadowMapTexture());
-        material->setInt("shadowMap", 1);
+
+        for (int i = 0; i < m_directionalLightSource->cascadeSplits().size(); i++) {
+            material->setFloat(
+                std::format("cascadePlaneDistances[{}]", i),
+                m_directionalLightSource->cascadeSplits()[i].farPlane
+            );
+        }
     }
 
     if (!renderPass->material) {
@@ -205,6 +207,7 @@ void Engine::render(RenderContext& ctx, const RenderPass* renderPass) const {
 
 
     ctx.attributes->bind();
+    material->bindTextures();
     glDrawArrays(GL_TRIANGLES, 0, n);
 }
 
@@ -307,7 +310,10 @@ void Engine::setDirectionalLightSource(
     // TODO once engine settings is implemented, revisit this (do not register the pass)
     registerRenderPass(
         DirectionalShadowPass::create(
-            lightSource->shadowMaterial(), lightSource->shadowFBO(), lightSource->resolution()
+            m_window->windowSize(),
+            lightSource->shadowMaterial(),
+            lightSource->shadowFBO(),
+            lightSource->resolution()
         ),
         passPosition
     );
