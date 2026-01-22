@@ -15,6 +15,31 @@ namespace engine {
     class Sun;
     class InputSystem;
 
+    struct RenderStats {
+        uint32_t drawCalls = 0;
+        uint32_t vertices = 0;
+        uint32_t triangles = 0;
+        double frameTime = 0.0;
+        double _frameStart = 0.0;
+
+        void reset() {
+            drawCalls = 0;
+            vertices = 0;
+            triangles = 0;
+            frameTime = 0.0;
+        }
+
+        std::string toString() const {
+            return std::format(
+                "Draw Calls: {}, Vertices: {}, Triangles: {}, Frame Time: {:.2f}ms",
+                drawCalls,
+                vertices,
+                triangles,
+                frameTime * 1000.0f
+            );
+        }
+    };
+
     class Engine {
       public:
         static inline float TickRate = 1.0f / 30.0f;
@@ -73,5 +98,6 @@ namespace engine {
 
         void render(RenderContext& ctx, const RenderPass* renderPass) const;
         void render(GroupRenderContext& ctx, const RenderPass* renderPass) const;
+        mutable RenderStats m_renderStats;
     };
 }  // namespace engine

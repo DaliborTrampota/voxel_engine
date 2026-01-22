@@ -209,6 +209,10 @@ void Engine::render(RenderContext& ctx, const RenderPass* renderPass) const {
     ctx.attributes->bind();
     material->bindTextures();
     glDrawArrays(GL_TRIANGLES, 0, n);
+
+    m_renderStats.drawCalls++;
+    m_renderStats.vertices += n;
+    m_renderStats.triangles += n / 3;
 }
 
 void Engine::render(GroupRenderContext& ctx, const RenderPass* renderPass) const {
@@ -248,6 +252,10 @@ void Engine::render(GroupRenderContext& ctx, const RenderPass* renderPass) const
         material->setMat4("model", drawCall.model);
         drawCall.attributes->bind();
         glDrawArrays(GL_TRIANGLES, 0, n);
+
+        m_renderStats.drawCalls++;
+        m_renderStats.vertices += n;
+        m_renderStats.triangles += n / 3;
     }
 }
 
@@ -285,6 +293,7 @@ void Engine::subscribeTick(std::shared_ptr<Tickable> tickable) {
 }
 
 void Engine::beginFrame() {
+    m_renderStats._frameStart = m_window->timeDouble();
     m_window->clearScreen();
     m_inputSystem->beginFrame();
     glfwPollEvents();
@@ -292,6 +301,10 @@ void Engine::beginFrame() {
 
 void Engine::endFrame() {
     m_window->swapBuffers();
+    m_renderStats.frameTime = m_window->timeDouble() - m_renderStats._frameStart;
+
+    // printf("Render stats: %s\n", m_renderStats.toString().c_str());
+    m_renderStats.reset();
 }
 
 void Engine::setDirectionalLightSource(
