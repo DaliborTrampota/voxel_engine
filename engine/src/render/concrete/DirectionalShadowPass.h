@@ -11,17 +11,24 @@ namespace engine {
         void afterRender(Engine& engine, uint8_t pass) override;
 
         static std::unique_ptr<RenderPass> create(
-            const Material* material, const gl::FBO* fbo, const glm::ivec2& resolution
+            glm::ivec2 resolution,
+            const Material* material,
+            const gl::FBO* fbo,
+            const glm::ivec2& shadowRes
         );
 
       protected:
         explicit DirectionalShadowPass(
-            ID id, const Material* material, const gl::FBO* fbo, const glm::ivec2& resolution
+            glm::ivec2 resolution,
+            ID id,
+            const Material* material,
+            const gl::FBO* fbo,
+            const glm::ivec2& shadowRes
         )
-            : RenderPass(id) {
+            : RenderPass(resolution, id) {
             this->material = material;
             this->fbo = fbo;
-            viewportSize = resolution;
+            viewportSize = shadowRes;
         }
     };
 }  // namespace engine
