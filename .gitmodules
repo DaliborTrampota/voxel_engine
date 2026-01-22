@@ -7,9 +7,6 @@
 [submodule "dependencies/lwgl"]
 	path = dependencies/lwgl
 	url = git@github.com:DaliborTrampota/LWGL.git
-[submodule "dependencies/seuil"]
-	path = dependencies/seuil
-	url = https://github.com/DaliborTrampota/SEUIL.git
 [submodule "dependencies/SoLoud/soloud"]
 	path = dependencies/SoLoud/soloud
 	url = https://github.com/jarikomppa/soloud
