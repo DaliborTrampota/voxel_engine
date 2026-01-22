@@ -20,6 +20,7 @@
 #include "render/RenderContext.h"
 #include "utility/Rotation.h"
 
+
 using namespace engine;
 
 namespace {
@@ -29,16 +30,16 @@ namespace {
 Chunk::Chunk(World* world, ChunkID coords, glm::ivec3 dims)
     : m_world(world),
       m_coords(coords),
-      m_data(dims),
-      m_opaqueVertData(GL_DYNAMIC_DRAW),
-      m_transparentVertData(GL_DYNAMIC_DRAW),
-      m_backOpaqueVertData(GL_DYNAMIC_DRAW),
-      m_backTransparentVertData(GL_DYNAMIC_DRAW) {
-    m_opaqueVertData.create();
-    m_transparentVertData.create();
-    m_backOpaqueVertData.create();
-    m_backTransparentVertData.create();
-}
+      m_data(dims)
+//   m_opaqueVertData(GL_DYNAMIC_DRAW),
+//   m_transparentVertData(GL_DYNAMIC_DRAW),
+//   m_backOpaqueVertData(GL_DYNAMIC_DRAW),
+//   m_backTransparentVertData(GL_DYNAMIC_DRAW) {
+// m_opaqueVertData.create();
+// m_transparentVertData.create();
+// m_backOpaqueVertData.create();
+// m_backTransparentVertData.create();
+{}
 
 Chunk::~Chunk() {}
 
@@ -56,15 +57,21 @@ bool Chunk::generateMesh() {
         return false;
 
     glm::ivec3 chunkBlockCoords = m_coords * m_data.dims;
-    m_backOpaqueVertData.clear();
-    m_backTransparentVertData.clear();
 
-    m_backOpaqueVertData.reserve(
-        m_data.dims.x * m_data.dims.y * 8 * 6
-    );  // dims.x*dims.y*8*6 faces (6 vertices per face) the 8 is taking into account height variation
-    m_backTransparentVertData.reserve(
-        m_data.dims.x * m_data.dims.y * 6
-    );  // dims.x*dims.y*6 faces (6 vertices per face) less transparent blocks
+    for (auto& layer : m_renderLayers) {
+        layer.clear();
+        layer.back.reserve(m_data.dims.x * m_data.dims.y * 8 * 6);
+    }
+
+    // m_backOpaqueVertData.clear();
+    // m_backTransparentVertData.clear();
+
+    // m_backOpaqueVertData.reserve(
+    //     m_data.dims.x * m_data.dims.y * 8 * 6
+    // );  // dims.x*dims.y*8*6 faces (6 vertices per face) the 8 is taking into account height variation
+    // m_backTransparentVertData.reserve(
+    //     m_data.dims.x * m_data.dims.y * 6
+    // );  // dims.x*dims.y*6 faces (6 vertices per face) less transparent blocks
 
     for (int x = 0; x < m_data.dims.x; x++) {
         for (int y = 0; y < m_data.dims.y; y++) {
@@ -96,11 +103,15 @@ bool Chunk::generateMesh() {
         }
     }
 
-    m_backOpaqueVertData.vertexData().shrink_to_fit();
-    m_backTransparentVertData.vertexData().shrink_to_fit();
+    for (auto& layer : m_renderLayers) {
+        layer.moveToFront();
+    }
 
-    m_opaqueVertData.moveDataFrom(m_backOpaqueVertData);
-    m_transparentVertData.moveDataFrom(m_backTransparentVertData);
+    // m_backOpaqueVertData.vertexData().shrink_to_fit();
+    // m_backTransparentVertData.vertexData().shrink_to_fit();
+
+    // m_opaqueVertData.moveDataFrom(m_backOpaqueVertData);
+    // m_transparentVertData.moveDataFrom(m_backTransparentVertData);
 
     m_generated = true;
     m_generatingMesh = false;
@@ -167,17 +178,10 @@ void Chunk::render(Engine& engine, const Camera* camera, int pass) {
         return;
     }
 
-    //TODO chunk culling
-    // ChunkID cameraChunk = getChunkID(camera->position(), m_world->chunkDims());
-    // glm::vec3 chunkDir = glm::normalize(glm::vec3(cameraChunk - m_coords));
-    // if (glm::dot(chunkDir, camera->lookDirection()) > 0) {
-    //     return;
-    // }
-
     RenderContext ctx;
     ctx.setModelMatrix(m_coords * m_data.dims);
     if (pass == 0) {
-        ctx.attributes = &m_opaqueVertData;
+        ctx.attributes = &m_renderLayers[Layers::Opaque].read();
         ctx.material = &m_world->m_material;
         ctx.passMask = RenderPass::Scene | RenderPass::DirectionalShadow;
         ctx.camera = camera;
@@ -185,17 +189,26 @@ void Chunk::render(Engine& engine, const Camera* camera, int pass) {
 
         RenderContext ctxTransparent;
         ctxTransparent.setModelMatrix(m_coords * m_data.dims);
-        ctxTransparent.attributes = &m_transparentVertData;
+        ctxTransparent.attributes = &m_renderLayers[Layers::Transparent].read();
         ctxTransparent.material = &m_world->m_material;
         ctxTransparent.passMask = RenderPass::SceneTransparent | RenderPass::DirectionalShadow;
         ctxTransparent.camera = camera;
         engine.submitRender(std::move(ctxTransparent));
+
+        RenderContext ctxTranslucent;
+        ctxTranslucent.setModelMatrix(m_coords * m_data.dims);
+        ctxTranslucent.attributes = &m_renderLayers[Layers::Translucent].read();
+        ctxTranslucent.material = &m_world->m_material;
+        ctxTranslucent.passMask = RenderPass::SceneTranslucent | RenderPass::DirectionalShadow;
+        ctxTranslucent.camera = camera;
+        engine.submitRender(std::move(ctxTranslucent));
     }
 
     else if (pass == 1) {  // Opaque front to back
-        if (!m_opaqueVertData.length())
+        if (!m_renderLayers[Layers::Opaque].read().length())
             return;
-        ctx.attributes = &m_opaqueVertData;
+        ctx.attributes = &m_renderLayers[Layers::Opaque].read();
+
         ctx.material = &m_world->m_material;
         ctx.passMask = RenderPass::Scene | RenderPass::DirectionalShadow;
         ctx.camera = camera;
@@ -203,9 +216,10 @@ void Chunk::render(Engine& engine, const Camera* camera, int pass) {
     }
 
     else if (pass == 2) {  // Transparent back to front
-        if (!m_transparentVertData.length())
+        if (!m_renderLayers[Layers::Transparent].read().length())
             return;
-        ctx.attributes = &m_transparentVertData;
+        ctx.attributes = &m_renderLayers[Layers::Transparent].read();
+
         ctx.material = &m_world->m_material;
         ctx.passMask = RenderPass::SceneTransparent | RenderPass::DirectionalShadow;
         ctx.camera = camera;
@@ -267,8 +281,7 @@ void Chunk::generateMeshForGeometry(const MeshGenContext& ctx) {
 void Chunk::generateMeshForBlock(
     const Block* block, glm::ivec3 pos, const BlockState* state, const glm::ivec3& chunkBlockCoords
 ) {
-    gl::Attributes<Vertex>& storage =
-        block->layer() == Layers::Opaque ? m_backOpaqueVertData : m_backTransparentVertData;
+    gl::Attributes<Vertex>& storage = m_renderLayers[block->layer()].write();
 
     MeshGenContext ctx{
         .block = block,
@@ -289,8 +302,7 @@ void Chunk::generateMeshForBlock(
 ) {
     VariantBlock::Neighbours neighboringBlocks = getNeighbouringBlocks(pos);
     // TODO somehow distinguish between opaque and transparent geometries? or just use the base block layer?
-    gl::Attributes<Vertex>& storage =
-        block->layer() == Layers::Opaque ? m_backOpaqueVertData : m_backTransparentVertData;
+    gl::Attributes<Vertex>& storage = m_renderLayers[block->layer()].write();
 
     GeometryState geoState = calculateGeometryState(block, state);
     if (geoState.angle != 0.0f) {
