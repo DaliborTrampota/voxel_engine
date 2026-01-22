@@ -10,12 +10,11 @@
 
 #include "data/TextureManager.h"
 
-
 using namespace engine;
 
-TextureLoader::TextureLoader(int slot) : m_texArray(slot) {}
-
-void TextureLoader::load(const fs::path& path, gl::ArraySettings settings) {
+void TextureLoader::loadArray2D(
+    gl::TextureArray* target, const fs::path& path, gl::ArraySettings settings
+) {
     int width = 0;
     int height = 0;
     std::vector<gl::ImageData> images;
@@ -54,18 +53,14 @@ void TextureLoader::load(const fs::path& path, gl::ArraySettings settings) {
     settings.format = gl::ImageFormat::RGBA;
 
 
-    m_texArray.create(settings);
-    m_texArray.bind();
+    target->create(settings);
+    target->bind();
     TextureManager& texMgr = TextureManager::Get();
 
     for (const auto& imgData : images) {
-        int layer = m_texArray.load(imgData);
+        int layer = target->load(imgData);
         texMgr.add(getTextureName(imgData.path), layer);
     }
-}
-
-void TextureLoader::bind() const {
-    m_texArray.bind();
 }
 
 std::string TextureLoader::getTextureName(const fs::path& path) {

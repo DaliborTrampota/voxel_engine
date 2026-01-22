@@ -7,6 +7,8 @@
 
 #include "../Globals.h"
 
+#include <LWGL/texture/TextureArray.h>
+
 namespace engine {
 
     class TextureManager {
@@ -29,8 +31,10 @@ namespace engine {
             return instance;
         }
 
+        gl::TextureArray* blockTextures() { return &m_blockTextures; }
       private:
         TextureManager() = default;
         std::unordered_map<std::string, TexID> m_textures;
+        gl::TextureArray m_blockTextures;
     };
 }  // namespace engine
