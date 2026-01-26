@@ -29,15 +29,7 @@ namespace engine {
             frameTime = 0.0;
         }
 
-        std::string toString() const {
-            return std::format(
-                "Draw Calls: {}, Vertices: {}, Triangles: {}, Frame Time: {:.2f}ms",
-                drawCalls,
-                vertices,
-                triangles,
-                frameTime * 1000.0f
-            );
-        }
+        std::string toString() const;
     };
 
     class Engine {

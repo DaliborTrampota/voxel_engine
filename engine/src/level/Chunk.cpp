@@ -194,14 +194,6 @@ void Chunk::render(Engine& engine, const Camera* camera, int pass) {
         ctxTransparent.passMask = RenderPass::SceneTransparent | RenderPass::DirectionalShadow;
         ctxTransparent.camera = camera;
         engine.submitRender(std::move(ctxTransparent));
-
-        RenderContext ctxTranslucent;
-        ctxTranslucent.setModelMatrix(m_coords * m_data.dims);
-        ctxTranslucent.attributes = &m_renderLayers[Layers::Translucent].read();
-        ctxTranslucent.material = &m_world->m_material;
-        ctxTranslucent.passMask = RenderPass::SceneTranslucent | RenderPass::DirectionalShadow;
-        ctxTranslucent.camera = camera;
-        engine.submitRender(std::move(ctxTranslucent));
     }
 
     else if (pass == 1) {  // Opaque front to back

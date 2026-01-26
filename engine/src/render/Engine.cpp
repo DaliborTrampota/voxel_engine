@@ -30,6 +30,17 @@
 
 using namespace engine;
 
+std::string RenderStats::toString() const {
+    return std::format(
+        "Draw Calls: {}, Vertices: {}, Triangles: {}, Frame Time: {:.2f} ms",
+        drawCalls,
+        vertices,
+        triangles,
+        frameTime * 1000.0
+    );
+}
+
+
 Engine::Engine(std::unique_ptr<Window> window)
     : m_window(std::move(window)),
       m_inputSystem(std::make_unique<InputSystem>()) {
