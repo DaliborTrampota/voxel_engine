@@ -1,6 +1,7 @@
 #include "Skybox.h"
 
 #include <LWGL/texture/ImageData.h>
+#include <LWGL/texture/TextureBase.h>
 
 #include "render/Engine.h"
 #include "scene/Camera.h"
@@ -46,18 +47,17 @@ Skybox::Skybox(const Settings& settings)
         m_buffer.add(skyboxVertices[i]);
     }
 
-    m_cubeMap.create(gl::Settings::Cubemap());
+    m_cubeMap.create(gl::TextureParams::Cubemap());
     load(settings);
 }
 
 void Skybox::load(const Settings& settings) {
-    m_cubeMap.bind();
-    m_cubeMap.loadFace(gl::CubeFace::Top, gl::ImageData(settings.top.c_str()));
-    m_cubeMap.loadFace(gl::CubeFace::Bottom, gl::ImageData(settings.bottom.c_str()));
-    m_cubeMap.loadFace(gl::CubeFace::Front, gl::ImageData(settings.front.c_str()));
-    m_cubeMap.loadFace(gl::CubeFace::Back, gl::ImageData(settings.back.c_str()));
-    m_cubeMap.loadFace(gl::CubeFace::Left, gl::ImageData(settings.left.c_str()));
-    m_cubeMap.loadFace(gl::CubeFace::Right, gl::ImageData(settings.right.c_str()));
+    m_cubeMap.upload(gl::CubeFace::Top, settings.top.c_str());
+    m_cubeMap.upload(gl::CubeFace::Bottom, settings.bottom.c_str());
+    m_cubeMap.upload(gl::CubeFace::Front, settings.front.c_str());
+    m_cubeMap.upload(gl::CubeFace::Back, settings.back.c_str());
+    m_cubeMap.upload(gl::CubeFace::Left, settings.left.c_str());
+    m_cubeMap.upload(gl::CubeFace::Right, settings.right.c_str());
 
     m_material.use();
     m_material.setTexture(0, &m_cubeMap, "skybox");

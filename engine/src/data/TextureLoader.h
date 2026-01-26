@@ -13,12 +13,12 @@ namespace engine {
         /// @brief Load textures from a directory into a texture array
         /// @param target Texture array to load the textures into
         /// @param dirPath Path to the directory containing the textures
-        /// @param settings Settings for the texture array
+        /// @param params Settings for the texture array
         /// @note No need to specify the width, height, layer count and format, they will be automatically determined from the images in the directory
         static void loadArray2D(
             gl::TextureArray* target,
             const fs::path& dirPath,
-            gl::ArraySettings settings = gl::ArraySettings::Pixelated()
+            gl::TextureParams params = gl::TextureParams::Pixelated()
         );
 
       private:
