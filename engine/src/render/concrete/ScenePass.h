@@ -17,11 +17,6 @@ namespace engine {
         void beforeRender(Engine& engine, uint8_t pass) override;
         void afterRender(Engine& engine, uint8_t pass) override;
 
-        // ScenePass(const ScenePass&) = delete;
-        // ScenePass& operator=(const ScenePass&) = delete;
-        // ScenePass(ScenePass&&);
-        // ScenePass& operator=(ScenePass&&) = delete;
-
         gl::FBO* FBO() { return &m_sceneFBO; }
 
         gl::Texture2D* depthMap() { return &m_depthMap; }
