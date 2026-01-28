@@ -23,6 +23,7 @@
 #include "scene/Updateable.h"
 #include "utility/UtilityShaders.h"
 
+#include "concrete/CompositePass.h"
 #include "concrete/DirectionalShadowPass.h"
 #include "concrete/ScenePass.h"
 #include "concrete/TransparentPass.h"
@@ -46,10 +47,12 @@ Engine::Engine(std::unique_ptr<Window> window)
       m_inputSystem(std::make_unique<InputSystem>()),
       m_passRegistry(&RenderPassRegistry::Get()) {
     m_window->subscribe(m_passRegistry);
+    Material::setConstant("CascadeCount", 4);
 
     glm::ivec2 resolution = m_window->windowSize();
     m_passRegistry->registerPass(std::make_unique<ScenePass>(resolution), 0);
     m_passRegistry->registerPass(std::make_unique<TransparentPass>(resolution), 1);
+    m_passRegistry->registerPass(std::make_unique<CompositePass>(resolution), 2);
 
     if (m_directionalLightSource) {
         m_passRegistry->registerPass(
@@ -72,8 +75,6 @@ Engine::Engine(std::unique_ptr<Window> window)
     // RegistryManager::Blocks().add(Block(6, Layers::Any, nullptr), "reserved_block_6");
     // RegistryManager::Blocks().add(Block(7, Layers::Any, nullptr), "reserved_block_7");
     // RegistryManager::Blocks().add(Block(8, Layers::Any, nullptr), "reserved_block_8");
-
-    Material::setConstant("CascadeCount", 4);
 }
 
 void Engine::submitRender(RenderContext&& ctx, bool immediate) {
