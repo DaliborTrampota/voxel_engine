@@ -3,6 +3,8 @@
 #include <glad/glad.h>
 #include <stdexcept>
 
+#include <LWGL/render/Shader.h>
+
 #include "GLFWUserPointer.h"
 #include "events/EngineEvents.h"
 #include "utility/UtilityShaders.h"
@@ -61,6 +63,9 @@ int Window::init(int w, int h, const char* name) {
     int success = gl::Context::init(w, h, name);
     if (!success)
         return success;
+
+
+    gl::Shader::setChunksDirectory(fs::path("resources/shaders/chunks"));
 
     setDebugCallback(
         [](int source,

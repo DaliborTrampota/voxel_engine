@@ -4,7 +4,7 @@ layout(triangles, invocations = 4) in;  // 4 cascades TODO
 layout(triangle_strip, max_vertices = 3) out;
 
 layout(std140) uniform LightSpaceMatrices {
-    mat4 lightSpaceMatrices[4];
+    mat4 lightSpaceMatrices[{{CascadeCount}}];
 };
 
 in Data {

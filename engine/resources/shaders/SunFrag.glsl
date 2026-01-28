@@ -1,7 +1,7 @@
 #version 460 core
 
 layout(std140) uniform LightSpaceMatrices {
-    mat4 lightSpaceMatrices[4];
+    mat4 lightSpaceMatrices[{{CascadeCount}}];
 };
 
 uniform sampler2DArray blockTextures;  // unit 0

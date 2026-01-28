@@ -72,6 +72,8 @@ Engine::Engine(std::unique_ptr<Window> window)
     // RegistryManager::Blocks().add(Block(6, Layers::Any, nullptr), "reserved_block_6");
     // RegistryManager::Blocks().add(Block(7, Layers::Any, nullptr), "reserved_block_7");
     // RegistryManager::Blocks().add(Block(8, Layers::Any, nullptr), "reserved_block_8");
+
+    Material::setConstant("CascadeCount", 4);
 }
 
 void Engine::submitRender(RenderContext&& ctx, bool immediate) {

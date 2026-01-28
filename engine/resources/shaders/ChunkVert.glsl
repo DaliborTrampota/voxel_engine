@@ -8,7 +8,6 @@ layout(location = 3) in uint aData;
 uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 model;
-// uniform mat4 lightSpaceTransform;
 
 out vec3 pos;
 out vec3 normal;
