@@ -81,5 +81,6 @@ void TransparentPass::init() {
     assert(m_OIT.checkCompleteness() == 0);
     m_OIT.unbind();
 
+    material = &m_transparentMat;
     fbo = &m_OIT;
 }

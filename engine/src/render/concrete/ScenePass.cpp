@@ -11,11 +11,6 @@
 
 using namespace engine;
 
-// ScenePass::ScenePass(ScenePass&& other) {
-//     m_opaqueFBO = std::move(other.m_opaqueFBO);
-// }
-
-
 void ScenePass::beforeRender(Engine& engine, uint8_t pass) {
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
