@@ -18,9 +18,9 @@ in float ao;
 
 uniform float time;
 
-uniform sampler2DArray blockTextures;
-uniform sampler2DArray shadowMap;
-uniform sampler2D opaqueDepthMap;
+layout(binding = 0) uniform sampler2DArray blockTextures;
+layout(binding = 1) uniform sampler2DArray shadowMap;
+layout(binding = 2) uniform sampler2D opaqueDepthMap;
 
 // clang-format off
 {{CSM_functions.glsl}}
