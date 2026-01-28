@@ -3,12 +3,20 @@
 #include <LWGL/buffer/FBO.h>
 #include <glad/glad.h>
 
-
 #include "render/Engine.h"
 #include "render/utility/UtilityShaders.h"
 #include "scene/Sun.h"
 
 using namespace engine;
+
+DirectionalShadowPass::DirectionalShadowPass(
+    glm::ivec2 resolution, const Material* material, const gl::FBO* fbo, const glm::ivec2& shadowRes
+)
+    : RenderPass(resolution, RenderPass::DirectionalShadow) {
+    this->material = material;
+    this->fbo = fbo;
+    viewportSize = shadowRes;
+}
 
 void DirectionalShadowPass::beforeRender(Engine& engine, uint8_t pass) {
     fbo->bind();
@@ -30,13 +38,4 @@ void DirectionalShadowPass::afterRender(Engine& engine, uint8_t pass) {
     //     resolution.y,
     //     nullptr
     // );
-}
-
-
-std::unique_ptr<RenderPass> DirectionalShadowPass::create(
-    glm::ivec2 resolution, const Material* material, const gl::FBO* fbo, const glm::ivec2& shadowRes
-) {
-    return std::make_unique<DirectionalShadowPass>(
-        DirectionalShadowPass(resolution, RenderPass::DirectionalShadow, material, fbo, shadowRes)
-    );
 }

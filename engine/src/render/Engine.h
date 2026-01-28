@@ -42,13 +42,6 @@ namespace engine {
         void submitRender(RenderContext&& ctx, bool immediate = false);
         void submitRender(GroupRenderContext&& ctx, bool immediate = false);
 
-        /// @brief Registers a custom render pass at the specified position.
-        /// @param pass The concrete RenderPass instance.
-        /// @param position Where to insert the pass (default: after scene)
-        void registerRenderPass(std::unique_ptr<RenderPass> pass, uint8_t position);
-
-        void registerDefaultRenderPasses();
-
         /// @brief Flushes the render queue; loops over all render passes and renders all contexts.
         /// @note This is called between beforeRender() and afterRender().
         /// @note Can be overridden, consumer must clear the m_renderQueue.
@@ -73,6 +66,7 @@ namespace engine {
         std::unique_ptr<InputSystem> m_inputSystem;
         std::shared_ptr<Sun> m_directionalLightSource;
 
+        RenderPassRegistry* m_passRegistry;
         std::vector<std::variant<RenderContext, GroupRenderContext>> m_renderQueue;
         std::unique_ptr<Window> m_window;
 
@@ -82,7 +76,6 @@ namespace engine {
       private:
         void initUtilityShaders();
 
-        std::vector<std::unique_ptr<RenderPass>> m_renderPasses;
         std::vector<std::weak_ptr<Updateable>> m_updateSubscribers;
         std::vector<std::weak_ptr<Tickable>> m_tickSubscribers;
         float m_tickAccumulator = 0.0f;

@@ -43,7 +43,26 @@ std::string RenderStats::toString() const {
 
 Engine::Engine(std::unique_ptr<Window> window)
     : m_window(std::move(window)),
-      m_inputSystem(std::make_unique<InputSystem>()) {
+      m_inputSystem(std::make_unique<InputSystem>()),
+      m_passRegistry(&RenderPassRegistry::Get()) {
+    m_window->subscribe(m_passRegistry);
+
+    glm::ivec2 resolution = m_window->windowSize();
+    m_passRegistry->registerPass(std::make_unique<ScenePass>(resolution), 0);
+    m_passRegistry->registerPass(std::make_unique<TransparentPass>(resolution), 1);
+
+    if (m_directionalLightSource) {
+        m_passRegistry->registerPass(
+            std::make_unique<DirectionalShadowPass>(
+                resolution,
+                m_directionalLightSource->shadowMaterial(),
+                m_directionalLightSource->shadowFBO(),
+                m_directionalLightSource->resolution()
+            ),
+            0
+        );
+    }
+
     RegistryManager::Blocks().add(Block::air(), "air");
     RegistryManager::Blocks().add(Block::multiblock(), "multiblock");
     // RegistryManager::Blocks().add(Block(2, Layers::Any, nullptr), "reserved_block_2");
@@ -61,7 +80,7 @@ void Engine::submitRender(RenderContext&& ctx, bool immediate) {
         return;
     }
 
-    for (const auto& pass : m_renderPasses) {
+    for (const auto& pass : m_passRegistry->passes()) {
         if ((ctx.passMask & pass->id()) != 0) {
             for (uint8_t subPass = 0; subPass < pass->passes(); subPass++) {
                 pass->beforeRender(*this, subPass);
@@ -78,7 +97,7 @@ void Engine::submitRender(GroupRenderContext&& ctx, bool immediate) {
         return;
     }
 
-    for (const auto& pass : m_renderPasses) {
+    for (const auto& pass : m_passRegistry->passes()) {
         if ((ctx.passMask & pass->id()) != 0) {
             for (uint8_t subPass = 0; subPass < pass->passes(); subPass++) {
                 pass->beforeRender(*this, subPass);
@@ -91,7 +110,7 @@ void Engine::submitRender(GroupRenderContext&& ctx, bool immediate) {
 
 void Engine::flush() {
     //printf("Flush %zu\n", m_renderQueue.size());
-    for (const auto& pass : m_renderPasses) {
+    for (const auto& pass : m_passRegistry->passes()) {
         for (uint8_t subPass = 0; subPass < pass->passes(); subPass++) {
             pass->beforeRender(*this, subPass);
 
@@ -113,30 +132,6 @@ void Engine::flush() {
     // glBindFramebuffer(GL_FRAMEBUFFER, 0);
     // glBindProgramPipeline(0);
     m_renderQueue.clear();
-}
-
-void Engine::registerRenderPass(std::unique_ptr<RenderPass> pass, uint8_t position) {
-    position = glm::min(position, static_cast<uint8_t>(m_renderPasses.size()));
-    m_renderPasses.insert(m_renderPasses.begin() + position, std::move(pass));
-}
-
-void Engine::registerDefaultRenderPasses() {
-    glm::ivec2 resolution = m_window->windowSize();
-    registerRenderPass(ScenePass::create(resolution), 0);
-    registerRenderPass(TransparentPass::create(resolution), 1);
-    // registerRenderPass(TranslucentPass::create(resolution), 2);
-
-    if (m_directionalLightSource) {
-        registerRenderPass(
-            DirectionalShadowPass::create(
-                resolution,
-                m_directionalLightSource->shadowMaterial(),
-                m_directionalLightSource->shadowFBO(),
-                m_directionalLightSource->resolution()
-            ),
-            0
-        );
-    }
 }
 
 
@@ -322,18 +317,11 @@ void Engine::setDirectionalLightSource(
     std::shared_ptr<engine::Sun> lightSource, uint8_t passPosition
 ) {
     m_directionalLightSource = lightSource;
-    m_renderPasses.erase(
-        std::remove_if(
-            m_renderPasses.begin(),
-            m_renderPasses.end(),
-            [](const auto& pass) { return pass->id() == RenderPass::DirectionalShadow; }
-        ),
-        m_renderPasses.end()
-    );
+    m_passRegistry->deletePass<DirectionalShadowPass>();
 
     // TODO once engine settings is implemented, revisit this (do not register the pass)
-    registerRenderPass(
-        DirectionalShadowPass::create(
+    m_passRegistry->registerPass(
+        std::make_unique<DirectionalShadowPass>(
             m_window->windowSize(),
             lightSource->shadowMaterial(),
             lightSource->shadowFBO(),
