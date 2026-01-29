@@ -135,11 +135,7 @@ namespace engine {
         );
 
       private:
-        std::array<LayerBuffer, 4> m_renderLayers;
-        // gl::Attributes<Vertex> m_opaqueVertData;
-        // gl::Attributes<Vertex> m_transparentVertData;
-        // gl::Attributes<Vertex> m_backOpaqueVertData;
-        // gl::Attributes<Vertex> m_backTransparentVertData;
+        std::array<LayerBuffer, 3> m_renderLayers;
 
         bool m_generated = false;
         std::atomic_bool m_generatingMesh = false;
