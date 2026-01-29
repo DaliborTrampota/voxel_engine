@@ -12,10 +12,10 @@
 using namespace engine;
 
 void ScenePass::beforeRender(Engine& engine, uint8_t pass) {
+    glDisable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glDepthMask(GL_TRUE);
-    glDisable(GL_BLEND);
     m_sceneFBO.clearActive(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f), 1.0f);
 }
 

@@ -32,12 +32,12 @@ TransparentPass::TransparentPass(glm::ivec2 resolution)
 }
 
 void TransparentPass::beforeRender(Engine& engine, uint8_t pass) {
+    glEnable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glDepthMask(GL_FALSE);
-    glEnable(GL_BLEND);
-    glBlendFunci(0, GL_ONE, GL_ONE);                   // accumulation blend target
-    glBlendFunci(1, GL_ZERO, GL_ONE_MINUS_SRC_COLOR);  // revealge blend target
+    glBlendFunci(0, GL_ONE, GL_ONE);                   // accumulation
+    glBlendFunci(1, GL_ZERO, GL_ONE_MINUS_SRC_COLOR);  // revealage
     glBlendEquation(GL_FUNC_ADD);
 
     m_OIT.bind();

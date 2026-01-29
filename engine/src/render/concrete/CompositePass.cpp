@@ -15,11 +15,10 @@
 using namespace engine;
 
 void CompositePass::beforeRender(Engine& engine, uint8_t pass) {
+    // composite pass renders a full-screen triangle to screen and relies
+    // on previously composited textures from earlier passes.
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
-    // glDepthFunc(GL_ALWAYS);
-    // glEnable(GL_BLEND);
-    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 

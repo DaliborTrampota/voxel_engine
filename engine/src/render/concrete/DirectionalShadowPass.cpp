@@ -19,6 +19,11 @@ DirectionalShadowPass::DirectionalShadowPass(
 }
 
 void DirectionalShadowPass::beforeRender(Engine& engine, uint8_t pass) {
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glDepthMask(GL_TRUE);
+    glDisable(GL_BLEND);
+
     fbo->bind();
     fbo->clearActive({1.f, 1.f, 1.f, 1.f}, 1.0f);
 
