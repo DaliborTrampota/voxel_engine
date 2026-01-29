@@ -1,5 +1,5 @@
-- TODO move seuil to game repo
-
+- TODO move seuil to game repo @done
+- indirect draw switch
 - rename interface classes to IClass
 - support to register axies in input system
 
@@ -14,16 +14,18 @@
 - lights
     - sun / directional @done
     - point - omnidirectional (using cubemap?
-    - cascaded shadowmaps
-    - somehow achieve hard shadows? - stencil buffer shadows nvidia paper?
+    - cascaded shadowmaps @done
+        - get rid of geometry shader
+    - somehow achieve hard shadows? - stencil buffer shadows nvidia paper? (cascades solved this) @done
     
 - shadows
-    - texel snap
+    - texel snap (not needed with cascades but code is there commented) @done
     - semitransparent block shadows
-    - colorful shadows?
+        - colorful shadows?
 
 - transparent block render support
-    - Weighted Blended OIT or Per-Pixel Linked Lists?
+    - Weighted Blended OIT or Per-Pixel Linked Lists? - OIT @done
+    - experiment with weight function for better layered transparent blocks
     
 - ui
     - basic ui elements @done
@@ -35,7 +37,6 @@
     - https://github.com/nxp-imx/gtec-demo-framework/blob/master/Doc/FslSimpleUI.md
     - https://behdad.org/text2024/#heading-h.moz5gv4bsvld
 - get rid of engine namespace in lwgl events @done
-- texture keep track of bound units and warn if two textures are bound to the same unit at the same time?
 - get rid of gl::texture namespace @done
 - move textureprivate to detail @done
 - glfw callbacks using window user pointer @done
@@ -56,6 +57,7 @@ Instanced Rendering - Batch contexts with identical VAO + material + transform b
 View Frustum Culling - Check AABB vs frustum before calling `submit()`
 Sorting Transparent Pass - Sort `RenderContext`s by camera-space depth
 multicamera support
+
 
 - support for variant block neighboring with multiblock
 - support multiblock dda 
