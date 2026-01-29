@@ -6,6 +6,7 @@
 
 namespace engine {
 
+    // TODO this should be private pass always at the end of the pipeline?
     class CompositePass : public RenderPass {
       public:
         CompositePass(glm::ivec2 resolution)

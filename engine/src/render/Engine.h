@@ -9,7 +9,6 @@
 #include "Window.h"
 
 
-
 namespace engine {
     class Updateable;
     class Renderable;
