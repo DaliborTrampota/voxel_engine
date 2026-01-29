@@ -15,7 +15,7 @@ namespace engine {
         }
 
         void beforeRender(Engine& engine, uint8_t pass) override;
-        void afterRender(Engine& engine, uint8_t pass) override;
+        void afterRender(Engine& engine, uint8_t pass) override {}
 
         gl::FBO* FBO() { return &m_sceneFBO; }
 

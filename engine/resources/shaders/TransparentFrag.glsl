@@ -49,7 +49,7 @@ void main() {
 
     vec4 finalColor = vec4(lighting, col.a);
     float weight = clamp(
-        pow(min(1.0, finalColor.a * 10.0) + 0.01, 3.0) * 1e8 * pow(1.0 - gl_FragCoord.z * 0.9, 3.0),
+        pow(min(1.0, finalColor.a * 10.0) + 0.01, 3.0) * 1e8 * pow(1.0 - gl_FragCoord.z * 0.9, 4.5),
         1e-2,
         3e3
     );

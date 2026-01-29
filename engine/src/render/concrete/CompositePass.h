@@ -18,7 +18,7 @@ namespace engine {
             init();
         }
         void beforeRender(Engine& engine, uint8_t pass) override;
-        void afterRender(Engine& engine, uint8_t pass) override;
+        void afterRender(Engine& engine, uint8_t pass) override {}
 
       private:
         gl::ShaderProgram m_compositeShader;

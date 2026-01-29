@@ -200,7 +200,7 @@ void Engine::render(RenderContext& ctx, const RenderPass* renderPass) const {
         }
     }
 
-    if (!renderPass->material) {
+    if (material->supportsMVP()) {
         if (ctx.matrices.view.has_value()) {
             material->setMat4("view", ctx.matrices.view.value());
         } else if (ctx.camera) {

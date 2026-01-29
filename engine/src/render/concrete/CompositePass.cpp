@@ -34,8 +34,6 @@ void CompositePass::beforeRender(Engine& engine, uint8_t pass) {
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
 }
-void CompositePass::afterRender(Engine& engine, uint8_t pass) {}
-
 
 void CompositePass::init() {
     m_compositeShader.use();

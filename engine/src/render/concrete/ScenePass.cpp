@@ -18,7 +18,6 @@ void ScenePass::beforeRender(Engine& engine, uint8_t pass) {
     glDisable(GL_BLEND);
     m_sceneFBO.clearActive(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f), 1.0f);
 }
-void ScenePass::afterRender(Engine& engine, uint8_t pass) {}
 
 void ScenePass::init() {
     m_opaque.create(gl::TextureParams(gl::TextureParams::ClampToEdge, gl::TextureParams::Linear));

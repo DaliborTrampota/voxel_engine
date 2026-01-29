@@ -44,9 +44,6 @@ void TransparentPass::beforeRender(Engine& engine, uint8_t pass) {
     m_OIT.clearColor(gl::FBOAttachment::Color, glm::vec4(0.0f));
     m_OIT.clearColor(gl::FBOAttachment::Color + 1, glm::vec4(1.0f));
 }
-void TransparentPass::afterRender(Engine& engine, uint8_t pass) {
-
-};
 
 void TransparentPass::init() {
     m_accumulation.create(
