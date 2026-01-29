@@ -40,5 +40,5 @@ void main() {
 
     // blend pixels
     vec3 transparentColor = average_color * (1.0 - revealage);
-    frag = vec4(mix(transparentColor, opaqueColor.rgb, revealage), 1.0);
+    frag = vec4(mix(average_color, opaqueColor.rgb, revealage), 1.0);
 }

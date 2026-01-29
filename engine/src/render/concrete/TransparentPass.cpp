@@ -14,7 +14,7 @@ using namespace engine;
 
 
 TransparentPass::TransparentPass(glm::ivec2 resolution)
-    : RenderPass(resolution, engine::RenderPass::SceneTransparent, 2),
+    : RenderPass(resolution, engine::RenderPass::SceneTransparent, 1),
       m_transparentMat(
           "resources/shaders/ChunkVert.glsl",
           "resources/shaders/TransparentFrag.glsl",
@@ -37,7 +37,7 @@ void TransparentPass::beforeRender(Engine& engine, uint8_t pass) {
     glDepthMask(GL_FALSE);
     glEnable(GL_BLEND);
     glBlendFunci(0, GL_ONE, GL_ONE);                   // accumulation blend target
-    glBlendFunci(1, GL_ZERO, GL_ONE_MINUS_SRC_ALPHA);  // revealge blend target
+    glBlendFunci(1, GL_ZERO, GL_ONE_MINUS_SRC_COLOR);  // revealge blend target
     glBlendEquation(GL_FUNC_ADD);
 
     m_OIT.bind();
@@ -56,7 +56,7 @@ void TransparentPass::init() {
         {.width = m_resolution.x,
          .height = m_resolution.y,
          .format = gl::ImageFormat::RGBA,
-         .dataType = gl::ImageDataType::Float}
+         .dataType = gl::ImageDataType::HalfFloat}
     );
 
     m_revealage.create(
