@@ -3,6 +3,8 @@
 #include "RenderPass.h"
 #include "events/EngineEventSite.h"
 
+#include <algorithm>
+
 namespace engine {
     class RenderPassRegistry : public EngineEventSite {
       public:
