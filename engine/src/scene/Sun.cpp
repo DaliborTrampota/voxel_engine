@@ -12,6 +12,7 @@
 #include "../Globals.h"
 #include "data/TextureManager.h"
 #include "physics/AABB.h"
+#include "render/Material.h"
 #include "scene/Camera.h"
 
 
@@ -26,6 +27,7 @@ Sun::Sun(glm::ivec2 resolution, const Camera* target, const glm::vec3& direction
           "SunDepthShader"
       ),
       m_direction(glm::normalize(direction)) {
+    Material::setConstant("CascadeCount", static_cast<int>(m_cascadeSplits.size()));
     setTarget(target);
 
     m_lightSpaceUBO = gl::UBO(
@@ -41,26 +43,17 @@ Sun::Sun(glm::ivec2 resolution, const Camera* target, const glm::vec3& direction
     m_lightSpaceUBO.create();
     m_depthShader.bindUBO(m_lightSpaceUBO);
 
-    // gl::FrameBufferSettings vsmSettings = {
-    //     gl::Settings(gl::Settings::ClampToEdge, gl::Settings::Linear),
-    //     resolution.x,
-    //     resolution.y,
-    //     gl::ImageFormat::GrayAlpha,
-    //     gl::ImageDataType::Float
-    // };
 
-    // m_depthFBO.createTexture(gl::FBOAttachment::Color, vsmSettings);
-    // m_depthFBO.createTexture(gl::FBOAttachment::Color + 1, vsmSettings);  // for blur
-
-
-    gl::ArraySettings cmsSettings = {
-        gl::Settings(gl::Settings::ClampToEdge, gl::Settings::Linear),
-        static_cast<unsigned>(m_cascadeSplits.size()),
-        resolution.x,
-        resolution.y,
-        gl::ImageFormat::Depth
-    };
-    TextureManager::Get().cascadeShadowMaps()->create(cmsSettings);
+    TextureManager::Get().cascadeShadowMaps()->create(
+        gl::TextureParams(gl::TextureParams::ClampToEdge, gl::TextureParams::Linear)
+    );
+    TextureManager::Get().cascadeShadowMaps()->allocate(
+        {.width = resolution.x,
+         .height = resolution.y,
+         .depth = static_cast<int>(m_cascadeSplits.size()),
+         .format = gl::ImageFormat::Depth,
+         .dataType = gl::ImageDataType::Float}
+    );
     m_depthFBO.bind();
     m_depthFBO.bindTexture(gl::FBOAttachment::Depth, TextureManager::Get().cascadeShadowMaps());
 
@@ -86,16 +79,11 @@ void Sun::setDirection(const glm::vec3& direction) {
 void Sun::setLightColor(const glm::vec3& color, float intensity) {
     m_lightColor = color;
     m_lightIntensity = intensity;
-
-    // m_depthShader.use();
-    // m_depthShader.setVec3("lightColor", m_lightColor);
-    // m_depthShader.setFloat("lightIntensity", m_lightIntensity);
 }
 
 
 gl::TextureRef Sun::cascadeShadowMaps() const {
     return m_depthFBO.texture(gl::FBOAttachment::Depth);
-    // return m_depthFBO.texture(gl::FBOAttachment::Color);
 }
 
 void Sun::update(float dt) {

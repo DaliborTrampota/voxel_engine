@@ -5,8 +5,9 @@
 #include <vector>
 
 #include "RenderContext.h"
-#include "RenderPass.h"
+#include "RenderPassRegistry.h"
 #include "Window.h"
+
 
 namespace engine {
     class Updateable;
@@ -14,6 +15,23 @@ namespace engine {
     class Tickable;
     class Sun;
     class InputSystem;
+
+    struct RenderStats {
+        uint32_t drawCalls = 0;
+        uint32_t vertices = 0;
+        uint32_t triangles = 0;
+        double frameTime = 0.0;
+        double _frameStart = 0.0;
+
+        void reset() {
+            drawCalls = 0;
+            vertices = 0;
+            triangles = 0;
+            frameTime = 0.0;
+        }
+
+        std::string toString() const;
+    };
 
     class Engine {
       public:
@@ -24,13 +42,6 @@ namespace engine {
 
         void submitRender(RenderContext&& ctx, bool immediate = false);
         void submitRender(GroupRenderContext&& ctx, bool immediate = false);
-
-        /// @brief Registers a custom render pass at the specified position.
-        /// @param pass The concrete RenderPass instance.
-        /// @param position Where to insert the pass (default: after scene)
-        void registerRenderPass(std::unique_ptr<RenderPass> pass, uint8_t position);
-
-        void registerDefaultRenderPasses();
 
         /// @brief Flushes the render queue; loops over all render passes and renders all contexts.
         /// @note This is called between beforeRender() and afterRender().
@@ -56,6 +67,7 @@ namespace engine {
         std::unique_ptr<InputSystem> m_inputSystem;
         std::shared_ptr<Sun> m_directionalLightSource;
 
+        RenderPassRegistry* m_passRegistry;
         std::vector<std::variant<RenderContext, GroupRenderContext>> m_renderQueue;
         std::unique_ptr<Window> m_window;
 
@@ -65,7 +77,6 @@ namespace engine {
       private:
         void initUtilityShaders();
 
-        std::vector<std::unique_ptr<RenderPass>> m_renderPasses;
         std::vector<std::weak_ptr<Updateable>> m_updateSubscribers;
         std::vector<std::weak_ptr<Tickable>> m_tickSubscribers;
         float m_tickAccumulator = 0.0f;
@@ -73,5 +84,6 @@ namespace engine {
 
         void render(RenderContext& ctx, const RenderPass* renderPass) const;
         void render(GroupRenderContext& ctx, const RenderPass* renderPass) const;
+        mutable RenderStats m_renderStats;
     };
 }  // namespace engine

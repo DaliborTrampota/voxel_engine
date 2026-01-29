@@ -16,7 +16,7 @@
     - ogt_vox - loading magica voxel models
 - SoLoud - basic audio support 
 - LWGL - Low Level OpenGL Library
-- SEUIL - Simple Enough UI Library
+- SEUIL - Simple Enough UI Library (needs to be moved out of voxel_engine to stomata)
     - LWGL
     - FreeType - font loading
     - MSDF - library implementing [Valve's interesting paper](https://steamcdn-a.akamaihd.net/apps/valve/2007/SIGGRAPH2007_AlphaTestedMagnification.pdf)

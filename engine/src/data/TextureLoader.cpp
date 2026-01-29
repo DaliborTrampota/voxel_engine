@@ -13,7 +13,7 @@
 using namespace engine;
 
 void TextureLoader::loadArray2D(
-    gl::TextureArray* target, const fs::path& path, gl::ArraySettings settings
+    gl::TextureArray* target, const fs::path& path, gl::TextureParams params
 ) {
     int width = 0;
     int height = 0;
@@ -47,18 +47,16 @@ void TextureLoader::loadArray2D(
     }
 
 
-    settings.layers = static_cast<unsigned>(images.size());
-    settings.width = width;
-    settings.height = height;
-    settings.format = gl::ImageFormat::RGBA;
-
-
-    target->create(settings);
-    target->bind();
+    target->create(params);
+    target->allocate(
+        {.width = width,
+         .height = height,
+         .depth = static_cast<int>(images.size()),
+         .format = gl::ImageFormat::RGBA}
+    );
     TextureManager& texMgr = TextureManager::Get();
-
     for (const auto& imgData : images) {
-        int layer = target->load(imgData);
+        int layer = target->upload(imgData);
         texMgr.add(getTextureName(imgData.path), layer);
     }
 }

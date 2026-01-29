@@ -25,13 +25,19 @@ namespace engine {
         static constexpr ID OmniShadow = 1 << 1;
         static constexpr ID Scene = 1 << 2;
         static constexpr ID SceneTransparent = 1 << 3;
+        static constexpr ID Composite = 1 << 4;
 
         virtual ~RenderPass() = default;
+
+        RenderPass(const RenderPass&) = delete;
+        RenderPass& operator=(const RenderPass&) = delete;
+        RenderPass(RenderPass&&) noexcept = delete;
+        RenderPass& operator=(RenderPass&&) noexcept = delete;
 
         virtual void beforeRender(Engine& engine, uint8_t pass) = 0;
         virtual void afterRender(Engine& engine, uint8_t pass) = 0;
 
-        static std::unique_ptr<RenderPass> create(const std::string& name);
+        virtual void resize(glm::ivec2 resolution) { m_resolution = resolution; }
 
         ID id() const { return m_id; }
         uint8_t passes() const { return m_passes; }

@@ -37,6 +37,6 @@ namespace engine {
         // gl::Attributes<SkyboxVertex> m_attributes;
         gl::Buffer<float> m_buffer;
         Material m_material;
-        gl::CubeMap m_cubeMap;
+        gl::CubeMap m_cubeMap{false};
     };
 }  // namespace engine

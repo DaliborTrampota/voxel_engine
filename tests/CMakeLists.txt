@@ -11,7 +11,6 @@ target_link_libraries(Test PRIVATE glfw)
 
 target_link_libraries(Test PUBLIC glm)
 target_link_libraries(Test PUBLIC tools)
-target_link_libraries(Test PUBLIC seuil)
 target_link_libraries(Test PUBLIC lwgl)
 
 if(WIN32)

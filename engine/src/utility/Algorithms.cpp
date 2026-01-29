@@ -59,12 +59,11 @@ DDAResult engine::DDA(
     glm::vec3 faceNormal(0.0f);
 
     length /= glm::sqrt(dx * dx + dy * dy + dz * dz);
-
+    std::shared_ptr<Chunk> chunk = nullptr;
     // TODO condition should be world bound check, maybe loaded chunks check?
     while (true) {
         glm::ivec3 localPos = glm::ivec3(x, y, z);
-        std::shared_ptr<Chunk> chunk =
-            world.getChunk(extractChunkCoords(localPos, world.chunkDims()));
+        chunk = world.getChunk(extractChunkCoords(localPos, world.chunkDims()));
 
         BlockState* state;
         const Block* block = chunk->getBlock(localPos, &state);
@@ -107,7 +106,14 @@ DDAResult engine::DDA(
         }
     }  // end while
 
-    return DDAResult{{x, y, z}, faceNormal, FaceTag::All, &Block::air(), length, {}};
+    return DDAResult{
+        {x, y, z},
+        faceNormal,
+        FaceTag::All,
+        &Block::air(),
+        length,
+        chunk,
+    };
 }
 
 
