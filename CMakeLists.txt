@@ -10,6 +10,7 @@ endif()
 project(voxel_engine VERSION 1.0)
 
 option(USE_DEPENDENCIES "Configure with dependencies" ON)
+option(BUILD_VOXEL_ENGINE_TESTS "Build the Voxel Engine tests" OFF)
 # set(GLFW_USE_WAYLAND OFF CACHE BOOL "Disable Wayland for GLFW (linux)")
 # set(GLFW_BUILD_X11 ON CACHE BOOL "Enable X11 backend in GLFW")
 
@@ -51,7 +52,7 @@ function(setup_voxelengine_resource_copy TARGET_NAME)
     )
 endfunction()
 
-if(BUILD_TESTING)
+if(BUILD_VOXEL_ENGINE_TESTS)
     enable_testing()
     add_subdirectory(tests)
 endif()
