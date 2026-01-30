@@ -2,7 +2,6 @@
 
 # VoxelEngine
 
-
 ## Notes
 
 #### Coordinate System
@@ -15,7 +14,7 @@
 
 #### Setup
 
-In your game/project's CMake file after linking VoxelEngine, call `setup_voxelengine_resource_copy(target)` and `setup_seuil_resource_copy(target)` with the target name of your project.
+In your game/project's CMake file after linking VoxelEngine, call `setup_voxelengine_resource_copy(target)` with the target name of your project.
 
 #### Registering blocks
 | Class/File                | Usage Description                                                                 |
