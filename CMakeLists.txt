@@ -38,6 +38,7 @@ target_link_libraries(VoxelEngine PUBLIC glm)
 target_link_libraries(VoxelEngine PUBLIC tools)
 target_link_libraries(VoxelEngine PUBLIC lwgl)
 target_link_libraries(VoxelEngine PUBLIC soloud)
+target_link_libraries(VoxelEngine PUBLIC FastNoise2)
 
 
 target_include_directories(VoxelEngine SYSTEM PUBLIC "${PROJECT_SOURCE_DIR}/src")
