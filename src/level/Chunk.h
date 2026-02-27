@@ -88,6 +88,10 @@ namespace engine {
         virtual void afterGenerated() {}
 
 
+        void serialize(std::ostream& out) const override;
+        void deserialize(std::istream& in) override;
+
+
       protected:
         World* m_world;
         ChunkID m_coords;

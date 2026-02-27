@@ -331,3 +331,11 @@ VariantBlock::Neighbours Chunk::getNeighbouringBlocks(glm::ivec3 pos) const {
         .downFacing = downState ? downState->facing() : glm::vec3(0.0f),
     };
 }
+
+void Chunk::serialize(std::ostream& out) const {
+    m_data->serialize(out);
+}
+
+void Chunk::deserialize(std::istream& in) {
+    m_data->deserialize(in);
+}

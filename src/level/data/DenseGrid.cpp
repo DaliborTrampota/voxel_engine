@@ -60,4 +60,51 @@ BlockState* DenseGrid::getOrCreateState(const glm::ivec3& pos) {
     return &it->second;
 }
 
+void DenseGrid::serialize(std::ostream& out) const {
+    std::vector<std::pair<glm::ivec3, engine::BlockState>> states;
+
+    for (int x = 0; x < dims.x; x++) {
+        for (int y = 0; y < dims.y; y++) {
+            for (int z = 0; z < dims.z; z++) {
+                const engine::BlockState* state = nullptr;
+                out << getBlockAndState({x, y, z}, state) << " ";
+                if (state) {
+                    states.push_back({glm::ivec3(x, y, z), *state});
+                }
+            }
+        }
+    }
+
+    out << states.size() << std::endl;
+    for (const auto& [pos, state] : states) {
+        out << pos.x << " " << pos.y << " " << pos.z << " ";
+        state.serialize(out);
+        out << std::endl;
+    }
+}
+
+void DenseGrid::deserialize(std::istream& in) {
+    int dims[3];
+    in >> dims[0] >> dims[1] >> dims[2];
+
+    engine::BlockID block;
+    for (int x = 0; x < dims[0]; x++) {
+        for (int y = 0; y < dims[1]; y++) {
+            for (int z = 0; z < dims[2]; z++) {
+                in >> block;
+                setBlock({x, y, z}, block);
+            }
+        }
+    }
+
+    size_t stateCount;
+    in >> stateCount;
+    for (size_t i = 0; i < stateCount; ++i) {
+        glm::ivec3 pos;
+        in >> pos.x >> pos.y >> pos.z;
+
+        engine::BlockState state;
+        state.deserialize(in);
+        setState(pos, std::move(state));
+    }
 }

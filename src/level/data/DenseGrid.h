@@ -71,6 +71,8 @@ namespace engine {
         void clearState(const glm::ivec3& pos) override final;
         BlockState* getOrCreateState(const glm::ivec3& pos) override final;
 
+        void serialize(std::ostream& out) const override final;
+        void deserialize(std::istream& in) override final;
     };
 
 }  // namespace engine
