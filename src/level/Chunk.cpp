@@ -27,19 +27,19 @@ namespace {
     RegistryManager::BlockRegistryT& blocks = RegistryManager::Blocks();
 }
 
-Chunk::Chunk(World* world, ChunkID coords, glm::ivec3 dims)
+Chunk::Chunk(World* world, ChunkID coords, IChunkData* data)
     : m_world(world),
       m_coords(coords),
-      m_data(dims) {}
+      m_data(std::unique_ptr<IChunkData>(data)) {}
 
 Chunk::~Chunk() {}
 
 void Chunk::populateTerrainData() {
-    if (m_generated || m_data.populated)
+    if (m_generated || m_data->populated)
         return;
 
     m_world->m_generator->populate(*this);
-    m_data.populated = true;
+    m_data->populated = true;
 }
 
 bool Chunk::generateMesh() {
@@ -47,22 +47,22 @@ bool Chunk::generateMesh() {
     if (!m_generatingMesh.compare_exchange_strong(expected, true))
         return false;
 
-    glm::ivec3 chunkBlockCoords = m_coords * m_data.dims;
+    glm::ivec3 chunkBlockCoords = m_coords * m_data->dims;
 
     for (auto& layer : m_renderLayers) {
         layer.clear();
-        layer.back.reserve(m_data.dims.x * m_data.dims.y * 8 * 6);
+        layer.back.reserve(m_data->dims.x * m_data->dims.y * 8 * 6);
     }
 
-    for (int x = 0; x < m_data.dims.x; x++) {
-        for (int y = 0; y < m_data.dims.y; y++) {
-            for (int z = 0; z < m_data.dims.z; z++) {
-                if (m_data.getBlock({x, y, z}) == Block::AirID)
+    for (int x = 0; x < m_data->dims.x; x++) {
+        for (int y = 0; y < m_data->dims.y; y++) {
+            for (int z = 0; z < m_data->dims.z; z++) {
+                if (m_data->getBlock({x, y, z}) == Block::AirID)
                     continue;
 
                 glm::ivec3 pos(x, y, z);
 
-                BlockID blockID = m_data.getBlock(pos);
+                BlockID blockID = m_data->getBlock(pos);
                 const Block* block = RegistryManager::Blocks().get(blockID);
 
                 if (!block) {
@@ -70,12 +70,12 @@ bool Chunk::generateMesh() {
                     continue;
                 }
 
-                const BlockState* state = m_data.getState(pos);
+                const BlockState* state = m_data->getState(pos);
 
                 if (auto variant = dynamic_cast<const VariantBlock*>(block)) {
                     generateMeshForBlock(variant, pos, state, chunkBlockCoords);
                 } else if (block->isMultiblock()) {
-                    MultiBlock* multi = m_data.getMultiBlock(pos);
+                    MultiBlock* multi = m_data->getMultiBlock(pos);
                     generateMeshForBlock(multi, pos, state, chunkBlockCoords);
                 } else {
                     generateMeshForBlock(block, pos, state, chunkBlockCoords);
@@ -95,24 +95,24 @@ bool Chunk::generateMesh() {
 }
 
 const Block* Chunk::getBlock(glm::ivec3 pos, BlockState** state) {
-    BlockID blockID = !m_data.populated
-                          ? m_world->m_generator->voxelAt(pos + m_coords * m_data.dims)
-                      : state ? m_data.getBlockAndState(pos, *state)
-                              : m_data.getBlock(pos);
+    BlockID blockID = !m_data->populated
+                          ? m_world->m_generator->voxelAt(pos + m_coords * m_data->dims)
+                      : state ? m_data->getBlockAndState(pos, *state)
+                              : m_data->getBlock(pos);
     return RegistryManager::Blocks().get(blockID);
 }
 
 void Chunk::setBlock(const glm::ivec3& pos, BlockID block) {
-    BlockState* oldState = m_data.getState(pos);
-    BlockID oldBlock = m_data.getBlock(pos);
+    BlockState* oldState = m_data->getState(pos);
+    BlockID oldBlock = m_data->getBlock(pos);
     if (oldBlock != Block::AirID)
         blocks.get(oldBlock)->onDestroyed(
             BlockSetContext{.chunk = this, .position = pos, .state = oldState}
         );
 
-    m_data.setBlock(pos, block);
+    m_data->setBlock(pos, block);
     if (block == Block::AirID) {
-        m_data.clearState(pos);
+        m_data->clearState(pos);
     }
 
     blocks.get(block)->onPlaced(BlockSetContext{.chunk = this, .position = pos, .state = nullptr});
@@ -121,26 +121,26 @@ void Chunk::setBlock(const glm::ivec3& pos, BlockID block) {
 }
 
 void Chunk::setBlock(const glm::ivec3& pos, BlockID block, BlockState state) {
-    BlockState* oldState = m_data.getState(pos);
-    BlockID oldBlock = m_data.getBlock(pos);
+    BlockState* oldState = m_data->getState(pos);
+    BlockID oldBlock = m_data->getBlock(pos);
     if (oldBlock != Block::AirID)
         blocks.get(oldBlock)->onDestroyed(
             BlockSetContext{.chunk = this, .position = pos, .state = oldState}
         );
 
-    m_data.setBlock(pos, block, state);
+    m_data->setBlock(pos, block, state);
     if (block == Block::AirID) {
-        m_data.clearState(pos);
+        m_data->clearState(pos);
     }
 
-    BlockState* setState = m_data.getState(pos);
+    BlockState* setState = m_data->getState(pos);
     blocks.get(block)->onPlaced(BlockSetContext{.chunk = this, .position = pos, .state = setState});
     m_world->afterBlockSet(pos, block, setState);
     m_dirty = true;
 }
 
 void Chunk::setBlock(const glm::ivec3& pos, MultiBlock&& multiBlock) {
-    m_data.setMultiBlock(pos, std::move(multiBlock));
+    m_data->setMultiBlock(pos, std::move(multiBlock));
 
     // TODO onPlaced?
     m_world->afterBlockSet(pos, Block::MultiblockID, nullptr);
@@ -154,7 +154,7 @@ void Chunk::render(Engine& engine, const Camera* camera, int pass) {
     }
 
     RenderContext ctx;
-    ctx.setModelMatrix(m_coords * m_data.dims);
+    ctx.setModelMatrix(m_coords * m_data->dims);
     if (pass == 0) {
         ctx.attributes = &m_renderLayers[Layers::Opaque].read();
         ctx.material = &m_world->m_material;
@@ -163,7 +163,7 @@ void Chunk::render(Engine& engine, const Camera* camera, int pass) {
         engine.submitRender(std::move(ctx));
 
         RenderContext ctxTransparent;
-        ctxTransparent.setModelMatrix(m_coords * m_data.dims);
+        ctxTransparent.setModelMatrix(m_coords * m_data->dims);
         ctxTransparent.attributes = &m_renderLayers[Layers::Transparent].read();
         ctxTransparent.material = &m_world->m_material;
         ctxTransparent.passMask = RenderPass::SceneTransparent | RenderPass::DirectionalShadow;

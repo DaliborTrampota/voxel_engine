@@ -1,7 +1,9 @@
 #pragma once
 
 #include <cstdint>
+#include <iosfwd>
 #include <limits>
+
 
 // OpenGL Defaults
 #define UP glm::vec3{0, 1, 0}
@@ -18,6 +20,8 @@ namespace engine {
     using BlockID = uint32_t;
     using Layer = uint8_t;
 
+    struct ChunkID;
+
     constexpr BlockID InvalidBlockID = std::numeric_limits<BlockID>::max();
 
     // Render layer constants
@@ -26,4 +30,8 @@ namespace engine {
         constexpr Layer Opaque = 1;
         constexpr Layer Transparent = 2;
     }  // namespace Layers
+
+
 }  // namespace engine
+
+std::ostream& operator<<(std::ostream& os, const engine::ChunkID& chID);

@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include "../Globals.h"
+#include "../block/MultiBlock.h"
 #include "AABB.h"
 #include "data/RegistryManager.h"
 #include "level/World.h"
