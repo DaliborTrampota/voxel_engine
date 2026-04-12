@@ -54,10 +54,6 @@ namespace engine {
         virtual glm::ivec3 dims() const { return m_data->dims; }
 
         World* world() const { return m_world; }
-        template <typename T>
-        T* worldAs() const {
-            return dynamic_cast<T*>(m_world);
-        }
 
         template <typename T>
         T* worldAs() const {

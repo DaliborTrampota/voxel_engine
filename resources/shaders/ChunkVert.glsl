@@ -24,7 +24,7 @@ flat out uint texID;
 out float ao;
 
 void main() {
-    texID = aData & 65'535u;
+    texID = aData & 65535u;
     ao = 1.0 - ((aData >> 16) & 3u) / 5.0;
 
     uv = aUV;
