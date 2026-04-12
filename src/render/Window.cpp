@@ -1,6 +1,7 @@
 #include "Window.h"
 
 #include <glad/glad.h>
+#include <filesystem>
 #include <stdexcept>
 
 #include <LWGL/render/Shader.h>
