@@ -6,13 +6,17 @@ using namespace engine;
 
 
 PerlinNoise::PerlinNoise(
-    uint64_t seed, float scale, float offset, uint32_t octaves, float persistence, float lacunarity
+    PerlinNoise::Seed seed,
+    float scale,
+    float offset,
+    uint32_t octaves,
+    float persistence,
+    float lacunarity
 )
     : m_noise(FastNoise::New<FastNoise::FractalFBm>()),
       m_seed(seed),
       m_offset(offset),
-      m_octaves(std::min(octaves, 1u)),
-      m_persistence(persistence) {
+      m_octaves(std::max(octaves, 1u)) {
     auto perlin = FastNoise::New<FastNoise::Simplex>();
     perlin->SetScale(scale);
     m_noise->SetSource(perlin);
@@ -31,8 +35,9 @@ float PerlinNoise::get2DNormalized(float x, float y) const noexcept {
     return m_noise->GenSingle2D(x + m_offset, y + m_offset, m_seed) / m_maxAmplitude;
 }
 
-void PerlinNoise::genArea2D(float* out, glm::ivec2 start, glm::uvec2 dims) const noexcept {
-    size_t count = dims.x * dims.y;
+void PerlinNoise::genArea2D(float* out, glm::ivec2 start, glm::ivec2 dims) const noexcept {
+    assert(dims.x >= 0 && dims.y >= 0);
+    size_t count = static_cast<size_t>(dims.x) * dims.y;
     std::vector<float> positionsX(count);
     std::vector<float> positionsY(count);
     int index = 0;
@@ -57,8 +62,9 @@ float PerlinNoise::get3DNormalized(float x, float y, float z) const noexcept {
     return m_noise->GenSingle3D(x + m_offset, y + m_offset, z + m_offset, m_seed) / m_maxAmplitude;
 }
 
-void PerlinNoise::genArea3D(float* out, glm::ivec3 start, glm::uvec3 dims) const noexcept {
-    size_t count = dims.x * dims.y * dims.z;
+void PerlinNoise::genArea3D(float* out, glm::ivec3 start, glm::ivec3 dims) const noexcept {
+    assert(dims.x >= 0 && dims.y >= 0 && dims.z >= 0);
+    size_t count = static_cast<size_t>(dims.x) * dims.y * dims.z;
     std::vector<float> positionsX(count);
     std::vector<float> positionsY(count);
     std::vector<float> positionsZ(count);
@@ -95,8 +101,9 @@ float PerlinNoise::get4DNormalized(float x, float y, float z, float w) const noe
            m_maxAmplitude;
 }
 
-void PerlinNoise::genArea4D(float* out, glm::ivec4 start, glm::uvec4 dims) const noexcept {
-    size_t count = dims.x * dims.y * dims.z * dims.w;
+void PerlinNoise::genArea4D(float* out, glm::ivec4 start, glm::ivec4 dims) const noexcept {
+    assert(dims.x >= 0 && dims.y >= 0 && dims.z >= 0 && dims.w >= 0);
+    size_t count = static_cast<size_t>(dims.x) * dims.y * dims.z * dims.w;
     std::vector<float> positionsX(count);
     std::vector<float> positionsY(count);
     std::vector<float> positionsZ(count);
