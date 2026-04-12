@@ -8,9 +8,12 @@ option(GLFW_BUILD_TESTS "Build the GLFW test programs" OFF)
 option(GLFW_BUILD_EXAMPLES "Build the GLFW example programs" OFF)
 option(GLFW_INSTALL "Generate installation target" OFF)
 
+set(FASTNOISE2_NOISETOOL OFF CACHE BOOL "Build Noise Tool" FORCE)
+
 add_subdirectory(glfw)
 add_subdirectory(lwgl)
 add_subdirectory(SoLoud)
+add_subdirectory(FastNoise2)
 
 target_include_directories(tools INTERFACE include/)
 target_include_directories(glad PUBLIC include/)

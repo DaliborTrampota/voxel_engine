@@ -47,7 +47,7 @@ Engine::Engine(std::unique_ptr<Window> window)
       m_inputSystem(std::make_unique<InputSystem>()),
       m_passRegistry(&RenderPassRegistry::Get()) {
     m_window->subscribe(m_passRegistry);
-    Material::setConstant("CascadeCount", 4);
+    Material::setGlobalConstant("CascadeCount", 4);
 
     glm::ivec2 resolution = m_window->windowSize();
     m_passRegistry->registerPass(std::make_unique<ScenePass>(resolution), 0);

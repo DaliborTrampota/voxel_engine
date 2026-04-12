@@ -1,6 +1,7 @@
 #include "Window.h"
 
 #include <glad/glad.h>
+#include <filesystem>
 #include <stdexcept>
 
 #include <LWGL/render/Shader.h>
@@ -49,6 +50,7 @@ namespace {
 }  // namespace
 
 using namespace engine;
+namespace fs = std::filesystem;
 
 Window::Window(gl::Context* share) : gl::Context(share) {}
 
