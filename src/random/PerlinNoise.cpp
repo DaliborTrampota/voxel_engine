@@ -1,6 +1,6 @@
 #include "PerlinNoise.h"
-
-#include <utility/Index.h>
+// todo index.h usage?
+#include <vector>
 
 using namespace engine;
 
@@ -19,6 +19,7 @@ PerlinNoise::PerlinNoise(
     m_noise->SetOctaveCount(octaves);
     m_noise->SetGain(persistence);
     m_noise->SetLacunarity(lacunarity);
+    m_maxAmplitude = MaxAmplitude(octaves, persistence);
 }
 
 
@@ -27,8 +28,7 @@ float PerlinNoise::get2D(float x, float y) const noexcept {
 }
 
 float PerlinNoise::get2DNormalized(float x, float y) const noexcept {
-    return m_noise->GenSingle2D(x + m_offset, y + m_offset, m_seed) /
-           MaxAmplitude(m_octaves, m_persistence);
+    return m_noise->GenSingle2D(x + m_offset, y + m_offset, m_seed) / m_maxAmplitude;
 }
 
 void PerlinNoise::genArea2D(float* out, glm::ivec2 start, glm::ivec2 dims) const noexcept {
@@ -54,8 +54,7 @@ float PerlinNoise::get3D(float x, float y, float z) const noexcept {
 }
 
 float PerlinNoise::get3DNormalized(float x, float y, float z) const noexcept {
-    return m_noise->GenSingle3D(x + m_offset, y + m_offset, z + m_offset, m_seed) /
-           MaxAmplitude(m_octaves, m_persistence);
+    return m_noise->GenSingle3D(x + m_offset, y + m_offset, z + m_offset, m_seed) / m_maxAmplitude;
 }
 
 void PerlinNoise::genArea3D(float* out, glm::ivec3 start, glm::ivec3 dims) const noexcept {
@@ -93,7 +92,7 @@ float PerlinNoise::get4D(float x, float y, float z, float w) const noexcept {
 
 float PerlinNoise::get4DNormalized(float x, float y, float z, float w) const noexcept {
     return m_noise->GenSingle4D(x + m_offset, y + m_offset, z + m_offset, w + m_offset, m_seed) /
-           MaxAmplitude(m_octaves, m_persistence);
+           m_maxAmplitude;
 }
 
 void PerlinNoise::genArea4D(float* out, glm::ivec4 start, glm::ivec4 dims) const noexcept {

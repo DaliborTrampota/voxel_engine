@@ -5,6 +5,8 @@
 
 #include <glm/glm.hpp>
 
+#include <cstddef>
+#include <cstdint>
 
 namespace engine {
 
@@ -45,6 +47,8 @@ namespace engine {
         float m_offset;
         uint32_t m_octaves;
         float m_persistence;
+
+        float m_maxAmplitude;
 
         static constexpr float MaxAmplitude(
             const uint32_t octaves, const float persistence
