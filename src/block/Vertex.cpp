@@ -26,5 +26,5 @@ void Vertex::rotate(glm::vec3 axis, float angle) {
 }
 
 void Vertex::data(int textureID, int ao) {
-    m_data = textureID | ao << 10u;  // textureID is 0-10, ao is 11-12,
+    m_data = textureID | ao << 16u;  // textureID is 0-15, ao is 16-17,
 }

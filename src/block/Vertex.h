@@ -14,7 +14,7 @@ namespace engine {
 
         glm::vec3 pos, normal;
         glm::vec2 uv;
-        /// Holds TextureID (0-10bits) and AO (11-12)
+        /// Holds TextureID (0-15bits) and AO (16-17)
         unsigned int m_data;
 
         static gl::VertexLayout layout() {
