@@ -11,15 +11,15 @@ PerlinNoise::PerlinNoise(
     : m_noise(FastNoise::New<FastNoise::FractalFBm>()),
       m_seed(seed),
       m_offset(offset),
-      m_octaves(octaves),
+      m_octaves(std::min(octaves, 1u)),
       m_persistence(persistence) {
     auto perlin = FastNoise::New<FastNoise::Simplex>();
     perlin->SetScale(scale);
     m_noise->SetSource(perlin);
-    m_noise->SetOctaveCount(octaves);
+    m_noise->SetOctaveCount(m_octaves);
     m_noise->SetGain(persistence);
     m_noise->SetLacunarity(lacunarity);
-    m_maxAmplitude = MaxAmplitude(octaves, persistence);
+    m_maxAmplitude = MaxAmplitude(m_octaves, persistence);
 }
 
 
@@ -31,7 +31,7 @@ float PerlinNoise::get2DNormalized(float x, float y) const noexcept {
     return m_noise->GenSingle2D(x + m_offset, y + m_offset, m_seed) / m_maxAmplitude;
 }
 
-void PerlinNoise::genArea2D(float* out, glm::ivec2 start, glm::ivec2 dims) const noexcept {
+void PerlinNoise::genArea2D(float* out, glm::ivec2 start, glm::uvec2 dims) const noexcept {
     size_t count = dims.x * dims.y;
     std::vector<float> positionsX(count);
     std::vector<float> positionsY(count);
@@ -57,7 +57,7 @@ float PerlinNoise::get3DNormalized(float x, float y, float z) const noexcept {
     return m_noise->GenSingle3D(x + m_offset, y + m_offset, z + m_offset, m_seed) / m_maxAmplitude;
 }
 
-void PerlinNoise::genArea3D(float* out, glm::ivec3 start, glm::ivec3 dims) const noexcept {
+void PerlinNoise::genArea3D(float* out, glm::ivec3 start, glm::uvec3 dims) const noexcept {
     size_t count = dims.x * dims.y * dims.z;
     std::vector<float> positionsX(count);
     std::vector<float> positionsY(count);
@@ -95,7 +95,7 @@ float PerlinNoise::get4DNormalized(float x, float y, float z, float w) const noe
            m_maxAmplitude;
 }
 
-void PerlinNoise::genArea4D(float* out, glm::ivec4 start, glm::ivec4 dims) const noexcept {
+void PerlinNoise::genArea4D(float* out, glm::ivec4 start, glm::uvec4 dims) const noexcept {
     size_t count = dims.x * dims.y * dims.z * dims.w;
     std::vector<float> positionsX(count);
     std::vector<float> positionsY(count);

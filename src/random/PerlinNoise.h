@@ -1,7 +1,6 @@
 #pragma once
 
 #include <FastNoise/FastNoise.h>
-#include <tools/PerlinNoise.h>
 
 #include <glm/glm.hpp>
 
@@ -23,15 +22,15 @@ namespace engine {
 
         float get2D(float x, float y) const noexcept;
         float get2DNormalized(float x, float y) const noexcept;
-        void genArea2D(float* out, glm::ivec2 start, glm::ivec2 dims) const noexcept;
+        void genArea2D(float* out, glm::ivec2 start, glm::uvec2 dims) const noexcept;
 
         float get3D(float x, float y, float z) const noexcept;
         float get3DNormalized(float x, float y, float z) const noexcept;
-        void genArea3D(float* out, glm::ivec3 start, glm::ivec3 dims) const noexcept;
+        void genArea3D(float* out, glm::ivec3 start, glm::uvec3 dims) const noexcept;
 
         float get4D(float x, float y, float z, float w) const noexcept;
         float get4DNormalized(float x, float y, float z, float w) const noexcept;
-        void genArea4D(float* out, glm::ivec4 start, glm::ivec4 dims) const noexcept;
+        void genArea4D(float* out, glm::ivec4 start, glm::uvec4 dims) const noexcept;
         void genPositions4D(
             float* out,
             const float* inX,
