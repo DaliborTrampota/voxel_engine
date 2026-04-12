@@ -55,6 +55,11 @@ namespace engine {
 
         World* world() const { return m_world; }
 
+        template <typename T>
+        T* worldAs() const {
+            return static_cast<T*>(m_world);
+        }
+
         /// @brief Generates the chunk data per TerrainGenerator if not generated yet.
         void populateTerrainData();
         bool generated() const { return m_generated; }
