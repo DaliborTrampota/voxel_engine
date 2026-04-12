@@ -36,8 +36,8 @@ float PerlinNoise::get2DNormalized(float x, float y) const noexcept {
 }
 
 void PerlinNoise::genArea2D(float* out, glm::ivec2 start, glm::ivec2 dims) const noexcept {
-    assert(dims.x >= 0 && dims.y >= 0);
-    size_t count = static_cast<size_t>(dims.x) * dims.y;
+    assert(dims.x > 0 && dims.y > 0);
+    size_t count = static_cast<size_t>(dims.x) * static_cast<size_t>(dims.y);
     std::vector<float> positionsX(count);
     std::vector<float> positionsY(count);
     int index = 0;
@@ -63,8 +63,9 @@ float PerlinNoise::get3DNormalized(float x, float y, float z) const noexcept {
 }
 
 void PerlinNoise::genArea3D(float* out, glm::ivec3 start, glm::ivec3 dims) const noexcept {
-    assert(dims.x >= 0 && dims.y >= 0 && dims.z >= 0);
-    size_t count = static_cast<size_t>(dims.x) * dims.y * dims.z;
+    assert(dims.x > 0 && dims.y > 0 && dims.z > 0);
+    size_t count =
+        static_cast<size_t>(dims.x) * static_cast<size_t>(dims.y) * static_cast<size_t>(dims.z);
     std::vector<float> positionsX(count);
     std::vector<float> positionsY(count);
     std::vector<float> positionsZ(count);
@@ -102,8 +103,9 @@ float PerlinNoise::get4DNormalized(float x, float y, float z, float w) const noe
 }
 
 void PerlinNoise::genArea4D(float* out, glm::ivec4 start, glm::ivec4 dims) const noexcept {
-    assert(dims.x >= 0 && dims.y >= 0 && dims.z >= 0 && dims.w >= 0);
-    size_t count = static_cast<size_t>(dims.x) * dims.y * dims.z * dims.w;
+    assert(dims.x > 0 && dims.y > 0 && dims.z > 0 && dims.w > 0);
+    size_t count = static_cast<size_t>(dims.x) * static_cast<size_t>(dims.y) *
+                   static_cast<size_t>(dims.z) * static_cast<size_t>(dims.w);
     std::vector<float> positionsX(count);
     std::vector<float> positionsY(count);
     std::vector<float> positionsZ(count);
