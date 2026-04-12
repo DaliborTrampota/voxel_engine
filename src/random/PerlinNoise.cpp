@@ -1,6 +1,8 @@
 #include "PerlinNoise.h"
 // todo index.h usage?
+#include <cassert>
 #include <vector>
+
 
 using namespace engine;
 
@@ -16,7 +18,7 @@ PerlinNoise::PerlinNoise(
     : m_noise(FastNoise::New<FastNoise::FractalFBm>()),
       m_seed(seed),
       m_offset(offset),
-      m_octaves(std::max(octaves, 1u)) {
+      m_octaves(octaves > 0 ? octaves : 1u) {
     auto perlin = FastNoise::New<FastNoise::Simplex>();
     perlin->SetScale(scale);
     m_noise->SetSource(perlin);
@@ -40,7 +42,7 @@ void PerlinNoise::genArea2D(float* out, glm::ivec2 start, glm::ivec2 dims) const
     size_t count = static_cast<size_t>(dims.x) * static_cast<size_t>(dims.y);
     std::vector<float> positionsX(count);
     std::vector<float> positionsY(count);
-    int index = 0;
+    size_t index = 0;
     for (int y = start.y; y < start.y + dims.y; y++) {
         for (int x = start.x; x < start.x + dims.x; x++) {
             positionsX[index] = x;
@@ -69,7 +71,7 @@ void PerlinNoise::genArea3D(float* out, glm::ivec3 start, glm::ivec3 dims) const
     std::vector<float> positionsX(count);
     std::vector<float> positionsY(count);
     std::vector<float> positionsZ(count);
-    int index = 0;
+    size_t index = 0;
     for (int z = start.z; z < start.z + dims.z; z++) {
         for (int y = start.y; y < start.y + dims.y; y++) {
             for (int x = start.x; x < start.x + dims.x; x++) {
@@ -110,7 +112,7 @@ void PerlinNoise::genArea4D(float* out, glm::ivec4 start, glm::ivec4 dims) const
     std::vector<float> positionsY(count);
     std::vector<float> positionsZ(count);
     std::vector<float> positionsW(count);
-    int index = 0;
+    size_t index = 0;
     for (int w = start.w; w < start.w + dims.w; w++) {
         for (int z = start.z; z < start.z + dims.z; z++) {
             for (int y = start.y; y < start.y + dims.y; y++) {
