@@ -27,7 +27,7 @@ Sun::Sun(glm::ivec2 resolution, const Camera* target, const glm::vec3& direction
           "SunDepthShader"
       ),
       m_direction(glm::normalize(direction)) {
-    Material::setConstant("CascadeCount", static_cast<int>(m_cascadeSplits.size()));
+    Material::setGlobalConstant("CascadeCount", static_cast<int>(m_cascadeSplits.size()));
     setTarget(target);
 
     m_lightSpaceUBO = gl::UBO(

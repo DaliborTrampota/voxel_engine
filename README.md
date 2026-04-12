@@ -15,6 +15,7 @@
     - PerlinNoise
     - ogt_vox - loading magica voxel models
 - SoLoud - basic audio support 
+- FastNoise2 - SIMD noise implementation
 - LWGL - Low Level OpenGL Library
 - SEUIL - Simple Enough UI Library (needs to be moved out of voxel_engine to stomata)
     - LWGL

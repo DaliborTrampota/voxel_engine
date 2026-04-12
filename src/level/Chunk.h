@@ -58,6 +58,10 @@ namespace engine {
         virtual glm::ivec3 dims() const { return m_data.dims; }
 
         World* world() const { return m_world; }
+        template <typename T>
+        T* worldAs() const {
+            return dynamic_cast<T*>(m_world);
+        }
 
         /// @brief Generates the chunk data per TerrainGenerator if not generated yet.
         void populateTerrainData();
