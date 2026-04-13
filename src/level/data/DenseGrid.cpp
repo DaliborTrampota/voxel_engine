@@ -61,7 +61,7 @@ BlockState* DenseGrid::getOrCreateState(const glm::ivec3& pos) {
 }
 
 void DenseGrid::serialize(std::ostream& out) const {
-    std::vector<std::pair<glm::ivec3, engine::BlockState>> states;
+    std::vector<std::pair<glm::ivec3, engine::BlockState>> serializedStates;
 
     for (int x = 0; x < dims.x; x++) {
         for (int y = 0; y < dims.y; y++) {
@@ -69,14 +69,14 @@ void DenseGrid::serialize(std::ostream& out) const {
                 const engine::BlockState* state = nullptr;
                 out << getBlockAndState({x, y, z}, state) << " ";
                 if (state) {
-                    states.push_back({glm::ivec3(x, y, z), *state});
+                    serializedStates.push_back({glm::ivec3(x, y, z), *state});
                 }
             }
         }
     }
 
-    out << states.size() << std::endl;
-    for (const auto& [pos, state] : states) {
+    out << serializedStates.size() << std::endl;
+    for (const auto& [pos, state] : serializedStates) {
         out << pos.x << " " << pos.y << " " << pos.z << " ";
         state.serialize(out);
         out << std::endl;
@@ -84,13 +84,15 @@ void DenseGrid::serialize(std::ostream& out) const {
 }
 
 void DenseGrid::deserialize(std::istream& in) {
-    int dims[3];
-    in >> dims[0] >> dims[1] >> dims[2];
+    // clear the data
+    data = {};
+    states = {};
+    multiBlocks = {};
 
     engine::BlockID block;
-    for (int x = 0; x < dims[0]; x++) {
-        for (int y = 0; y < dims[1]; y++) {
-            for (int z = 0; z < dims[2]; z++) {
+    for (int x = 0; x < dims.x; x++) {
+        for (int y = 0; y < dims.y; y++) {
+            for (int z = 0; z < dims.z; z++) {
                 in >> block;
                 setBlock({x, y, z}, block);
             }
@@ -107,4 +109,6 @@ void DenseGrid::deserialize(std::istream& in) {
         state.deserialize(in);
         setState(pos, std::move(state));
     }
+
+    populated = true;
 }
