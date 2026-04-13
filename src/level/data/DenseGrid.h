@@ -26,7 +26,6 @@
 namespace engine {
     /// @brief DenseGrid is a storage of blocks in a dense grid aka array..
     struct DenseGrid : public IChunkData {
-        bool populated = false;
         BlockID uniform = InvalidBlockID;
         std::vector<BlockID> data;
         std::unordered_map<glm::ivec3, BlockState> states;

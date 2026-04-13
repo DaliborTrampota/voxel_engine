@@ -12,7 +12,7 @@ namespace engine {
     class MultiBlock;
 
     /// @brief Interface for chunk data representation.
-    /// @note The concrete implementation must represent the whole chunk range, from (0, 0, 0) to (CHUNK_X - 1, CHUNK_Y - 1, CHUNK_Z - 1).
+    /// @note The concrete implementation must represent the whole chunk range, from (0, 0, 0) to (dims.x - 1, dims.y - 1, dims.z - 1).
     /// @note For representing invalid blockID use InvalidBlockID from Globals.h
     class IChunkData : public ISerializable {
       public:
@@ -46,6 +46,7 @@ namespace engine {
         void clear(const glm::ivec3& pos) {
             setBlock(pos, Block::AirID);
             clearState(pos);
+            // TODO clear multiblock somehow
         }
 
         bool isEmpty(const glm::ivec3& pos) const { return getBlock(pos) == Block::AirID; }

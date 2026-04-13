@@ -16,10 +16,16 @@ MultiBlock* DenseGrid::getMultiBlock(const glm::ivec3& pos) {
 
 // Set block
 void DenseGrid::setBlock(const glm::ivec3& pos, BlockID block) {
+    if (block != Block::MultiblockID) {
+        multiBlocks.erase(pos);
+    }
     data[index(pos)] = block;
 }
 
 void DenseGrid::setBlock(const glm::ivec3& pos, BlockID block, BlockState state) {
+    if (block != Block::MultiblockID) {
+        multiBlocks.erase(pos);
+    }
     data[index(pos)] = block;
     states[pos] = state;
 }
@@ -60,6 +66,7 @@ BlockState* DenseGrid::getOrCreateState(const glm::ivec3& pos) {
     return &it->second;
 }
 
+// TODO (de)serialize multiblocks
 void DenseGrid::serialize(std::ostream& out) const {
     std::vector<std::pair<glm::ivec3, engine::BlockState>> serializedStates;
 
