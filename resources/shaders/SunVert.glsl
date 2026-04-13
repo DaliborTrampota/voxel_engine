@@ -16,7 +16,7 @@ out Data {
 vs_out;
 
 void main() {
-    vs_out.texID = aData & 1023u;
+    vs_out.texID = aData & 65535u;
     vs_out.uv = aUV;
 
     // gl_Position = projection * view * model * vec4(aPos, 1.0);

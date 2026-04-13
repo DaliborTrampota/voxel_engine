@@ -25,7 +25,7 @@ void DenseGrid::setBlock(const glm::ivec3& pos, BlockID block, BlockState state)
 }
 
 void DenseGrid::setMultiBlock(const glm::ivec3& pos, MultiBlock&& multiBlock) {
-    multiBlocks[pos] = multiBlock;
+    multiBlocks[pos] = std::move(multiBlock);
     setBlock(pos, Block::MultiblockID);
     clearState(pos);
 }
@@ -85,7 +85,7 @@ void DenseGrid::serialize(std::ostream& out) const {
 
 void DenseGrid::deserialize(std::istream& in) {
     // clear the data
-    data = {};
+    data.assign(dims.x * dims.y * dims.z, Block::AirID);
     states = {};
     multiBlocks = {};
 

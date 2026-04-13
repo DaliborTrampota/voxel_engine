@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include "../../Globals.h"
 #include "../../block/Block.h"
+#include "../../block/BlockState.h"
 
 #include "../../serialize/ISerializable.h"
 
