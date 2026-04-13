@@ -34,11 +34,11 @@ namespace engine {
 
 
     class Chunk : public Renderable,
-                  ISerializable {
+                  public ISerializable {
       public:
         static inline glm::ivec3 Dims{16, 16, 16};
 
-        Chunk(World* world, ChunkID coords, IChunkData* data);
+        Chunk(World* world, ChunkID coords, std::unique_ptr<IChunkData> data);
         Chunk(Chunk&) = delete;
         Chunk(Chunk&&) = delete;
         ~Chunk();
@@ -56,7 +56,7 @@ namespace engine {
         World* world() const { return m_world; }
 
         template <typename T>
-        T* worldAs() const {
+        T* worldAs() const {  // The user knows what world the chunk belongs to, thus static_cast
             return static_cast<T*>(m_world);
         }
 

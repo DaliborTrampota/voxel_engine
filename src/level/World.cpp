@@ -475,5 +475,5 @@ void World::update(float dt) {
 }
 
 std::shared_ptr<Chunk> World::createChunk(const ChunkID& id) {
-    return std::make_shared<Chunk>(this, id, new DenseGrid(m_chunkDims));
+    return std::make_shared<Chunk>(this, id, std::make_unique<DenseGrid>(m_chunkDims));
 }

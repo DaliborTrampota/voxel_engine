@@ -12,7 +12,7 @@ namespace engine {
 
     /// @brief Interface for chunk data representation.
     /// @note The concrete implementation must represent the whole chunk range, from (0, 0, 0) to (CHUNK_X - 1, CHUNK_Y - 1, CHUNK_Z - 1).
-    /// @note For representig invalid blockID use InvalidBlockID from Globals.h
+    /// @note For representing invalid blockID use InvalidBlockID from Globals.h
     class IChunkData : public ISerializable {
       public:
         glm::ivec3 dims;

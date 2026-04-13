@@ -27,10 +27,10 @@ namespace {
     RegistryManager::BlockRegistryT& blocks = RegistryManager::Blocks();
 }
 
-Chunk::Chunk(World* world, ChunkID coords, IChunkData* data)
+Chunk::Chunk(World* world, ChunkID coords, std::unique_ptr<IChunkData> data)
     : m_world(world),
       m_coords(coords),
-      m_data(std::unique_ptr<IChunkData>(data)) {}
+      m_data(std::move(data)) {}
 
 Chunk::~Chunk() {}
 
