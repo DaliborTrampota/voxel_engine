@@ -9,10 +9,12 @@
 #include <unordered_map>
 #include <variant>
 
+#include "../serialize/ISerializable.h"
+
 
 namespace engine {
 
-    class BlockState {
+    class BlockState : public ISerializable {
       public:
         using Value = std::variant<bool, int, unsigned int, float, glm::vec3, glm::ivec3>;
 
@@ -53,8 +55,8 @@ namespace engine {
             return std::get<T>(it->second);
         }
 
-        void serialize(std::ostream& out) const;
-        void deserialize(std::istream& in);
+        void serialize(std::ostream& out) const override;
+        void deserialize(std::istream& in) override;
 
       protected:
         glm::vec3 m_facing;

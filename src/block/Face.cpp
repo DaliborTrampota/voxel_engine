@@ -23,7 +23,7 @@ namespace engine {
             v.data(textureID, ao);
     }
 
-    const Face Face::TriangleFace(
+    Face Face::TriangleFace(
         FaceTag tag,
         glm::vec3 p1,
         glm::vec3 p2,
@@ -47,7 +47,7 @@ namespace engine {
         return face;
     }
 
-    const Face Face::SquareFace(
+    Face Face::SquareFace(
         FaceTag tag, glm::vec3 start, glm::vec3 end, glm::vec3 n, glm::vec2 uvStart, glm::vec2 uvEnd
     ) {
         glm::vec3 mid = (start + end) / 2.0f;
@@ -77,7 +77,7 @@ namespace engine {
         return face;
     }
 
-    const Face Face::CircleFace(
+    Face Face::CircleFace(
         FaceTag tag,
         glm::vec3 center,
         float r,
@@ -129,7 +129,8 @@ namespace engine {
 
         return face;
     }
-    const Face Face::CylinderFace(
+    
+    Face Face::CylinderFace(
         FaceTag tag,
         glm::vec3 center,
         float r,
@@ -197,7 +198,7 @@ namespace engine {
         return face;
     }
 
-    const Face Face::RectangleFace(
+    Face Face::RectangleFace(
         FaceTag tag,
         glm::vec3 p0,
         glm::vec3 p1,

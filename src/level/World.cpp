@@ -7,6 +7,7 @@
 #include "data/TextureManager.h"
 #include "events/LevelEvents.h"
 #include "level/Chunk.h"
+#include "level/data/DenseGrid.h"
 #include "render/Engine.h"
 #include "render/RenderContext.h"
 #include "scene/Camera.h"
@@ -230,9 +231,9 @@ BlockID World::getBlockID(
         return InvalidBlockID;
     }
     if (state) {
-        return chunk->second->m_data.getBlockAndState(pos, *state);
+        return chunk->second->m_data->getBlockAndState(pos, *state);
     }
-    return chunk->second->m_data.getBlock(pos);
+    return chunk->second->m_data->getBlock(pos);
 }
 
 BlockID World::getBlockID(glm::vec3 pos, bool fallbackToGenerator, BlockState** state) {
@@ -244,9 +245,9 @@ BlockID World::getBlockID(glm::vec3 pos, bool fallbackToGenerator, BlockState** 
         return InvalidBlockID;
     }
     if (state) {
-        return chunk->second->m_data.getBlockAndState(pos, *state);
+        return chunk->second->m_data->getBlockAndState(pos, *state);
     }
-    return chunk->second->m_data.getBlock(pos);
+    return chunk->second->m_data->getBlock(pos);
 }
 
 bool World::canSeeFace(const Block& curBlock, glm::vec3 pos, glm::ivec3 dir) const {
@@ -257,7 +258,7 @@ bool World::canSeeFace(const Block& curBlock, glm::vec3 pos, glm::ivec3 dir) con
     if (!chunk)  // Chunk not generated
         return false;
 
-    const Block* block = RegistryManager::Blocks().get(chunk->m_data.getBlock(neighborPos));
+    const Block* block = RegistryManager::Blocks().get(chunk->m_data->getBlock(neighborPos));
     if (block->getID() == 0)
         return true;
 
@@ -363,19 +364,19 @@ void World::setBlock(
 
         chunk = it->second.get();
 
-        oldBlock = chunk->m_data.getBlock(pos);
-        oldState = chunk->m_data.getState(pos);
+        oldBlock = chunk->m_data->getBlock(pos);
+        oldState = chunk->m_data->getState(pos);
 
         if (state.has_value()) {
-            chunk->m_data.setBlock(pos, blockID, state.value());
+            chunk->m_data->setBlock(pos, blockID, state.value());
             storedState = &state.value();
         } else {
-            chunk->m_data.setBlock(pos, blockID);
+            chunk->m_data->setBlock(pos, blockID);
             storedState = nullptr;
         }
 
         if (blockID == Block::AirID) {
-            chunk->m_data.clearState(pos);
+            chunk->m_data->clearState(pos);
         }
         chunk->m_dirty = true;
         checkAndUpdateSurroundingChunks(chID, pos);
@@ -403,7 +404,7 @@ void World::setBlock(const ChunkID& chID, const glm::ivec3& pos, MultiBlock&& mu
         return;
 
     Chunk* chunk = it->second.get();
-    chunk->m_data.setMultiBlock(pos, std::move(multiBlock));
+    chunk->m_data->setMultiBlock(pos, std::move(multiBlock));
     chunk->m_dirty = true;
     checkAndUpdateSurroundingChunks(chID, pos);
 
@@ -421,7 +422,7 @@ MultiBlock* World::getMultiBlock(const ChunkID& chID, const glm::ivec3& pos) {
     auto it = m_chunks.find(chID);
     if (it == m_chunks.end())
         return nullptr;
-    return it->second->m_data.getMultiBlock(pos);
+    return it->second->m_data->getMultiBlock(pos);
 }
 
 MultiBlock* World::getMultiBlock(glm::ivec3 pos) {
@@ -474,5 +475,5 @@ void World::update(float dt) {
 }
 
 std::shared_ptr<Chunk> World::createChunk(const ChunkID& id) {
-    return std::make_shared<Chunk>(this, id, m_chunkDims);
+    return std::make_shared<Chunk>(this, id, std::make_unique<DenseGrid>(m_chunkDims));
 }

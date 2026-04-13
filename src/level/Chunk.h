@@ -3,13 +3,17 @@
 #include <glm/glm.hpp>
 #include <iostream>
 
-#include "ChunkData.h"
+#include "../hash.h"
+#include "ChunkID.h"
+
 #include "LayerBuffer.h"
 #include "block/Block.h"
 #include "block/BlockState.h"
 #include "block/VariantBlock.h"
 #include "block/Vertex.h"
+#include "data/IChunkData.h"
 #include "render/Renderable.h"
+
 
 #include <LWGL/buffer/Attributes.h>
 
@@ -29,20 +33,12 @@ namespace engine {
     struct RenderContext;
 
 
-    struct ChunkID : glm::ivec3 {
-        ChunkID(int x, int y, int z) : glm::ivec3(x, y, z) {}
-        ChunkID(const glm::ivec3& vec) : glm::ivec3(vec) {}
-
-        bool operator==(const ChunkID& other) const;
-        std::string toString() const;
-    };
-
-
-    class Chunk : public Renderable {
+    class Chunk : public Renderable,
+                  public ISerializable {
       public:
         static inline glm::ivec3 Dims{16, 16, 16};
 
-        Chunk(World* world, ChunkID coords, glm::ivec3 dims = Dims);
+        Chunk(World* world, ChunkID coords, std::unique_ptr<IChunkData> data);
         Chunk(Chunk&) = delete;
         Chunk(Chunk&&) = delete;
         ~Chunk();
@@ -50,17 +46,18 @@ namespace engine {
         /// @return ID or coordinates of the chunk in the world.
         const ChunkID& id() const { return m_coords; }
         /// @return Position of the chunk in world space.
-        glm::ivec3 position() const { return m_coords * m_data.dims; }
+        glm::ivec3 position() const { return m_coords * m_data->dims; }
 
         /// @brief Get the dimensions of this chunk type.
         /// @return The dimensions (x, y, z) of the chunk.
         /// @note Override this in derived classes to provide custom chunk dimensions.
-        virtual glm::ivec3 dims() const { return m_data.dims; }
+        virtual glm::ivec3 dims() const { return m_data->dims; }
 
         World* world() const { return m_world; }
+
         template <typename T>
-        T* worldAs() const {
-            return dynamic_cast<T*>(m_world);
+        T* worldAs() const {  // The user knows what world the chunk belongs to, thus static_cast
+            return static_cast<T*>(m_world);
         }
 
         /// @brief Generates the chunk data per TerrainGenerator if not generated yet.
@@ -80,9 +77,9 @@ namespace engine {
 
 
         /// @return ChunkData structure containing all the block/terrain data.
-        ChunkData& data() { return m_data; }
+        IChunkData* data() { return m_data.get(); }
         /// @return const ChunkData structure containing all the block/terrain data.
-        const ChunkData& data() const { return m_data; }
+        const IChunkData* data() const { return m_data.get(); }
 
 
         /// @brief Renders the chunk.
@@ -96,10 +93,14 @@ namespace engine {
         virtual void afterGenerated() {}
 
 
+        void serialize(std::ostream& out) const override;
+        void deserialize(std::istream& in) override;
+
+
       protected:
         World* m_world;
         ChunkID m_coords;
-        ChunkData m_data;
+        std::unique_ptr<IChunkData> m_data;
         bool m_dirty = false;
 
         struct GeometryState {
@@ -149,16 +150,3 @@ namespace engine {
 
 
 }  // namespace engine
-
-
-std::ostream& operator<<(std::ostream& os, const engine::ChunkID& chID);
-
-namespace std {
-    template <>
-    struct hash<engine::ChunkID> {
-        size_t operator()(const engine::ChunkID& k) const {
-            return hash<int>()(k.x) ^ hash<int>()(k.y << 1) ^ hash<int>()(k.z << 2);
-        }
-    };
-
-}  // namespace std

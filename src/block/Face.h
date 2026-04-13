@@ -50,7 +50,7 @@ namespace engine {
             cull = false;
         }
 
-        static const Face TriangleFace(
+        static Face TriangleFace(
             FaceTag tag,
             glm::vec3 p1,
             glm::vec3 p2,
@@ -60,7 +60,7 @@ namespace engine {
             glm::vec2 uv3
         );
 
-        static const Face SquareFace(
+        static Face SquareFace(
             FaceTag tag,
             glm::vec3 start,
             glm::vec3 end,
@@ -69,7 +69,7 @@ namespace engine {
             glm::vec2 uvEnd
         );
 
-        static const Face CircleFace(
+        static Face CircleFace(
             FaceTag tag,
             glm::vec3 center,
             float r,
@@ -79,7 +79,7 @@ namespace engine {
             glm::vec2 uvEnd
         );
 
-        static const Face CylinderFace(
+        static Face CylinderFace(
             FaceTag tag,
             glm::vec3 center,
             float r,
@@ -90,7 +90,7 @@ namespace engine {
             glm::vec2 uvEnd
         );
 
-        static const Face RectangleFace(
+        static Face RectangleFace(
             FaceTag tag,
             glm::vec3 start,
             glm::vec3 end,
