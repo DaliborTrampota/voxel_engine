@@ -31,6 +31,17 @@ if(USE_DEPENDENCIES)
     add_subdirectory(dependencies)
 endif()
 
+# Windows: windef.h min/max macros break FastNoise Generator.h (members named min/max).
+# Applied here so vendored FastNoise2 CMake stays unmodified.
+if(WIN32)
+    if(TARGET FastNoise)
+        target_compile_definitions(FastNoise PUBLIC NOMINMAX)
+    endif()
+    if(TARGET FastSIMD_FastNoise)
+        target_compile_definitions(FastSIMD_FastNoise PRIVATE NOMINMAX)
+    endif()
+endif()
+
 target_link_libraries(VoxelEngine PRIVATE glad)
 target_link_libraries(VoxelEngine PRIVATE glfw)
 
