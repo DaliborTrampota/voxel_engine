@@ -56,6 +56,10 @@ void TextureLoader::loadArray2D(
     );
     TextureManager& texMgr = TextureManager::Get();
     for (const auto& imgData : images) {
+        if (!imgData.isValid()) {
+            printf("Failed to load image: %s\n", imgData.error().c_str());
+            continue;
+        }
         int layer = target->upload(imgData);
         texMgr.add(getTextureName(imgData.path), layer);
     }
