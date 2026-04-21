@@ -6,7 +6,7 @@
 	url = https://github.com/g-truc/glm.git
 [submodule "dependencies/lwgl"]
 	path = dependencies/lwgl
-	url = git@github.com:DaliborTrampota/LWGL.git
+	url = https://github.com/DaliborTrampota/LWGL.git
 [submodule "dependencies/SoLoud/soloud"]
 	path = dependencies/SoLoud/soloud
 	url = https://github.com/jarikomppa/soloud
