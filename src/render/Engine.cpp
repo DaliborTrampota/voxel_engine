@@ -114,6 +114,14 @@ void Engine::submitRender(GroupRenderContext&& ctx, bool immediate) {
 void Engine::flush() {
     //printf("Flush %zu\n", m_renderQueue.size());
     for (const auto& pass : m_passRegistry->passes()) {
+        // TODO sort by material
+
+        // TODO render order:
+        // passes
+        // FBOs
+        // Materials
+        // Texture Units?
+
         for (uint8_t subPass = 0; subPass < pass->passes(); subPass++) {
             pass->beforeRender(*this, subPass);
 
@@ -132,8 +140,6 @@ void Engine::flush() {
         }
     }
 
-    // glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    // glBindProgramPipeline(0);
     m_renderQueue.clear();
 }
 
