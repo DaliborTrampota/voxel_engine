@@ -60,51 +60,44 @@ DDAResult engine::DDA(
 
     length /= glm::sqrt(dx * dx + dy * dy + dz * dz);
     std::shared_ptr<Chunk> chunk = nullptr;
-    // TODO condition should be world bound check, maybe loaded chunks check?
-    while (true) {
+    while (glm::min(tMaxX, glm::min(tMaxY, tMaxZ)) <= length) {
         glm::ivec3 localPos = glm::ivec3(x, y, z);
         chunk = world.getChunk(extractChunkCoords(localPos, world.chunkDims()));
 
-        BlockState* state;
-        const Block* block = chunk->getBlock(localPos, &state);
-        //TODO check if we are in bounds?
+        if (chunk) {
+            BlockState* state;
+            const Block* block = chunk->getBlock(localPos, &state);
 
-        const Face* aimedFace =
-            getAimedFace({start - glm::vec3(x, y, z), direction}, block->geometry());
-        if (pred(block, aimedFace)) {
-            return DDAResult{glm::ivec3(x, y, z), faceNormal, aimedFace->tag, block, 0.f, chunk};
+            const Face* aimedFace =
+                getAimedFace({start - glm::vec3(x, y, z), direction}, block->geometry());
+            if (pred(block, aimedFace)) {
+                FaceTag tag = aimedFace ? aimedFace->tag : FaceTag::All;
+                return DDAResult{glm::ivec3(x, y, z), faceNormal, tag, block, 0.f, chunk};
+            }
         }
 
         if (tMaxX < tMaxY) {
             if (tMaxX < tMaxZ) {
-                if (tMaxX > length)
-                    break;
                 x += stepX;
                 tMaxX += tDeltaX;
                 faceNormal = glm::vec3(-stepX, 0.0f, 0.0f);
             } else {
-                if (tMaxZ > length)
-                    break;
                 z += stepZ;
                 tMaxZ += tDeltaZ;
                 faceNormal = glm::vec3(0.0f, 0.0f, -stepZ);
             }
         } else {
             if (tMaxY < tMaxZ) {
-                if (tMaxY > length)
-                    break;
                 y += stepY;
                 tMaxY += tDeltaY;
                 faceNormal = glm::vec3(0.0f, -stepY, 0.0f);
             } else {
-                if (tMaxZ > length)
-                    break;
                 z += stepZ;
                 tMaxZ += tDeltaZ;
                 faceNormal = glm::vec3(0.0f, 0.0f, -stepZ);
             }
         }
-    }  // end while
+    }
 
     return DDAResult{
         {x, y, z},
