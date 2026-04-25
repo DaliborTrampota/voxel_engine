@@ -62,7 +62,8 @@ namespace engine {
 
         /// @brief Generates the chunk data per TerrainGenerator if not generated yet.
         void populateTerrainData();
-        bool generated() const { return m_generated; }
+        bool populated() const { return m_data->populated; }
+        bool hasMesh() const { return m_generated; }
 
         /// @brief Generates the mesh data for the chunk.
         /// @return true if the mesh was generated, false if it was already generating.

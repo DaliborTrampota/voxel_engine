@@ -225,7 +225,7 @@ BlockID World::getBlockID(
     const ChunkID& chID, const glm::ivec3& pos, bool fallbackToGenerator, BlockState** state
 ) {
     auto chunk = m_chunks.find(chID);
-    if (chunk == m_chunks.end() || !chunk->second->generated()) {
+    if (chunk == m_chunks.end() || !chunk->second->populated()) {
         if (fallbackToGenerator)
             return m_generator->voxelAt(pos);
         return InvalidBlockID;
@@ -239,7 +239,7 @@ BlockID World::getBlockID(
 BlockID World::getBlockID(glm::vec3 pos, bool fallbackToGenerator, BlockState** state) {
     ChunkID chID = extractChunkCoords(pos, m_chunkDims);
     auto chunk = m_chunks.find(chID);
-    if (chunk == m_chunks.end() || !chunk->second->generated()) {
+    if (chunk == m_chunks.end() || !chunk->second->populated()) {
         if (fallbackToGenerator)
             return m_generator->voxelAt(pos);
         return InvalidBlockID;
@@ -255,10 +255,14 @@ bool World::canSeeFace(const Block& curBlock, glm::vec3 pos, glm::ivec3 dir) con
     ChunkID chunkCoords = engine::extractChunkCoords(neighborPos, m_chunkDims);
 
     std::shared_ptr<const Chunk> chunk = getChunk(chunkCoords);
-    if (!chunk)  // Chunk not generated
-        return false;
+    BlockID neighborBlock = Block::AirID;
+    if (!chunk || !chunk->populated()) {
+        neighborBlock = m_generator->voxelAt(pos + glm::vec3(dir));
+    } else {
+        neighborBlock = chunk->m_data->getBlock(neighborPos);
+    }
 
-    const Block* block = RegistryManager::Blocks().get(chunk->m_data->getBlock(neighborPos));
+    const Block* block = RegistryManager::Blocks().get(neighborBlock);
     if (block->getID() == 0)
         return true;
 
