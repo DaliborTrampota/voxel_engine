@@ -49,22 +49,10 @@ void TransparentPass::init() {
     m_accumulation.create(
         gl::TextureParams(gl::TextureParams::ClampToEdge, gl::TextureParams::Linear)
     );
-    m_accumulation.allocate(
-        {.width = m_resolution.x,
-         .height = m_resolution.y,
-         .format = gl::ImageFormat::RGBA,
-         .dataType = gl::ImageDataType::HalfFloat}
-    );
-
     m_revealage.create(
         gl::TextureParams(gl::TextureParams::ClampToEdge, gl::TextureParams::Linear)
     );
-    m_revealage.allocate(
-        {.width = m_resolution.x,
-         .height = m_resolution.y,
-         .format = gl::ImageFormat::Gray,
-         .dataType = gl::ImageDataType::HalfFloat}
-    );
+    allocateTextures();
 
     ScenePass* sPass = RenderPassRegistry::Get().getPass<ScenePass>();
 
@@ -80,4 +68,24 @@ void TransparentPass::init() {
 
     material = &m_transparentMat;
     fbo = &m_OIT;
+}
+
+void TransparentPass::resize(glm::ivec2 resolution) {
+    RenderPass::resize(resolution);
+    allocateTextures();
+}
+
+void TransparentPass::allocateTextures() {
+    m_accumulation.allocate(
+        {.width = m_resolution.x,
+         .height = m_resolution.y,
+         .format = gl::ImageFormat::RGBA,
+         .dataType = gl::ImageDataType::HalfFloat}
+    );
+    m_revealage.allocate(
+        {.width = m_resolution.x,
+         .height = m_resolution.y,
+         .format = gl::ImageFormat::Gray,
+         .dataType = gl::ImageDataType::HalfFloat}
+    );
 }

@@ -21,13 +21,16 @@ namespace engine {
         gl::Texture2D* accumulation() { return &m_accumulation; }
         gl::Texture2D* revealage() { return &m_revealage; }
 
+        void resize(glm::ivec2 resolution) override;
+
       private:
         gl::FBO m_OIT;
-        gl::Texture2D m_accumulation;
-        gl::Texture2D m_revealage;
+        gl::Texture2D m_accumulation{false};
+        gl::Texture2D m_revealage{false};
 
         Material m_transparentMat;
 
         void init();
+        void allocateTextures();
     };
 }  // namespace engine

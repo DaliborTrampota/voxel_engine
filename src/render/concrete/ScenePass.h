@@ -22,12 +22,15 @@ namespace engine {
         gl::Texture2D* depthMap() { return &m_depthMap; }
         gl::Texture2D* color() { return &m_opaque; }
 
+        void resize(glm::ivec2 resolution) override;
+
       protected:
       private:
         gl::FBO m_sceneFBO;
-        gl::Texture2D m_opaque;
-        gl::Texture2D m_depthMap;
+        gl::Texture2D m_opaque{false};
+        gl::Texture2D m_depthMap{false};
 
         void init();
+        void allocateTextures();
     };
 }  // namespace engine

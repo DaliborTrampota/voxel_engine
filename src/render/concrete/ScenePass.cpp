@@ -21,15 +21,8 @@ void ScenePass::beforeRender(Engine& engine, uint8_t pass) {
 
 void ScenePass::init() {
     m_opaque.create(gl::TextureParams(gl::TextureParams::ClampToEdge, gl::TextureParams::Linear));
-    m_opaque.allocate(
-        {.width = m_resolution.x,
-         .height = m_resolution.y,
-         .format = gl::ImageFormat::RGBA,
-         .dataType = gl::ImageDataType::HalfFloat}
-    );
-
     m_depthMap.create(gl::TextureParams::Depth());
-    m_depthMap.allocate(gl::TextureStorage::FBODepth(m_resolution.x, m_resolution.y));
+    allocateTextures();
 
     m_sceneFBO.bind();
     m_sceneFBO.bindTexture(gl::FBOAttachment::Color, &m_opaque);
@@ -39,4 +32,19 @@ void ScenePass::init() {
     m_sceneFBO.unbind();
 
     fbo = &m_sceneFBO;
+}
+
+void ScenePass::resize(glm::ivec2 resolution) {
+    RenderPass::resize(resolution);
+    allocateTextures();
+}
+
+void ScenePass::allocateTextures() {
+    m_opaque.allocate(
+        {.width = m_resolution.x,
+         .height = m_resolution.y,
+         .format = gl::ImageFormat::RGBA,
+         .dataType = gl::ImageDataType::HalfFloat}
+    );
+    m_depthMap.allocate(gl::TextureStorage::FBODepth(m_resolution.x, m_resolution.y));
 }
