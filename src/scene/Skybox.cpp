@@ -64,29 +64,12 @@ void Skybox::load(const Settings& settings) {
 }
 
 void Skybox::render(Engine& engine, const Camera* camera, int pass) {
-    // if (pass != 0)
-    //     return;  // Only render in the first pass
-
     RenderContext ctx;
     ctx.material = &m_material;
     ctx.attributes = &m_buffer;
     ctx.matrices.projection = camera->getProjection();
     ctx.matrices.view = glm::mat4(glm::mat3(camera->getView()));
     ctx.matrices.model = glm::mat4(1.0f);
-    // engine.submitRender(std::move(ctx));
-
-    glDepthFunc(GL_LEQUAL);
-    m_material.use();
-    m_buffer.bind();
-
-    glm::mat4 view = glm::mat4(glm::mat3(camera->getView()));
-
-    m_material.setMat4("projection", camera->getProjection());
-    m_material.setMat4("view", view);
-
-    m_material.bindTextures();
-
-    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(m_buffer.length()));
-
-    glDepthFunc(GL_LESS);
+    ctx.depthFunc = DepthFunc::LessEqual;
+    engine.submitRender(std::move(ctx));
 }

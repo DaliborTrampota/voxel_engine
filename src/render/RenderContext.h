@@ -42,12 +42,18 @@ namespace engine {
     //     }
     // };
 
+    enum class DepthFunc {
+        Less,
+        LessEqual,
+    };
+
     struct RenderContext {
         gl::IBuffer* attributes;
         const Material* material;
         const Camera* camera = nullptr;
         const gl::FBO* fbo = nullptr;
         RenderPass::ID passMask = RenderPass::Scene;
+        DepthFunc depthFunc = DepthFunc::Less;
 
         struct {
             std::optional<glm::mat4> projection;

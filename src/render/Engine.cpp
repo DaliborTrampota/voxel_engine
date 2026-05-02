@@ -221,9 +221,15 @@ void Engine::render(RenderContext& ctx, const RenderPass* renderPass) const {
     }
 
 
+    if (ctx.depthFunc == DepthFunc::LessEqual)
+        glDepthFunc(GL_LEQUAL);
+
     ctx.attributes->bind();
     material->bindTextures();
     glDrawArrays(GL_TRIANGLES, 0, n);
+
+    if (ctx.depthFunc == DepthFunc::LessEqual)  // Revert to default
+        glDepthFunc(GL_LESS);
 
     m_renderStats.drawCalls++;
     m_renderStats.vertices += n;
