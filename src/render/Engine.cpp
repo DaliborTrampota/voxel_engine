@@ -344,4 +344,6 @@ void Engine::setDirectionalLightSource(
         ),
         passPosition
     );
+
+    subscribeUpdate(lightSource);
 }
