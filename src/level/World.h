@@ -162,6 +162,7 @@ namespace engine {
         std::unique_ptr<ITerrainGenerator> m_generator = nullptr;
         glm::ivec3 m_chunkDims;
 
+        // TODO size dynamically? based on ViewDistance?
         static constexpr uint32_t m_poolCapacity = 4'000'000;
         gl::VertexPool<Vertex> m_opaquePool{m_poolCapacity}, m_transparentPool{m_poolCapacity};
         gl::IndirectBuffer m_opaqueBuffer, m_transparentBuffer;

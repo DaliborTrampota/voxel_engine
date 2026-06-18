@@ -7,9 +7,10 @@
 #include <ranges>
 
 
-#include <Globals.h>
 #include <LWGL/buffer/Attributes.h>
 #include <LWGL/indirect/IndirectTypes.h>
+#include "../Globals.h"
+
 
 #include "World.h"
 #include "block/Block.h"
