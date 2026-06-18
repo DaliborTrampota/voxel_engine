@@ -18,6 +18,9 @@
 #include "scene/Updateable.h"
 #include "utility/ThreadPool.h"
 
+#include <LWGL/indirect/IndirectBuffer.h>
+#include <LWGL/indirect/VertexPool.h>
+#include <block/Vertex.h>
 
 namespace gl {
     class ShaderPipeline;
@@ -157,6 +160,11 @@ namespace engine {
         std::unordered_set<ChunkID> m_loadedChunks;
         std::unique_ptr<ITerrainGenerator> m_generator = nullptr;
         glm::ivec3 m_chunkDims;
+
+        static constexpr uint32_t m_poolCapacity = 4'000'000;
+        gl::VertexPool<Vertex> m_opaquePool{m_poolCapacity}, m_transparentPool{m_poolCapacity};
+        gl::IndirectBuffer m_opaqueBuffer, m_transparentBuffer;
+
 
         Material m_material;
         Skybox m_skybox;

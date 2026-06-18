@@ -9,7 +9,10 @@
 
 #include <LWGL/buffer/Attributes.h>
 #include <LWGL/buffer/FBO.h>
+#include <LWGL/indirect/IndirectBuffer.h>
+#include <LWGL/indirect/VertexPool.h>
 
+#include "RenderContext.h"
 #include "RenderPass.h"
 #include "data/RegistryManager.h"
 #include "input/InputSystem.h"
@@ -95,6 +98,23 @@ void Engine::submitRender(RenderContext&& ctx, bool immediate) {
 }
 
 void Engine::submitRender(GroupRenderContext&& ctx, bool immediate) {
+    if (!immediate) {
+        m_renderQueue.push_back(std::move(ctx));
+        return;
+    }
+
+    for (const auto& pass : m_passRegistry->passes()) {
+        if ((ctx.passMask & pass->id()) != 0) {
+            for (uint8_t subPass = 0; subPass < pass->passes(); subPass++) {
+                pass->beforeRender(*this, subPass);
+                render(ctx, pass.get());
+                pass->afterRender(*this, subPass);
+            }
+        }
+    }
+}
+
+void Engine::submitRender(IndirectRenderContext&& ctx, bool immediate) {
     if (!immediate) {
         m_renderQueue.push_back(std::move(ctx));
         return;
@@ -266,6 +286,64 @@ void Engine::render(GroupRenderContext& ctx, const RenderPass* renderPass) const
         m_renderStats.vertices += n;
         m_renderStats.triangles += n / 3;
     }
+}
+
+void Engine::render(IndirectRenderContext& ctx, const RenderPass* renderPass) const {
+    size_t n = ctx.batch->drawCount();
+    if (n == 0)
+        return;
+    // Apply override if set
+    const Material* material = renderPass->material ? renderPass->material : ctx.material;
+    const gl::FBO* fbo = renderPass->fbo ? renderPass->fbo : ctx.fbo;
+
+    if (fbo) {
+        fbo->bind();
+    } else {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+
+    material->use();
+
+    if (material->supportsShadows() && m_directionalLightSource) {
+        // material->setVec3("lightPos", m_directionalLightSource->lightPosition());
+        material->setVec3("lightColor", m_directionalLightSource->lightColor());
+        material->setVec3("lightDir", -m_directionalLightSource->direction());
+        material->setVec3("viewPos", ctx.camera->position());
+
+
+        for (int i = 0; i < m_directionalLightSource->cascadeSplits().size(); i++) {
+            material->setFloat(
+                std::format("cascadePlaneDistances[{}]", i),
+                m_directionalLightSource->cascadeSplits()[i].farPlane
+            );
+        }
+    }
+
+    if (material->supportsMVP()) {
+        if (ctx.matrices.view.has_value()) {
+            material->setMat4("view", ctx.matrices.view.value());
+        } else if (ctx.camera) {
+            material->setMat4("view", ctx.camera->getView());
+        }
+
+        if (ctx.matrices.projection.has_value()) {
+            material->setMat4("projection", ctx.matrices.projection.value());
+        } else if (ctx.camera) {
+            material->setMat4("projection", ctx.camera->getProjection());
+        }
+    }
+
+
+    // if (ctx.depthFunc == DepthFunc::LessEqual)
+    //     glDepthFunc(GL_LEQUAL);
+
+    ctx.pool->bind();
+    material->bindTextures();
+    ctx.batch->draw();
+
+    m_renderStats.drawCalls++;
+    m_renderStats.vertices += ctx.batch->verticesCount();
+    m_renderStats.triangles += ctx.batch->verticesCount() / 3;
 }
 
 void Engine::fireUpdate(float dt) {
