@@ -16,7 +16,7 @@
 
 
 #include <LWGL/buffer/Attributes.h>
-
+#include <LWGL/indirect/IndirectTypes.h>
 
 namespace gl {
     class ShaderPipeline;
@@ -33,8 +33,7 @@ namespace engine {
     struct RenderContext;
 
 
-    class Chunk : public Renderable,
-                  public ISerializable {
+    class Chunk : public ISerializable {
       public:
         static inline glm::ivec3 Dims{16, 16, 16};
 
@@ -84,7 +83,14 @@ namespace engine {
 
         /// @brief Renders the chunk.
         /// @param pass Pass == 0 will render the whole chunk, pass == 1 will render opaque blocks, pass == 2 will render transparent blocks.
-        void render(Engine& engine, const Camera* camera, int pass) override;
+        // void render(Engine& engine, const Camera* camera, int pass) override;
+
+        void uploadVertices(gl::VertexPool<Vertex>& opaque, gl::VertexPool<Vertex>& transparent);
+        void releaseVertices(gl::VertexPool<Vertex>& opaque, gl::VertexPool<Vertex>& transparent);
+
+        glm::mat4 modelMatrix() const;
+        const gl::PoolAllocation& transparentAlloc() const;
+        const gl::PoolAllocation& opaqueAlloc() const;
 
         VariantBlock::Neighbours getNeighbouringBlocks(glm::ivec3 pos) const;
 
@@ -112,7 +118,7 @@ namespace engine {
             const Block* block;
             const Geometry* geometry;
             GeometryState geometryState;
-            gl::Attributes<Vertex>& storage;
+            LayerData& storage;
             glm::ivec3 posInChunk;
             glm::ivec3 worldPos;
         };

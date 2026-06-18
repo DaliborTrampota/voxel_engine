@@ -8,11 +8,15 @@
 
 #include <LWGL/buffer/IBuffer.h>
 
+#include <LWGL/indirect/VertexPool.h>
 #include "RenderPass.h"
+#include "block/Vertex.h"
+
 // #include <glad/glad.h>
 
 namespace gl {
     class FBO;
+    class IndirectBuffer;
 }  // namespace gl
 
 namespace engine {
@@ -99,6 +103,18 @@ namespace engine {
         void addDrawCall(gl::IBuffer* attributes, const glm::mat4& model) {
             drawCalls.push_back({attributes, model});
         }
+    };
+
+    struct IndirectRenderContext {
+        const gl::VertexPool<Vertex>* pool;
+        const gl::IndirectBuffer* batch;
+        const Material* material;
+        const Camera* camera = nullptr;
+        const gl::FBO* fbo = nullptr;
+        RenderPass::ID passMask = RenderPass::Scene;
+        struct {
+            std::optional<glm::mat4> projection, view;
+        } matrices;
     };
 
 }  // namespace engine
