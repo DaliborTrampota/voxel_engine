@@ -30,5 +30,6 @@ namespace engine {
         void clear();
         void moveToFront();
         void uploadToPool(gl::VertexPool<Vertex>& pool);
+        void releaseFromPool(gl::VertexPool<Vertex>& pool);
     };
 }  // namespace engine

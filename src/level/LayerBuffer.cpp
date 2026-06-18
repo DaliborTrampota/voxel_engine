@@ -1,5 +1,7 @@
 #include "LayerBuffer.h"
 
+#include <LWGL/indirect/VertexPool.h>
+#include <block/Vertex.h>
 #include <glad/glad.h>
 
 using namespace engine;
@@ -40,7 +42,19 @@ void LayerBuffer::uploadToPool(gl::VertexPool<Vertex>& pool) {
     if (allocation.isValid()) {
         pool.free(allocation);
     }
+    if (front.vertices.empty()) {
+        allocation = {};
+        front.dirty = false;
+        return;
+    }
     allocation = pool.allocate(front.vertices);
     if (allocation.isValid())
         front.dirty = false;
+}
+
+void LayerBuffer::releaseFromPool(gl::VertexPool<Vertex>& pool) {
+    if (allocation.isValid()) {
+        pool.free(allocation);
+        allocation = {};
+    }
 }

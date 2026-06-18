@@ -160,12 +160,8 @@ void Chunk::uploadVertices(gl::VertexPool<Vertex>& opaque, gl::VertexPool<Vertex
 }
 
 void Chunk::releaseVertices(gl::VertexPool<Vertex>& opaque, gl::VertexPool<Vertex>& transparent) {
-    if (const gl::PoolAllocation& alloc = opaqueAlloc(); alloc.isValid()) {
-        opaque.free(alloc);
-    }
-    if (const gl::PoolAllocation& alloc = transparentAlloc(); alloc.isValid()) {
-        transparent.free(alloc);
-    }
+    m_renderLayers[Layers::Opaque].releaseFromPool(opaque);
+    m_renderLayers[Layers::Transparent].releaseFromPool(transparent);
 }
 
 glm::mat4 Chunk::modelMatrix() const {
