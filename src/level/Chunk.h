@@ -12,8 +12,6 @@
 #include "block/VariantBlock.h"
 #include "block/Vertex.h"
 #include "data/IChunkData.h"
-#include "render/Renderable.h"
-
 
 #include <LWGL/buffer/Attributes.h>
 #include <LWGL/indirect/IndirectTypes.h>
@@ -79,11 +77,6 @@ namespace engine {
         IChunkData* data() { return m_data.get(); }
         /// @return const ChunkData structure containing all the block/terrain data.
         const IChunkData* data() const { return m_data.get(); }
-
-
-        /// @brief Renders the chunk.
-        /// @param pass Pass == 0 will render the whole chunk, pass == 1 will render opaque blocks, pass == 2 will render transparent blocks.
-        // void render(Engine& engine, const Camera* camera, int pass) override;
 
         void uploadVertices(gl::VertexPool<Vertex>& opaque, gl::VertexPool<Vertex>& transparent);
         void releaseVertices(gl::VertexPool<Vertex>& opaque, gl::VertexPool<Vertex>& transparent);

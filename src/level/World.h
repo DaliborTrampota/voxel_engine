@@ -12,15 +12,16 @@
 
 #include "Chunk.h"
 #include "ITerrainGenerator.h"
+#include "block/Vertex.h"
 #include "render/Material.h"
 #include "render/Renderable.h"
 #include "scene/Skybox.h"
 #include "scene/Updateable.h"
 #include "utility/ThreadPool.h"
 
+
 #include <LWGL/indirect/IndirectBuffer.h>
 #include <LWGL/indirect/VertexPool.h>
-#include <block/Vertex.h>
 
 namespace gl {
     class ShaderPipeline;

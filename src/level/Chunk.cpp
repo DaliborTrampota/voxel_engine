@@ -150,54 +150,6 @@ void Chunk::setBlock(const glm::ivec3& pos, MultiBlock&& multiBlock) {
     m_dirty = true;
 }
 
-
-// void Chunk::render(Engine& engine, const Camera* camera, int pass) {
-//     if (!m_generated) {
-//         return;
-//     }
-
-//     RenderContext ctx;
-//     ctx.setModelMatrix(m_coords * m_data->dims);
-//     if (pass == 0) {
-//         ctx.attributes = &m_renderLayers[Layers::Opaque].read();
-//         ctx.material = &m_world->m_material;
-//         ctx.passMask = RenderPass::Scene | RenderPass::DirectionalShadow;
-//         ctx.camera = camera;
-//         engine.submitRender(std::move(ctx));
-
-//         RenderContext ctxTransparent;
-//         ctxTransparent.setModelMatrix(m_coords * m_data->dims);
-//         ctxTransparent.attributes = &m_renderLayers[Layers::Transparent].read();
-//         ctxTransparent.material = &m_world->m_material;
-//         ctxTransparent.passMask = RenderPass::SceneTransparent | RenderPass::DirectionalShadow;
-//         ctxTransparent.camera = camera;
-//         engine.submitRender(std::move(ctxTransparent));
-//     }
-
-//     else if (pass == 1) {  // Opaque front to back
-//         if (!m_renderLayers[Layers::Opaque].read().length())
-//             return;
-//         ctx.attributes = &m_renderLayers[Layers::Opaque].read();
-
-//         ctx.material = &m_world->m_material;
-//         ctx.passMask = RenderPass::Scene | RenderPass::DirectionalShadow;
-//         ctx.camera = camera;
-//         engine.submitRender(std::move(ctx));
-//     }
-
-//     else if (pass == 2) {  // Transparent back to front
-//         if (!m_renderLayers[Layers::Transparent].read().length())
-//             return;
-//         ctx.attributes = &m_renderLayers[Layers::Transparent].read();
-
-//         ctx.material = &m_world->m_material;
-//         ctx.passMask = RenderPass::SceneTransparent | RenderPass::DirectionalShadow;
-//         ctx.camera = camera;
-//         engine.submitRender(std::move(ctx));
-//     }
-// }
-
-
 void Chunk::uploadVertices(gl::VertexPool<Vertex>& opaque, gl::VertexPool<Vertex>& transparent) {
     if (!m_generated) {
         return;

@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cstddef>
+#include <vector>
+
 #include <LWGL/buffer/Attributes.h>
 #include <LWGL/indirect/VertexPool.h>
 #include "block/Vertex.h"

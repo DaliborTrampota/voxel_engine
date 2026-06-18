@@ -205,7 +205,8 @@ void Engine::render(RenderContext& ctx, const RenderPass* renderPass) const {
     material->use();
     material->setMat4("model", ctx.matrices.model);
 
-    if (material->supportsShadows()) {
+    if (material->supportsShadows() && m_directionalLightSource) {
+        assert(ctx.camera && "RenderContext Camera is required when material supports shadows");
         // material->setVec3("lightPos", m_directionalLightSource->lightPosition());
         material->setVec3("lightColor", m_directionalLightSource->lightColor());
         material->setVec3("lightDir", -m_directionalLightSource->direction());
@@ -305,6 +306,9 @@ void Engine::render(IndirectRenderContext& ctx, const RenderPass* renderPass) co
     material->use();
 
     if (material->supportsShadows() && m_directionalLightSource) {
+        assert(
+            ctx.camera && "IndirectRenderContext Camera is required when material supports shadows"
+        );
         // material->setVec3("lightPos", m_directionalLightSource->lightPosition());
         material->setVec3("lightColor", m_directionalLightSource->lightColor());
         material->setVec3("lightDir", -m_directionalLightSource->direction());

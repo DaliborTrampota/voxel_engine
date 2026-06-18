@@ -31,6 +31,7 @@ void LayerBuffer::moveToFront() {
     front = std::move(back);
     back.clear();
     back.dirty = false;
+    front.dirty = true;
 }
 
 void LayerBuffer::uploadToPool(gl::VertexPool<Vertex>& pool) {
