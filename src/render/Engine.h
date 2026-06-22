@@ -42,6 +42,7 @@ namespace engine {
 
         void submitRender(RenderContext&& ctx, bool immediate = false);
         void submitRender(GroupRenderContext&& ctx, bool immediate = false);
+        void submitRender(IndirectRenderContext&& ctx, bool immediate = false);
 
         /// @brief Flushes the render queue; loops over all render passes and renders all contexts.
         /// @note This is called between beforeRender() and afterRender().
@@ -68,7 +69,8 @@ namespace engine {
         std::shared_ptr<Sun> m_directionalLightSource;
 
         RenderPassRegistry* m_passRegistry;
-        std::vector<std::variant<RenderContext, GroupRenderContext>> m_renderQueue;
+        std::vector<std::variant<RenderContext, GroupRenderContext, IndirectRenderContext>>
+            m_renderQueue;
         std::unique_ptr<Window> m_window;
 
         void beginFrame();
@@ -84,6 +86,7 @@ namespace engine {
 
         void render(RenderContext& ctx, const RenderPass* renderPass) const;
         void render(GroupRenderContext& ctx, const RenderPass* renderPass) const;
+        void render(IndirectRenderContext& ctx, const RenderPass* renderPass) const;
         mutable RenderStats m_renderStats;
     };
 }  // namespace engine

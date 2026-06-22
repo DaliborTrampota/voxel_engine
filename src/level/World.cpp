@@ -20,6 +20,7 @@
 #include <glm/gtx/component_wise.hpp>
 #include <glm/gtx/norm.hpp>
 
+// TODO dont set chunk dirty from world, use chunk methods to set blocks
 
 using namespace engine;
 
@@ -197,6 +198,7 @@ void World::unloadChunksFromMemory(const std::vector<ChunkID>& ids) {
     for (const ChunkID& id : ids) {
         auto it = m_chunks.find(id);
         if (it != m_chunks.end()) {
+            it->second->releaseVertices(m_opaquePool, m_transparentPool);
             m_chunks.erase(it);
         }
     }
@@ -312,6 +314,9 @@ void World::render(Engine& engine, const Camera* camera, int pass) {
 
     std::array<Plane, 6> frustum = camera->getFrustum();
 
+    m_opaqueBuffer.begin();
+    m_transparentBuffer.begin();
+
     // Render without lock - shared_ptr keeps chunks alive
     for (auto& chunk : chunksToRender) {
         AABB chunkAABB{
@@ -325,9 +330,41 @@ void World::render(Engine& engine, const Camera* camera, int pass) {
                 break;
             }
         }
-        if (visible)
-            chunk->render(engine, camera, pass);
+        if (visible) {
+            chunk->uploadVertices(m_opaquePool, m_transparentPool);
+
+            glm::mat4 model = chunk->modelMatrix();
+            if (chunk->opaqueAlloc().isValid())
+                m_opaqueBuffer.add(chunk->opaqueAlloc(), model);
+            if (chunk->transparentAlloc().isValid())
+                m_transparentBuffer.add(chunk->transparentAlloc(), model);
+            // chunk->render(engine, camera, pass);
+        }
     }
+
+    m_opaqueBuffer.upload();
+    m_transparentBuffer.upload();
+
+    IndirectRenderContext ctxOpaque{
+        .pool = &m_opaquePool,
+        .batch = &m_opaqueBuffer,
+        .material = &m_material,
+        .camera = camera,
+        .passMask = RenderPass::Scene | RenderPass::DirectionalShadow
+    };
+
+    IndirectRenderContext ctxTransparent{
+        .pool = &m_transparentPool,
+        .batch = &m_transparentBuffer,
+        .material = &m_material,
+        .camera = camera,
+        .passMask = RenderPass::SceneTransparent | RenderPass::DirectionalShadow
+    };
+
+    engine.submitRender(std::move(ctxOpaque));
+    engine.submitRender(std::move(ctxTransparent));
+
+
     m_skybox.render(engine, camera);
     //std::cout << "Rendered chunks: " << m_chunks.size() << "\n";
 }
@@ -345,7 +382,6 @@ void World::updateChunk(ChunkID id) {
 
         lock.unlock();
         chunk->generateMesh();
-        chunk->m_dirty = false;
     });
 }
 

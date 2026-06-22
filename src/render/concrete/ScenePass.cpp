@@ -16,6 +16,8 @@ void ScenePass::beforeRender(Engine& engine, uint8_t pass) {
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glDepthMask(GL_TRUE);
+
+    m_sceneFBO.bind();
     m_sceneFBO.clearActive(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f), 1.0f);
 }
 

@@ -8,6 +8,9 @@
 
 
 #include <LWGL/buffer/Attributes.h>
+#include <LWGL/indirect/IndirectTypes.h>
+#include "../Globals.h"
+
 
 #include "World.h"
 #include "block/Block.h"
@@ -47,12 +50,18 @@ bool Chunk::generateMesh() {
     if (!m_generatingMesh.compare_exchange_strong(expected, true))
         return false;
 
-    glm::ivec3 chunkBlockCoords = m_coords * m_data->dims;
+    m_dirty = false;
 
-    for (auto& layer : m_renderLayers) {
-        layer.clear();
-        layer.back.reserve(m_data->dims.x * m_data->dims.y * 8 * 6);
+    {
+        std::lock_guard lock(m_backMutex);
+        for (auto& layer : m_renderLayers)
+            layer.clear();
+        m_meshReady = false;
     }
+    for (auto& layer : m_renderLayers)
+        layer.back.reserve(m_data->dims.x * m_data->dims.y * 8 * 6);
+
+    glm::ivec3 chunkBlockCoords = m_coords * m_data->dims;
 
     for (int x = 0; x < m_data->dims.x; x++) {
         for (int y = 0; y < m_data->dims.y; y++) {
@@ -84,11 +93,8 @@ bool Chunk::generateMesh() {
         }
     }
 
-    for (auto& layer : m_renderLayers) {
-        layer.moveToFront();
-    }
-
     m_generated = true;
+    m_meshReady = true;
     m_generatingMesh = false;
     afterGenerated();
     return true;
@@ -147,52 +153,40 @@ void Chunk::setBlock(const glm::ivec3& pos, MultiBlock&& multiBlock) {
     m_dirty = true;
 }
 
+void Chunk::uploadVertices(gl::VertexPool<Vertex>& opaque, gl::VertexPool<Vertex>& transparent) {
+    if (m_meshReady) {
+        std::lock_guard lock(m_backMutex);
+        if (m_meshReady) {
+            for (auto& layer : m_renderLayers)
+                layer.moveToFront();
+            m_meshReady = false;
+        }
+    }
 
-void Chunk::render(Engine& engine, const Camera* camera, int pass) {
-    if (!m_generated) {
+    if (!m_generated)
         return;
-    }
 
-    RenderContext ctx;
-    ctx.setModelMatrix(m_coords * m_data->dims);
-    if (pass == 0) {
-        ctx.attributes = &m_renderLayers[Layers::Opaque].read();
-        ctx.material = &m_world->m_material;
-        ctx.passMask = RenderPass::Scene | RenderPass::DirectionalShadow;
-        ctx.camera = camera;
-        engine.submitRender(std::move(ctx));
-
-        RenderContext ctxTransparent;
-        ctxTransparent.setModelMatrix(m_coords * m_data->dims);
-        ctxTransparent.attributes = &m_renderLayers[Layers::Transparent].read();
-        ctxTransparent.material = &m_world->m_material;
-        ctxTransparent.passMask = RenderPass::SceneTransparent | RenderPass::DirectionalShadow;
-        ctxTransparent.camera = camera;
-        engine.submitRender(std::move(ctxTransparent));
-    }
-
-    else if (pass == 1) {  // Opaque front to back
-        if (!m_renderLayers[Layers::Opaque].read().length())
-            return;
-        ctx.attributes = &m_renderLayers[Layers::Opaque].read();
-
-        ctx.material = &m_world->m_material;
-        ctx.passMask = RenderPass::Scene | RenderPass::DirectionalShadow;
-        ctx.camera = camera;
-        engine.submitRender(std::move(ctx));
-    }
-
-    else if (pass == 2) {  // Transparent back to front
-        if (!m_renderLayers[Layers::Transparent].read().length())
-            return;
-        ctx.attributes = &m_renderLayers[Layers::Transparent].read();
-
-        ctx.material = &m_world->m_material;
-        ctx.passMask = RenderPass::SceneTransparent | RenderPass::DirectionalShadow;
-        ctx.camera = camera;
-        engine.submitRender(std::move(ctx));
-    }
+    m_renderLayers[Layers::Transparent].uploadToPool(transparent);
+    m_renderLayers[Layers::Opaque].uploadToPool(opaque);
 }
+
+void Chunk::releaseVertices(gl::VertexPool<Vertex>& opaque, gl::VertexPool<Vertex>& transparent) {
+    m_renderLayers[Layers::Opaque].releaseFromPool(opaque);
+    m_renderLayers[Layers::Transparent].releaseFromPool(transparent);
+}
+
+glm::mat4 Chunk::modelMatrix() const {
+    return glm::translate(glm::mat4(1.0f), static_cast<glm::vec3>(m_coords * m_data->dims));
+}
+
+const gl::PoolAllocation& Chunk::transparentAlloc() const {
+    return m_renderLayers[Layers::Transparent].allocation;
+}
+
+const gl::PoolAllocation& Chunk::opaqueAlloc() const {
+    return m_renderLayers[Layers::Opaque].allocation;
+}
+
 
 Chunk::GeometryState Chunk::calculateGeometryState(
     const Block* block, const BlockState* state
@@ -248,7 +242,7 @@ void Chunk::generateMeshForGeometry(const MeshGenContext& ctx) {
 void Chunk::generateMeshForBlock(
     const Block* block, glm::ivec3 pos, const BlockState* state, const glm::ivec3& chunkBlockCoords
 ) {
-    gl::Attributes<Vertex>& storage = m_renderLayers[block->layer()].write();
+    LayerData& storage = m_renderLayers[block->layer()].write();
 
     MeshGenContext ctx{
         .block = block,
@@ -269,7 +263,7 @@ void Chunk::generateMeshForBlock(
 ) {
     VariantBlock::Neighbours neighboringBlocks = getNeighbouringBlocks(pos);
     // TODO somehow distinguish between opaque and transparent geometries? or just use the base block layer?
-    gl::Attributes<Vertex>& storage = m_renderLayers[block->layer()].write();
+    LayerData& storage = m_renderLayers[block->layer()].write();
 
     GeometryState geoState = calculateGeometryState(block, state);
     if (geoState.angle != 0.0f) {

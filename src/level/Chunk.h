@@ -1,7 +1,11 @@
 #pragma once
 
+#include <array>
+#include <atomic>
 #include <glm/glm.hpp>
 #include <iostream>
+#include <mutex>
+
 
 #include "../hash.h"
 #include "ChunkID.h"
@@ -12,11 +16,9 @@
 #include "block/VariantBlock.h"
 #include "block/Vertex.h"
 #include "data/IChunkData.h"
-#include "render/Renderable.h"
-
 
 #include <LWGL/buffer/Attributes.h>
-
+#include <LWGL/indirect/IndirectTypes.h>
 
 namespace gl {
     class ShaderPipeline;
@@ -33,8 +35,7 @@ namespace engine {
     struct RenderContext;
 
 
-    class Chunk : public Renderable,
-                  public ISerializable {
+    class Chunk : public ISerializable {
       public:
         static inline glm::ivec3 Dims{16, 16, 16};
 
@@ -81,10 +82,12 @@ namespace engine {
         /// @return const ChunkData structure containing all the block/terrain data.
         const IChunkData* data() const { return m_data.get(); }
 
+        void uploadVertices(gl::VertexPool<Vertex>& opaque, gl::VertexPool<Vertex>& transparent);
+        void releaseVertices(gl::VertexPool<Vertex>& opaque, gl::VertexPool<Vertex>& transparent);
 
-        /// @brief Renders the chunk.
-        /// @param pass Pass == 0 will render the whole chunk, pass == 1 will render opaque blocks, pass == 2 will render transparent blocks.
-        void render(Engine& engine, const Camera* camera, int pass) override;
+        glm::mat4 modelMatrix() const;
+        const gl::PoolAllocation& transparentAlloc() const;
+        const gl::PoolAllocation& opaqueAlloc() const;
 
         VariantBlock::Neighbours getNeighbouringBlocks(glm::ivec3 pos) const;
 
@@ -101,7 +104,7 @@ namespace engine {
         World* m_world;
         ChunkID m_coords;
         std::unique_ptr<IChunkData> m_data;
-        bool m_dirty = false;
+        std::atomic_bool m_dirty{false};
 
         struct GeometryState {
             glm::vec3 axis;
@@ -112,7 +115,7 @@ namespace engine {
             const Block* block;
             const Geometry* geometry;
             GeometryState geometryState;
-            gl::Attributes<Vertex>& storage;
+            LayerData& storage;
             glm::ivec3 posInChunk;
             glm::ivec3 worldPos;
         };
@@ -142,8 +145,10 @@ namespace engine {
       private:
         std::array<LayerBuffer, 3> m_renderLayers;
 
-        bool m_generated = false;
-        std::atomic_bool m_generatingMesh = false;
+        std::atomic_bool m_generated{false};
+        std::atomic_bool m_generatingMesh{false};
+        std::atomic_bool m_meshReady{false};
+        std::mutex m_backMutex;
 
         friend class World;
     };
