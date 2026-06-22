@@ -299,6 +299,13 @@ bool World::canSeeFace(const Block& curBlock, glm::vec3 pos, glm::ivec3 dir) con
 }
 
 void World::render(Engine& engine, const Camera* camera, int pass) {
+    m_pointLightManager.update(camera);
+
+    m_material.setUInt("lightCount", m_pointLightManager.lightCount());
+    m_material.setVec2("resolution", engine.window()->windowSize());
+    m_material.setFloat("nearPlane", camera->nearPlane());
+    m_material.setFloat("farPlane", camera->farPlane());
+
     // Copy chunk pointers while holding lock, then render without lock
     std::vector<std::shared_ptr<Chunk>> chunksToRender;
     {

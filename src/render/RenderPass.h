@@ -21,11 +21,12 @@ namespace engine {
         using ID = uint16_t;
 
         // Built-in pass IDs
-        static constexpr ID DirectionalShadow = 1 << 0;
-        static constexpr ID OmniShadow = 1 << 1;
-        static constexpr ID Scene = 1 << 2;
-        static constexpr ID SceneTransparent = 1 << 3;
-        static constexpr ID Composite = 1 << 4;
+        static constexpr ID Scene = 1 << 0;
+        static constexpr ID SceneTransparent = 1 << 1;
+        static constexpr ID DirectionalShadow = 1 << 2;
+        static constexpr ID Composite = 1 << 3;
+        static constexpr ID OmniShadow = 1 << 4;
+        static constexpr ID ClusterBuildPass = 1 << 5;
 
         virtual ~RenderPass() = default;
 

@@ -61,3 +61,52 @@ multicamera support
 
 - support for variant block neighboring with multiblock
 - support multiblock dda 
+
+
+
+
+
+some of the things i want to add to the engine are
+1. replacable meshing algorithm - marching cubes and  normal meshing as it is now and possibly greedy meshing. this also includes that some part of the world is meshed by maching cubes and some by normal meshing to combine sharp blocks for buildings and smooth for terrain mostly
+2. liquid support
+3. better shaders - the world looks blant. id like to get some feeling like optifine shaders on minecraft but i have no idea how they're doing it
+4. dynamic skybox
+what do you think? then i think i can start focusing on the 
+
+Here's my honest take, hardest to easiest and where I'd focus:
+
+Replaceable meshing — Medium to Very Hard (3 separate problems)
+
+Greedy meshing alone is medium — merge adjacent same-type faces per direction at chunk level. The wrinkle is your AO baked per-vertex: merged quads need uniform AO or the merge condition gets strict. UV tiling also needs care.
+Marching cubes is hard — completely different data model. You'd need a density/SDF field per chunk instead of block IDs, a 256-config lookup table, per-vertex interpolation, and a way to map density back to textures. It's a parallel system, not an extension of the current one.
+Per-region mixing is the hardest part. MC and block meshing generate incompatible geometry at boundaries. Smooth transitions are genuinely unsolved-looking unless you commit to a hard seam or use a transition zone.
+Liquid support — Medium rendering, Hard simulation
+
+Rendering liquids is doable: top-face-only geometry when exposed to air, slightly sub-full height, transparent pass (which you already have with OIT). You could use the VariantBlock/neighbor system for face culling. The hard part is simulation — Minecraft-style spreading is a cellular automaton that needs per-tick updates on every liquid block, which fights the current "generate mesh once per chunk" model. I'd do rendering first, simulation as a separate effort.
+
+Better shaders — Easy to Hard depending on which effects
+
+Optifine works by chaining post-process passes. Your biggest quick wins:
+
+Bloom + tone mapping: Easy, pure post-process, slot into your composite pass
+SSAO: Medium, needs a depth/normal pass but you can reconstruct normals from depth
+Atmospheric scattering sky: Medium, it's shader math (Rayleigh/Mie), many reference implementations
+PBR materials: Hard, needs material system rework (roughness/metallic maps) — your todo already flags this
+The world looks "blant" mostly because of flat Phong + static sky + no post-processing. Bloom + sky alone would be dramatic.
+
+Dynamic skybox — Medium
+
+The sky shader itself is 1-2 days — replace the cubemap lookup with procedural atmospheric scattering math. The tricky part is the sun moving: your CSM shadow matrices need to update as lightDir changes, and rebuilding those every frame is expensive. You'd want temporal caching or limiting update frequency.
+
+Omnidirectional lights — Medium (unshadowed), Hard (with shadows)
+
+Your todo already nails it: cubemap shadows = 6 render passes per light, expensive. I'd do unshadowed point lights first — it's a UBO/SSBO of light structs + extend the fragment shader. For a game with indoor habitats, you actually need this: your interiors are completely dark with only a directional sun. It's probably blocking gameplay feel more than anything else.
+
+What I'd focus on first: a lighting overhaul
+
+Sky + omnidirectional lights are tightly coupled anyway — improving the sky means updating sun direction, which touches the same lighting uniforms as point lights. I'd do them together:
+
+Omnidirectional lights (unshadowed) — critical for interiors, medium effort, huge gameplay impact
+Dynamic sky + atmospheric scattering — transforms how the world feels, sun movement is the same feature
+Bloom + tone mapping — trivial once you have the render pipeline you're already building
+Meshing is interesting architecture work but marching cubes is a big investment before you know if the visual result justifies it. Liquids are blocked anyway until you have somewhere interesting to put them. The lighting stack gives you the most visible return per hour right now.

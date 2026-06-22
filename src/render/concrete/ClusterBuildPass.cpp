@@ -1,0 +1,122 @@
+#include "ClusterBuildPass.h"
+#include <LWGL/buffer/SSBO.h>
+
+#include "scene/Camera.h"
+#include "scene/PointLightManager.h"
+
+
+using namespace engine;
+
+ClusterBuildPass::ClusterBuildPass(
+    glm::ivec2 resolution, Camera* camera, PointLightManager* pointLightManager
+)
+    : RenderPass(resolution, RenderPass::ClusterBuildPass),
+      m_camera(camera),
+      m_pointLightManager(pointLightManager),
+      m_clusters(GL_STATIC_DRAW),
+      m_compute("resources/shaders/light/ClusterBuild.comp") {
+    uint32_t maxClusters = ClusterGridSize.x * ClusterGridSize.y * ClusterGridSize.z;
+    uint32_t MaxClustersPerLight = 40;
+    m_clusters.create(maxClusters);
+    m_lightIndices.create(pointLightManager->maxLights() * MaxClustersPerLight);
+    m_clusterGrid.create(maxClusters);
+    m_atomicCounter.create(1);
+    subdivideFrustum();
+}
+
+
+void ClusterBuildPass::beforeRender(Engine& engine, uint8_t pass) {
+    m_pointLightManager->bindLights(1);
+    m_compute.setUInt("lightCount", m_pointLightManager->lightCount());
+    m_compute.setMat4("view", m_camera->getView());
+
+    printf("lightCount: %d\n", m_pointLightManager->lightCount());
+
+    m_clusterGrid.bind(2);
+    m_lightIndices.bind(3);
+    m_clusters.bind(4);
+    m_atomicCounter.bind(5);
+    m_atomicCounter.clear();
+    m_atomicCounter.add(0);
+    m_atomicCounter.upload();
+
+    m_compute.dispatch(1, 9, 24);
+    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+}
+
+
+void ClusterBuildPass::resize(glm::ivec2 resolution) {
+    m_resolution = resolution;
+    subdivideFrustum();
+}
+
+void ClusterBuildPass::subdivideFrustum() {
+    m_clusters.clear();
+
+    glm::mat4 proj = m_camera->getProjection();
+    auto unproject = [&](float ndcX, float ndcY, float z) -> glm::vec3 {
+        return {
+            ndcX / proj[0][0] * glm::abs(z),
+            ndcY / proj[1][1] * glm::abs(z),
+            z,
+        };
+    };
+
+    for (int i = 0; i < ClusterGridSize.x; i++) {
+        for (int j = 0; j < ClusterGridSize.y; j++) {
+            for (int k = 0; k < ClusterGridSize.z; k++) {
+                glm::vec2 ndcMin = glm::vec2(
+                                       static_cast<float>(i) / ClusterGridSize.x,
+                                       static_cast<float>(j) / ClusterGridSize.y
+                                   ) * 2.0f -
+                                   1.0f;
+                glm::vec2 ndcMax = glm::vec2(
+                                       static_cast<float>(i + 1) / ClusterGridSize.x,
+                                       static_cast<float>(j + 1) / ClusterGridSize.y
+                                   ) * 2.0f -
+                                   1.0f;
+
+                float near =
+                    -m_camera->nearPlane() * glm::pow(
+                                                 m_camera->farPlane() / m_camera->nearPlane(),
+                                                 static_cast<float>(k) / ClusterGridSize.z
+                                             );
+                float far =
+                    -m_camera->nearPlane() * glm::pow(
+                                                 m_camera->farPlane() / m_camera->nearPlane(),
+                                                 static_cast<float>(k + 1) / ClusterGridSize.z
+                                             );
+
+
+                glm::vec3 corners[8] = {
+                    unproject(ndcMin.x, ndcMin.y, near),
+                    unproject(ndcMax.x, ndcMin.y, near),
+                    unproject(ndcMin.x, ndcMax.y, near),
+                    unproject(ndcMax.x, ndcMax.y, near),
+                    unproject(ndcMin.x, ndcMin.y, far),
+                    unproject(ndcMax.x, ndcMin.y, far),
+                    unproject(ndcMin.x, ndcMax.y, far),
+                    unproject(ndcMax.x, ndcMax.y, far),
+                };
+
+                glm::vec3 aabbMin = corners[0];
+                glm::vec3 aabbMax = corners[0];
+
+                for (int c = 1; c < 8; c++) {
+                    aabbMin = glm::min(aabbMin, corners[c]);
+                    aabbMax = glm::max(aabbMax, corners[c]);
+                }
+
+                m_clusters.add(AABB(aabbMin, aabbMax));
+            }
+        }
+    }
+    m_clusters.upload();
+}
+
+void ClusterBuildPass::bindForShading(
+    unsigned int clusterGridBinding, unsigned int lightIndicesBinding
+) const {
+    m_clusterGrid.bind(clusterGridBinding);
+    m_lightIndices.bind(lightIndicesBinding);
+}
