@@ -1,8 +1,11 @@
 #pragma once
 
+#include <array>
+#include <atomic>
 #include <glm/glm.hpp>
 #include <iostream>
 #include <mutex>
+
 
 #include "../hash.h"
 #include "ChunkID.h"

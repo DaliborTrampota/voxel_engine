@@ -1,13 +1,17 @@
 #include "LayerBuffer.h"
 
-#include <LWGL/indirect/VertexPool.h>
-#include <block/Vertex.h>
 #include <glad/glad.h>
+#include <utility>
+
+
+#include <LWGL/indirect/VertexPool.h>
+
+#include "block/Vertex.h"
 
 using namespace engine;
 
 void LayerData::add(Vertex v) {
-    vertices.push_back(v);
+    vertices.push_back(std::move(v));
     dirty = true;
 }
 

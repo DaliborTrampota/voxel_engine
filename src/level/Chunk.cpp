@@ -50,6 +50,8 @@ bool Chunk::generateMesh() {
     if (!m_generatingMesh.compare_exchange_strong(expected, true))
         return false;
 
+    m_dirty = false;
+
     {
         std::lock_guard lock(m_backMutex);
         for (auto& layer : m_renderLayers)
@@ -94,8 +96,6 @@ bool Chunk::generateMesh() {
     m_generated = true;
     m_meshReady = true;
     m_generatingMesh = false;
-    bool wasDirty = true;
-    m_dirty.compare_exchange_strong(wasDirty, false);
     afterGenerated();
     return true;
 }
