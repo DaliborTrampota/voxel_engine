@@ -15,7 +15,9 @@
 #include "block/Vertex.h"
 #include "render/Material.h"
 #include "render/Renderable.h"
+#include "scene/PointLightManager.h"
 #include "scene/Skybox.h"
+#include "scene/Sun.h"
 #include "scene/Updateable.h"
 #include "utility/ThreadPool.h"
 
@@ -143,6 +145,10 @@ namespace engine {
         const ITerrainGenerator* getGenerator() const { return m_generator.get(); }
         const Material& getMaterial() const { return m_material; }
         Skybox& getSkybox() { return m_skybox; }
+        PointLightManager& getPointLightManager() { return m_pointLightManager; }
+
+        void setSun(Sun&& sun) { m_sun = std::make_shared<Sun>(std::move(sun)); }
+        std::weak_ptr<Sun> getSun() const { return m_sun; }
 
         virtual void render(Engine& engine, const Camera* camera, int pass = 0) override;
         virtual void update(float dt) override;
@@ -170,6 +176,8 @@ namespace engine {
 
         Material m_material;
         Skybox m_skybox;
+        std::shared_ptr<Sun> m_sun;
+        PointLightManager m_pointLightManager;
 
         ThreadPool m_genPool;
 

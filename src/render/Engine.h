@@ -15,6 +15,7 @@ namespace engine {
     class Tickable;
     class Sun;
     class InputSystem;
+    class PointLightManager;
 
     struct RenderStats {
         uint32_t drawCalls = 0;
@@ -50,7 +51,9 @@ namespace engine {
         virtual void flush();
 
         void subscribeUpdate(std::shared_ptr<Updateable> updateable);
+        void unsubscribeUpdate(Updateable* updateable);
         void subscribeTick(std::shared_ptr<Tickable> tickable);
+        void unsubscribeTick(Tickable* tickable);
         void fireUpdate(float dt);
         void gameloop();
 
@@ -62,11 +65,16 @@ namespace engine {
         InputSystem* inputSystem() const { return m_inputSystem.get(); }
 
         void setDirectionalLightSource(std::shared_ptr<Sun> lightSource, uint8_t passPosition = 0);
-        std::shared_ptr<Sun> directionalLightSource() const { return m_directionalLightSource; }
+        Sun* directionalLightSource() const { return m_activeDirectionalLightSource; }
+
+        void setPointLightSource(PointLightManager* pointLightManager, Camera* camera);
+
+        // RenderPassRegistry* passRegistry() const { return m_passRegistry; }
 
       protected:
         std::unique_ptr<InputSystem> m_inputSystem;
-        std::shared_ptr<Sun> m_directionalLightSource;
+        Sun* m_activeDirectionalLightSource = nullptr;
+        PointLightManager* m_activePointLightManager = nullptr;
 
         RenderPassRegistry* m_passRegistry;
         std::vector<std::variant<RenderContext, GroupRenderContext, IndirectRenderContext>>

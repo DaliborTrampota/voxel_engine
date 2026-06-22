@@ -26,6 +26,7 @@
 #include "scene/Updateable.h"
 #include "utility/UtilityShaders.h"
 
+#include "concrete/ClusterBuildPass.h"
 #include "concrete/CompositePass.h"
 #include "concrete/DirectionalShadowPass.h"
 #include "concrete/ScenePass.h"
@@ -57,13 +58,13 @@ Engine::Engine(std::unique_ptr<Window> window)
     m_passRegistry->registerPass(std::make_unique<TransparentPass>(resolution), 1);
     m_passRegistry->registerPass(std::make_unique<CompositePass>(resolution), 2);
 
-    if (m_directionalLightSource) {
+    if (m_activeDirectionalLightSource) {
         m_passRegistry->registerPass(
             std::make_unique<DirectionalShadowPass>(
                 resolution,
-                m_directionalLightSource->shadowMaterial(),
-                m_directionalLightSource->shadowFBO(),
-                m_directionalLightSource->resolution()
+                m_activeDirectionalLightSource->shadowMaterial(),
+                m_activeDirectionalLightSource->shadowFBO(),
+                m_activeDirectionalLightSource->resolution()
             ),
             0
         );
@@ -205,18 +206,18 @@ void Engine::render(RenderContext& ctx, const RenderPass* renderPass) const {
     material->use();
     material->setMat4("model", ctx.matrices.model);
 
-    if (material->supportsShadows() && m_directionalLightSource) {
+    if (material->supportsShadows() && m_activeDirectionalLightSource) {
         assert(ctx.camera && "RenderContext Camera is required when material supports shadows");
         // material->setVec3("lightPos", m_directionalLightSource->lightPosition());
-        material->setVec3("lightColor", m_directionalLightSource->lightColor());
-        material->setVec3("lightDir", -m_directionalLightSource->direction());
+        material->setVec3("lightColor", m_activeDirectionalLightSource->lightColor());
+        material->setVec3("lightDir", -m_activeDirectionalLightSource->direction());
         material->setVec3("viewPos", ctx.camera->position());
 
 
-        for (size_t i = 0; i < m_directionalLightSource->cascadeSplits().size(); i++) {
+        for (size_t i = 0; i < m_activeDirectionalLightSource->cascadeSplits().size(); i++) {
             material->setFloat(
                 std::format("cascadePlaneDistances[{}]", i),
-                m_directionalLightSource->cascadeSplits()[i].farPlane
+                m_activeDirectionalLightSource->cascadeSplits()[i].farPlane
             );
         }
     }
@@ -305,20 +306,20 @@ void Engine::render(IndirectRenderContext& ctx, const RenderPass* renderPass) co
 
     material->use();
 
-    if (material->supportsShadows() && m_directionalLightSource) {
+    if (material->supportsShadows() && m_activeDirectionalLightSource) {
         assert(
             ctx.camera && "IndirectRenderContext Camera is required when material supports shadows"
         );
         // material->setVec3("lightPos", m_directionalLightSource->lightPosition());
-        material->setVec3("lightColor", m_directionalLightSource->lightColor());
-        material->setVec3("lightDir", -m_directionalLightSource->direction());
+        material->setVec3("lightColor", m_activeDirectionalLightSource->lightColor());
+        material->setVec3("lightDir", -m_activeDirectionalLightSource->direction());
         material->setVec3("viewPos", ctx.camera->position());
 
 
-        for (size_t i = 0; i < m_directionalLightSource->cascadeSplits().size(); i++) {
+        for (size_t i = 0; i < m_activeDirectionalLightSource->cascadeSplits().size(); i++) {
             material->setFloat(
                 std::format("cascadePlaneDistances[{}]", i),
-                m_directionalLightSource->cascadeSplits()[i].farPlane
+                m_activeDirectionalLightSource->cascadeSplits()[i].farPlane
             );
         }
     }
@@ -379,8 +380,30 @@ void Engine::subscribeUpdate(std::shared_ptr<Updateable> updateable) {
     m_updateSubscribers.push_back(updateable);
 }
 
+void Engine::unsubscribeUpdate(Updateable* updateable) {
+    for (auto it = m_updateSubscribers.begin(); it != m_updateSubscribers.end();) {
+        if (it->lock().get() == updateable) {
+            it = m_updateSubscribers.erase(it);
+            break;
+        } else {
+            ++it;
+        }
+    }
+}
+
 void Engine::subscribeTick(std::shared_ptr<Tickable> tickable) {
     m_tickSubscribers.push_back(tickable);
+}
+
+void Engine::unsubscribeTick(Tickable* tickable) {
+    for (auto it = m_tickSubscribers.begin(); it != m_tickSubscribers.end();) {
+        if (it->lock().get() == tickable) {
+            it = m_tickSubscribers.erase(it);
+            break;
+        } else {
+            ++it;
+        }
+    }
 }
 
 void Engine::beginFrame() {
@@ -401,8 +424,13 @@ void Engine::endFrame() {
 void Engine::setDirectionalLightSource(
     std::shared_ptr<engine::Sun> lightSource, uint8_t passPosition
 ) {
-    m_directionalLightSource = lightSource;
-    m_passRegistry->deletePass<DirectionalShadowPass>();
+    if (m_activeDirectionalLightSource) {
+        unsubscribeUpdate(m_activeDirectionalLightSource);
+        m_passRegistry->deletePass<DirectionalShadowPass>();
+    }
+
+    m_activeDirectionalLightSource = lightSource.get();
+    subscribeUpdate(lightSource);
 
     // TODO once engine settings is implemented, revisit this (do not register the pass)
     m_passRegistry->registerPass(
@@ -413,5 +441,20 @@ void Engine::setDirectionalLightSource(
             lightSource->resolution()
         ),
         passPosition
+    );
+}
+
+// TODO track active camera in engine
+void Engine::setPointLightSource(PointLightManager* pointLightManager, Camera* camera) {
+    if (m_activePointLightManager) {
+        m_passRegistry->deletePass<ClusterBuildPass>();
+    }
+
+    m_activePointLightManager = pointLightManager;
+    m_passRegistry->registerPass(
+        std::make_unique<ClusterBuildPass>(
+            m_window->windowSize(), camera, m_activePointLightManager
+        ),
+        0
     );
 }
