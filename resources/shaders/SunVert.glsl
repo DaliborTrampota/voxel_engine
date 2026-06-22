@@ -26,6 +26,7 @@ void main() {
     // clang-format on
     vs_out.uv = aUV;
 
+    // for VSM
     // gl_Position = projection * view * model * vec4(aPos, 1.0);
     // vs_out.vertPosition = gl_Position;
     gl_Position = models[gl_DrawID] * vec4(aPos, 1.0);

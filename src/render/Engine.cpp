@@ -213,7 +213,7 @@ void Engine::render(RenderContext& ctx, const RenderPass* renderPass) const {
         material->setVec3("viewPos", ctx.camera->position());
 
 
-        for (int i = 0; i < m_directionalLightSource->cascadeSplits().size(); i++) {
+        for (size_t i = 0; i < m_directionalLightSource->cascadeSplits().size(); i++) {
             material->setFloat(
                 std::format("cascadePlaneDistances[{}]", i),
                 m_directionalLightSource->cascadeSplits()[i].farPlane
@@ -315,7 +315,7 @@ void Engine::render(IndirectRenderContext& ctx, const RenderPass* renderPass) co
         material->setVec3("viewPos", ctx.camera->position());
 
 
-        for (int i = 0; i < m_directionalLightSource->cascadeSplits().size(); i++) {
+        for (size_t i = 0; i < m_directionalLightSource->cascadeSplits().size(); i++) {
             material->setFloat(
                 std::format("cascadePlaneDistances[{}]", i),
                 m_directionalLightSource->cascadeSplits()[i].farPlane

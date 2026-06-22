@@ -50,12 +50,16 @@ bool Chunk::generateMesh() {
     if (!m_generatingMesh.compare_exchange_strong(expected, true))
         return false;
 
-    glm::ivec3 chunkBlockCoords = m_coords * m_data->dims;
-
-    for (auto& layer : m_renderLayers) {
-        layer.clear();
-        layer.back.reserve(m_data->dims.x * m_data->dims.y * 8 * 6);
+    {
+        std::lock_guard lock(m_backMutex);
+        for (auto& layer : m_renderLayers)
+            layer.clear();
+        m_meshReady = false;
     }
+    for (auto& layer : m_renderLayers)
+        layer.back.reserve(m_data->dims.x * m_data->dims.y * 8 * 6);
+
+    glm::ivec3 chunkBlockCoords = m_coords * m_data->dims;
 
     for (int x = 0; x < m_data->dims.x; x++) {
         for (int y = 0; y < m_data->dims.y; y++) {
@@ -87,13 +91,11 @@ bool Chunk::generateMesh() {
         }
     }
 
-    for (auto& layer : m_renderLayers) {
-        layer.moveToFront();
-    }
-
     m_generated = true;
+    m_meshReady = true;
     m_generatingMesh = false;
-    m_dirty = false;
+    bool wasDirty = true;
+    m_dirty.compare_exchange_strong(wasDirty, false);
     afterGenerated();
     return true;
 }
@@ -152,9 +154,17 @@ void Chunk::setBlock(const glm::ivec3& pos, MultiBlock&& multiBlock) {
 }
 
 void Chunk::uploadVertices(gl::VertexPool<Vertex>& opaque, gl::VertexPool<Vertex>& transparent) {
-    if (!m_generated) {
-        return;
+    if (m_meshReady) {
+        std::lock_guard lock(m_backMutex);
+        if (m_meshReady) {
+            for (auto& layer : m_renderLayers)
+                layer.moveToFront();
+            m_meshReady = false;
+        }
     }
+
+    if (!m_generated)
+        return;
 
     m_renderLayers[Layers::Transparent].uploadToPool(transparent);
     m_renderLayers[Layers::Opaque].uploadToPool(opaque);

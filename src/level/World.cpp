@@ -20,6 +20,7 @@
 #include <glm/gtx/component_wise.hpp>
 #include <glm/gtx/norm.hpp>
 
+// TODO dont set chunk dirty from world, use chunk methods to set blocks
 
 using namespace engine;
 
@@ -381,7 +382,6 @@ void World::updateChunk(ChunkID id) {
 
         lock.unlock();
         chunk->generateMesh();
-        chunk->m_dirty = false;
     });
 }
 

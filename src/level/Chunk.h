@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 #include <iostream>
+#include <mutex>
 
 #include "../hash.h"
 #include "ChunkID.h"
@@ -100,7 +101,7 @@ namespace engine {
         World* m_world;
         ChunkID m_coords;
         std::unique_ptr<IChunkData> m_data;
-        bool m_dirty = false;
+        std::atomic_bool m_dirty{false};
 
         struct GeometryState {
             glm::vec3 axis;
@@ -141,8 +142,10 @@ namespace engine {
       private:
         std::array<LayerBuffer, 3> m_renderLayers;
 
-        bool m_generated = false;
-        std::atomic_bool m_generatingMesh = false;
+        std::atomic_bool m_generated{false};
+        std::atomic_bool m_generatingMesh{false};
+        std::atomic_bool m_meshReady{false};
+        std::mutex m_backMutex;
 
         friend class World;
     };
