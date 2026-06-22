@@ -32,8 +32,8 @@ void TextureLoader::loadArray2D(
             }
 
             gl::ImageData data(entry.path().string().c_str());
-            width = data.width;
-            height = data.height;
+            width = std::max(width, data.width);
+            height = std::max(height, data.height);
             images.emplace_back(std::move(data));
         }
     } catch (std::filesystem::filesystem_error& e) {
