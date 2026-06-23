@@ -12,13 +12,17 @@ ivec3 clusterIndex() {
     return ivec3(x, y, z);
 }
 
-uniform uint lightCount;
-
 vec3 calculatePointLights(vec4 baseColor, ivec3 indexOfCluster) {
     vec3 result = vec3(0.0);
 
-    for (uint i = 0; i < lightCount; i++) {
-        PointLight light = pointLight[i];
+    uint index = indexOfCluster.x + indexOfCluster.y * 16 + indexOfCluster.z * 16 * 9;
+    ClusterGrid cluster = clusterGrid[index];
+    if (cluster.count == 0) {
+        return result;
+    }
+
+    for (uint i = 0; i < cluster.count; i++) {
+        PointLight light = pointLight[lightIndices[cluster.offset + i]];
 
         vec3 toLight = light.position.xyz - fragPos;
         float dist = length(toLight);

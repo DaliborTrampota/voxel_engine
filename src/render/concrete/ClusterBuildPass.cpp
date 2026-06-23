@@ -62,29 +62,29 @@ void ClusterBuildPass::subdivideFrustum() {
         };
     };
 
-    for (int i = 0; i < ClusterGridSize.x; i++) {
-        for (int j = 0; j < ClusterGridSize.y; j++) {
-            for (int k = 0; k < ClusterGridSize.z; k++) {
+    for (int z = 0; z < ClusterGridSize.z; z++) {
+        for (int y = 0; y < ClusterGridSize.y; y++) {
+            for (int x = 0; x < ClusterGridSize.x; x++) {
                 glm::vec2 ndcMin = glm::vec2(
-                                       static_cast<float>(i) / ClusterGridSize.x,
-                                       static_cast<float>(j) / ClusterGridSize.y
+                                       static_cast<float>(x) / ClusterGridSize.x,
+                                       static_cast<float>(y) / ClusterGridSize.y
                                    ) * 2.0f -
                                    1.0f;
                 glm::vec2 ndcMax = glm::vec2(
-                                       static_cast<float>(i + 1) / ClusterGridSize.x,
-                                       static_cast<float>(j + 1) / ClusterGridSize.y
+                                       static_cast<float>(x + 1) / ClusterGridSize.x,
+                                       static_cast<float>(y + 1) / ClusterGridSize.y
                                    ) * 2.0f -
                                    1.0f;
 
                 float near =
                     -m_camera->nearPlane() * glm::pow(
                                                  m_camera->farPlane() / m_camera->nearPlane(),
-                                                 static_cast<float>(k) / ClusterGridSize.z
+                                                 static_cast<float>(z) / ClusterGridSize.z
                                              );
                 float far =
                     -m_camera->nearPlane() * glm::pow(
                                                  m_camera->farPlane() / m_camera->nearPlane(),
-                                                 static_cast<float>(k + 1) / ClusterGridSize.z
+                                                 static_cast<float>(z + 1) / ClusterGridSize.z
                                              );
 
 
@@ -107,7 +107,9 @@ void ClusterBuildPass::subdivideFrustum() {
                     aabbMax = glm::max(aabbMax, corners[c]);
                 }
 
-                m_clusters.add(AABB(aabbMin, aabbMax));
+                m_clusters.add(
+                    ClusterAABB{.min = glm::vec4(aabbMin, 0.0f), .max = glm::vec4(aabbMax, 0.0f)}
+                );
             }
         }
     }

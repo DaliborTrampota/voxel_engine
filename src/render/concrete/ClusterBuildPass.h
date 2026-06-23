@@ -39,7 +39,12 @@ namespace engine {
             uint32_t count;
         };
 
-        gl::SSBO<AABB> m_clusters;
+        struct ClusterAABB {
+            glm::vec4 min;
+            glm::vec4 max;
+        };
+
+        gl::SSBO<ClusterAABB> m_clusters;
         // GPU-only buffers
         gl::SSBO<uint32_t> m_lightIndices;
         gl::SSBO<ClusterGrid> m_clusterGrid;
