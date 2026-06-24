@@ -25,7 +25,7 @@ namespace engine {
         static constexpr ID SceneTransparent = 1 << 1;
         static constexpr ID DirectionalShadow = 1 << 2;
         static constexpr ID Composite = 1 << 3;
-        static constexpr ID OmniShadow = 1 << 4;
+        static constexpr ID PointLightShadow = 1 << 4;
         static constexpr ID ClusterBuildPass = 1 << 5;
 
         virtual ~RenderPass() = default;
@@ -41,7 +41,7 @@ namespace engine {
         virtual void resize(glm::ivec2 resolution) { m_resolution = resolution; }
 
         ID id() const { return m_id; }
-        uint8_t passes() const { return m_passes; }
+        virtual uint8_t passes() const { return m_passes; }
 
         const Material* material = nullptr;
         const gl::FBO* fbo = nullptr;

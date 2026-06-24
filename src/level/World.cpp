@@ -1,5 +1,7 @@
 #include "World.h"
 
+#include <LWGL/texture/CubeMapArray.h>
+
 #include "../Globals.h"
 #include "ITerrainGenerator.h"
 #include "block/Block.h"
@@ -356,7 +358,7 @@ void World::render(Engine& engine, const Camera* camera, int pass) {
         .batch = &m_opaqueBuffer,
         .material = &m_material,
         .camera = camera,
-        .passMask = RenderPass::Scene | RenderPass::DirectionalShadow
+        .passMask = RenderPass::Scene | RenderPass::DirectionalShadow | RenderPass::PointLightShadow
     };
 
     IndirectRenderContext ctxTransparent{
@@ -364,7 +366,8 @@ void World::render(Engine& engine, const Camera* camera, int pass) {
         .batch = &m_transparentBuffer,
         .material = &m_material,
         .camera = camera,
-        .passMask = RenderPass::SceneTransparent | RenderPass::DirectionalShadow
+        .passMask = RenderPass::SceneTransparent | RenderPass::DirectionalShadow |
+                    RenderPass::PointLightShadow
     };
 
     engine.submitRender(std::move(ctxOpaque));
@@ -518,4 +521,8 @@ void World::update(float dt) {
 
 std::shared_ptr<Chunk> World::createChunk(const ChunkID& id) {
     return std::make_shared<Chunk>(this, id, std::make_unique<DenseGrid>(m_chunkDims));
+}
+
+void World::setOmniShadowMaps(gl::CubeMapArray& omniShadowMaps) {
+    m_material.setTexture(2, &omniShadowMaps, "omniShadowMaps");
 }

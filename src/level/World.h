@@ -147,6 +147,8 @@ namespace engine {
         Skybox& getSkybox() { return m_skybox; }
         PointLightManager& getPointLightManager() { return m_pointLightManager; }
 
+        void setOmniShadowMaps(gl::CubeMapArray& omniShadowMaps);
+
         void setSun(Sun&& sun) { m_sun = std::make_shared<Sun>(std::move(sun)); }
         std::weak_ptr<Sun> getSun() const { return m_sun; }
 

@@ -30,8 +30,6 @@ void ClusterBuildPass::beforeRender(Engine& engine, uint8_t pass) {
     m_compute.setUInt("lightCount", m_pointLightManager->lightCount());
     m_compute.setMat4("view", m_camera->getView());
 
-    printf("lightCount: %d\n", m_pointLightManager->lightCount());
-
     m_clusterGrid.bind(2);
     m_lightIndices.bind(3);
     m_clusters.bind(4);

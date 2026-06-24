@@ -29,6 +29,7 @@
 #include "concrete/ClusterBuildPass.h"
 #include "concrete/CompositePass.h"
 #include "concrete/DirectionalShadowPass.h"
+#include "concrete/PointLightShadowPass.h"
 #include "concrete/ScenePass.h"
 #include "concrete/TransparentPass.h"
 
@@ -445,9 +446,10 @@ void Engine::setDirectionalLightSource(
 }
 
 // TODO track active camera in engine
-void Engine::setPointLightSource(PointLightManager* pointLightManager, Camera* camera) {
+gl::CubeMapArray& Engine::setPointLightSource(PointLightManager* pointLightManager, Camera* camera) {
     if (m_activePointLightManager) {
         m_passRegistry->deletePass<ClusterBuildPass>();
+        m_passRegistry->deletePass<PointLightShadowPass>();
     }
 
     m_activePointLightManager = pointLightManager;
@@ -457,4 +459,13 @@ void Engine::setPointLightSource(PointLightManager* pointLightManager, Camera* c
         ),
         0
     );
+
+    m_passRegistry->registerPass(
+        std::make_unique<PointLightShadowPass>(
+            m_window->windowSize(), m_activePointLightManager, glm::ivec2(1024, 1024)
+        ),
+        0
+    );
+
+    return m_passRegistry->getPass<PointLightShadowPass>()->shadowMaps();
 }

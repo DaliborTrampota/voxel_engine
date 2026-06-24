@@ -19,6 +19,10 @@ uint32_t PointLightManager::lightCount() const {
     return m_lights.data().size();
 }
 
+uint32_t PointLightManager::shadowLightCount() const {
+    return m_shadowLightCount;
+}
+
 void PointLightManager::addLight(const PointLight& light) {
     if (m_lights.data().size() >= m_maxLights) {
         printf("Max lights reached\n");
@@ -32,21 +36,22 @@ void PointLightManager::removeLight(const PointLight& light) {}
 void PointLightManager::update(const Camera* camera) {
     assert(camera && "Camera is required for PointLightManager::update");
 
-    std::vector<PointLight> lights = m_lights.data();
+    std::vector<PointLight>& lights = m_lights.data();
     std::sort(lights.begin(), lights.end(), [camera](const PointLight& a, const PointLight& b) {
         return glm::distance(a.position, camera->position()) <
                glm::distance(b.position, camera->position());
     });
 
+    m_shadowLightCount = 0;
     for (int i = 0; i < lights.size(); i++) {
-        if (i < m_shadowLights) {
+        if (i < m_maxShadowLights) {
             lights[i].shadowIndex = i;
+            m_shadowLightCount++;
         } else {
             lights[i].shadowIndex = PointLight::NoShadow;
         }
     }
 
-    m_lights.setData(std::move(lights));
     m_lights.upload();
 }
 
@@ -54,12 +59,12 @@ const std::vector<PointLight>& PointLightManager::lights() const {
     return m_lights.data();
 }
 
-uint8_t PointLightManager::shadowLights() const {
-    return m_shadowLights;
+uint8_t PointLightManager::maxShadowLights() const {
+    return m_maxShadowLights;
 }
 
-void PointLightManager::setShadowLights(uint8_t count) {
-    m_shadowLights = count;
+void PointLightManager::setMaxShadowLights(uint8_t count) {
+    m_maxShadowLights = count;
 }
 
 void PointLightManager::setMaxLights(uint32_t maxLights) {

@@ -9,6 +9,10 @@
 #include "Window.h"
 
 
+namespace gl {
+    class CubeMapArray;
+}
+
 namespace engine {
     class Updateable;
     class Renderable;
@@ -67,7 +71,7 @@ namespace engine {
         void setDirectionalLightSource(std::shared_ptr<Sun> lightSource, uint8_t passPosition = 0);
         Sun* directionalLightSource() const { return m_activeDirectionalLightSource; }
 
-        void setPointLightSource(PointLightManager* pointLightManager, Camera* camera);
+        gl::CubeMapArray& setPointLightSource(PointLightManager* pointLightManager, Camera* camera);
 
         // RenderPassRegistry* passRegistry() const { return m_passRegistry; }
 

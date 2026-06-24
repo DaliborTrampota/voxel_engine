@@ -14,20 +14,23 @@ namespace engine {
         void bindLights(uint32_t binding);
 
         uint32_t lightCount() const;
+        uint32_t shadowLightCount() const;
         void addLight(const PointLight& light);
         void removeLight(const PointLight& light);
         void update(const Camera* camera);
 
         const std::vector<PointLight>& lights() const;
-        uint8_t shadowLights() const;
-        void setShadowLights(uint8_t count);
+
+        uint8_t maxShadowLights() const;
+        void setMaxShadowLights(uint8_t count);
 
         void setMaxLights(uint32_t maxLights);
         uint32_t maxLights() const;
 
       private:
         gl::SSBO<PointLight> m_lights;
-        uint8_t m_shadowLights = 8;
+        uint32_t m_shadowLightCount = 0;
+        uint8_t m_maxShadowLights = 8;
         uint32_t m_maxLights;
     };
 }  // namespace engine
