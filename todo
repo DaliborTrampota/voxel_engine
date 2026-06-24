@@ -1,10 +1,10 @@
 - TODO move seuil to game repo @done
-- indirect draw switch
+- indirect draw switch @done
 - rename interface classes to IClass
 - support to register axies in input system
-
-- geometry and compute shaders
-    - grass/foliage?
+- compute shaders @done
+- geometry shader - grass/foliage?
+- ambient occlusion
     
 - materials
     - what did I mean by this?
@@ -13,7 +13,11 @@
     
 - lights
     - sun / directional @done
-    - point - omnidirectional (using cubemap?
+    - point - omnidirectional (using cubemap?) @done
+        - optimize omni shadow pass (caps ~2ms with many shadow lights):
+            - cache cube maps: re-render a light's depth only when it moves or a chunk within its radius is re-meshed; skip+don't-clear clean lights. Requires STABLE light->layer slots (shadowIndex is currently re-sorted by camera distance every frame, which churns the layer and breaks caching)
+            - per-light geometry culling: each shadow light currently draws the whole shared omni shadow buffer (chunks near ANY light); cull to only chunks within THIS light's radius (could lean on ClusterBuild light/cluster assignments)
+            - stagger updates: re-render only K lights/frame round-robin instead of all. Same foundation as caching (needs stable light->layer slots + per-layer clear instead of clearing the whole array). Pairs with raising maxShadowLights since it bounds per-frame cost regardless of light count
     - cascaded shadowmaps @done
         - get rid of geometry shader
     - somehow achieve hard shadows? - stencil buffer shadows nvidia paper? (cascades solved this) @done
