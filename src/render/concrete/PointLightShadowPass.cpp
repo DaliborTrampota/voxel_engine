@@ -76,8 +76,6 @@ void PointLightShadowPass::beforeRender(Engine& engine, uint8_t pass) {
     material->setMat4("view", view);
     material->setVec3("lightPos", light.position);
     material->setFloat("farPlane", light.radius);
-
-    printf("Shadows for light %d, face %d\n", lightIndex, faceIndex);
 }
 
 void PointLightShadowPass::afterRender(Engine& engine, uint8_t pass) {

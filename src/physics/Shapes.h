@@ -12,4 +12,13 @@ namespace engine {
         glm::vec3 normal{0.0f, 1.0f, 0.0f};
         float distance{0.0f};
     };
+
+    struct Sphere {
+        Sphere(glm::vec3 center, float radius) {
+            this->center = center;
+            this->radius = radius;
+        }
+        glm::vec3 center{0.0f, 0.0f, 0.0f};
+        float radius{0.0f};
+    };
 }  // namespace engine

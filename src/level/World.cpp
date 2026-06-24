@@ -303,6 +303,7 @@ bool World::canSeeFace(const Block& curBlock, glm::vec3 pos, glm::ivec3 dir) con
 void World::render(Engine& engine, const Camera* camera, int pass) {
     m_pointLightManager.update(camera);
 
+
     m_material.setVec2("resolution", engine.window()->windowSize());
     m_material.setFloat("nearPlane", camera->nearPlane());
     m_material.setFloat("farPlane", camera->farPlane());
@@ -324,6 +325,23 @@ void World::render(Engine& engine, const Camera* camera, int pass) {
 
     m_opaqueBuffer.begin();
     m_transparentBuffer.begin();
+    m_omniShadowBuffer.begin();
+    for (const auto& chunk : chunksToRender) {
+        if (!chunk->opaqueAlloc().isValid())
+            continue;
+        AABB chunkAABB{
+            .min = glm::vec3(chunk->id() * m_chunkDims),
+            .max = glm::vec3((chunk->id() + 1) * m_chunkDims)
+        };
+        for (int i = 0; i < m_pointLightManager.shadowLightCount(); i++) {
+            const PointLight& light = m_pointLightManager.lights()[i];
+            Sphere lightSphere(light.position, light.radius);
+            if (chunkAABB.intersects(lightSphere)) {
+                m_omniShadowBuffer.add(chunk->opaqueAlloc(), chunk->modelMatrix());
+                break;
+            }
+        }
+    }
 
     // Render without lock - shared_ptr keeps chunks alive
     for (auto& chunk : chunksToRender) {
@@ -352,13 +370,14 @@ void World::render(Engine& engine, const Camera* camera, int pass) {
 
     m_opaqueBuffer.upload();
     m_transparentBuffer.upload();
+    m_omniShadowBuffer.upload();
 
     IndirectRenderContext ctxOpaque{
         .pool = &m_opaquePool,
         .batch = &m_opaqueBuffer,
         .material = &m_material,
         .camera = camera,
-        .passMask = RenderPass::Scene | RenderPass::DirectionalShadow | RenderPass::PointLightShadow
+        .passMask = RenderPass::Scene | RenderPass::DirectionalShadow
     };
 
     IndirectRenderContext ctxTransparent{
@@ -366,13 +385,20 @@ void World::render(Engine& engine, const Camera* camera, int pass) {
         .batch = &m_transparentBuffer,
         .material = &m_material,
         .camera = camera,
-        .passMask = RenderPass::SceneTransparent | RenderPass::DirectionalShadow |
-                    RenderPass::PointLightShadow
+        .passMask = RenderPass::SceneTransparent | RenderPass::DirectionalShadow
+    };
+
+    IndirectRenderContext ctxOmniShadows{
+        .pool = &m_opaquePool,
+        .batch = &m_omniShadowBuffer,
+        .material = &m_material,
+        .camera = camera,
+        .passMask = RenderPass::PointLightShadow
     };
 
     engine.submitRender(std::move(ctxOpaque));
     engine.submitRender(std::move(ctxTransparent));
-
+    engine.submitRender(std::move(ctxOmniShadows));
 
     m_skybox.render(engine, camera);
     //std::cout << "Rendered chunks: " << m_chunks.size() << "\n";

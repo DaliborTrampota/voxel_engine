@@ -173,7 +173,7 @@ namespace engine {
         // TODO size dynamically? based on ViewDistance?
         static constexpr uint32_t m_poolCapacity = 4'000'000;
         gl::VertexPool<Vertex> m_opaquePool{m_poolCapacity}, m_transparentPool{m_poolCapacity};
-        gl::IndirectBuffer m_opaqueBuffer, m_transparentBuffer;
+        gl::IndirectBuffer m_opaqueBuffer, m_transparentBuffer, m_omniShadowBuffer;
 
 
         Material m_material;
