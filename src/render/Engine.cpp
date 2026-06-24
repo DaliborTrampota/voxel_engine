@@ -21,7 +21,7 @@
 #include "render/Material.h"
 #include "render/Renderable.h"
 #include "scene/Camera.h"
-#include "scene/Sun.h"
+#include "scene/DirectionalLight.h"
 #include "scene/Tickable.h"
 #include "scene/Updateable.h"
 #include "utility/UtilityShaders.h"
@@ -58,18 +58,6 @@ Engine::Engine(std::unique_ptr<Window> window)
     m_passRegistry->registerPass(std::make_unique<ScenePass>(resolution), 0);
     m_passRegistry->registerPass(std::make_unique<TransparentPass>(resolution), 1);
     m_passRegistry->registerPass(std::make_unique<CompositePass>(resolution), 2);
-
-    if (m_activeDirectionalLightSource) {
-        m_passRegistry->registerPass(
-            std::make_unique<DirectionalShadowPass>(
-                resolution,
-                m_activeDirectionalLightSource->shadowMaterial(),
-                m_activeDirectionalLightSource->shadowFBO(),
-                m_activeDirectionalLightSource->resolution()
-            ),
-            0
-        );
-    }
 
     RegistryManager::Blocks().add(Block::air(), "air");
     RegistryManager::Blocks().add(Block::multiblock(), "multiblock");
@@ -215,10 +203,11 @@ void Engine::render(RenderContext& ctx, const RenderPass* renderPass) const {
         material->setVec3("viewPos", ctx.camera->position());
 
 
-        for (size_t i = 0; i < m_activeDirectionalLightSource->cascadeSplits().size(); i++) {
+        const auto& cascadeSplits =
+            m_passRegistry->getPass<DirectionalShadowPass>()->cascadeSplits();
+        for (size_t i = 0; i < cascadeSplits.size(); i++) {
             material->setFloat(
-                std::format("cascadePlaneDistances[{}]", i),
-                m_activeDirectionalLightSource->cascadeSplits()[i].farPlane
+                std::format("cascadePlaneDistances[{}]", i), cascadeSplits[i].farPlane
             );
         }
     }
@@ -316,11 +305,11 @@ void Engine::render(IndirectRenderContext& ctx, const RenderPass* renderPass) co
         material->setVec3("lightDir", -m_activeDirectionalLightSource->direction());
         material->setVec3("viewPos", ctx.camera->position());
 
-
-        for (size_t i = 0; i < m_activeDirectionalLightSource->cascadeSplits().size(); i++) {
+        const auto& cascadeSplits =
+            m_passRegistry->getPass<DirectionalShadowPass>()->cascadeSplits();
+        for (size_t i = 0; i < cascadeSplits.size(); i++) {
             material->setFloat(
-                std::format("cascadePlaneDistances[{}]", i),
-                m_activeDirectionalLightSource->cascadeSplits()[i].farPlane
+                std::format("cascadePlaneDistances[{}]", i), cascadeSplits[i].farPlane
             );
         }
     }
@@ -422,27 +411,27 @@ void Engine::endFrame() {
     m_renderStats.reset();
 }
 
-void Engine::setDirectionalLightSource(
-    std::shared_ptr<engine::Sun> lightSource, uint8_t passPosition
+gl::TextureArray& Engine::setDirectionalLightSource(
+    std::shared_ptr<engine::DirectionalLight> lightSource, Camera* camera
 ) {
     if (m_activeDirectionalLightSource) {
-        unsubscribeUpdate(m_activeDirectionalLightSource);
         m_passRegistry->deletePass<DirectionalShadowPass>();
     }
 
     m_activeDirectionalLightSource = lightSource.get();
-    subscribeUpdate(lightSource);
 
     // TODO once engine settings is implemented, revisit this (do not register the pass)
     m_passRegistry->registerPass(
         std::make_unique<DirectionalShadowPass>(
-            m_window->windowSize(),
-            lightSource->shadowMaterial(),
-            lightSource->shadowFBO(),
-            lightSource->resolution()
+            m_window->windowSize(), camera, m_activeDirectionalLightSource, glm::ivec2{4096, 4096}
         ),
-        passPosition
+        0
     );
+
+    auto& directionalShadowMaps =
+        m_passRegistry->getPass<DirectionalShadowPass>()->cascadeShadowMaps();
+    m_passRegistry->getPass<TransparentPass>()->setDirectionalShadowMaps(directionalShadowMaps);
+    return directionalShadowMaps;
 }
 
 // TODO track active camera in engine

@@ -15,9 +15,9 @@
 #include "block/Vertex.h"
 #include "render/Material.h"
 #include "render/Renderable.h"
+#include "scene/DirectionalLight.h"
 #include "scene/PointLightManager.h"
 #include "scene/Skybox.h"
-#include "scene/Sun.h"
 #include "scene/Updateable.h"
 #include "utility/ThreadPool.h"
 
@@ -27,7 +27,9 @@
 
 namespace gl {
     class ShaderPipeline;
-}
+    class TextureArray;
+    class CubeMapArray;
+}  // namespace gl
 
 namespace engine {
     class Chunk;
@@ -148,9 +150,10 @@ namespace engine {
         PointLightManager& getPointLightManager() { return m_pointLightManager; }
 
         void setOmniShadowMaps(gl::CubeMapArray& omniShadowMaps);
+        void setDirectionalShadowMaps(gl::TextureArray& directionalShadowMaps);
 
-        void setSun(Sun&& sun) { m_sun = std::make_shared<Sun>(std::move(sun)); }
-        std::weak_ptr<Sun> getSun() const { return m_sun; }
+        void setDirectionalLight(DirectionalLight&& directionalLight);
+        std::weak_ptr<DirectionalLight> getDirectionalLight() const { return m_directionalLight; }
 
         virtual void render(Engine& engine, const Camera* camera, int pass = 0) override;
         virtual void update(float dt) override;
@@ -178,7 +181,7 @@ namespace engine {
 
         Material m_material;
         Skybox m_skybox;
-        std::shared_ptr<Sun> m_sun;
+        std::shared_ptr<DirectionalLight> m_directionalLight;
         PointLightManager m_pointLightManager;
 
         ThreadPool m_genPool;

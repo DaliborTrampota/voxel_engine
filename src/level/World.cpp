@@ -43,7 +43,6 @@ World::World(std::unique_ptr<ITerrainGenerator> gen, glm::ivec3 chunkDims, uint3
     m_material.use();
     m_material.setShadowSupport(true);
     m_material.setTexture(0, TextureManager::Get().blockTextures(), "blockTextures");
-    m_material.setTexture(1, TextureManager::Get().cascadeShadowMaps(), "shadowMap");
     printf("World created\n");
 
     m_generator->setWorld(this);
@@ -549,6 +548,14 @@ std::shared_ptr<Chunk> World::createChunk(const ChunkID& id) {
     return std::make_shared<Chunk>(this, id, std::make_unique<DenseGrid>(m_chunkDims));
 }
 
+void World::setDirectionalShadowMaps(gl::TextureArray& directionalShadowMaps) {
+    m_material.setTexture(1, &directionalShadowMaps, "shadowMap");
+}
+
 void World::setOmniShadowMaps(gl::CubeMapArray& omniShadowMaps) {
     m_material.setTexture(2, &omniShadowMaps, "omniShadowMaps");
+}
+
+void World::setDirectionalLight(DirectionalLight&& directionalLight) {
+    m_directionalLight = std::make_shared<DirectionalLight>(std::move(directionalLight));
 }

@@ -11,13 +11,14 @@
 
 namespace gl {
     class CubeMapArray;
-}
+    class TextureArray;
+}  // namespace gl
 
 namespace engine {
     class Updateable;
     class Renderable;
     class Tickable;
-    class Sun;
+    class DirectionalLight;
     class InputSystem;
     class PointLightManager;
 
@@ -68,16 +69,17 @@ namespace engine {
         Window* window() const { return m_window.get(); }
         InputSystem* inputSystem() const { return m_inputSystem.get(); }
 
-        void setDirectionalLightSource(std::shared_ptr<Sun> lightSource, uint8_t passPosition = 0);
-        Sun* directionalLightSource() const { return m_activeDirectionalLightSource; }
-
+        DirectionalLight* directionalLightSource() const { return m_activeDirectionalLightSource; }
+        gl::TextureArray& setDirectionalLightSource(
+            std::shared_ptr<DirectionalLight> lightSource, Camera* camera
+        );
         gl::CubeMapArray& setPointLightSource(PointLightManager* pointLightManager, Camera* camera);
 
         // RenderPassRegistry* passRegistry() const { return m_passRegistry; }
 
       protected:
         std::unique_ptr<InputSystem> m_inputSystem;
-        Sun* m_activeDirectionalLightSource = nullptr;
+        DirectionalLight* m_activeDirectionalLightSource = nullptr;
         PointLightManager* m_activePointLightManager = nullptr;
 
         RenderPassRegistry* m_passRegistry;

@@ -1,7 +1,7 @@
 #include "TransparentPass.h"
 
 #include <LWGL/GLTypes.h>
-#include <LWGL/texture/TextureRef.h>
+#include <LWGL/texture/TextureArray.h>
 
 #include <glad/glad.h>
 
@@ -23,7 +23,6 @@ TransparentPass::TransparentPass(glm::ivec2 resolution)
     m_transparentMat.setShadowSupport(true);
     m_transparentMat.use();
     m_transparentMat.setTexture(0, TextureManager::Get().blockTextures(), "blockTextures");
-    m_transparentMat.setTexture(1, TextureManager::Get().cascadeShadowMaps(), "shadowMap");
     m_transparentMat.setTexture(
         2, RenderPassRegistry::Get().getPass<ScenePass>()->depthMap(), "opaqueDepthMap"
     );
@@ -80,4 +79,9 @@ void TransparentPass::init() {
 
     material = &m_transparentMat;
     fbo = &m_OIT;
+}
+
+
+void TransparentPass::setDirectionalShadowMaps(gl::TextureArray& directionalShadowMaps) {
+    m_transparentMat.setTexture(1, &directionalShadowMaps, "shadowMap");
 }
