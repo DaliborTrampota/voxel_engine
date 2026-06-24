@@ -34,8 +34,8 @@ void ScenePass::init() {
     m_depthMap.allocate(gl::TextureStorage::FBODepth(m_resolution.x, m_resolution.y));
 
     m_sceneFBO.bind();
-    m_sceneFBO.bindTexture(gl::FBOAttachment::Color, &m_opaque);
-    m_sceneFBO.bindTexture(gl::FBOAttachment::Depth, &m_depthMap);
+    m_sceneFBO.attach(gl::FBOAttachment::Color, &m_opaque);
+    m_sceneFBO.attach(gl::FBOAttachment::Depth, &m_depthMap);
 
     assert(m_sceneFBO.checkCompleteness() == 0);
     m_sceneFBO.unbind();

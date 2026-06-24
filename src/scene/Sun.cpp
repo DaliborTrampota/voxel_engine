@@ -21,9 +21,9 @@ using namespace engine;
 Sun::Sun(glm::ivec2 resolution, const Camera* target, const glm::vec3& direction)
     : m_resolution(resolution),
       m_depthShader(
-          "resources/shaders/SunVert.glsl",
-          "resources/shaders/SunGeom.glsl",
-          "resources/shaders/SunFrag.glsl",
+          "resources/shaders/light/SunVert.glsl",
+          "resources/shaders/light/SunGeom.glsl",
+          "resources/shaders/light/SunFrag.glsl",
           "SunDepthShader"
       ),
       m_direction(glm::normalize(direction)) {
@@ -55,7 +55,7 @@ Sun::Sun(glm::ivec2 resolution, const Camera* target, const glm::vec3& direction
          .dataType = gl::ImageDataType::Float}
     );
     m_depthFBO.bind();
-    m_depthFBO.bindTexture(gl::FBOAttachment::Depth, TextureManager::Get().cascadeShadowMaps());
+    m_depthFBO.attach(gl::FBOAttachment::Depth, TextureManager::Get().cascadeShadowMaps());
 
 
     m_depthFBO.bind();

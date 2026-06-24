@@ -9,9 +9,6 @@ layout(std430, binding = 0) readonly buffer ModelMatrices {
     mat4 models[];
 };
 
-// uniform mat4 projection;
-// uniform mat4 view;
-uniform mat4 model;
 
 out Data {
     vec4 vertPosition;

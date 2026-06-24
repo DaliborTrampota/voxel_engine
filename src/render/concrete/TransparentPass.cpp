@@ -69,9 +69,9 @@ void TransparentPass::init() {
     ScenePass* sPass = RenderPassRegistry::Get().getPass<ScenePass>();
 
     m_OIT.bind();
-    m_OIT.bindTexture(gl::FBOAttachment::Color, &m_accumulation);
-    m_OIT.bindTexture(gl::FBOAttachment::Color + 1, &m_revealage);
-    m_OIT.bindTexture(gl::FBOAttachment::Depth, sPass->depthMap());
+    m_OIT.attach(gl::FBOAttachment::Color, &m_accumulation);
+    m_OIT.attach(gl::FBOAttachment::Color + 1, &m_revealage);
+    m_OIT.attach(gl::FBOAttachment::Depth, sPass->depthMap());
 
     m_OIT.setDrawBuffers({gl::FBOAttachment::Color, gl::FBOAttachment::Color + 1});
 

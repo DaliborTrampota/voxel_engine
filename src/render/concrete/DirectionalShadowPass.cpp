@@ -25,7 +25,7 @@ void DirectionalShadowPass::beforeRender(Engine& engine, uint8_t pass) {
     glDisable(GL_BLEND);
 
     fbo->bind();
-    fbo->clearActive({1.f, 1.f, 1.f, 1.f}, 1.0f);
+    fbo->clearDepth(1.0f);
 
     glm::ivec2 res = viewportSize.value();
     glViewport(0, 0, res.x, res.y);
