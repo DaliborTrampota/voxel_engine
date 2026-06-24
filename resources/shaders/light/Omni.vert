@@ -10,12 +10,6 @@ layout(std430, binding = 0) readonly buffer ModelMatrices {
     mat4 models[];
 };
 
-uniform mat4 projection;
-uniform mat4 view;
-
-out vec3 fragPos;
-
 void main() {
-    fragPos = vec3(models[gl_DrawID] * vec4(aPos, 1.0));
-    gl_Position = projection * view * models[gl_DrawID] * vec4(aPos, 1.0);
+    gl_Position = models[gl_DrawID] * vec4(aPos, 1.0);
 }
