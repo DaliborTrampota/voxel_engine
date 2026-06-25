@@ -33,9 +33,9 @@
 #include "concrete/ScenePass.h"
 #include "concrete/TransparentPass.h"
 
-#include "utility/GPUProfiler.h"
+// #include "utility/GPUProfiler.h"
 
-static engine::GPUProfiler gpuProfiler;
+// static engine::GPUProfiler gpuProfiler;
 
 
 using namespace engine;
@@ -72,7 +72,7 @@ Engine::Engine(std::unique_ptr<Window> window)
     // RegistryManager::Blocks().add(Block(6, Layers::Any, nullptr), "reserved_block_6");
     // RegistryManager::Blocks().add(Block(7, Layers::Any, nullptr), "reserved_block_7");
     // RegistryManager::Blocks().add(Block(8, Layers::Any, nullptr), "reserved_block_8");
-    gpuProfiler.init();
+    // gpuProfiler.init();
 }
 
 
@@ -128,10 +128,10 @@ void Engine::submitRender(IndirectRenderContext&& ctx, bool immediate) {
 }
 
 void Engine::flush() {
-    gpuProfiler.beginFrame();
+    // gpuProfiler.beginFrame();
     //printf("Flush %zu\n", m_renderQueue.size());
     for (const auto& pass : m_passRegistry->passes()) {
-        GPU_SCOPE(&gpuProfiler, std::format("Pass {}", pass->id()));
+        // GPU_SCOPE(&gpuProfiler, std::format("Pass {}", pass->id()));
         for (uint8_t subPass = 0; subPass < pass->passes(); subPass++) {
             pass->beforeRender(*this, subPass);
 
@@ -152,7 +152,7 @@ void Engine::flush() {
 
     // glBindFramebuffer(GL_FRAMEBUFFER, 0);
     // glBindProgramPipeline(0);
-    gpuProfiler.endFrame();
+    // gpuProfiler.endFrame();
     m_renderQueue.clear();
 }
 
