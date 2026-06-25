@@ -27,9 +27,9 @@ namespace engine {
         ) const;
 
       private:
-        // TODO: if this is changed, shader code has to change as well
         static constexpr glm::ivec3 ClusterGridSize = {16, 9, 24};
         static constexpr uint32_t MaxLightsPerCluster = 128;
+        static constexpr uint32_t LocalSize = 64;
 
         Camera* m_camera;
         PointLightManager* m_pointLightManager = nullptr;
@@ -46,6 +46,8 @@ namespace engine {
         };
 
         gl::SSBO<ClusterAABB> m_clusters;
+        uint32_t m_maxClusters;
+        uint32_t m_groups;
         // GPU-only buffers
         gl::SSBO<uint32_t> m_lightIndices;
         gl::SSBO<ClusterGrid> m_clusterGrid;

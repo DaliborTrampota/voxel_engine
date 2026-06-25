@@ -2,9 +2,9 @@
 // clang-format off
 // TODO maybe 64?
 #define MAX_LIGHTS_PER_CLUSTER {{OMNI_MAX_LIGHTS_PER_CLUSTER}}
-// uniform uint MAX_LIGHTS_PER_CLUSTER;
+#define CLUSTER_COUNT {{OMNI_CLUSTER_COUNT}}
+layout(local_size_x = {{OMNI_LOCAL_SIZE}}, local_size_y = 1, local_size_z = 1) in;
 // clang-format on
-layout(local_size_x = 16, local_size_y = 1, local_size_z = 1) in;
 
 // uniform uvec3 clusterGridSize;
 uniform uint lightCount;
@@ -63,17 +63,20 @@ bool aabbLightIntersection(AABB aabb, PointLight light) {
 }
 
 void main() {
-    uint clusterIndex =
-        gl_GlobalInvocationID.x + gl_GlobalInvocationID.y * 16 + gl_GlobalInvocationID.z * 16 * 9;
+    uint clusterIndex = gl_GlobalInvocationID.x;
+    if (clusterIndex >= CLUSTER_COUNT)
+        return;
 
     AABB cluster = clusters[clusterIndex];
 
+    // TODO visibleIndices array is too big and doesnt fit to register, benchmark two pass approach
     uint visibleCount = 0;
     uint visibleIndices[MAX_LIGHTS_PER_CLUSTER];
 
     for (uint i = 0; i < lightCount; i++) {
-        if (aabbLightIntersection(cluster, pointLight[i]) &&
-            visibleCount < MAX_LIGHTS_PER_CLUSTER) {
+        if (visibleCount >= MAX_LIGHTS_PER_CLUSTER)
+            break;
+        if (aabbLightIntersection(cluster, pointLight[i])) {
             visibleIndices[visibleCount++] = i;
         }
     }
@@ -82,7 +85,7 @@ void main() {
     clusterGrid[clusterIndex].offset = offset;
     clusterGrid[clusterIndex].count = visibleCount;
 
-    for (int i = 0; i < visibleCount; i++) {
+    for (uint i = 0; i < visibleCount; i++) {
         lightIndices[offset + i] = visibleIndices[i];
     }
 }

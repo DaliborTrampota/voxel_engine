@@ -17,12 +17,15 @@ ClusterBuildPass::ClusterBuildPass(
       m_pointLightManager(pointLightManager),
       m_clusters(GL_STATIC_DRAW),
       m_compute("resources/shaders/light/ClusterBuild.comp", true) {
-    uint32_t maxClusters = ClusterGridSize.x * ClusterGridSize.y * ClusterGridSize.z;
+    m_maxClusters = ClusterGridSize.x * ClusterGridSize.y * ClusterGridSize.z;
+    m_groups = (m_maxClusters + LocalSize - 1) / LocalSize;
     m_compute.setConstant("OMNI_MAX_LIGHTS_PER_CLUSTER", (int)MaxLightsPerCluster);
+    m_compute.setConstant("OMNI_CLUSTER_COUNT", (int)m_maxClusters);
+    m_compute.setConstant("OMNI_LOCAL_SIZE", (int)LocalSize);
     m_compute.compile();
-    m_clusters.create(maxClusters);
-    m_lightIndices.create(maxClusters * MaxLightsPerCluster);
-    m_clusterGrid.create(maxClusters);
+    m_clusters.create(m_maxClusters);
+    m_lightIndices.create(m_maxClusters * MaxLightsPerCluster);
+    m_clusterGrid.create(m_maxClusters);
     m_atomicCounter.create(1);
     subdivideFrustum();
 }
@@ -41,7 +44,7 @@ void ClusterBuildPass::beforeRender(Engine& engine, uint8_t pass) {
     m_atomicCounter.add(0);
     m_atomicCounter.upload();
 
-    m_compute.dispatch(1, 9, 24);
+    m_compute.dispatch(m_groups, 1, 1);
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
 
