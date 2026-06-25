@@ -106,6 +106,10 @@ void DirectionalShadowPass::afterRender(Engine& engine, uint8_t pass) {
     // );
 }
 
+bool DirectionalShadowPass::shouldRun() const {
+    return m_light->castShadows();
+}
+
 
 void DirectionalShadowPass::calculateLightSpaceMatrices() {
     for (int i = 0; i < m_cascadeSplits.size(); i++) {

@@ -2,10 +2,10 @@
 
 #include "../RenderPass.h"
 #include "render/Material.h"
+#include "scene/PointLightManager.h"
 
 #include <LWGL/buffer/FBO.h>
 #include <LWGL/texture/CubeMapArray.h>
-#include <scene/PointLightManager.h>
 
 #include <glm/glm.hpp>
 

@@ -4,6 +4,9 @@ float shadowFaceOutside() {
 }
 
 float calculateShadow(vec3 fragPosWorldSpace) {
+    if (!castShadows)
+        return 0.0;
+
     vec4 fragPosViewSpace = view * vec4(fragPosWorldSpace, 1.0);
     float depthValue = abs(fragPosViewSpace.z);
 

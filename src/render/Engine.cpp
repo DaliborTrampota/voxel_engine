@@ -131,6 +131,8 @@ void Engine::flush() {
     // gpuProfiler.beginFrame();
     //printf("Flush %zu\n", m_renderQueue.size());
     for (const auto& pass : m_passRegistry->passes()) {
+        if (!pass->shouldRun())
+            continue;
         // GPU_SCOPE(&gpuProfiler, std::format("Pass {}", pass->id()));
         for (uint8_t subPass = 0; subPass < pass->passes(); subPass++) {
             pass->beforeRender(*this, subPass);
@@ -210,6 +212,7 @@ void Engine::render(RenderContext& ctx, const RenderPass* renderPass) const {
         material->setVec3("lightColor", m_activeDirectionalLightSource->lightColor());
         material->setVec3("lightDir", -m_activeDirectionalLightSource->direction());
         material->setVec3("viewPos", ctx.camera->position());
+        material->setBool("castShadows", m_activeDirectionalLightSource->castShadows());
 
 
         const auto& cascadeSplits =
@@ -313,6 +316,7 @@ void Engine::render(IndirectRenderContext& ctx, const RenderPass* renderPass) co
         material->setVec3("lightColor", m_activeDirectionalLightSource->lightColor());
         material->setVec3("lightDir", -m_activeDirectionalLightSource->direction());
         material->setVec3("viewPos", ctx.camera->position());
+        material->setBool("castShadows", m_activeDirectionalLightSource->castShadows());
 
         const auto& cascadeSplits =
             m_passRegistry->getPass<DirectionalShadowPass>()->cascadeSplits();

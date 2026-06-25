@@ -42,6 +42,7 @@ namespace engine {
 
         ID id() const { return m_id; }
         virtual uint8_t passes() const { return m_passes; }
+        virtual bool shouldRun() const { return true; }
 
         const Material* material = nullptr;
         const gl::FBO* fbo = nullptr;

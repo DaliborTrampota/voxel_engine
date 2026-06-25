@@ -25,6 +25,8 @@ namespace engine {
         void beforeRender(Engine& engine, uint8_t pass) override;
         void afterRender(Engine& engine, uint8_t pass) override;
 
+        bool shouldRun() const override;
+
         struct Cascade {
             float farPlane;
             glm::mat4 lightSpace;
