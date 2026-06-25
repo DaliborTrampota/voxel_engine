@@ -1,6 +1,8 @@
 #include "GPUProfiler.h"
 
 #include <glad/glad.h>
+#include <cstdio>
+
 
 using namespace engine;
 

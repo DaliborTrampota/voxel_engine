@@ -66,7 +66,7 @@ namespace engine {
       private:
         ID m_id;
         uint8_t m_passes;
-        inline static unsigned int s_nextPassIndex = 4;
+        inline static unsigned int s_nextPassIndex = 6;
     };
 
 }  // namespace engine

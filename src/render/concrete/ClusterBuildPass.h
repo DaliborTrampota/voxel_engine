@@ -29,6 +29,7 @@ namespace engine {
       private:
         // TODO: if this is changed, shader code has to change as well
         static constexpr glm::ivec3 ClusterGridSize = {16, 9, 24};
+        static constexpr uint32_t MaxLightsPerCluster = 128;
 
         Camera* m_camera;
         PointLightManager* m_pointLightManager = nullptr;

@@ -1,6 +1,9 @@
 #version 460 core
-
-#define MAX_LIGHTS_PER_CLUSTER 256
+// clang-format off
+// TODO maybe 64?
+#define MAX_LIGHTS_PER_CLUSTER {{OMNI_MAX_LIGHTS_PER_CLUSTER}}
+// uniform uint MAX_LIGHTS_PER_CLUSTER;
+// clang-format on
 layout(local_size_x = 16, local_size_y = 1, local_size_z = 1) in;
 
 // uniform uvec3 clusterGridSize;
@@ -69,7 +72,8 @@ void main() {
     uint visibleIndices[MAX_LIGHTS_PER_CLUSTER];
 
     for (uint i = 0; i < lightCount; i++) {
-        if (aabbLightIntersection(cluster, pointLight[i])) {
+        if (aabbLightIntersection(cluster, pointLight[i]) &&
+            visibleCount < MAX_LIGHTS_PER_CLUSTER) {
             visibleIndices[visibleCount++] = i;
         }
     }

@@ -4,6 +4,8 @@
 #include "scene/Camera.h"
 #include "scene/PointLightManager.h"
 
+#include <glad/glad.h>
+
 
 using namespace engine;
 
@@ -14,11 +16,12 @@ ClusterBuildPass::ClusterBuildPass(
       m_camera(camera),
       m_pointLightManager(pointLightManager),
       m_clusters(GL_STATIC_DRAW),
-      m_compute("resources/shaders/light/ClusterBuild.comp") {
+      m_compute("resources/shaders/light/ClusterBuild.comp", true) {
     uint32_t maxClusters = ClusterGridSize.x * ClusterGridSize.y * ClusterGridSize.z;
-    uint32_t MaxClustersPerLight = 40;
+    m_compute.setConstant("OMNI_MAX_LIGHTS_PER_CLUSTER", (int)MaxLightsPerCluster);
+    m_compute.compile();
     m_clusters.create(maxClusters);
-    m_lightIndices.create(pointLightManager->maxLights() * MaxClustersPerLight);
+    m_lightIndices.create(maxClusters * MaxLightsPerCluster);
     m_clusterGrid.create(maxClusters);
     m_atomicCounter.create(1);
     subdivideFrustum();
