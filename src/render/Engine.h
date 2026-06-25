@@ -70,10 +70,11 @@ namespace engine {
         InputSystem* inputSystem() const { return m_inputSystem.get(); }
 
         DirectionalLight* directionalLightSource() const { return m_activeDirectionalLightSource; }
-        gl::TextureArray& setDirectionalLightSource(
-            std::shared_ptr<DirectionalLight> lightSource, Camera* camera
-        );
+        gl::TextureArray& setDirectionalLightSource(DirectionalLight* lightSource, Camera* camera);
         gl::CubeMapArray& setPointLightSource(PointLightManager* pointLightManager, Camera* camera);
+
+        void clearDirectionalLightSource();
+        void clearPointLightSource();
 
         // RenderPassRegistry* passRegistry() const { return m_passRegistry; }
 

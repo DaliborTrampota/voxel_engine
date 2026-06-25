@@ -147,13 +147,13 @@ namespace engine {
         const ITerrainGenerator* getGenerator() const { return m_generator.get(); }
         const Material& getMaterial() const { return m_material; }
         Skybox& getSkybox() { return m_skybox; }
-        PointLightManager& getPointLightManager() { return m_pointLightManager; }
 
         void setOmniShadowMaps(gl::CubeMapArray& omniShadowMaps);
         void setDirectionalShadowMaps(gl::TextureArray& directionalShadowMaps);
 
         void setDirectionalLight(DirectionalLight&& directionalLight);
-        std::weak_ptr<DirectionalLight> getDirectionalLight() const { return m_directionalLight; }
+        DirectionalLight& getDirectionalLight() { return m_directionalLight; }
+        PointLightManager& getPointLightManager() { return m_pointLightManager; }
 
         virtual void render(Engine& engine, const Camera* camera, int pass = 0) override;
         virtual void update(float dt) override;
@@ -181,7 +181,7 @@ namespace engine {
 
         Material m_material;
         Skybox m_skybox;
-        std::shared_ptr<DirectionalLight> m_directionalLight;
+        DirectionalLight m_directionalLight;
         PointLightManager m_pointLightManager;
 
         ThreadPool m_genPool;

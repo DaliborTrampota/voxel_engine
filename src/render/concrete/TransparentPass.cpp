@@ -20,7 +20,6 @@ TransparentPass::TransparentPass(glm::ivec2 resolution)
           "resources/shaders/TransparentFrag.glsl",
           "TransparentChunk"
       ) {
-    m_transparentMat.setShadowSupport(true);
     m_transparentMat.use();
     m_transparentMat.setTexture(0, TextureManager::Get().blockTextures(), "blockTextures");
     m_transparentMat.setTexture(
@@ -84,4 +83,10 @@ void TransparentPass::init() {
 
 void TransparentPass::setDirectionalShadowMaps(gl::TextureArray& directionalShadowMaps) {
     m_transparentMat.setTexture(1, &directionalShadowMaps, "shadowMap");
+    m_transparentMat.setShadowSupport(true);
+}
+
+void TransparentPass::clearDirectionalShadowMaps() {
+    m_transparentMat.setTexture(1, nullptr, "shadowMap");
+    m_transparentMat.setShadowSupport(false);
 }

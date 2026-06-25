@@ -421,13 +421,13 @@ void Engine::endFrame() {
 }
 
 gl::TextureArray& Engine::setDirectionalLightSource(
-    std::shared_ptr<engine::DirectionalLight> lightSource, Camera* camera
+    engine::DirectionalLight* lightSource, Camera* camera
 ) {
     if (m_activeDirectionalLightSource) {
         m_passRegistry->deletePass<DirectionalShadowPass>();
     }
 
-    m_activeDirectionalLightSource = lightSource.get();
+    m_activeDirectionalLightSource = lightSource;
 
     // TODO once engine settings is implemented, revisit this (do not register the pass)
     m_passRegistry->registerPass(
@@ -466,4 +466,16 @@ gl::CubeMapArray& Engine::setPointLightSource(PointLightManager* pointLightManag
     );
 
     return m_passRegistry->getPass<PointLightShadowPass>()->shadowMaps();
+}
+
+void Engine::clearDirectionalLightSource() {
+    m_activeDirectionalLightSource = nullptr;
+    m_passRegistry->deletePass<DirectionalShadowPass>();
+    m_passRegistry->getPass<TransparentPass>()->clearDirectionalShadowMaps();
+}
+
+void Engine::clearPointLightSource() {
+    m_activePointLightManager = nullptr;
+    m_passRegistry->deletePass<ClusterBuildPass>();
+    m_passRegistry->deletePass<PointLightShadowPass>();
 }

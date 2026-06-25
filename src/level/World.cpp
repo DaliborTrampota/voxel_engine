@@ -10,10 +10,12 @@
 #include "events/LevelEvents.h"
 #include "level/Chunk.h"
 #include "level/data/DenseGrid.h"
+#include "physics/Shapes.h"
 #include "render/Engine.h"
 #include "render/RenderContext.h"
 #include "scene/Camera.h"
 #include "utility/CoordUtils.h"
+
 
 
 #include <algorithm>
@@ -557,5 +559,5 @@ void World::setOmniShadowMaps(gl::CubeMapArray& omniShadowMaps) {
 }
 
 void World::setDirectionalLight(DirectionalLight&& directionalLight) {
-    m_directionalLight = std::make_shared<DirectionalLight>(std::move(directionalLight));
+    m_directionalLight = std::move(directionalLight);
 }
