@@ -6,8 +6,8 @@ layout(triangle_strip, max_vertices = 3) out;
 uniform mat4 faceMatrices[6];
 uniform int baseLayer;
 
-in vec2 uv[];
-in flat uint texID[];
+in vec2 vUv[];
+in flat uint vTexID[];
 
 out vec3 fragPos;
 out vec2 uv;
@@ -17,8 +17,8 @@ void main() {
     for (int i = 0; i < 3; ++i) {
         vec4 worldPos = gl_in[i].gl_Position;
         fragPos = worldPos.xyz;
-        uv = uv[i];
-        texID = texID[i];
+        uv = vUv[i];
+        texID = vTexID[i];
         gl_Layer = baseLayer + gl_InvocationID;
         gl_Position = faceMatrices[gl_InvocationID] * worldPos;
         EmitVertex();

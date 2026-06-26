@@ -123,7 +123,7 @@ void ClusterBuildPass::subdivideFrustum() {
 }
 
 bool ClusterBuildPass::shouldRun() const {
-    return m_pointLightManager->shadowLightCount() > 0;
+    return m_pointLightManager && m_pointLightManager->shadowLightCount() > 0;
 }
 
 void ClusterBuildPass::bindForShading(
