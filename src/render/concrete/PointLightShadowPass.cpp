@@ -1,6 +1,8 @@
 #include "PointLightShadowPass.h"
 
+#include "data/TextureManager.h"
 #include "render/Material.h"
+
 
 #include <glad/glad.h>
 #include <format>
@@ -23,6 +25,7 @@ PointLightShadowPass::PointLightShadowPass(
           "OmniShadows"
       ) {
     m_material.mvpSupport(false);
+    m_material.setTexture(0, TextureManager::Get().blockTextures(), "blockTextures");
     material = &m_material;
     fbo = &m_shadowFBO;
     viewportSize = shadowRes;

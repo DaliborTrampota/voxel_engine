@@ -28,15 +28,32 @@ uint32_t PointLightManager::shadowLightCount() const {
     return m_shadowLightCount;
 }
 
-void PointLightManager::addLight(const PointLight& light) {
+PointLightManager::ID PointLightManager::addLight(PointLight& light) {
     if (m_lights.data().size() >= m_maxLights) {
         printf("Max lights reached\n");
-        return;
+        return PointLightManager::InvalidID;
     }
+    light.id = m_nextID++;
     m_lights.add(light);
+    return light.id;
 }
 
-void PointLightManager::removeLight(const PointLight& light) {}
+void PointLightManager::removeLight(ID id) {
+    auto it = std::remove_if(
+        m_lights.data().begin(), m_lights.data().end(), [id](const PointLight& light) {
+            return light.id == id;
+        }
+    );
+    m_lights.data().erase(it, m_lights.data().end());
+}
+
+PointLight& PointLightManager::light(ID id) {
+    return *std::find_if(
+        m_lights.data().begin(), m_lights.data().end(), [id](const PointLight& light) {
+            return light.id == id;
+        }
+    );
+}
 
 void PointLightManager::update(const Camera* camera) {
     assert(camera && "Camera is required for PointLightManager::update");

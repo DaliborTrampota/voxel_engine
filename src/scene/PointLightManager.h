@@ -9,16 +9,21 @@ namespace engine {
 
     class PointLightManager {
       public:
+        using ID = uint32_t;
+        static constexpr ID InvalidID = 0xFFFFFFFF;
+
         PointLightManager(uint32_t maxLights = 1024);
 
         void bindLights(uint32_t binding);
 
         uint32_t lightCount() const;
         uint32_t shadowLightCount() const;
-        void addLight(const PointLight& light);
-        void removeLight(const PointLight& light);
+
+        ID addLight(PointLight& light);
+        void removeLight(ID id);
         void update(const Camera* camera);
 
+        PointLight& light(ID id);
         const std::vector<PointLight>& lights() const;
 
         uint8_t maxShadowLights() const;
@@ -32,5 +37,7 @@ namespace engine {
         uint32_t m_shadowLightCount = 0;
         uint8_t m_maxShadowLights = 8;
         uint32_t m_maxLights;
+
+        ID m_nextID = 0;
     };
 }  // namespace engine

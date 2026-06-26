@@ -10,6 +10,14 @@ layout(std430, binding = 0) readonly buffer ModelMatrices {
     mat4 models[];
 };
 
+out vec2 uv;
+out flat uint texID;
+
 void main() {
+    // clang-format off
+    texID = aData & 65535u;
+    uv = aUV;
+    // clang-format on
+
     gl_Position = models[gl_DrawID] * vec4(aPos, 1.0);
 }

@@ -5,7 +5,8 @@ struct PointLight {
     float intensity;
     float radius;
     uint shadowIndex;
-    // 8 bytes implicit trailing padding, stride = 48
+    uint id;
+    // 4 bytes implicit trailing padding, stride = 48
 };
 
 const uint NoShadow = 0xFFFFFFFF;

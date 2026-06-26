@@ -11,8 +11,9 @@ namespace engine {
         float intensity;
         float radius;
         uint32_t shadowIndex = NoShadow;
+        uint32_t id = 0;  // CPU-side stable handle; not read by GPU (lies past shadowIndex)
         // std430 array stride requires struct size to be multiple of 16 (48 bytes)
-        uint32_t _pad[2];
+        uint32_t _pad;
 
         static constexpr uint32_t NoShadow = 0xFFFFFFFF;
     };
