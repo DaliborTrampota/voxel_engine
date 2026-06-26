@@ -28,17 +28,17 @@ uint32_t PointLightManager::shadowLightCount() const {
     return m_shadowLightCount;
 }
 
-PointLightManager::ID PointLightManager::addLight(PointLight& light) {
+PointLight::ID PointLightManager::addLight(PointLight light) {
     if (m_lights.data().size() >= m_maxLights) {
         printf("Max lights reached\n");
-        return PointLightManager::InvalidID;
+        return PointLight::NoID;
     }
     light.id = m_nextID++;
-    m_lights.add(light);
+    m_lights.add(std::move(light));
     return light.id;
 }
 
-void PointLightManager::removeLight(ID id) {
+void PointLightManager::removeLight(PointLight::ID id) {
     auto it = std::remove_if(
         m_lights.data().begin(), m_lights.data().end(), [id](const PointLight& light) {
             return light.id == id;
@@ -47,7 +47,7 @@ void PointLightManager::removeLight(ID id) {
     m_lights.data().erase(it, m_lights.data().end());
 }
 
-PointLight& PointLightManager::light(ID id) {
+PointLight& PointLightManager::light(PointLight::ID id) {
     return *std::find_if(
         m_lights.data().begin(), m_lights.data().end(), [id](const PointLight& light) {
             return light.id == id;
