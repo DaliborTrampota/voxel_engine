@@ -1,13 +1,19 @@
+// clang-format off
+#define CLUSTER_SIZE_X {{OMNI_CLUSTER_SIZE_X}}
+#define CLUSTER_SIZE_Y {{OMNI_CLUSTER_SIZE_Y}}
+#define CLUSTER_SIZE_Z {{OMNI_CLUSTER_SIZE_Z}}
+// clang-format on
+
 ivec3 clusterIndex() {
-    int x = int(gl_FragCoord.x / resolution.x * 16);
-    int y = int(gl_FragCoord.y / resolution.y * 9);
+    int x = int(gl_FragCoord.x / resolution.x * CLUSTER_SIZE_X);
+    int y = int(gl_FragCoord.y / resolution.y * CLUSTER_SIZE_Y);
 
-    float viewDepth = (view * vec4(fragPos, 1.0)).z;
-    int z = int(log(abs(viewDepth) / nearPlane) / log(farPlane / nearPlane) * 24);
+    float viewDepth = max((view * vec4(fragPos, 1.0)).z, nearPlane);
+    int z = int(log(abs(viewDepth) / nearPlane) / log(farPlane / nearPlane) * CLUSTER_SIZE_Z);
 
-    x = clamp(x, 0, 15);
-    y = clamp(y, 0, 8);
-    z = clamp(z, 0, 23);
+    x = clamp(x, 0, CLUSTER_SIZE_X - 1);
+    y = clamp(y, 0, CLUSTER_SIZE_Y - 1);
+    z = clamp(z, 0, CLUSTER_SIZE_Z - 1);
 
     return ivec3(x, y, z);
 }
@@ -20,7 +26,8 @@ float samplePointShadowMap(uint shadowIndex, vec3 lightToFragDir) {
 vec3 calculatePointLights(vec4 baseColor, ivec3 indexOfCluster) {
     vec3 result = vec3(0.0);
 
-    uint index = indexOfCluster.x + indexOfCluster.y * 16 + indexOfCluster.z * 16 * 9;
+    uint index = indexOfCluster.x + indexOfCluster.y * CLUSTER_SIZE_X +
+                 indexOfCluster.z * CLUSTER_SIZE_X * CLUSTER_SIZE_Y;
     ClusterGrid cluster = clusterGrid[index];
     if (cluster.count == 0) {
         return result;

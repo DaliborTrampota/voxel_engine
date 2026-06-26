@@ -21,6 +21,7 @@ namespace engine {
         void afterRender(Engine& engine, uint8_t pass) override;
 
         uint8_t passes() const override;
+        bool shouldRun() const override;
 
         gl::CubeMapArray& shadowMaps() { return m_shadowMaps; }
 

@@ -91,3 +91,7 @@ void PointLightShadowPass::afterRender(Engine& engine, uint8_t pass) {
 uint8_t PointLightShadowPass::passes() const {
     return m_pointLightManager->shadowLightCount();
 }
+
+bool PointLightShadowPass::shouldRun() const {
+    return m_pointLightManager->shadowLightCount() > 0;
+}

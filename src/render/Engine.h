@@ -91,6 +91,13 @@ namespace engine {
         void beginFrame();
         void endFrame();
 
+        void configureMaterialBeforeRender(
+            const Material* material,
+            const Camera* camera,
+            const std::optional<glm::mat4>& view,
+            const std::optional<glm::mat4>& projection
+        ) const;
+
       private:
         void initUtilityShaders();
 

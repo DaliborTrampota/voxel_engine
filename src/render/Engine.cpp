@@ -57,6 +57,9 @@ Engine::Engine(std::unique_ptr<Window> window)
       m_passRegistry(&RenderPassRegistry::Get()) {
     m_window->subscribe(m_passRegistry);
     Material::setGlobalConstant("CascadeCount", 4);
+    Material::setGlobalConstant("OMNI_CLUSTER_SIZE_X", (int)ClusterBuildPass::ClusterGridSize.x);
+    Material::setGlobalConstant("OMNI_CLUSTER_SIZE_Y", (int)ClusterBuildPass::ClusterGridSize.y);
+    Material::setGlobalConstant("OMNI_CLUSTER_SIZE_Z", (int)ClusterBuildPass::ClusterGridSize.z);
 
     glm::ivec2 resolution = m_window->windowSize();
     m_passRegistry->registerPass(std::make_unique<ScenePass>(resolution), 0);
@@ -188,6 +191,60 @@ void Engine::gameloop() {
     }
 }
 
+
+void Engine::configureMaterialBeforeRender(
+    const Material* material,
+    const Camera* camera,
+    const std::optional<glm::mat4>& view,
+    const std::optional<glm::mat4>& projection
+) const {
+    if (material->supportsShadows()) {
+        if (m_activeDirectionalLightSource) {
+            assert(camera && "Camera is required in RenderContext when material supports shadows");
+
+            // material->setVec3("lightPos", m_directionalLightSource->lightPosition());
+            material->setVec3("lightColor", m_activeDirectionalLightSource->lightColor());
+            material->setVec3("lightDir", -m_activeDirectionalLightSource->direction());
+            material->setVec3("viewPos", camera->position());
+            material->setBool(
+                "castDirectionalShadows", m_activeDirectionalLightSource->castShadows()
+            );
+
+            const auto& cascadeSplits =
+                m_passRegistry->getPass<DirectionalShadowPass>()->cascadeSplits();
+            for (size_t i = 0; i < cascadeSplits.size(); i++) {
+                material->setFloat(
+                    std::format("cascadePlaneDistances[{}]", i), cascadeSplits[i].farPlane
+                );
+            }
+        } else {
+            material->setBool("castDirectionalShadows", false);
+        }
+
+
+        if (m_activePointLightManager) {
+            m_passRegistry->getPass<ClusterBuildPass>()->bindForShading();
+            material->setBool("omniLightsEnabled", true);
+        } else {
+            material->setBool("omniLightsEnabled", false);
+        }
+    }
+
+    if (material->supportsMVP()) {
+        if (view.has_value()) {
+            material->setMat4("view", view.value());
+        } else if (camera) {
+            material->setMat4("view", camera->getView());
+        }
+
+        if (projection.has_value()) {
+            material->setMat4("projection", projection.value());
+        } else if (camera) {
+            material->setMat4("projection", camera->getProjection());
+        }
+    }
+}
+
 void Engine::render(RenderContext& ctx, const RenderPass* renderPass) const {
     size_t n = ctx.attributes->length();
     if (n == 0)
@@ -206,38 +263,7 @@ void Engine::render(RenderContext& ctx, const RenderPass* renderPass) const {
     material->use();
     material->setMat4("model", ctx.matrices.model);
 
-    if (material->supportsShadows() && m_activeDirectionalLightSource) {
-        assert(ctx.camera && "RenderContext Camera is required when material supports shadows");
-        // material->setVec3("lightPos", m_directionalLightSource->lightPosition());
-        material->setVec3("lightColor", m_activeDirectionalLightSource->lightColor());
-        material->setVec3("lightDir", -m_activeDirectionalLightSource->direction());
-        material->setVec3("viewPos", ctx.camera->position());
-        material->setBool("castShadows", m_activeDirectionalLightSource->castShadows());
-
-
-        const auto& cascadeSplits =
-            m_passRegistry->getPass<DirectionalShadowPass>()->cascadeSplits();
-        for (size_t i = 0; i < cascadeSplits.size(); i++) {
-            material->setFloat(
-                std::format("cascadePlaneDistances[{}]", i), cascadeSplits[i].farPlane
-            );
-        }
-    }
-
-    if (material->supportsMVP()) {
-        if (ctx.matrices.view.has_value()) {
-            material->setMat4("view", ctx.matrices.view.value());
-        } else if (ctx.camera) {
-            material->setMat4("view", ctx.camera->getView());
-        }
-
-        if (ctx.matrices.projection.has_value()) {
-            material->setMat4("projection", ctx.matrices.projection.value());
-        } else if (ctx.camera) {
-            material->setMat4("projection", ctx.camera->getProjection());
-        }
-    }
-
+    configureMaterialBeforeRender(material, ctx.camera, ctx.matrices.view, ctx.matrices.projection);
 
     ctx.attributes->bind();
     material->bindTextures();
@@ -308,39 +334,7 @@ void Engine::render(IndirectRenderContext& ctx, const RenderPass* renderPass) co
 
     material->use();
 
-    if (material->supportsShadows() && m_activeDirectionalLightSource) {
-        assert(
-            ctx.camera && "IndirectRenderContext Camera is required when material supports shadows"
-        );
-        // material->setVec3("lightPos", m_directionalLightSource->lightPosition());
-        material->setVec3("lightColor", m_activeDirectionalLightSource->lightColor());
-        material->setVec3("lightDir", -m_activeDirectionalLightSource->direction());
-        material->setVec3("viewPos", ctx.camera->position());
-        material->setBool("castShadows", m_activeDirectionalLightSource->castShadows());
-
-        const auto& cascadeSplits =
-            m_passRegistry->getPass<DirectionalShadowPass>()->cascadeSplits();
-        for (size_t i = 0; i < cascadeSplits.size(); i++) {
-            material->setFloat(
-                std::format("cascadePlaneDistances[{}]", i), cascadeSplits[i].farPlane
-            );
-        }
-    }
-
-    if (material->supportsMVP()) {
-        if (ctx.matrices.view.has_value()) {
-            material->setMat4("view", ctx.matrices.view.value());
-        } else if (ctx.camera) {
-            material->setMat4("view", ctx.camera->getView());
-        }
-
-        if (ctx.matrices.projection.has_value()) {
-            material->setMat4("projection", ctx.matrices.projection.value());
-        } else if (ctx.camera) {
-            material->setMat4("projection", ctx.camera->getProjection());
-        }
-    }
-
+    configureMaterialBeforeRender(material, ctx.camera, ctx.matrices.view, ctx.matrices.projection);
 
     // if (ctx.depthFunc == DepthFunc::LessEqual)
     //     glDepthFunc(GL_LEQUAL);

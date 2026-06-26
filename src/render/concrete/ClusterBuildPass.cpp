@@ -4,6 +4,7 @@
 #include "scene/Camera.h"
 #include "scene/PointLightManager.h"
 
+#include <LWGL/render/ShaderProgram.h>
 #include <glad/glad.h>
 
 
@@ -22,6 +23,7 @@ ClusterBuildPass::ClusterBuildPass(
     m_compute.setConstant("OMNI_MAX_LIGHTS_PER_CLUSTER", (int)MaxLightsPerCluster);
     m_compute.setConstant("OMNI_CLUSTER_COUNT", (int)m_maxClusters);
     m_compute.setConstant("OMNI_LOCAL_SIZE", (int)LocalSize);
+
     m_compute.compile();
     m_clusters.create(m_maxClusters);
     m_lightIndices.create(m_maxClusters * MaxLightsPerCluster);
@@ -120,9 +122,14 @@ void ClusterBuildPass::subdivideFrustum() {
     m_clusters.upload();
 }
 
+bool ClusterBuildPass::shouldRun() const {
+    return m_pointLightManager->shadowLightCount() > 0;
+}
+
 void ClusterBuildPass::bindForShading(
-    unsigned int clusterGridBinding, unsigned int lightIndicesBinding
+    unsigned int lightBinding, unsigned int clusterGridBinding, unsigned int lightIndicesBinding
 ) const {
+    m_pointLightManager->bindLights(lightBinding);
     m_clusterGrid.bind(clusterGridBinding);
     m_lightIndices.bind(lightIndicesBinding);
 }

@@ -13,6 +13,7 @@ namespace engine {
 
     class ClusterBuildPass : public RenderPass {
       public:
+        static constexpr glm::ivec3 ClusterGridSize = {16, 9, 24};
         ClusterBuildPass(
             glm::ivec2 resolution, Camera* camera, PointLightManager* pointLightManager
         );
@@ -21,13 +22,15 @@ namespace engine {
         void afterRender(Engine& engine, uint8_t pass) override {}
 
         void resize(glm::ivec2 resolution) override;
+        bool shouldRun() const override;
 
         void bindForShading(
-            unsigned int clusterGridBinding = 2, unsigned int lightIndicesBinding = 3
+            unsigned int lightBinding = 1,
+            unsigned int clusterGridBinding = 2,
+            unsigned int lightIndicesBinding = 3
         ) const;
 
       private:
-        static constexpr glm::ivec3 ClusterGridSize = {16, 9, 24};
         static constexpr uint32_t MaxLightsPerCluster = 128;
         static constexpr uint32_t LocalSize = 64;
 

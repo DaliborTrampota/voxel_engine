@@ -28,3 +28,4 @@ layout(std430, binding = 3) readonly buffer lightIndicesSSBO {
 };
 
 uniform samplerCubeArray omniShadowMaps;
+uniform bool omniLightsEnabled;

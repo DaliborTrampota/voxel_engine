@@ -62,8 +62,10 @@ void main() {
     float shadow = calculateShadow(fragPos);
     vec3 lighting = phongLighting(col, shadow);
 
-    vec3 pointLights = calculatePointLights(col, clusterIndex());
-    lighting += pointLights;
+    if (omniLightsEnabled) {
+        vec3 pointLights = calculatePointLights(col, clusterIndex());
+        lighting += pointLights;
+    }
 
     float transmittance = 1.0;
     // if (translucentDensity > 0.0) {
