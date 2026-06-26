@@ -48,6 +48,7 @@ void GPUProfiler::endFrame() {
         glGetQueryObjectui64v(m_queries[read][s.begin], GL_QUERY_RESULT, &t0);
         glGetQueryObjectui64v(m_queries[read][s.end], GL_QUERY_RESULT, &t1);
         double time = (t1 - t0) / 1'000'000.0;
+        //todo move to print
         printf("%s: %fms\n", s.name.c_str(), time);
     }
 }

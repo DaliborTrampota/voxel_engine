@@ -4,6 +4,10 @@
 #include <cassert>
 #include <cstdio>
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/norm.hpp>
+
+
 #include "scene/Camera.h"
 
 using namespace engine;
@@ -39,8 +43,8 @@ void PointLightManager::update(const Camera* camera) {
 
     std::vector<PointLight>& lights = m_lights.data();
     std::sort(lights.begin(), lights.end(), [camera](const PointLight& a, const PointLight& b) {
-        return glm::distance(a.position, camera->position()) <
-               glm::distance(b.position, camera->position());
+        return glm::distance2(a.position, camera->position()) <
+               glm::distance2(b.position, camera->position());
     });
 
     m_shadowLightCount = 0;
