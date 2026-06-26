@@ -8,8 +8,8 @@ ivec3 clusterIndex() {
     int x = int(gl_FragCoord.x / resolution.x * CLUSTER_SIZE_X);
     int y = int(gl_FragCoord.y / resolution.y * CLUSTER_SIZE_Y);
 
-    float viewDepth = max((view * vec4(fragPos, 1.0)).z, nearPlane);
-    int z = int(log(abs(viewDepth) / nearPlane) / log(farPlane / nearPlane) * CLUSTER_SIZE_Z);
+    float viewDepth = max(abs((view * vec4(fragPos, 1.0)).z), nearPlane);
+    int z = int(log(viewDepth / nearPlane) / log(farPlane / nearPlane) * CLUSTER_SIZE_Z);
 
     x = clamp(x, 0, CLUSTER_SIZE_X - 1);
     y = clamp(y, 0, CLUSTER_SIZE_Y - 1);
