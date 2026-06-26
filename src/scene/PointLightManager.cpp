@@ -68,8 +68,8 @@ void PointLightManager::update(const Camera* camera) {
     });
 
     m_shadowLightCount = 0;
-    for (int i = 0; i < lights.size(); i++) {
-        if (i < m_maxShadowLights) {
+    for (size_t i = 0; i < lights.size(); i++) {
+        if (i < static_cast<size_t>(m_maxShadowLights)) {
             lights[i].shadowIndex = i;
             m_shadowLightCount++;
         } else {
