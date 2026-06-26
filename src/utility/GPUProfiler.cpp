@@ -1,6 +1,7 @@
 #include "GPUProfiler.h"
 
 #include <glad/glad.h>
+#include <cassert>
 #include <cstdio>
 
 
@@ -26,6 +27,10 @@ void GPUProfiler::beginFrame() {
 }
 
 int GPUProfiler::begin(std::string name) {
+    assert(m_marker < MAX && "GPU profiler scope budget exceeded (each scope uses 2 markers)");
+    if (m_marker >= MAX) {
+        return -1;
+    }
     int b = m_marker++;
     glQueryCounter(m_queries[m_slot][b], GL_TIMESTAMP);
     m_scopes[m_slot].push_back({name, m_depth++, b, -1});
@@ -33,10 +38,17 @@ int GPUProfiler::begin(std::string name) {
 }
 
 void GPUProfiler::end(int handle) {
+    if (handle < 0 || handle >= m_scopes[m_slot].size()) {
+        return;
+    }
+    m_depth--;
+    assert(m_marker < MAX && "GPU profiler scope budget exceeded (each scope uses 2 markers)");
+    if (m_marker >= MAX) {
+        return;
+    }
     int e = m_marker++;
     glQueryCounter(m_queries[m_slot][e], GL_TIMESTAMP);
     m_scopes[m_slot][handle].end = e;
-    m_depth--;
 }
 
 void GPUProfiler::endFrame() {
