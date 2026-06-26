@@ -14,9 +14,7 @@ using namespace engine;
 PointLightShadowPass::PointLightShadowPass(
     glm::ivec2 resolution, PointLightManager* pointLightManager, const glm::ivec2& shadowRes
 )
-    : RenderPass(
-          resolution, RenderPass::PointLightShadow, pointLightManager->maxShadowLights() * 6
-      ),
+    : RenderPass(resolution, RenderPass::PointLightShadow, pointLightManager->maxShadowLights()),
       m_pointLightManager(pointLightManager),
       m_material(
           "resources/shaders/light/Omni.vert",

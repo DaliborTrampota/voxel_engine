@@ -22,7 +22,9 @@ namespace engine {
         void removeLight(PointLight::ID id);
         void update(const Camera* camera);
 
-        PointLight& light(PointLight::ID id);
+        /// @brief Get a light by its ID.
+        /// @warning The returned pointer is invalidated next frame due to distance sorting done in update().
+        PointLight* light(PointLight::ID id);
         const std::vector<PointLight>& lights() const;
 
         uint8_t maxShadowLights() const;

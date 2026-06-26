@@ -47,12 +47,15 @@ void PointLightManager::removeLight(PointLight::ID id) {
     m_lights.data().erase(it, m_lights.data().end());
 }
 
-PointLight& PointLightManager::light(PointLight::ID id) {
-    return *std::find_if(
-        m_lights.data().begin(), m_lights.data().end(), [id](const PointLight& light) {
+PointLight* PointLightManager::light(PointLight::ID id) {
+    auto res =
+        std::find_if(m_lights.data().begin(), m_lights.data().end(), [id](const PointLight& light) {
             return light.id == id;
-        }
-    );
+        });
+    if (res == m_lights.data().end()) {
+        return nullptr;
+    }
+    return &*res;
 }
 
 void PointLightManager::update(const Camera* camera) {

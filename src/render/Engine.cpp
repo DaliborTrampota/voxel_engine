@@ -288,19 +288,8 @@ void Engine::render(GroupRenderContext& ctx, const RenderPass* renderPass) const
 
     material->use();
 
-    if (!renderPass->material) {
-        if (ctx.matrices.view.has_value()) {
-            material->setMat4("view", ctx.matrices.view.value());
-        } else if (ctx.camera) {
-            material->setMat4("view", ctx.camera->getView());
-        }
-
-        if (ctx.matrices.projection.has_value()) {
-            material->setMat4("projection", ctx.matrices.projection.value());
-        } else if (ctx.camera) {
-            material->setMat4("projection", ctx.camera->getProjection());
-        }
-    }
+    // TODO, GroupRenderContext is not tested
+    configureMaterialBeforeRender(material, ctx.camera, ctx.matrices.view, ctx.matrices.projection);
 
     // Render all draw calls with only model matrix and attributes changing
     for (const auto& drawCall : ctx.drawCalls) {
@@ -421,6 +410,8 @@ void Engine::endFrame() {
 gl::TextureArray& Engine::setDirectionalLightSource(
     engine::DirectionalLight* lightSource, Camera* camera
 ) {
+    assert(lightSource && "Light source is required");
+    assert(camera && "Camera is required");
     if (m_activeDirectionalLightSource) {
         m_passRegistry->deletePass<DirectionalShadowPass>();
     }
@@ -443,6 +434,8 @@ gl::TextureArray& Engine::setDirectionalLightSource(
 
 // TODO track active camera in engine
 gl::CubeMapArray& Engine::setPointLightSource(PointLightManager* pointLightManager, Camera* camera) {
+    assert(pointLightManager && "Point light manager is required");
+    assert(camera && "Camera is required");
     if (m_activePointLightManager) {
         m_passRegistry->deletePass<ClusterBuildPass>();
         m_passRegistry->deletePass<PointLightShadowPass>();
