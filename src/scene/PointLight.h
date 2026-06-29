@@ -21,5 +21,11 @@ namespace engine {
         static constexpr ID NoID = 0xFFFFFFFF;
     };
 
+    static_assert(offsetof(PointLight, position) == 0);
+    static_assert(offsetof(PointLight, color) == 16);
+    static_assert(offsetof(PointLight, intensity) == 28);
+    static_assert(offsetof(PointLight, radius) == 32);
+    static_assert(offsetof(PointLight, shadowIndex) == 36);
+    static_assert(offsetof(PointLight, id) == 40);
     static_assert(sizeof(PointLight) == 48, "PointLight size must match std430 GPU layout");
 }  // namespace engine

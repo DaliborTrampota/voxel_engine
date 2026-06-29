@@ -5,8 +5,10 @@
 
 
 #include <glad/glad.h>
+#include <cassert>
 #include <format>
 #include <glm/gtc/matrix_transform.hpp>
+
 
 
 using namespace engine;

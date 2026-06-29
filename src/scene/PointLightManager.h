@@ -2,6 +2,9 @@
 
 #include <LWGL/buffer/SSBO.h>
 
+#include <cstdint>
+#include <vector>
+
 #include "PointLight.h"
 
 namespace engine {

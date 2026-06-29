@@ -2,6 +2,8 @@
 
 #include <LWGL/buffer/FBO.h>
 #include <glad/glad.h>
+#include <array>
+#include <cassert>
 #include <numeric>
 
 #include "physics/AABB.h"
@@ -30,6 +32,7 @@ DirectionalShadowPass::DirectionalShadowPass(
       ),
       m_light(light),
       m_target(camera) {
+    m_depthShader.mvpSupport(false);
     Material::setGlobalConstant("CascadeCount", static_cast<int>(m_cascadeSplits.size()));
     this->material = &m_depthShader;
     this->fbo = &m_depthFBO;

@@ -7,6 +7,8 @@
 #include <LWGL/texture/TextureArray.h>
 #include <render/Material.h>
 
+#include <vector>
+
 
 namespace engine {
 
