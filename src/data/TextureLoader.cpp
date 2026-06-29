@@ -1,13 +1,12 @@
 #include "TextureLoader.h"
 
 #include <algorithm>
+#include <cstdlib>
 #include <string>
 #include <vector>
 
-#define STB_IMAGE_IMPLEMENTATION
 #include <LWGL/texture/ImageData.h>
 #include <glad/glad.h>
-#include <tools/stb_image.h>
 
 #include "data/TextureManager.h"
 
@@ -57,7 +56,13 @@ void TextureLoader::loadArray2D(
     );
     TextureManager& texMgr = TextureManager::Get();
     for (const auto& imgData : images) {
-        int layer = target->upload(imgData);
+        int layer;
+        if (imgData.width == width && imgData.height == height) {
+            layer = target->upload(imgData);
+        } else {
+            gl::ImageData scaled = imgData.resize(width, height, gl::ImageResizeFilter::Nearest);
+            layer = target->upload(scaled);
+        }
         texMgr.add(getTextureName(imgData.path), layer);
     }
 }
