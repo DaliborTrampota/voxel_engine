@@ -9,12 +9,18 @@
 #include "Window.h"
 
 
+namespace gl {
+    class CubeMapArray;
+    class TextureArray;
+}  // namespace gl
+
 namespace engine {
     class Updateable;
     class Renderable;
     class Tickable;
-    class Sun;
+    class DirectionalLight;
     class InputSystem;
+    class PointLightManager;
 
     struct RenderStats {
         uint32_t drawCalls = 0;
@@ -50,7 +56,9 @@ namespace engine {
         virtual void flush();
 
         void subscribeUpdate(std::shared_ptr<Updateable> updateable);
+        void unsubscribeUpdate(Updateable* updateable);
         void subscribeTick(std::shared_ptr<Tickable> tickable);
+        void unsubscribeTick(Tickable* tickable);
         void fireUpdate(float dt);
         void gameloop();
 
@@ -61,12 +69,19 @@ namespace engine {
         Window* window() const { return m_window.get(); }
         InputSystem* inputSystem() const { return m_inputSystem.get(); }
 
-        void setDirectionalLightSource(std::shared_ptr<Sun> lightSource, uint8_t passPosition = 0);
-        std::shared_ptr<Sun> directionalLightSource() const { return m_directionalLightSource; }
+        DirectionalLight* directionalLightSource() const { return m_activeDirectionalLightSource; }
+        gl::TextureArray& setDirectionalLightSource(DirectionalLight* lightSource, Camera* camera);
+        gl::CubeMapArray& setPointLightSource(PointLightManager* pointLightManager, Camera* camera);
+
+        void clearDirectionalLightSource();
+        void clearPointLightSource();
+
+        // RenderPassRegistry* passRegistry() const { return m_passRegistry; }
 
       protected:
         std::unique_ptr<InputSystem> m_inputSystem;
-        std::shared_ptr<Sun> m_directionalLightSource;
+        DirectionalLight* m_activeDirectionalLightSource = nullptr;
+        PointLightManager* m_activePointLightManager = nullptr;
 
         RenderPassRegistry* m_passRegistry;
         std::vector<std::variant<RenderContext, GroupRenderContext, IndirectRenderContext>>
@@ -75,6 +90,13 @@ namespace engine {
 
         void beginFrame();
         void endFrame();
+
+        void configureMaterialBeforeRender(
+            const Material* material,
+            const Camera* camera,
+            const std::optional<glm::mat4>& view,
+            const std::optional<glm::mat4>& projection
+        ) const;
 
       private:
         void initUtilityShaders();

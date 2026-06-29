@@ -1,7 +1,7 @@
 #include "TransparentPass.h"
 
 #include <LWGL/GLTypes.h>
-#include <LWGL/texture/TextureRef.h>
+#include <LWGL/texture/TextureArray.h>
 
 #include <glad/glad.h>
 
@@ -20,10 +20,8 @@ TransparentPass::TransparentPass(glm::ivec2 resolution)
           "resources/shaders/TransparentFrag.glsl",
           "TransparentChunk"
       ) {
-    m_transparentMat.setShadowSupport(true);
     m_transparentMat.use();
     m_transparentMat.setTexture(0, TextureManager::Get().blockTextures(), "blockTextures");
-    m_transparentMat.setTexture(1, TextureManager::Get().cascadeShadowMaps(), "shadowMap");
     m_transparentMat.setTexture(
         2, RenderPassRegistry::Get().getPass<ScenePass>()->depthMap(), "opaqueDepthMap"
     );
@@ -69,9 +67,9 @@ void TransparentPass::init() {
     ScenePass* sPass = RenderPassRegistry::Get().getPass<ScenePass>();
 
     m_OIT.bind();
-    m_OIT.bindTexture(gl::FBOAttachment::Color, &m_accumulation);
-    m_OIT.bindTexture(gl::FBOAttachment::Color + 1, &m_revealage);
-    m_OIT.bindTexture(gl::FBOAttachment::Depth, sPass->depthMap());
+    m_OIT.attach(gl::FBOAttachment::Color, &m_accumulation);
+    m_OIT.attach(gl::FBOAttachment::Color + 1, &m_revealage);
+    m_OIT.attach(gl::FBOAttachment::Depth, sPass->depthMap());
 
     m_OIT.setDrawBuffers({gl::FBOAttachment::Color, gl::FBOAttachment::Color + 1});
 
@@ -80,4 +78,15 @@ void TransparentPass::init() {
 
     material = &m_transparentMat;
     fbo = &m_OIT;
+}
+
+
+void TransparentPass::setDirectionalShadowMaps(gl::TextureArray& directionalShadowMaps) {
+    m_transparentMat.setTexture(1, &directionalShadowMaps, "shadowMap");
+    m_transparentMat.setShadowSupport(true);
+}
+
+void TransparentPass::clearDirectionalShadowMaps() {
+    m_transparentMat.setTexture(1, nullptr, "shadowMap");
+    m_transparentMat.setShadowSupport(false);
 }

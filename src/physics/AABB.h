@@ -7,6 +7,7 @@ namespace engine {
 
     class Geometry;
     struct Plane;
+    struct Sphere;
 
     struct AABB {
         glm::vec3 min;
@@ -15,6 +16,7 @@ namespace engine {
         bool contains(const glm::vec3& point) const;
         bool intersects(const AABB& other) const;
         bool intersects(const Plane& plane) const;
+        bool intersects(const Sphere& sphere) const;
         bool isOutsidePlane(const Plane& plane) const;
         glm::vec3 center() const;
 

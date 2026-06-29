@@ -1,11 +1,38 @@
 #pragma once
 
 #include <array>
+#include <cassert>
 
 #include "../Globals.h"
 #include "block/Face.h"
+#include "block/Side.h"
 
 namespace engine::data {
+
+    static_assert(
+        static_cast<int>(Side::North) == static_cast<int>(FaceTag::Front),
+        "Side::North must be equal to FaceTag::Front"
+    );
+    static_assert(
+        static_cast<int>(Side::West) == static_cast<int>(FaceTag::Right),
+        "Side::West must be equal to FaceTag::Right"
+    );
+    static_assert(
+        static_cast<int>(Side::South) == static_cast<int>(FaceTag::Back),
+        "Side::South must be equal to FaceTag::Back"
+    );
+    static_assert(
+        static_cast<int>(Side::East) == static_cast<int>(FaceTag::Left),
+        "Side::East must be equal to FaceTag::Left"
+    );
+    static_assert(
+        static_cast<int>(Side::Up) == static_cast<int>(FaceTag::Top),
+        "Side::Up must be equal to FaceTag::Top"
+    );
+    static_assert(
+        static_cast<int>(Side::Down) == static_cast<int>(FaceTag::Bottom),
+        "Side::Down must be equal to FaceTag::Bottom"
+    );
 
     template <typename T, size_t row, size_t col>
     using array2d = std::array<std::array<T, col>, row>;
@@ -71,14 +98,54 @@ namespace engine::data {
         glm::vec3(-UP)      // down
     };
 
-    constexpr std::array<glm::vec2, 6> uvs = {
-        glm::vec2(0, 1),
-        glm::vec2(0, 0),
-        glm::vec2(1, 1),
-        glm::vec2(1, 0),
-        glm::vec2(1, 1),
-        glm::vec2(0, 0)
-    };
+    // Per-face UVs for Box(), one row per face matching `faces` above (north, west,
+    // south, east, up, down). Unlike the single `uvs` table, these account for each
+    // face's distinct vertex winding so every face is upright and consistent with the
+    // SquareFace/Cube convention (start->uvEnd, end->uvStart).
+    constexpr array2d<glm::vec2, 6, 6> box_uvs = {{
+        // north (+Z)
+        {glm::vec2(0, 0),
+         glm::vec2(0, 1),
+         glm::vec2(1, 0),
+         glm::vec2(1, 1),
+         glm::vec2(1, 0),
+         glm::vec2(0, 1)},
+        // west (-X)
+        {glm::vec2(0, 0),
+         glm::vec2(0, 1),
+         glm::vec2(1, 0),
+         glm::vec2(1, 1),
+         glm::vec2(1, 0),
+         glm::vec2(0, 1)},
+        // south (-Z)
+        {glm::vec2(1, 1),
+         glm::vec2(1, 0),
+         glm::vec2(0, 1),
+         glm::vec2(0, 0),
+         glm::vec2(0, 1),
+         glm::vec2(1, 0)},
+        // east (+X)
+        {glm::vec2(0, 0),
+         glm::vec2(0, 1),
+         glm::vec2(1, 0),
+         glm::vec2(1, 1),
+         glm::vec2(1, 0),
+         glm::vec2(0, 1)},
+        // up (+Y)
+        {glm::vec2(1, 0),
+         glm::vec2(0, 0),
+         glm::vec2(1, 1),
+         glm::vec2(0, 1),
+         glm::vec2(1, 1),
+         glm::vec2(0, 0)},
+        // down (-Y)
+        {glm::vec2(0, 1),
+         glm::vec2(1, 1),
+         glm::vec2(0, 0),
+         glm::vec2(1, 0),
+         glm::vec2(0, 0),
+         glm::vec2(1, 1)},
+    }};
 
     constexpr std::array<glm::ivec2, 6> axisForSide = {
         glm::ivec2(2, 1),  // north

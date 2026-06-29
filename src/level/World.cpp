@@ -1,5 +1,7 @@
 #include "World.h"
 
+#include <LWGL/texture/CubeMapArray.h>
+
 #include "../Globals.h"
 #include "ITerrainGenerator.h"
 #include "block/Block.h"
@@ -8,10 +10,12 @@
 #include "events/LevelEvents.h"
 #include "level/Chunk.h"
 #include "level/data/DenseGrid.h"
+#include "physics/Shapes.h"
 #include "render/Engine.h"
 #include "render/RenderContext.h"
 #include "scene/Camera.h"
 #include "utility/CoordUtils.h"
+
 
 
 #include <algorithm>
@@ -41,7 +45,6 @@ World::World(std::unique_ptr<ITerrainGenerator> gen, glm::ivec3 chunkDims, uint3
     m_material.use();
     m_material.setShadowSupport(true);
     m_material.setTexture(0, TextureManager::Get().blockTextures(), "blockTextures");
-    m_material.setTexture(1, TextureManager::Get().cascadeShadowMaps(), "shadowMap");
     printf("World created\n");
 
     m_generator->setWorld(this);
@@ -299,6 +302,13 @@ bool World::canSeeFace(const Block& curBlock, glm::vec3 pos, glm::ivec3 dir) con
 }
 
 void World::render(Engine& engine, const Camera* camera, int pass) {
+    m_pointLightManager.update(camera);
+
+
+    m_material.setVec2("resolution", engine.window()->windowSize());
+    m_material.setFloat("nearPlane", camera->nearPlane());
+    m_material.setFloat("farPlane", camera->farPlane());
+
     // Copy chunk pointers while holding lock, then render without lock
     std::vector<std::shared_ptr<Chunk>> chunksToRender;
     {
@@ -316,6 +326,23 @@ void World::render(Engine& engine, const Camera* camera, int pass) {
 
     m_opaqueBuffer.begin();
     m_transparentBuffer.begin();
+    m_omniShadowBuffer.begin();
+    for (const auto& chunk : chunksToRender) {
+        if (!chunk->opaqueAlloc().isValid())
+            continue;
+        AABB chunkAABB{
+            .min = glm::vec3(chunk->id() * m_chunkDims),
+            .max = glm::vec3((chunk->id() + 1) * m_chunkDims)
+        };
+        for (int i = 0; i < m_pointLightManager.shadowLightCount(); i++) {
+            const PointLight& light = m_pointLightManager.lights()[i];
+            Sphere lightSphere(light.position, light.radius);
+            if (chunkAABB.intersects(lightSphere)) {
+                m_omniShadowBuffer.add(chunk->opaqueAlloc(), chunk->modelMatrix());
+                break;
+            }
+        }
+    }
 
     // Render without lock - shared_ptr keeps chunks alive
     for (auto& chunk : chunksToRender) {
@@ -344,6 +371,7 @@ void World::render(Engine& engine, const Camera* camera, int pass) {
 
     m_opaqueBuffer.upload();
     m_transparentBuffer.upload();
+    m_omniShadowBuffer.upload();
 
     IndirectRenderContext ctxOpaque{
         .pool = &m_opaquePool,
@@ -361,9 +389,17 @@ void World::render(Engine& engine, const Camera* camera, int pass) {
         .passMask = RenderPass::SceneTransparent | RenderPass::DirectionalShadow
     };
 
+    IndirectRenderContext ctxOmniShadows{
+        .pool = &m_opaquePool,
+        .batch = &m_omniShadowBuffer,
+        .material = &m_material,
+        .camera = camera,
+        .passMask = RenderPass::PointLightShadow
+    };
+
     engine.submitRender(std::move(ctxOpaque));
     engine.submitRender(std::move(ctxTransparent));
-
+    engine.submitRender(std::move(ctxOmniShadows));
 
     m_skybox.render(engine, camera);
     //std::cout << "Rendered chunks: " << m_chunks.size() << "\n";
@@ -512,4 +548,16 @@ void World::update(float dt) {
 
 std::shared_ptr<Chunk> World::createChunk(const ChunkID& id) {
     return std::make_shared<Chunk>(this, id, std::make_unique<DenseGrid>(m_chunkDims));
+}
+
+void World::setDirectionalShadowMaps(gl::TextureArray& directionalShadowMaps) {
+    m_material.setTexture(1, &directionalShadowMaps, "shadowMap");
+}
+
+void World::setOmniShadowMaps(gl::CubeMapArray& omniShadowMaps) {
+    m_material.setTexture(2, &omniShadowMaps, "omniShadowMaps");
+}
+
+void World::setDirectionalLight(DirectionalLight&& directionalLight) {
+    m_directionalLight = std::move(directionalLight);
 }

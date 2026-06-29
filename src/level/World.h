@@ -15,6 +15,8 @@
 #include "block/Vertex.h"
 #include "render/Material.h"
 #include "render/Renderable.h"
+#include "scene/DirectionalLight.h"
+#include "scene/PointLightManager.h"
 #include "scene/Skybox.h"
 #include "scene/Updateable.h"
 #include "utility/ThreadPool.h"
@@ -25,7 +27,9 @@
 
 namespace gl {
     class ShaderPipeline;
-}
+    class TextureArray;
+    class CubeMapArray;
+}  // namespace gl
 
 namespace engine {
     class Chunk;
@@ -144,6 +148,13 @@ namespace engine {
         const Material& getMaterial() const { return m_material; }
         Skybox& getSkybox() { return m_skybox; }
 
+        void setOmniShadowMaps(gl::CubeMapArray& omniShadowMaps);
+        void setDirectionalShadowMaps(gl::TextureArray& directionalShadowMaps);
+
+        void setDirectionalLight(DirectionalLight&& directionalLight);
+        DirectionalLight& getDirectionalLight() { return m_directionalLight; }
+        PointLightManager& getPointLightManager() { return m_pointLightManager; }
+
         virtual void render(Engine& engine, const Camera* camera, int pass = 0) override;
         virtual void update(float dt) override;
 
@@ -165,11 +176,13 @@ namespace engine {
         // TODO size dynamically? based on ViewDistance?
         static constexpr uint32_t m_poolCapacity = 4'000'000;
         gl::VertexPool<Vertex> m_opaquePool{m_poolCapacity}, m_transparentPool{m_poolCapacity};
-        gl::IndirectBuffer m_opaqueBuffer, m_transparentBuffer;
+        gl::IndirectBuffer m_opaqueBuffer, m_transparentBuffer, m_omniShadowBuffer;
 
 
         Material m_material;
         Skybox m_skybox;
+        DirectionalLight m_directionalLight;
+        PointLightManager m_pointLightManager;
 
         ThreadPool m_genPool;
 

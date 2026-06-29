@@ -2,7 +2,6 @@
 
 #include "BlockMaterial.h"
 #include "Globals.h"
-#include "Side.h"
 
 #include "Contexts.h"
 

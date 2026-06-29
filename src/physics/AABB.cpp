@@ -1,7 +1,10 @@
 #include "AABB.h"
 
-#include "Plane.h"
+#include "Shapes.h"
 #include "block/Geometry.h"
+
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/norm.hpp>
 
 
 using namespace engine;
@@ -25,6 +28,14 @@ bool AABB::intersects(const Plane& plane) const {
     float s = glm::dot(plane.normal, center) - plane.distance;
 
     return glm::abs(s) <= r;
+}
+
+bool AABB::intersects(const Sphere& sphere) const {
+    glm::vec3 closest = glm::clamp(sphere.center, min, max);
+    if (glm::length2(closest - sphere.center) <= sphere.radius * sphere.radius) {
+        return true;
+    }
+    return false;
 }
 
 bool AABB::isOutsidePlane(const Plane& plane) const {

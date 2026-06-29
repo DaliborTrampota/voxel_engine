@@ -1,7 +1,9 @@
 #version 460 core
 
 // clang-format off
+{{Common_uniforms.glsl}}
 {{CSM_uniforms.glsl}}
+{{Omni_ssbos.glsl}}
 // clang-format on
 
 const float ALPHA_THRESHOLD = 0.5;
@@ -27,6 +29,7 @@ uniform float translucentDensity;
 
 // clang-format off
 {{Utils_functions.glsl}}
+{{Omni_functions.glsl}}
 // clang-format on
 
 vec3 phongLighting(vec4 baseColor, float shadow) {
@@ -58,6 +61,11 @@ void main() {
 
     float shadow = calculateShadow(fragPos);
     vec3 lighting = phongLighting(col, shadow);
+
+    if (omniLightsEnabled) {
+        vec3 pointLights = calculatePointLights(col, clusterIndex());
+        lighting += pointLights;
+    }
 
     float transmittance = 1.0;
     // if (translucentDensity > 0.0) {

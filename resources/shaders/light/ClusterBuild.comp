@@ -1,0 +1,91 @@
+#version 460 core
+// clang-format off
+// TODO maybe 64?
+#define MAX_LIGHTS_PER_CLUSTER {{OMNI_MAX_LIGHTS_PER_CLUSTER}}
+#define CLUSTER_COUNT {{OMNI_CLUSTER_COUNT}}
+layout(local_size_x = {{OMNI_LOCAL_SIZE}}, local_size_y = 1, local_size_z = 1) in;
+// clang-format on
+
+// uniform uvec3 clusterGridSize;
+uniform uint lightCount;
+uniform mat4 view;
+
+struct AABB {
+    vec4 min;
+    vec4 max;
+};
+
+struct PointLight {
+    vec3 position;
+    vec3 color;
+    float intensity;
+    float radius;
+    uint shadowIndex;
+};
+
+struct ClusterGrid {
+    uint offset;
+    uint count;
+};
+
+layout(std430, binding = 1) readonly buffer lightSSBO {
+    PointLight pointLight[];
+};
+
+layout(std430, binding = 2) buffer clusterGridSSBO {
+    ClusterGrid clusterGrid[];
+};
+
+layout(std430, binding = 3) writeonly buffer lightIndicesSSBO {
+    uint lightIndices[];
+};
+
+layout(std430, binding = 4) readonly buffer clustersSSBO {
+    AABB clusters[];
+};
+
+layout(std430, binding = 5) buffer atomicCounterSSBO {
+    uint atomicCounter;
+};
+
+
+bool aabbLightIntersection(AABB aabb, PointLight light) {
+    float distMin = 0.0;
+    vec3 transformed = (view * vec4(light.position, 1.0)).xyz;
+
+    for (int i = 0; i < 3; i++) {
+        if (transformed[i] < aabb.min[i])
+            distMin += pow(transformed[i] - aabb.min[i], 2.0);
+        else if (transformed[i] > aabb.max[i])
+            distMin += pow(transformed[i] - aabb.max[i], 2.0);
+    }
+    return distMin <= light.radius * light.radius;
+}
+
+void main() {
+    uint clusterIndex = gl_GlobalInvocationID.x;
+    if (clusterIndex >= CLUSTER_COUNT)
+        return;
+
+    AABB cluster = clusters[clusterIndex];
+
+    // TODO visibleIndices array is too big and doesnt fit to register, benchmark two pass approach
+    uint visibleCount = 0;
+    uint visibleIndices[MAX_LIGHTS_PER_CLUSTER];
+
+    for (uint i = 0; i < lightCount; i++) {
+        if (visibleCount >= MAX_LIGHTS_PER_CLUSTER)
+            break;
+        if (aabbLightIntersection(cluster, pointLight[i])) {
+            visibleIndices[visibleCount++] = i;
+        }
+    }
+
+    uint offset = atomicAdd(atomicCounter, visibleCount);
+    clusterGrid[clusterIndex].offset = offset;
+    clusterGrid[clusterIndex].count = visibleCount;
+
+    for (uint i = 0; i < visibleCount; i++) {
+        lightIndices[offset + i] = visibleIndices[i];
+    }
+}

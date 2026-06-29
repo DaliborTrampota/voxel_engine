@@ -5,6 +5,7 @@ layout(location = 1) out float reveal;
 
 
 // clang-format off
+{{Common_uniforms.glsl}}
 {{CSM_uniforms.glsl}}
 // clang-format on
 

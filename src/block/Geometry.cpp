@@ -86,18 +86,17 @@ Geometry Geometry::Box(glm::vec3 start, glm::vec3 end) {
 
     for (int i = 0; i < 6; i++) {
         Face face;
-        face.tag = static_cast<FaceTag>(i + 2);
+        face.tag = IterateFaces[i];
         int uvIdx = 0;
         for (int vertIdx : data::faces[i]) {
             glm::vec3 vert = data::vertices[vertIdx];
 
-            assert(FaceTag::Front == static_cast<FaceTag>(static_cast<int>(Side::North) + 2));
 
             vert.x = vert.x * (end.x - start.x) + start.x;
             vert.y = vert.y * (end.y - start.y) + start.y;
             vert.z = vert.z * (end.z - start.z) + start.z;
 
-            face.vertices.push_back({vert, data::normals[i], data::uvs[uvIdx]});
+            face.vertices.push_back({vert, data::normals[i], data::box_uvs[i][uvIdx]});
             uvIdx++;
         }
         g.m_faces.push_back(face);

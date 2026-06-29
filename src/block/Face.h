@@ -7,15 +7,15 @@
 
 namespace engine {
     enum class FaceTag {
-        All = 0,
-        Side,
-
-        Front,
+        Front = 0,
         Right,
         Back,
         Left,
         Top,
         Bottom,
+
+        All,
+        Side,
 
         Tag1,
         Tag2,

@@ -21,15 +21,21 @@
 #include "render/Material.h"
 #include "render/Renderable.h"
 #include "scene/Camera.h"
-#include "scene/Sun.h"
+#include "scene/DirectionalLight.h"
 #include "scene/Tickable.h"
 #include "scene/Updateable.h"
 #include "utility/UtilityShaders.h"
 
+#include "concrete/ClusterBuildPass.h"
 #include "concrete/CompositePass.h"
 #include "concrete/DirectionalShadowPass.h"
+#include "concrete/PointLightShadowPass.h"
 #include "concrete/ScenePass.h"
 #include "concrete/TransparentPass.h"
+
+// #include "utility/GPUProfiler.h"
+
+// static engine::GPUProfiler gpuProfiler;
 
 
 using namespace engine;
@@ -51,23 +57,14 @@ Engine::Engine(std::unique_ptr<Window> window)
       m_passRegistry(&RenderPassRegistry::Get()) {
     m_window->subscribe(m_passRegistry);
     Material::setGlobalConstant("CascadeCount", 4);
+    Material::setGlobalConstant("OMNI_CLUSTER_SIZE_X", (int)ClusterBuildPass::ClusterGridSize.x);
+    Material::setGlobalConstant("OMNI_CLUSTER_SIZE_Y", (int)ClusterBuildPass::ClusterGridSize.y);
+    Material::setGlobalConstant("OMNI_CLUSTER_SIZE_Z", (int)ClusterBuildPass::ClusterGridSize.z);
 
     glm::ivec2 resolution = m_window->windowSize();
     m_passRegistry->registerPass(std::make_unique<ScenePass>(resolution), 0);
     m_passRegistry->registerPass(std::make_unique<TransparentPass>(resolution), 1);
     m_passRegistry->registerPass(std::make_unique<CompositePass>(resolution), 2);
-
-    if (m_directionalLightSource) {
-        m_passRegistry->registerPass(
-            std::make_unique<DirectionalShadowPass>(
-                resolution,
-                m_directionalLightSource->shadowMaterial(),
-                m_directionalLightSource->shadowFBO(),
-                m_directionalLightSource->resolution()
-            ),
-            0
-        );
-    }
 
     RegistryManager::Blocks().add(Block::air(), "air");
     RegistryManager::Blocks().add(Block::multiblock(), "multiblock");
@@ -78,7 +75,9 @@ Engine::Engine(std::unique_ptr<Window> window)
     // RegistryManager::Blocks().add(Block(6, Layers::Any, nullptr), "reserved_block_6");
     // RegistryManager::Blocks().add(Block(7, Layers::Any, nullptr), "reserved_block_7");
     // RegistryManager::Blocks().add(Block(8, Layers::Any, nullptr), "reserved_block_8");
+    // gpuProfiler.init();
 }
+
 
 void Engine::submitRender(RenderContext&& ctx, bool immediate) {
     if (!immediate) {
@@ -132,8 +131,12 @@ void Engine::submitRender(IndirectRenderContext&& ctx, bool immediate) {
 }
 
 void Engine::flush() {
+    // gpuProfiler.beginFrame();
     //printf("Flush %zu\n", m_renderQueue.size());
     for (const auto& pass : m_passRegistry->passes()) {
+        if (!pass->shouldRun())
+            continue;
+        // GPU_SCOPE(&gpuProfiler, std::format("Pass {}", pass->id()));
         for (uint8_t subPass = 0; subPass < pass->passes(); subPass++) {
             pass->beforeRender(*this, subPass);
 
@@ -154,6 +157,7 @@ void Engine::flush() {
 
     // glBindFramebuffer(GL_FRAMEBUFFER, 0);
     // glBindProgramPipeline(0);
+    // gpuProfiler.endFrame();
     m_renderQueue.clear();
 }
 
@@ -187,6 +191,60 @@ void Engine::gameloop() {
     }
 }
 
+
+void Engine::configureMaterialBeforeRender(
+    const Material* material,
+    const Camera* camera,
+    const std::optional<glm::mat4>& view,
+    const std::optional<glm::mat4>& projection
+) const {
+    if (material->supportsShadows()) {
+        if (m_activeDirectionalLightSource) {
+            assert(camera && "Camera is required in RenderContext when material supports shadows");
+
+            // material->setVec3("lightPos", m_directionalLightSource->lightPosition());
+            material->setVec3("lightColor", m_activeDirectionalLightSource->lightColor());
+            material->setVec3("lightDir", -m_activeDirectionalLightSource->direction());
+            material->setVec3("viewPos", camera->position());
+            material->setBool(
+                "castDirectionalShadows", m_activeDirectionalLightSource->castShadows()
+            );
+
+            const auto& cascadeSplits =
+                m_passRegistry->getPass<DirectionalShadowPass>()->cascadeSplits();
+            for (size_t i = 0; i < cascadeSplits.size(); i++) {
+                material->setFloat(
+                    std::format("cascadePlaneDistances[{}]", i), cascadeSplits[i].farPlane
+                );
+            }
+        } else {
+            material->setBool("castDirectionalShadows", false);
+        }
+
+
+        if (m_activePointLightManager) {
+            m_passRegistry->getPass<ClusterBuildPass>()->bindForShading();
+            material->setBool("omniLightsEnabled", true);
+        } else {
+            material->setBool("omniLightsEnabled", false);
+        }
+    }
+
+    if (material->supportsMVP()) {
+        if (view.has_value()) {
+            material->setMat4("view", view.value());
+        } else if (camera) {
+            material->setMat4("view", camera->getView());
+        }
+
+        if (projection.has_value()) {
+            material->setMat4("projection", projection.value());
+        } else if (camera) {
+            material->setMat4("projection", camera->getProjection());
+        }
+    }
+}
+
 void Engine::render(RenderContext& ctx, const RenderPass* renderPass) const {
     size_t n = ctx.attributes->length();
     if (n == 0)
@@ -205,36 +263,7 @@ void Engine::render(RenderContext& ctx, const RenderPass* renderPass) const {
     material->use();
     material->setMat4("model", ctx.matrices.model);
 
-    if (material->supportsShadows() && m_directionalLightSource) {
-        assert(ctx.camera && "RenderContext Camera is required when material supports shadows");
-        // material->setVec3("lightPos", m_directionalLightSource->lightPosition());
-        material->setVec3("lightColor", m_directionalLightSource->lightColor());
-        material->setVec3("lightDir", -m_directionalLightSource->direction());
-        material->setVec3("viewPos", ctx.camera->position());
-
-
-        for (size_t i = 0; i < m_directionalLightSource->cascadeSplits().size(); i++) {
-            material->setFloat(
-                std::format("cascadePlaneDistances[{}]", i),
-                m_directionalLightSource->cascadeSplits()[i].farPlane
-            );
-        }
-    }
-
-    if (material->supportsMVP()) {
-        if (ctx.matrices.view.has_value()) {
-            material->setMat4("view", ctx.matrices.view.value());
-        } else if (ctx.camera) {
-            material->setMat4("view", ctx.camera->getView());
-        }
-
-        if (ctx.matrices.projection.has_value()) {
-            material->setMat4("projection", ctx.matrices.projection.value());
-        } else if (ctx.camera) {
-            material->setMat4("projection", ctx.camera->getProjection());
-        }
-    }
-
+    configureMaterialBeforeRender(material, ctx.camera, ctx.matrices.view, ctx.matrices.projection);
 
     ctx.attributes->bind();
     material->bindTextures();
@@ -259,19 +288,8 @@ void Engine::render(GroupRenderContext& ctx, const RenderPass* renderPass) const
 
     material->use();
 
-    if (!renderPass->material) {
-        if (ctx.matrices.view.has_value()) {
-            material->setMat4("view", ctx.matrices.view.value());
-        } else if (ctx.camera) {
-            material->setMat4("view", ctx.camera->getView());
-        }
-
-        if (ctx.matrices.projection.has_value()) {
-            material->setMat4("projection", ctx.matrices.projection.value());
-        } else if (ctx.camera) {
-            material->setMat4("projection", ctx.camera->getProjection());
-        }
-    }
+    // TODO, GroupRenderContext is not tested
+    configureMaterialBeforeRender(material, ctx.camera, ctx.matrices.view, ctx.matrices.projection);
 
     // Render all draw calls with only model matrix and attributes changing
     for (const auto& drawCall : ctx.drawCalls) {
@@ -305,38 +323,7 @@ void Engine::render(IndirectRenderContext& ctx, const RenderPass* renderPass) co
 
     material->use();
 
-    if (material->supportsShadows() && m_directionalLightSource) {
-        assert(
-            ctx.camera && "IndirectRenderContext Camera is required when material supports shadows"
-        );
-        // material->setVec3("lightPos", m_directionalLightSource->lightPosition());
-        material->setVec3("lightColor", m_directionalLightSource->lightColor());
-        material->setVec3("lightDir", -m_directionalLightSource->direction());
-        material->setVec3("viewPos", ctx.camera->position());
-
-
-        for (size_t i = 0; i < m_directionalLightSource->cascadeSplits().size(); i++) {
-            material->setFloat(
-                std::format("cascadePlaneDistances[{}]", i),
-                m_directionalLightSource->cascadeSplits()[i].farPlane
-            );
-        }
-    }
-
-    if (material->supportsMVP()) {
-        if (ctx.matrices.view.has_value()) {
-            material->setMat4("view", ctx.matrices.view.value());
-        } else if (ctx.camera) {
-            material->setMat4("view", ctx.camera->getView());
-        }
-
-        if (ctx.matrices.projection.has_value()) {
-            material->setMat4("projection", ctx.matrices.projection.value());
-        } else if (ctx.camera) {
-            material->setMat4("projection", ctx.camera->getProjection());
-        }
-    }
-
+    configureMaterialBeforeRender(material, ctx.camera, ctx.matrices.view, ctx.matrices.projection);
 
     // if (ctx.depthFunc == DepthFunc::LessEqual)
     //     glDepthFunc(GL_LEQUAL);
@@ -379,8 +366,30 @@ void Engine::subscribeUpdate(std::shared_ptr<Updateable> updateable) {
     m_updateSubscribers.push_back(updateable);
 }
 
+void Engine::unsubscribeUpdate(Updateable* updateable) {
+    for (auto it = m_updateSubscribers.begin(); it != m_updateSubscribers.end();) {
+        if (it->lock().get() == updateable) {
+            it = m_updateSubscribers.erase(it);
+            break;
+        } else {
+            ++it;
+        }
+    }
+}
+
 void Engine::subscribeTick(std::shared_ptr<Tickable> tickable) {
     m_tickSubscribers.push_back(tickable);
+}
+
+void Engine::unsubscribeTick(Tickable* tickable) {
+    for (auto it = m_tickSubscribers.begin(); it != m_tickSubscribers.end();) {
+        if (it->lock().get() == tickable) {
+            it = m_tickSubscribers.erase(it);
+            break;
+        } else {
+            ++it;
+        }
+    }
 }
 
 void Engine::beginFrame() {
@@ -398,20 +407,66 @@ void Engine::endFrame() {
     m_renderStats.reset();
 }
 
-void Engine::setDirectionalLightSource(
-    std::shared_ptr<engine::Sun> lightSource, uint8_t passPosition
+gl::TextureArray& Engine::setDirectionalLightSource(
+    engine::DirectionalLight* lightSource, Camera* camera
 ) {
-    m_directionalLightSource = lightSource;
-    m_passRegistry->deletePass<DirectionalShadowPass>();
+    assert(lightSource && "Light source is required");
+    assert(camera && "Camera is required");
+    if (m_activeDirectionalLightSource) {
+        m_passRegistry->deletePass<DirectionalShadowPass>();
+    }
+
+    m_activeDirectionalLightSource = lightSource;
 
     // TODO once engine settings is implemented, revisit this (do not register the pass)
     m_passRegistry->registerPass(
         std::make_unique<DirectionalShadowPass>(
-            m_window->windowSize(),
-            lightSource->shadowMaterial(),
-            lightSource->shadowFBO(),
-            lightSource->resolution()
+            m_window->windowSize(), camera, m_activeDirectionalLightSource, glm::ivec2{4096, 4096}
         ),
-        passPosition
+        0
     );
+
+    auto& directionalShadowMaps =
+        m_passRegistry->getPass<DirectionalShadowPass>()->cascadeShadowMaps();
+    m_passRegistry->getPass<TransparentPass>()->setDirectionalShadowMaps(directionalShadowMaps);
+    return directionalShadowMaps;
+}
+
+// TODO track active camera in engine
+gl::CubeMapArray& Engine::setPointLightSource(PointLightManager* pointLightManager, Camera* camera) {
+    assert(pointLightManager && "Point light manager is required");
+    assert(camera && "Camera is required");
+    if (m_activePointLightManager) {
+        m_passRegistry->deletePass<ClusterBuildPass>();
+        m_passRegistry->deletePass<PointLightShadowPass>();
+    }
+
+    m_activePointLightManager = pointLightManager;
+    m_passRegistry->registerPass(
+        std::make_unique<ClusterBuildPass>(
+            m_window->windowSize(), camera, m_activePointLightManager
+        ),
+        0
+    );
+
+    m_passRegistry->registerPass(
+        std::make_unique<PointLightShadowPass>(
+            m_window->windowSize(), m_activePointLightManager, glm::ivec2(1024, 1024)
+        ),
+        0
+    );
+
+    return m_passRegistry->getPass<PointLightShadowPass>()->shadowMaps();
+}
+
+void Engine::clearDirectionalLightSource() {
+    m_activeDirectionalLightSource = nullptr;
+    m_passRegistry->deletePass<DirectionalShadowPass>();
+    m_passRegistry->getPass<TransparentPass>()->clearDirectionalShadowMaps();
+}
+
+void Engine::clearPointLightSource() {
+    m_activePointLightManager = nullptr;
+    m_passRegistry->deletePass<ClusterBuildPass>();
+    m_passRegistry->deletePass<PointLightShadowPass>();
 }
