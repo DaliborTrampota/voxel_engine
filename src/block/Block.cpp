@@ -53,3 +53,5 @@ Block& Block::material(const BlockMaterial& mat) {
 const BlockMaterial& Block::material() const {
     return m_material;
 }
+
+void Block::appendMesh(const MeshEmitContext&, const World&) const {}

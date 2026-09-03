@@ -14,13 +14,12 @@
 
 #include "World.h"
 #include "block/Block.h"
+#include "block/MeshEmitContext.h"
 #include "block/MultiBlock.h"
 #include "block/Side.h"
 #include "block/VariantBlock.h"
 #include "block/Vertex.h"
 #include "data/RegistryManager.h"
-#include "render/Engine.h"
-#include "render/RenderContext.h"
 #include "utility/Rotation.h"
 
 
@@ -80,6 +79,20 @@ bool Chunk::generateMesh() {
                 }
 
                 const BlockState* state = m_data->getState(pos);
+
+                if (block->overridesMesh()) {
+                    block->appendMesh(
+                        MeshEmitContext{
+                            .block = block,
+                            .posInChunk = pos,
+                            .worldPos = pos + chunkBlockCoords,
+                            .neighbours = getNeighbouringBlocks(pos),
+                            .storage = &m_renderLayers[block->layer()].write()
+                        },
+                        *m_world
+                    );
+                    continue;
+                }
 
                 if (auto variant = dynamic_cast<const VariantBlock*>(block)) {
                     generateMeshForBlock(variant, pos, state, chunkBlockCoords);
@@ -261,7 +274,7 @@ void Chunk::generateMeshForBlock(
     const BlockState* state,
     const glm::ivec3& chunkBlockCoords
 ) {
-    VariantBlock::Neighbours neighboringBlocks = getNeighbouringBlocks(pos);
+    Neighbours neighboringBlocks = getNeighbouringBlocks(pos);
     // TODO somehow distinguish between opaque and transparent geometries? or just use the base block layer?
     LayerData& storage = m_renderLayers[block->layer()].write();
 
@@ -301,29 +314,19 @@ void Chunk::generateMeshForBlock(
     }
 }
 
-VariantBlock::Neighbours Chunk::getNeighbouringBlocks(glm::ivec3 pos) const {
-    BlockState* northState = nullptr;
-    BlockState* southState = nullptr;
-    BlockState* eastState = nullptr;
-    BlockState* westState = nullptr;
-    BlockState* upState = nullptr;
-    BlockState* downState = nullptr;
+Neighbours Chunk::getNeighbouringBlocks(glm::ivec3 pos) const {
+    std::array<BlockState*, 6> states{nullptr};
+    Neighbours neighbours;
 
     glm::ivec3 chPos = position();
-    return {
-        .north = m_world->getBlockID(chPos + pos + INORTH, false, &northState),
-        .south = m_world->getBlockID(chPos + pos - INORTH, false, &southState),
-        .east = m_world->getBlockID(chPos + pos + IEAST, false, &eastState),
-        .west = m_world->getBlockID(chPos + pos - IEAST, false, &westState),
-        .up = m_world->getBlockID(chPos + pos + IUP, false, &upState),
-        .down = m_world->getBlockID(chPos + pos - IUP, false, &downState),
-        .northFacing = northState ? northState->facing() : glm::vec3(0.0f),
-        .southFacing = southState ? southState->facing() : glm::vec3(0.0f),
-        .eastFacing = eastState ? eastState->facing() : glm::vec3(0.0f),
-        .westFacing = westState ? westState->facing() : glm::vec3(0.0f),
-        .upFacing = upState ? upState->facing() : glm::vec3(0.0f),
-        .downFacing = downState ? downState->facing() : glm::vec3(0.0f),
-    };
+    for (Side side : IterateSides) {
+        size_t index = static_cast<size_t>(side);
+        glm::ivec3 dir = sideDirection(side);
+        glm::ivec3 nPos = chPos + pos + dir;
+        neighbours.sides[index] = m_world->getBlockID(nPos, false, &states[index]);
+        neighbours.facings[index] = states[index] ? states[index]->facing() : glm::vec3(0.0f);
+    }
+    return neighbours;
 }
 
 void Chunk::serialize(std::ostream& out) const {
