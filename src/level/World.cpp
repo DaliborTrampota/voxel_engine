@@ -17,7 +17,6 @@
 #include "utility/CoordUtils.h"
 
 
-
 #include <algorithm>
 
 #define GLM_ENABLE_EXPERIMENTAL
