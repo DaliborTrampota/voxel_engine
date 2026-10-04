@@ -135,7 +135,7 @@ void Chunk::setBlock(const glm::ivec3& pos, BlockID block) {
     }
 
     blocks.get(block)->onPlaced(BlockSetContext{.chunk = this, .position = pos, .state = nullptr});
-    m_world->afterBlockSet(pos, block, nullptr);
+    m_world->afterBlockSet(position() + pos, block, nullptr);
     m_dirty = true;
 }
 
@@ -154,7 +154,7 @@ void Chunk::setBlock(const glm::ivec3& pos, BlockID block, BlockState state) {
 
     BlockState* setState = m_data->getState(pos);
     blocks.get(block)->onPlaced(BlockSetContext{.chunk = this, .position = pos, .state = setState});
-    m_world->afterBlockSet(pos, block, setState);
+    m_world->afterBlockSet(position() + pos, block, setState);
     m_dirty = true;
 }
 
@@ -162,7 +162,7 @@ void Chunk::setBlock(const glm::ivec3& pos, MultiBlock&& multiBlock) {
     m_data->setMultiBlock(pos, std::move(multiBlock));
 
     // TODO onPlaced?
-    m_world->afterBlockSet(pos, Block::MultiblockID, nullptr);
+    m_world->afterBlockSet(position() + pos, Block::MultiblockID, nullptr);
     m_dirty = true;
 }
 

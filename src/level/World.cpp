@@ -461,7 +461,7 @@ void World::setBlock(
     blocks.get(blockID)->onPlaced(
         BlockSetContext{.chunk = chunk, .position = pos, .state = storedState}
     );
-    afterBlockSet(pos, blockID, storedState);
+    afterBlockSet(chunk->position() + pos, blockID, storedState);
 }
 
 void World::setBlock(glm::ivec3 pos, BlockID blockID, std::optional<BlockState> state) {
@@ -481,7 +481,7 @@ void World::setBlock(const ChunkID& chID, const glm::ivec3& pos, MultiBlock&& mu
     checkAndUpdateSurroundingChunks(chID, pos);
 
     // TODO onPlaced?
-    afterBlockSet(pos, Block::MultiblockID, nullptr);
+    afterBlockSet(chunk->position() + pos, Block::MultiblockID, nullptr);
 }
 
 void World::setBlock(glm::ivec3 pos, MultiBlock&& multiBlock) {
