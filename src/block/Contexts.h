@@ -16,7 +16,7 @@ namespace engine {
         glm::ivec3 position;
         glm::vec3 normal;
         FaceTag face;
-        GLFWKey button;
+        MouseButton button;
         bool shiftPressed = false;
         bool ctrlPressed = false;
         bool altPressed = false;

@@ -6,6 +6,12 @@ namespace engine {
 
     using GLFWKey = int;
 
+    enum class MouseButton {
+        Left,
+        Right,
+        Middle
+    };
+
     enum class InputAxis {
         Sideways,
         Forward,
