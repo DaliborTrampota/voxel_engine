@@ -231,7 +231,7 @@ BlockID World::getBlockID(
     auto chunk = m_chunks.find(chID);
     if (chunk == m_chunks.end() || !chunk->second->generated()) {
         if (fallbackToGenerator)
-            return m_generator->voxelAt(pos);
+            return m_generator->voxelAt(pos + chID * m_chunkDims);
         return InvalidBlockID;
     }
     if (state) {
@@ -245,7 +245,7 @@ BlockID World::getBlockID(glm::vec3 pos, bool fallbackToGenerator, BlockState** 
     auto chunk = m_chunks.find(chID);
     if (chunk == m_chunks.end() || !chunk->second->generated()) {
         if (fallbackToGenerator)
-            return m_generator->voxelAt(pos);
+            return m_generator->voxelAt(glm::ivec3(pos) + chID * m_chunkDims);
         return InvalidBlockID;
     }
     if (state) {
