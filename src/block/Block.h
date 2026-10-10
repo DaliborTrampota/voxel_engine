@@ -10,6 +10,8 @@
 
 namespace engine {
     class Geometry;
+    class World;
+    struct MeshEmitContext;
 
     /// @brief The rotation mode of the block.
     /// @note None is for non rotational blocks, eg stone, dirt, sand
@@ -69,6 +71,9 @@ namespace engine {
 
         Block& material(const BlockMaterial& mat);
         const BlockMaterial& material() const;
+
+        virtual bool overridesMesh() const { return false; };
+        virtual void appendMesh(const MeshEmitContext& ctx, const World& world) const;
 
       protected:
         bool m_isSolid;

@@ -13,9 +13,11 @@
 #include "LayerBuffer.h"
 #include "block/Block.h"
 #include "block/BlockState.h"
+#include "block/Neighbours.h"
 #include "block/VariantBlock.h"
 #include "block/Vertex.h"
 #include "data/IChunkData.h"
+
 
 #include <LWGL/buffer/Attributes.h>
 #include <LWGL/indirect/IndirectTypes.h>
@@ -89,7 +91,7 @@ namespace engine {
         const gl::PoolAllocation& transparentAlloc() const;
         const gl::PoolAllocation& opaqueAlloc() const;
 
-        VariantBlock::Neighbours getNeighbouringBlocks(glm::ivec3 pos) const;
+        Neighbours getNeighbouringBlocks(glm::ivec3 pos) const;
 
         /// @section Events
         // TODO probably remove this

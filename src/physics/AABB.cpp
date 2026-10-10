@@ -77,10 +77,9 @@ void AABB::moveAxis(int axis, float amount) {
 }
 
 void AABB::position(const glm::vec3& pos) {
-    glm::vec3 center = this->center();
-    center.y = min.y;
-    glm::vec3 offset = pos - center;
-    move(offset);
+    glm::vec3 size = max - min;
+    min = glm::vec3(pos.x - size.x * 0.5f, pos.y, pos.z - size.z * 0.5f);
+    max = min + size;
 }
 
 void AABB::expand(float amount) {

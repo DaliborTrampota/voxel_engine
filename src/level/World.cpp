@@ -17,7 +17,6 @@
 #include "utility/CoordUtils.h"
 
 
-
 #include <algorithm>
 
 #define GLM_ENABLE_EXPERIMENTAL
@@ -232,7 +231,7 @@ BlockID World::getBlockID(
     auto chunk = m_chunks.find(chID);
     if (chunk == m_chunks.end() || !chunk->second->generated()) {
         if (fallbackToGenerator)
-            return m_generator->voxelAt(pos);
+            return m_generator->voxelAt(pos + chID * m_chunkDims);
         return InvalidBlockID;
     }
     if (state) {
@@ -246,7 +245,7 @@ BlockID World::getBlockID(glm::vec3 pos, bool fallbackToGenerator, BlockState** 
     auto chunk = m_chunks.find(chID);
     if (chunk == m_chunks.end() || !chunk->second->generated()) {
         if (fallbackToGenerator)
-            return m_generator->voxelAt(pos);
+            return m_generator->voxelAt(glm::ivec3(pos) + chID * m_chunkDims);
         return InvalidBlockID;
     }
     if (state) {
@@ -461,7 +460,7 @@ void World::setBlock(
     blocks.get(blockID)->onPlaced(
         BlockSetContext{.chunk = chunk, .position = pos, .state = storedState}
     );
-    afterBlockSet(pos, blockID, storedState);
+    afterBlockSet(chunk->position() + pos, blockID, storedState);
 }
 
 void World::setBlock(glm::ivec3 pos, BlockID blockID, std::optional<BlockState> state) {
@@ -481,7 +480,7 @@ void World::setBlock(const ChunkID& chID, const glm::ivec3& pos, MultiBlock&& mu
     checkAndUpdateSurroundingChunks(chID, pos);
 
     // TODO onPlaced?
-    afterBlockSet(pos, Block::MultiblockID, nullptr);
+    afterBlockSet(chunk->position() + pos, Block::MultiblockID, nullptr);
 }
 
 void World::setBlock(glm::ivec3 pos, MultiBlock&& multiBlock) {
