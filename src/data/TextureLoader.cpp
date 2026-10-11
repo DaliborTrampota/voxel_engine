@@ -12,6 +12,8 @@
 
 using namespace engine;
 
+
+// TODO maybe param for sRGB?
 void TextureLoader::loadArray2D(
     gl::TextureArray* target, const fs::path& path, gl::TextureParams params
 ) {
@@ -31,7 +33,7 @@ void TextureLoader::loadArray2D(
                 continue;
             }
 
-            gl::ImageData data(entry.path().string().c_str());
+            gl::ImageData data(entry.path().string().c_str(), gl::ColorSpace::sRGB);
             width = std::max(width, data.width);
             height = std::max(height, data.height);
             images.emplace_back(std::move(data));
@@ -52,7 +54,7 @@ void TextureLoader::loadArray2D(
         {.width = width,
          .height = height,
          .depth = static_cast<int>(images.size()),
-         .format = gl::ImageFormat::RGBA}
+         .format = gl::ImageFormat::SRGBA}
     );
     TextureManager& texMgr = TextureManager::Get();
     for (const auto& imgData : images) {

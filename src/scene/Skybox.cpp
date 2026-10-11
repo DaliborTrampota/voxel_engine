@@ -52,12 +52,22 @@ Skybox::Skybox(const Settings& settings)
 }
 
 void Skybox::load(const Settings& settings) {
-    m_cubeMap.upload(gl::CubeFace::Top, settings.top.c_str());
-    m_cubeMap.upload(gl::CubeFace::Bottom, settings.bottom.c_str());
-    m_cubeMap.upload(gl::CubeFace::Front, settings.front.c_str());
-    m_cubeMap.upload(gl::CubeFace::Back, settings.back.c_str());
-    m_cubeMap.upload(gl::CubeFace::Left, settings.left.c_str());
-    m_cubeMap.upload(gl::CubeFace::Right, settings.right.c_str());
+    m_cubeMap.upload(gl::CubeFace::Top, gl::ImageData(settings.top.c_str(), gl::ColorSpace::sRGB));
+    m_cubeMap.upload(
+        gl::CubeFace::Bottom, gl::ImageData(settings.bottom.c_str(), gl::ColorSpace::sRGB)
+    );
+    m_cubeMap.upload(
+        gl::CubeFace::Front, gl::ImageData(settings.front.c_str(), gl::ColorSpace::sRGB)
+    );
+    m_cubeMap.upload(
+        gl::CubeFace::Back, gl::ImageData(settings.back.c_str(), gl::ColorSpace::sRGB)
+    );
+    m_cubeMap.upload(
+        gl::CubeFace::Left, gl::ImageData(settings.left.c_str(), gl::ColorSpace::sRGB)
+    );
+    m_cubeMap.upload(
+        gl::CubeFace::Right, gl::ImageData(settings.right.c_str(), gl::ColorSpace::sRGB)
+    );
 
     m_material.use();
     m_material.setTexture(0, &m_cubeMap, "skybox");

@@ -27,6 +27,7 @@ namespace engine {
         static constexpr ID Composite = 1 << 3;
         static constexpr ID PointLightShadow = 1 << 4;
         static constexpr ID ClusterBuildPass = 1 << 5;
+        static constexpr ID Tonemap = 1 << 6;
 
         virtual ~RenderPass() = default;
 
@@ -67,7 +68,7 @@ namespace engine {
       private:
         ID m_id;
         uint8_t m_passes;
-        inline static unsigned int s_nextPassIndex = 6;
+        inline static unsigned int s_nextPassIndex = 7;
     };
 
 }  // namespace engine

@@ -136,4 +136,14 @@ namespace engine {
         glViewport(prevViewport[0], prevViewport[1], prevViewport[2], prevViewport[3]);
         glEnable(GL_DEPTH_TEST);
     }
+
+    void drawFullscreenTriangle() {
+        static unsigned dummyVAO = 0;
+        if (dummyVAO == 0) {
+            glGenVertexArrays(1, &dummyVAO);
+        }
+        glBindVertexArray(dummyVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glBindVertexArray(0);
+    }
 }  // namespace engine
