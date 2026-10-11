@@ -52,6 +52,8 @@ void ClusterBuildPass::beforeRender(Engine& engine, uint8_t pass) {
 
 
 void ClusterBuildPass::resize(glm::ivec2 resolution) {
+    if (resolution.x == 0 || resolution.y == 0)
+        return;
     m_resolution = resolution;
     subdivideFrustum();
 }
