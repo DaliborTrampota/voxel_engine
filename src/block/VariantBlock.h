@@ -8,6 +8,8 @@
 
 namespace engine {
 
+    struct Neighbours;
+
     /// @brief A variant block is a block that can have multiple geometries based on the surrounding blocks.
     /// @note The block is always using the base geometry if no variant is found.
     /// @note The block can be configured to always use the base geometry even if a variant is found.
@@ -50,26 +52,6 @@ namespace engine {
             bool operator==(const Variant& other) const {
                 return geometry.getID() == other.geometry.getID() && conditions == other.conditions;
             }
-        };
-
-        struct Neighbours {
-            BlockID north;
-            BlockID south;
-            BlockID east;
-            BlockID west;
-            BlockID up;
-            BlockID down;
-
-            glm::vec3 northFacing;
-            glm::vec3 southFacing;
-            glm::vec3 eastFacing;
-            glm::vec3 westFacing;
-            glm::vec3 upFacing;
-            glm::vec3 downFacing;
-
-            BlockID operator[](Side direction) const;
-            glm::vec3 getFacing(Side direction) const;
-            void rotate(Side from, Side to);
         };
 
         VariantBlock(

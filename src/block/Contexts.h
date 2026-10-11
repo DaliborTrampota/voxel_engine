@@ -16,7 +16,7 @@ namespace engine {
         glm::ivec3 position;
         glm::vec3 normal;
         FaceTag face;
-        GLFWKey button;
+        MouseButton button;
         bool shiftPressed = false;
         bool ctrlPressed = false;
         bool altPressed = false;
@@ -27,7 +27,7 @@ namespace engine {
         Chunk* chunk;
         /// @brief The position of the block in the chunk.
         glm::ivec3 position;
-        BlockState* state;
+        const BlockState* state;
         void* data = nullptr;
     };
 }  // namespace engine
