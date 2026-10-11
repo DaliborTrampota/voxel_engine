@@ -18,6 +18,7 @@
 
 
 #include <algorithm>
+#include <memory>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/component_wise.hpp>
@@ -423,9 +424,9 @@ void World::updateChunk(ChunkID id) {
 void World::setBlock(
     const ChunkID& chID, const glm::ivec3& pos, BlockID blockID, std::optional<BlockState> state
 ) {
-    Chunk* chunk = nullptr;
+    std::shared_ptr<Chunk> chunk = nullptr;
     BlockState* storedState = nullptr;
-    BlockState* oldState = nullptr;
+    std::optional<BlockState> oldState = std::nullopt;
     BlockID oldBlock = Block::AirID;
     {
         std::lock_guard<std::mutex> lock(m_mutex);
@@ -433,34 +434,40 @@ void World::setBlock(
         if (it == m_chunks.end())
             return;
 
-        chunk = it->second.get();
+        chunk = it->second;
 
         oldBlock = chunk->m_data->getBlock(pos);
-        oldState = chunk->m_data->getState(pos);
+        oldState = chunk->m_data->getState(pos)
+                       ? std::optional<BlockState>(*chunk->m_data->getState(pos))
+                       : std::nullopt;
 
         if (state.has_value()) {
             chunk->m_data->setBlock(pos, blockID, state.value());
-            storedState = &state.value();
         } else {
             chunk->m_data->setBlock(pos, blockID);
-            storedState = nullptr;
         }
 
-        if (blockID == Block::AirID) {
+        if (blockID == Block::AirID)
             chunk->m_data->clearState(pos);
-        }
+
+
+        storedState = state.has_value() ? chunk->m_data->getState(pos) : nullptr;
         chunk->m_dirty = true;
         checkAndUpdateSurroundingChunks(chID, pos);
     }
 
     if (oldBlock != Block::AirID)
         blocks.get(oldBlock)->onDestroyed(
-            BlockSetContext{.chunk = chunk, .position = pos, .state = oldState}
+            BlockSetContext{
+                .chunk = chunk.get(),
+                .position = pos,
+                .state = oldState.has_value() ? &oldState.value() : nullptr
+            }
         );
     blocks.get(blockID)->onPlaced(
-        BlockSetContext{.chunk = chunk, .position = pos, .state = storedState}
+        BlockSetContext{.chunk = chunk.get(), .position = pos, .state = storedState}
     );
-    afterBlockSet(chunk->position() + pos, blockID, storedState);
+    afterBlockSet(chID * m_chunkDims + pos, blockID, storedState);
 }
 
 void World::setBlock(glm::ivec3 pos, BlockID blockID, std::optional<BlockState> state) {
