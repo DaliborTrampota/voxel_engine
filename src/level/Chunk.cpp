@@ -84,6 +84,7 @@ bool Chunk::generateMesh() {
                     block->appendMesh(
                         MeshEmitContext{
                             .block = block,
+                            .state = state,
                             .posInChunk = pos,
                             .worldPos = pos + chunkBlockCoords,
                             .neighbours = getNeighbouringBlocks(pos),
