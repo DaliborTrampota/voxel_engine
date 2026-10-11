@@ -129,7 +129,7 @@ namespace engine {
 
         return face;
     }
-    
+
     Face Face::CylinderFace(
         FaceTag tag,
         glm::vec3 center,

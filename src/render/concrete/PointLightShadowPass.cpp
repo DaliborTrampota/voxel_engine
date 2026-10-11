@@ -10,7 +10,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 
-
 using namespace engine;
 
 PointLightShadowPass::PointLightShadowPass(
