@@ -163,7 +163,7 @@ namespace engine {
 
 
         virtual void afterBlockSet(
-            const glm::ivec3& pos, BlockID blockID, BlockState* state = nullptr
+            const glm::ivec3& pos, BlockID blockID, const BlockState* state = nullptr
         ) {}
         // virtual void multiBlockUpdated(const glm::ivec3& pos, MultiBlock* block) {};
 
