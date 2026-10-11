@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cassert>
 #include <cstdint>
 #include <type_traits>
 
@@ -37,8 +38,20 @@ namespace engine {
         }
         float range(float min, float max) { return nextFloat() * (max - min) + min; }
         double range(double min, double max) { return nextDouble() * (max - min) + min; }
+        /// @brief Uniform int in the half-open range [min, max). Requires min < max; returns min otherwise.
         int range(int min, int max) {
-            return min + getNumber() % static_cast<StateType>(max - min);
+            assert(min < max && "max must be greater than min");
+            if (max <= min) return min;
+
+            const uint32_t span = static_cast<uint32_t>(static_cast<int64_t>(max) - min);
+            uint64_t m = static_cast<uint64_t>(next32()) * span;
+            if (static_cast<uint32_t>(m) < span) {
+                const uint32_t threshold = (0u - span) % span;
+                while (static_cast<uint32_t>(m) < threshold) {
+                    m = static_cast<uint64_t>(next32()) * span;
+                }
+            }
+            return static_cast<int>(static_cast<int64_t>(min) + static_cast<int64_t>(m >> 32));
         }
 
         void setSeed(Seed seed) {
@@ -64,6 +77,14 @@ namespace engine {
                 t = (t ^ (t >> 15)) * (t | 1u);
                 t = ((t + ((t ^ (t >> 7)) * (t | 61u)))) ^ t;
                 return t ^ (t >> 14);
+            }
+        }
+
+        uint32_t next32() {
+            if constexpr (Algorithm == RandomAlgorithm::Splitmix64) {
+                return static_cast<uint32_t>(getNumber() >> 32);
+            } else {
+                return getNumber();
             }
         }
     };
