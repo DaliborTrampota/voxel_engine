@@ -48,4 +48,6 @@ namespace engine {
         int height,
         const gl::FBO* temp = nullptr
     );
+
+    void drawFullscreenTriangle();
 }  // namespace engine

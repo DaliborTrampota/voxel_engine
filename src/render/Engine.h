@@ -8,6 +8,8 @@
 #include "RenderPassRegistry.h"
 #include "Window.h"
 
+#include "../scene/AmbientLight.h"
+
 
 namespace gl {
     class CubeMapArray;
@@ -72,6 +74,8 @@ namespace engine {
         DirectionalLight* directionalLightSource() const { return m_activeDirectionalLightSource; }
         gl::TextureArray& setDirectionalLightSource(DirectionalLight* lightSource, Camera* camera);
         gl::CubeMapArray& setPointLightSource(PointLightManager* pointLightManager, Camera* camera);
+        /// @brief Pass nullptr to fall back to AmbientLight defaults
+        void setAmbientLight(const AmbientLight* ambientLight);
 
         void clearDirectionalLightSource();
         void clearPointLightSource();
@@ -82,6 +86,7 @@ namespace engine {
         std::unique_ptr<InputSystem> m_inputSystem;
         DirectionalLight* m_activeDirectionalLightSource = nullptr;
         PointLightManager* m_activePointLightManager = nullptr;
+        const AmbientLight* m_ambientLight = nullptr;
 
         RenderPassRegistry* m_passRegistry;
         std::vector<std::variant<RenderContext, GroupRenderContext, IndirectRenderContext>>

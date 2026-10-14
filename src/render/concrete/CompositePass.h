@@ -2,7 +2,10 @@
 
 #include "../RenderPass.h"
 
+#include <LWGL/buffer/FBO.h>
 #include <LWGL/render/ShaderProgram.h>
+#include <LWGL/texture/Texture2D.h>
+
 
 namespace engine {
 
@@ -21,8 +24,14 @@ namespace engine {
         void beforeRender(Engine& engine, uint8_t pass) override;
         void afterRender(Engine& engine, uint8_t pass) override {}
 
+        gl::Texture2D* color() { return &m_hdrTexture; }
+
+        void resize(glm::ivec2 resolution) override;
+
       private:
         gl::ShaderProgram m_compositeShader;
+        gl::FBO m_hdrFBO;
+        gl::Texture2D m_hdrTexture{false};
 
         void init();
     };

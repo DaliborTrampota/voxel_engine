@@ -90,3 +90,27 @@ void TransparentPass::clearDirectionalShadowMaps() {
     m_transparentMat.setTexture(1, nullptr, "shadowMap");
     m_transparentMat.setShadowSupport(false);
 }
+
+void TransparentPass::resize(glm::ivec2 resolution) {
+    if (resolution.x == 0 || resolution.y == 0)
+        return;
+
+    m_resolution = resolution;
+
+    // TODO duplication
+    m_accumulation.allocate(
+        {.width = m_resolution.x,
+         .height = m_resolution.y,
+         .format = gl::ImageFormat::RGBA,
+         .dataType = gl::ImageDataType::HalfFloat}
+    );
+
+    m_revealage.allocate(
+        {.width = m_resolution.x,
+         .height = m_resolution.y,
+         .format = gl::ImageFormat::Gray,
+         .dataType = gl::ImageDataType::HalfFloat}
+    );
+
+    assert(m_OIT.checkCompleteness() == 0);
+}

@@ -28,10 +28,12 @@ namespace engine {
         void setDirectionalShadowMaps(gl::TextureArray& directionalShadowMaps);
         void clearDirectionalShadowMaps();
 
+        void resize(glm::ivec2 resolution) override;
+
       private:
         gl::FBO m_OIT;
-        gl::Texture2D m_accumulation;
-        gl::Texture2D m_revealage;
+        gl::Texture2D m_accumulation{false};
+        gl::Texture2D m_revealage{false};
 
         Material m_transparentMat;
 

@@ -15,6 +15,7 @@
 #include "block/Vertex.h"
 #include "render/Material.h"
 #include "render/Renderable.h"
+#include "scene/AmbientLight.h"
 #include "scene/DirectionalLight.h"
 #include "scene/PointLightManager.h"
 #include "scene/Skybox.h"
@@ -147,7 +148,9 @@ namespace engine {
         const ITerrainGenerator* getGenerator() const { return m_generator.get(); }
         const Material& getMaterial() const { return m_material; }
         Skybox& getSkybox() { return m_skybox; }
+        AmbientLight& getAmbientLight() { return m_ambientLight; }
 
+        void setAmbientLight(const AmbientLight& ambientLight);
         void setOmniShadowMaps(gl::CubeMapArray& omniShadowMaps);
         void setDirectionalShadowMaps(gl::TextureArray& directionalShadowMaps);
 
@@ -181,6 +184,7 @@ namespace engine {
 
         Material m_material;
         Skybox m_skybox;
+        AmbientLight m_ambientLight;
         DirectionalLight m_directionalLight;
         PointLightManager m_pointLightManager;
 

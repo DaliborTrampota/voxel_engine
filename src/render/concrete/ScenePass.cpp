@@ -42,3 +42,23 @@ void ScenePass::init() {
 
     fbo = &m_sceneFBO;
 }
+
+
+void ScenePass::resize(glm::ivec2 resolution) {
+    if (resolution.x == 0 || resolution.y == 0)
+        return;
+
+    m_resolution = resolution;
+
+    // TODO duplication
+    m_opaque.allocate(
+        {.width = m_resolution.x,
+         .height = m_resolution.y,
+         .format = gl::ImageFormat::RGBA,
+         .dataType = gl::ImageDataType::HalfFloat}
+    );
+
+    m_depthMap.allocate(gl::TextureStorage::FBODepth(m_resolution.x, m_resolution.y));
+
+    assert(m_sceneFBO.checkCompleteness() == 0);
+}
