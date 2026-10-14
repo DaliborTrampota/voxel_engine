@@ -80,23 +80,15 @@ void Skybox::render(Engine& engine, const Camera* camera, int pass) {
     RenderContext ctx;
     ctx.material = &m_material;
     ctx.attributes = &m_buffer;
+    ctx.camera = camera;
+    ctx.passMask = RenderPass::Scene;
     ctx.matrices.projection = camera->getProjection();
     ctx.matrices.view = glm::mat4(glm::mat3(camera->getView()));
     ctx.matrices.model = glm::mat4(1.0f);
-    // engine.submitRender(std::move(ctx));
+    engine.submitRender(std::move(ctx));
 
-    glDepthFunc(GL_LEQUAL);
-    m_material.use();
-    m_buffer.bind();
-
-    glm::mat4 view = glm::mat4(glm::mat3(camera->getView()));
-
-    m_material.setMat4("projection", camera->getProjection());
-    m_material.setMat4("view", view);
-
-    m_material.bindTextures();
-
-    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(m_buffer.length()));
-
-    glDepthFunc(GL_LESS);
+    // TODO workaround in shader for depth testing with skybox
+    // glDepthFunc(GL_LEQUAL);
+    // glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(m_buffer.length()));
+    // glDepthFunc(GL_LESS);
 }
