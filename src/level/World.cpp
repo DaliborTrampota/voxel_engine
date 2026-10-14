@@ -452,7 +452,8 @@ void World::setBlock(
         checkAndUpdateSurroundingChunks(chID, pos);
     }
 
-    const BlockState* placedState = state.has_value() && blockID != Block::AirID ? &*state : nullptr;
+    const BlockState* placedState =
+        state.has_value() && blockID != Block::AirID ? &*state : nullptr;
 
     if (oldBlock != Block::AirID)
         blocks.get(oldBlock)->onDestroyed(
@@ -556,6 +557,10 @@ std::shared_ptr<Chunk> World::createChunk(const ChunkID& id) {
 
 void World::setDirectionalShadowMaps(gl::TextureArray& directionalShadowMaps) {
     m_material.setTexture(1, &directionalShadowMaps, "shadowMap");
+}
+
+void World::setAmbientLight(const AmbientLight& ambientLight) {
+    m_ambientLight = ambientLight;
 }
 
 void World::setOmniShadowMaps(gl::CubeMapArray& omniShadowMaps) {

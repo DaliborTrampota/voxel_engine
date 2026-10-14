@@ -202,16 +202,18 @@ void Engine::configureMaterialBeforeRender(
     const std::optional<glm::mat4>& projection
 ) const {
     if (material->supportsShadows()) {
+        material->setVec3("skyAmbient", m_ambientLight.skyAmbient);
+        material->setVec3("groundAmbient", m_ambientLight.groundAmbient);
+        material->setVec3("ambientUp", m_ambientLight.up);
+
         if (m_activeDirectionalLightSource) {
+            auto sun = m_activeDirectionalLightSource;
             assert(camera && "Camera is required in RenderContext when material supports shadows");
 
-            // material->setVec3("lightPos", m_directionalLightSource->lightPosition());
-            material->setVec3("lightColor", m_activeDirectionalLightSource->lightColor());
-            material->setVec3("lightDir", -m_activeDirectionalLightSource->direction());
+            material->setVec3("lightColor", sun->lightColor() * sun->lightIntensity());
+            material->setVec3("lightDir", -sun->direction());
             material->setVec3("viewPos", camera->position());
-            material->setBool(
-                "castDirectionalShadows", m_activeDirectionalLightSource->castShadows()
-            );
+            material->setBool("castDirectionalShadows", sun->castShadows());
 
             const auto& cascadeSplits =
                 m_passRegistry->getPass<DirectionalShadowPass>()->cascadeSplits();
@@ -460,6 +462,10 @@ gl::CubeMapArray& Engine::setPointLightSource(PointLightManager* pointLightManag
     );
 
     return m_passRegistry->getPass<PointLightShadowPass>()->shadowMaps();
+}
+
+void Engine::setAmbientLight(const AmbientLight& ambientLight) {
+    m_ambientLight = ambientLight;
 }
 
 void Engine::clearDirectionalLightSource() {

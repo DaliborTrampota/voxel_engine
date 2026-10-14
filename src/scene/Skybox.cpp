@@ -5,6 +5,9 @@
 
 #include "render/Engine.h"
 #include "scene/Camera.h"
+#include "scene/DirectionalLight.h"
+
+#include <glm/trigonometric.hpp>
 
 using namespace engine;
 
@@ -49,6 +52,8 @@ Skybox::Skybox(const Settings& settings)
 
     m_cubeMap.create(gl::TextureParams::Cubemap());
     load(settings);
+
+    setLightDiskAngularRadius(1.5f);
 }
 
 void Skybox::load(const Settings& settings) {
@@ -71,11 +76,33 @@ void Skybox::load(const Settings& settings) {
 
     m_material.use();
     m_material.setTexture(0, &m_cubeMap, "skybox");
+    m_material.setFloat("skyIntensity", m_skyIntensity);
 }
+
+void Skybox::setSkyIntensity(float intensity) {
+    m_skyIntensity = intensity;
+    m_material.setFloat("skyIntensity", m_skyIntensity);
+}
+
+void Skybox::setLightDiskAngularRadius(float degrees) {
+    m_material.setFloat("lightDiskCosRadius", std::cos(glm::radians(degrees)));
+}
+
 
 void Skybox::render(Engine& engine, const Camera* camera, int pass) {
     // if (pass != 0)
     //     return;  // Only render in the first pass
+
+    const DirectionalLight* light = engine.directionalLightSource();
+    if (light && m_lightDiskEnabled) {
+        m_material.setVec3("lightDiskDir", -light->direction());
+        m_material.setVec3(
+            "lightDiskRadiance",
+            light->lightColor() * m_lightDiskColor * light->lightIntensity() * m_lightDiskBoost
+        );
+    } else {
+        m_material.setVec3("lightDiskRadiance", glm::vec3(0.0f));
+    }
 
     RenderContext ctx;
     ctx.material = &m_material;

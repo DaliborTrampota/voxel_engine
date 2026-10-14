@@ -28,7 +28,7 @@ layout(binding = 2) uniform sampler2D opaqueDepthMap;
 // clang-format on
 
 vec3 phongLighting(vec4 baseColor, float shadow) {
-    vec3 ambientCol = 0.3 * lightColor;
+    vec3 ambientCol = mix(groundAmbient, skyAmbient, dot(normal, ambientUp) * 0.5 + 0.5);
     float diff = max(dot(lightDir, normal), 0.0);
     vec3 diffuse = diff * lightColor;
 
