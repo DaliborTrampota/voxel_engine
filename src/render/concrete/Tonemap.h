@@ -6,6 +6,8 @@
 #include <LWGL/render/ShaderProgram.h>
 
 namespace engine {
+    enum class Tonemapper { PbrNeutral = 0, AgX = 1 };
+
     class TonemapPass : public RenderPass {
       public:
         explicit TonemapPass(glm::ivec2 resolution)
@@ -23,8 +25,8 @@ namespace engine {
 
         float exposure() const { return m_exposure; }
         void setExposure(float exposure) { m_exposure = exposure; }
-        int getMode() const { return m_mode; }
-        void setMode(int mode) { m_mode = mode; }
+        Tonemapper getMode() const { return m_mode; }
+        void setMode(Tonemapper mode) { m_mode = mode; }
 
       private:
         gl::ShaderProgram m_tonemapShader;
@@ -32,6 +34,6 @@ namespace engine {
         void init();
 
         float m_exposure = 1.0f;
-        int m_mode = 1; // AgX default
+        Tonemapper m_mode = Tonemapper::AgX;
     };
 }  // namespace engine

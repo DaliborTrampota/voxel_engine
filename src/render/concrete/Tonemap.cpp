@@ -22,10 +22,7 @@ void TonemapPass::beforeRender(Engine& engine, uint8_t pass) {
     m_tonemapShader.use();
     m_tonemapShader.bindTextures();
     m_tonemapShader.setFloat("exposure", m_exposure);
-
-    // 0 - Khronos PBR Neutral
-    // 1 - AgX
-    m_tonemapShader.setInt("tonemapper", m_mode);
+    m_tonemapShader.setInt("tonemapper", static_cast<int>(m_mode));
 
     drawFullscreenTriangle();
 }

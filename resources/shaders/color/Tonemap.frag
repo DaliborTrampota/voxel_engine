@@ -44,7 +44,7 @@ vec3 agx(vec3 color) {
     );
     const float minEv = -12.47393;
     const float maxEv = 4.026069;
-    color = clamp(log2(inset * color), minEv, maxEv);
+    color = clamp(log2(max(inset * color, 1e-10)), minEv, maxEv);
     color = agxContrast((color - minEv) / (maxEv - minEv));
     return outset * color;
 }

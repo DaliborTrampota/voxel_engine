@@ -6,3 +6,7 @@ uniform mat4 view;
 uniform vec3 skyAmbient;
 uniform vec3 groundAmbient;
 uniform vec3 ambientUp;
+
+vec3 getAmbientColor(vec3 normal) {
+    return mix(groundAmbient, skyAmbient, dot(normal, ambientUp) * 0.5 + 0.5);
+}

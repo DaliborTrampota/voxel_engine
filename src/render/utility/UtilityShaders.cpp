@@ -138,11 +138,7 @@ namespace engine {
     }
 
     void drawFullscreenTriangle() {
-        static unsigned dummyVAO = 0;
-        if (dummyVAO == 0) {
-            glGenVertexArrays(1, &dummyVAO);
-        }
-        glBindVertexArray(dummyVAO);
+        glBindVertexArray(s_dummyVAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
         glBindVertexArray(0);
     }

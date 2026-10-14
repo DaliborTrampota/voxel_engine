@@ -201,11 +201,13 @@ void Engine::configureMaterialBeforeRender(
     const std::optional<glm::mat4>& view,
     const std::optional<glm::mat4>& projection
 ) const {
-    if (material->supportsShadows()) {
-        material->setVec3("skyAmbient", m_ambientLight.skyAmbient);
-        material->setVec3("groundAmbient", m_ambientLight.groundAmbient);
-        material->setVec3("ambientUp", m_ambientLight.up);
+    static const AmbientLight defaultAmbient;
+    const AmbientLight& ambient = m_ambientLight ? *m_ambientLight : defaultAmbient;
+    material->setVec3("skyAmbient", ambient.skyAmbient);
+    material->setVec3("groundAmbient", ambient.groundAmbient);
+    material->setVec3("ambientUp", ambient.up);
 
+    if (material->supportsShadows()) {
         if (m_activeDirectionalLightSource) {
             auto sun = m_activeDirectionalLightSource;
             assert(camera && "Camera is required in RenderContext when material supports shadows");
@@ -464,7 +466,7 @@ gl::CubeMapArray& Engine::setPointLightSource(PointLightManager* pointLightManag
     return m_passRegistry->getPass<PointLightShadowPass>()->shadowMaps();
 }
 
-void Engine::setAmbientLight(const AmbientLight& ambientLight) {
+void Engine::setAmbientLight(const AmbientLight* ambientLight) {
     m_ambientLight = ambientLight;
 }
 

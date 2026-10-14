@@ -34,7 +34,7 @@ uniform float translucentDensity;
 
 vec3 phongLighting(vec4 baseColor, float shadow) {
     //TODO extract to func?
-    vec3 ambientCol = mix(groundAmbient, skyAmbient, dot(normal, ambientUp) * 0.5 + 0.5);
+    vec3 ambientCol = getAmbientColor(normal);
     float diff = max(dot(lightDir, normal), 0.0);
     vec3 diffuse = diff * lightColor;
 
