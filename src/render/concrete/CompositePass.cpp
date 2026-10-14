@@ -41,7 +41,7 @@ void CompositePass::init() {
         {.width = m_resolution.x,
          .height = m_resolution.y,
          .format = gl::ImageFormat::RGBPackedFloat,
-         .dataType = gl::ImageDataType::Float}  // dataType choise doesnt matter
+         .dataType = gl::ImageDataType::Float}  // dataType doesn't matter, no data is uploaded
     );
     m_hdrFBO.bind();
     m_hdrFBO.attach(gl::FBOAttachment::Color, &m_hdrTexture);
