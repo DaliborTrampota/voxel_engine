@@ -417,7 +417,8 @@ void World::updateChunk(ChunkID id) {
             return;
 
         lock.unlock();
-        chunk->generateMesh();
+        if (!chunk->generateMesh())
+            chunk->m_dirty = true;
     });
 }
 
@@ -539,7 +540,7 @@ void World::update(float dt) {
         std::lock_guard<std::mutex> lock(m_mutex);
         for (const ChunkID& pos : m_loadedChunks) {
             auto it = m_chunks.find(pos);
-            if (it != m_chunks.end() && it->second->m_dirty) {
+            if (it != m_chunks.end() && it->second->m_dirty.exchange(false)) {
                 dirtyChunks.push_back(pos);
             }
         }
