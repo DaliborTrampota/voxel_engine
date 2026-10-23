@@ -1,6 +1,8 @@
 #pragma once
 
 #include <memory>
+#include <string>
+#include <unordered_map>
 #include <variant>
 #include <vector>
 
@@ -76,6 +78,8 @@ namespace engine {
         gl::CubeMapArray& setPointLightSource(PointLightManager* pointLightManager, Camera* camera);
         /// @brief Pass nullptr to fall back to AmbientLight defaults
         void setAmbientLight(const AmbientLight* ambientLight);
+        /// @brief Float uniform set on every material before it renders; keeps its value until set again.
+        void setGlobalUniform(const std::string& name, float value) { m_globalUniforms[name] = value; }
 
         void clearDirectionalLightSource();
         void clearPointLightSource();
@@ -87,6 +91,7 @@ namespace engine {
         DirectionalLight* m_activeDirectionalLightSource = nullptr;
         PointLightManager* m_activePointLightManager = nullptr;
         const AmbientLight* m_ambientLight = nullptr;
+        std::unordered_map<std::string, float> m_globalUniforms;
 
         RenderPassRegistry* m_passRegistry;
         std::vector<std::variant<RenderContext, GroupRenderContext, IndirectRenderContext>>

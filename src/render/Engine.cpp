@@ -206,6 +206,8 @@ void Engine::configureMaterialBeforeRender(
     material->setVec3("skyAmbient", ambient.skyAmbient);
     material->setVec3("groundAmbient", ambient.groundAmbient);
     material->setVec3("ambientUp", ambient.up);
+    for (const auto& [name, value] : m_globalUniforms)
+        material->setFloat(name, value);
 
     if (material->supportsShadows()) {
         if (m_activeDirectionalLightSource) {

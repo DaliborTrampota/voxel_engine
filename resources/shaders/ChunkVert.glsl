@@ -11,6 +11,7 @@ layout(std430, binding = 0) readonly buffer ModelMatrices {
 
 uniform mat4 projection;
 uniform mat4 view;
+uniform float tideLevel;
 
 out vec3 pos;
 out vec3 normal;
@@ -40,9 +41,13 @@ void main() {
     //mat3 normalMatrix = transpose(inverse(mat3(model))); // not needed when we dont do non-uniform scaling
     normal = mat3(model) * aNormal;
 
-    fragPos = vec3(model * vec4(aPos, 1.0));
+    vec4 worldPos = model * vec4(aPos, 1.0);
+    // aData bit 18: sea-surface vertex, emitted at its cell top; it follows the tide within that cell.
+    if (((aData >> 18) & 1u) != 0u)
+        worldPos.y = clamp(tideLevel, worldPos.y - 1.0, worldPos.y);
+    fragPos = worldPos.xyz;
     // shadowData.fragPos = vec3(model * vec4(aPos, 1.0));
     // shadowData.fragPosLightSpace = lightSpaceTransform * vec4(shadowData.fragPos, 1.0);
 
-    gl_Position = projection * view * model * vec4(aPos, 1.0);
+    gl_Position = projection * view * worldPos;
 }
