@@ -7,6 +7,7 @@
 #include <optional>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 #include "events/LevelEventSource.h"
 
@@ -95,7 +96,8 @@ namespace engine {
         template <typename T>
         std::shared_ptr<const T> getChunkAs(const ChunkID& id) const;
 
-        const std::unordered_set<ChunkID>& loadedChunks() const { return m_loadedChunks; }
+        /// @brief A copy of the loaded chunk ids, taken under the world lock; safe while generation runs.
+        std::vector<ChunkID> loadedChunks() const;
 
         /// @brief Checks if the surrounding chunks need to be updated due to a block change.
         /// @param chID The chunk that was changed.
