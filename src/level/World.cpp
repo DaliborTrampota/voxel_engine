@@ -195,6 +195,11 @@ void World::unloadAllChunks(const std::vector<ChunkID>& except) {
     }
 }
 
+std::vector<ChunkID> World::loadedChunks() const {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    return {m_loadedChunks.begin(), m_loadedChunks.end()};
+}
+
 void World::unloadChunksFromMemory(const std::vector<ChunkID>& ids) {
     m_genPool.pause();
     std::lock_guard<std::mutex> lock(m_mutex);
