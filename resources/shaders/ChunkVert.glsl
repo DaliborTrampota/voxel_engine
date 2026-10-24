@@ -46,7 +46,7 @@ void main() {
 
     vec4 worldPos = model * vec4(aPos, 1.0);
     if ((aData & SEA_SURFACE_BIT) != 0u) {
-        vec3 waves = waveHeightGrad(worldPos.xz);
+        vec3 waves = seaSurfaceWaves(worldPos.xz, worldPos.y, aData);
         worldPos.y = seaSurfaceY(worldPos.y, waves, aData, abs(normal.y) < 0.5);
         if (normal.y > 0.5)
             normal = normalize(vec3(-waves.y, 1.0, -waves.z));

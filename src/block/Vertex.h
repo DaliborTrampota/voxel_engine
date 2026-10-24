@@ -14,7 +14,7 @@ namespace engine {
 
         glm::vec3 pos, normal;
         glm::vec2 uv;
-        /// Holds TextureID (0-15bits), AO (16-17) and the sea-surface (18) and shore-skirt (19) flags, see SeaSurface_functions.glsl
+        /// Holds TextureID (0-15bits), AO (16-17) and the sea-surface (18), shore-skirt (19) and shallow-corner (20) flags, see SeaSurface_functions.glsl
         unsigned int m_data;
 
         static gl::VertexLayout layout() {

@@ -33,7 +33,7 @@ void main() {
     vec4 worldPos = models[gl_DrawID] * vec4(aPos, 1.0);
     if ((aData & SEA_SURFACE_BIT) != 0u) {
         vec3 normal = mat3(models[gl_DrawID]) * aNormal;
-        worldPos.y = seaSurfaceY(worldPos.y, waveHeightGrad(worldPos.xz), aData, abs(normal.y) < 0.5);
+        worldPos.y = seaSurfaceY(worldPos.y, seaSurfaceWaves(worldPos.xz, worldPos.y, aData), aData, abs(normal.y) < 0.5);
     }
     gl_Position = worldPos;
 }
