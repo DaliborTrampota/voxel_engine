@@ -5,13 +5,16 @@ layout(location = 1) in vec3 aNormal;
 layout(location = 2) in vec2 aUV;
 layout(location = 3) in uint aData;
 
+// clang-format off
+{{SeaSurface_functions.glsl}}
+// clang-format on
+
 layout(std430, binding = 0) readonly buffer ModelMatrices {
     mat4 models[];
 };
 
 uniform mat4 projection;
 uniform mat4 view;
-uniform float tideLevel;
 
 out vec3 pos;
 out vec3 normal;
@@ -42,9 +45,12 @@ void main() {
     normal = mat3(model) * aNormal;
 
     vec4 worldPos = model * vec4(aPos, 1.0);
-    // aData bit 18: sea-surface vertex, emitted at its cell top; it follows the tide within that cell.
-    if (((aData >> 18) & 1u) != 0u)
-        worldPos.y = clamp(tideLevel, worldPos.y - 1.0, worldPos.y);
+    if ((aData & SEA_SURFACE_BIT) != 0u) {
+        vec3 waves = waveHeightGrad(worldPos.xz);
+        worldPos.y = seaSurfaceY(worldPos.y, waves, aData, abs(normal.y) < 0.5);
+        if (normal.y > 0.5)
+            normal = normalize(vec3(-waves.y, 1.0, -waves.z));
+    }
     fragPos = worldPos.xyz;
     // shadowData.fragPos = vec3(model * vec4(aPos, 1.0));
     // shadowData.fragPosLightSpace = lightSpaceTransform * vec4(shadowData.fragPos, 1.0);

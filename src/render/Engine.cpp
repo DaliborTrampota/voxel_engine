@@ -42,6 +42,27 @@
 
 using namespace engine;
 
+namespace {
+    void setUniform(const Material* m, const std::string& name, int value) { m->setInt(name, value); }
+    void setUniform(const Material* m, const std::string& name, float value) { m->setFloat(name, value); }
+    void setUniform(const Material* m, const std::string& name, const glm::vec2& value) { m->setVec2(name, value); }
+
+    void setUniform(const Material* m, const std::string& name, const std::vector<float>& values) {
+        glProgramUniform1fv(
+            m->id(), glGetUniformLocation(m->id(), name.c_str()), static_cast<GLsizei>(values.size()), values.data()
+        );
+    }
+
+    void setUniform(const Material* m, const std::string& name, const std::vector<glm::vec2>& values) {
+        glProgramUniform2fv(
+            m->id(),
+            glGetUniformLocation(m->id(), name.c_str()),
+            static_cast<GLsizei>(values.size()),
+            reinterpret_cast<const float*>(values.data())
+        );
+    }
+}  // namespace
+
 std::string RenderStats::toString() const {
     return std::format(
         "Draw Calls: {}, Vertices: {}, Triangles: {}, Frame Time: {:.2f} ms",
@@ -207,7 +228,7 @@ void Engine::configureMaterialBeforeRender(
     material->setVec3("groundAmbient", ambient.groundAmbient);
     material->setVec3("ambientUp", ambient.up);
     for (const auto& [name, value] : m_globalUniforms)
-        material->setFloat(name, value);
+        std::visit([&](const auto& v) { setUniform(material, name, v); }, value);
 
     if (material->supportsShadows()) {
         if (m_activeDirectionalLightSource) {

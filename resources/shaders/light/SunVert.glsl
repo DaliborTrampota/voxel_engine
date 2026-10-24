@@ -4,6 +4,10 @@ layout(location = 1) in vec3 aNormal;
 layout(location = 2) in vec2 aUV;
 layout(location = 3) in uint aData;
 
+// clang-format off
+{{SeaSurface_functions.glsl}}
+// clang-format on
+
 
 layout(std430, binding = 0) readonly buffer ModelMatrices {
     mat4 models[];
@@ -26,5 +30,10 @@ void main() {
     // for VSM
     // gl_Position = projection * view * model * vec4(aPos, 1.0);
     // vs_out.vertPosition = gl_Position;
-    gl_Position = models[gl_DrawID] * vec4(aPos, 1.0);
+    vec4 worldPos = models[gl_DrawID] * vec4(aPos, 1.0);
+    if ((aData & SEA_SURFACE_BIT) != 0u) {
+        vec3 normal = mat3(models[gl_DrawID]) * aNormal;
+        worldPos.y = seaSurfaceY(worldPos.y, waveHeightGrad(worldPos.xz), aData, abs(normal.y) < 0.5);
+    }
+    gl_Position = worldPos;
 }
