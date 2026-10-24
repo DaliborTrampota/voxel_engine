@@ -1,5 +1,5 @@
-// Sea-surface displacement shared by ChunkVert.glsl and SunVert.glsl. Stomata's WaterTests compile this file
-// as C++ (uniform -> static), so keep it to syntax valid in both.
+// Sea-surface displacement shared by ChunkVert.glsl and SunVert.glsl. Host tests may compile this file as C++
+// (uniform -> static), so keep it to syntax valid in both.
 const uint SEA_SURFACE_BIT = 1u << 18;
 const uint SHORE_SKIRT_BIT = 1u << 19;
 const int WAVE_CAPACITY = 48;
@@ -17,7 +17,7 @@ uniform float wavePatchPhase[WAVE_PATCH_CAPACITY];
 uniform float wavePatchBase;
 uniform float wavePatchDepth;
 
-/// x = height, yz = (dh/dx, dh/dz). The sum of Stomata's WaveField::heightAt, with xz reduced modulo the period.
+/// x = height, yz = (dh/dx, dh/dz) of patch(xz) * sum_i amp_i*sin(dot(k_i, xz) - phase_i), xz reduced modulo the period.
 vec3 waveHeightGrad(vec2 xz) {
     if (worldPeriod.x > 0.0f && worldPeriod.y > 0.0f)
         xz = mod(xz, worldPeriod);
