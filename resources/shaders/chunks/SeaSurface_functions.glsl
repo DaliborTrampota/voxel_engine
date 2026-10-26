@@ -3,6 +3,7 @@
 const uint SEA_SURFACE_BIT = 1u << 18;
 const uint SHORE_SKIRT_BIT = 1u << 19;
 const uint SHALLOW_CORNER_BIT = 1u << 20;
+const float SHALLOW_SINK = 1.0f / 16.0f;
 const int WAVE_CAPACITY = 48;
 const int WAVE_PATCH_CAPACITY = 4;
 
@@ -17,7 +18,6 @@ uniform vec2 wavePatchK[WAVE_PATCH_CAPACITY];
 uniform float wavePatchPhase[WAVE_PATCH_CAPACITY];
 uniform float wavePatchBase;
 uniform float wavePatchDepth;
-uniform float waveRoughPeak;
 
 /// x = height, yz = (dh/dx, dh/dz) of patch(xz) * sum_i amp_i*sin(dot(k_i, xz) - phase_i), xz reduced modulo the period.
 vec3 waveHeightGrad(vec2 xz) {
@@ -47,23 +47,25 @@ vec3 waveHeightGrad(vec2 xz) {
     return vec3(patchScale * sum, patchScale * sumGrad + (sum * depth) * patchGrad);
 }
 
-/// waveHeightGrad at a SEA_SURFACE_BIT vertex; at a SHALLOW_CORNER_BIT one it is scaled by min(1, depth / roughPeak),
-/// depth being the tide's height above the floor of the vertex's cell.
+/// waveHeightGrad at a SEA_SURFACE_BIT vertex; at a SHALLOW_CORNER_BIT one it is scaled by the tide's height above
+/// the vertex's cell floor, so waves reach full height only with a whole water block below.
 vec3 seaSurfaceWaves(vec2 xz, float cellTop, uint data) {
     vec3 waves = waveHeightGrad(xz);
-    if ((data & SHALLOW_CORNER_BIT) != 0u && waveRoughPeak > 0.0f) {
-        float depth = clamp(tideLevel, cellTop - 1.0f, cellTop) - (cellTop - 1.0f);
-        waves *= min(1.0f, depth / waveRoughPeak);
-    }
+    if ((data & SHALLOW_CORNER_BIT) != 0u)
+        waves *= clamp(tideLevel, cellTop - 1.0f, cellTop) - (cellTop - 1.0f);
     return waves;
 }
 
 /// Final y of a SEA_SURFACE_BIT vertex, which is emitted at its cell top: the tide within that cell plus waves.
-/// Side faces and shallow corners never drop below the cell floor; a shoreline skirt's moved edge stops at the cell top.
+/// tideLevel moves in whole liquid units. Side faces stop at the cell floor; a shallow corner with the tide at or below
+/// the land top sinks SHALLOW_SINK under it so the land hides it. A shoreline skirt's moved edge stops at the cell top.
 float seaSurfaceY(float cellTop, vec3 waves, uint data, bool sideFace) {
-    float y = clamp(tideLevel, cellTop - 1.0f, cellTop) + waves.x;
-    if (sideFace || (data & SHALLOW_CORNER_BIT) != 0u)
-        y = max(y, cellTop - 1.0f);
+    float floorY = cellTop - 1.0f;
+    float y = clamp(tideLevel, floorY, cellTop) + waves.x;
+    if ((data & SHALLOW_CORNER_BIT) != 0u && tideLevel <= floorY + 1e-3f)
+        y = floorY - SHALLOW_SINK;
+    else if (sideFace || (data & SHALLOW_CORNER_BIT) != 0u)
+        y = max(y, floorY);
     if (sideFace && (data & SHORE_SKIRT_BIT) != 0u)
         y = max(y, cellTop);
     return y;
