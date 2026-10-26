@@ -62,9 +62,9 @@ vec3 seaSurfaceWaves(vec2 xz, float cellTop, uint data) {
 float seaSurfaceY(float cellTop, vec3 waves, uint data, bool sideFace) {
     float floorY = cellTop - 1.0f;
     float y = clamp(tideLevel, floorY, cellTop) + waves.x;
-    if ((data & SHALLOW_CORNER_BIT) != 0u && tideLevel <= floorY + 1e-3f)
+    if ((data & SHALLOW_CORNER_BIT) != 0u && tideLevel <= floorY)
         y = floorY - SHALLOW_SINK;
-    else if (sideFace || (data & SHALLOW_CORNER_BIT) != 0u)
+    else if (sideFace)
         y = max(y, floorY);
     if (sideFace && (data & SHORE_SKIRT_BIT) != 0u)
         y = max(y, cellTop);
