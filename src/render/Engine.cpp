@@ -43,17 +43,28 @@
 using namespace engine;
 
 namespace {
-    void setUniform(const Material* m, const std::string& name, int value) { m->setInt(name, value); }
-    void setUniform(const Material* m, const std::string& name, float value) { m->setFloat(name, value); }
-    void setUniform(const Material* m, const std::string& name, const glm::vec2& value) { m->setVec2(name, value); }
+    void setUniform(const Material* m, const std::string& name, int value) {
+        m->setInt(name, value);
+    }
+    void setUniform(const Material* m, const std::string& name, float value) {
+        m->setFloat(name, value);
+    }
+    void setUniform(const Material* m, const std::string& name, const glm::vec2& value) {
+        m->setVec2(name, value);
+    }
 
     void setUniform(const Material* m, const std::string& name, const std::vector<float>& values) {
         glProgramUniform1fv(
-            m->id(), glGetUniformLocation(m->id(), name.c_str()), static_cast<GLsizei>(values.size()), values.data()
+            m->id(),
+            glGetUniformLocation(m->id(), name.c_str()),
+            static_cast<GLsizei>(values.size()),
+            values.data()
         );
     }
 
-    void setUniform(const Material* m, const std::string& name, const std::vector<glm::vec2>& values) {
+    void setUniform(
+        const Material* m, const std::string& name, const std::vector<glm::vec2>& values
+    ) {
         glProgramUniform2fv(
             m->id(),
             glGetUniformLocation(m->id(), name.c_str()),
@@ -85,10 +96,19 @@ Engine::Engine(std::unique_ptr<Window> window)
     Material::setGlobalConstant("OMNI_CLUSTER_SIZE_Z", (int)ClusterBuildPass::ClusterGridSize.z);
 
     glm::ivec2 resolution = m_window->windowSize();
-    m_passRegistry->registerPass(std::make_unique<ScenePass>(resolution), 0);
-    m_passRegistry->registerPass(std::make_unique<TransparentPass>(resolution), 1);
-    m_passRegistry->registerPass(std::make_unique<CompositePass>(resolution), 2);
-    m_passRegistry->registerPass(std::make_unique<TonemapPass>(resolution), 3);
+    m_clusterBuildPass =
+        m_passRegistry->registerPass(std::make_unique<ClusterBuildPass>(resolution));
+    m_pointShadowPass = m_passRegistry->registerPass(
+        std::make_unique<PointLightShadowPass>(resolution, glm::ivec2(1024, 1024), 8)
+    );
+    m_sunShadowPass = m_passRegistry->registerPass(
+        std::make_unique<DirectionalShadowPass>(resolution, glm::ivec2(4096, 4096))
+    );
+    m_passRegistry->registerPass(std::make_unique<ScenePass>(resolution));
+    m_passRegistry->registerPass(std::make_unique<TransparentPass>(resolution))
+        ->setDirectionalShadowMaps(m_sunShadowPass->cascadeShadowMaps());
+    m_passRegistry->registerPass(std::make_unique<CompositePass>(resolution));
+    m_passRegistry->registerPass(std::make_unique<TonemapPass>(resolution));
 
     RegistryManager::Blocks().add(Block::air(), "air");
     RegistryManager::Blocks().add(Block::multiblock(), "multiblock");
@@ -240,20 +260,20 @@ void Engine::configureMaterialBeforeRender(
             material->setVec3("viewPos", camera->position());
             material->setBool("castDirectionalShadows", sun->castShadows());
 
-            const auto& cascadeSplits =
-                m_passRegistry->getPass<DirectionalShadowPass>()->cascadeSplits();
+            const auto& cascadeSplits = m_sunShadowPass->cascadeSplits();
             for (size_t i = 0; i < cascadeSplits.size(); i++) {
                 material->setFloat(
                     std::format("cascadePlaneDistances[{}]", i), cascadeSplits[i].farPlane
                 );
             }
         } else {
+            material->setVec3("lightColor", glm::vec3(0.0f));
             material->setBool("castDirectionalShadows", false);
         }
 
 
         if (m_activePointLightManager) {
-            m_passRegistry->getPass<ClusterBuildPass>()->bindForShading();
+            m_clusterBuildPass->bindForShading();
             material->setBool("omniLightsEnabled", true);
         } else {
             material->setBool("omniLightsEnabled", false);
@@ -442,51 +462,19 @@ gl::TextureArray& Engine::setDirectionalLightSource(
 ) {
     assert(lightSource && "Light source is required");
     assert(camera && "Camera is required");
-    if (m_activeDirectionalLightSource) {
-        m_passRegistry->deletePass<DirectionalShadowPass>();
-    }
-
     m_activeDirectionalLightSource = lightSource;
-
-    // TODO once engine settings is implemented, revisit this (do not register the pass)
-    m_passRegistry->registerPass(
-        std::make_unique<DirectionalShadowPass>(
-            m_window->windowSize(), camera, m_activeDirectionalLightSource, glm::ivec2{4096, 4096}
-        ),
-        0
-    );
-
-    auto& directionalShadowMaps =
-        m_passRegistry->getPass<DirectionalShadowPass>()->cascadeShadowMaps();
-    m_passRegistry->getPass<TransparentPass>()->setDirectionalShadowMaps(directionalShadowMaps);
-    return directionalShadowMaps;
+    m_sunShadowPass->setSource(lightSource, camera);
+    return m_sunShadowPass->cascadeShadowMaps();
 }
 
 // TODO track active camera in engine
 gl::CubeMapArray& Engine::setPointLightSource(PointLightManager* pointLightManager, Camera* camera) {
     assert(pointLightManager && "Point light manager is required");
     assert(camera && "Camera is required");
-    if (m_activePointLightManager) {
-        m_passRegistry->deletePass<ClusterBuildPass>();
-        m_passRegistry->deletePass<PointLightShadowPass>();
-    }
-
     m_activePointLightManager = pointLightManager;
-    m_passRegistry->registerPass(
-        std::make_unique<ClusterBuildPass>(
-            m_window->windowSize(), camera, m_activePointLightManager
-        ),
-        0
-    );
-
-    m_passRegistry->registerPass(
-        std::make_unique<PointLightShadowPass>(
-            m_window->windowSize(), m_activePointLightManager, glm::ivec2(1024, 1024)
-        ),
-        0
-    );
-
-    return m_passRegistry->getPass<PointLightShadowPass>()->shadowMaps();
+    m_clusterBuildPass->setSource(pointLightManager, camera);
+    m_pointShadowPass->setManager(pointLightManager);
+    return m_pointShadowPass->shadowMaps();
 }
 
 void Engine::setAmbientLight(const AmbientLight* ambientLight) {
@@ -495,12 +483,11 @@ void Engine::setAmbientLight(const AmbientLight* ambientLight) {
 
 void Engine::clearDirectionalLightSource() {
     m_activeDirectionalLightSource = nullptr;
-    m_passRegistry->deletePass<DirectionalShadowPass>();
-    m_passRegistry->getPass<TransparentPass>()->clearDirectionalShadowMaps();
+    m_sunShadowPass->setSource(nullptr, nullptr);
 }
 
 void Engine::clearPointLightSource() {
     m_activePointLightManager = nullptr;
-    m_passRegistry->deletePass<ClusterBuildPass>();
-    m_passRegistry->deletePass<PointLightShadowPass>();
+    m_clusterBuildPass->setSource(nullptr, nullptr);
+    m_pointShadowPass->setManager(nullptr);
 }

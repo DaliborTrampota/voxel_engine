@@ -1,5 +1,8 @@
 #include "RenderPassRegistry.h"
 
+#include <algorithm>
+#include <cassert>
+
 #include "events/EngineEvents.h"
 
 using namespace engine;
@@ -16,13 +19,23 @@ void RenderPassRegistry::windowResizeEvent(ResizeEvent* pEvent) {
     }
 }
 
-void RenderPassRegistry::registerPass(std::unique_ptr<RenderPass> pass, uint8_t position) {
-    position = glm::min(position, static_cast<uint8_t>(m_renderPasses.size()));
-    m_renderPasses.insert(m_renderPasses.begin() + position, std::move(pass));
-
-void RenderPassRegistry::registerPassAfter(RenderPass::ID anchor, std::unique_ptr<RenderPass> pass) {
-    auto it = std::find_if(m_renderPasses.begin(), m_renderPasses.end(), [anchor](const auto& p) {
-        return p->id() == anchor;
+RenderPassRegistry::Iterator RenderPassRegistry::find(RenderPass::ID id) {
+    auto it = std::find_if(m_renderPasses.begin(), m_renderPasses.end(), [id](const auto& p) {
+        return p->id() == id;
     });
-    m_renderPasses.insert(it == m_renderPasses.end() ? it : it + 1, std::move(pass));
+
+    assert(it != m_renderPasses.end() && "anchor pass not registered");
+    return it;
+}
+
+RenderPass* RenderPassRegistry::insert(Iterator at, std::unique_ptr<RenderPass> pass) {
+    assert(
+        std::none_of(
+            m_renderPasses.begin(),
+            m_renderPasses.end(),
+            [&](const auto& p) { return p->id() == pass->id(); }
+        ) &&
+        "pass id already registered"
+    );
+    return m_renderPasses.insert(at, std::move(pass))->get();
 }

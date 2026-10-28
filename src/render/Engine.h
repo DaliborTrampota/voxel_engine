@@ -28,6 +28,9 @@ namespace engine {
     class DirectionalLight;
     class InputSystem;
     class PointLightManager;
+    class ClusterBuildPass;
+    class PointLightShadowPass;
+    class DirectionalShadowPass;
 
     struct RenderStats {
         uint32_t drawCalls = 0;
@@ -108,6 +111,9 @@ namespace engine {
         std::unordered_map<std::string, GlobalUniform> m_globalUniforms;
 
         RenderPassRegistry* m_passRegistry;
+        ClusterBuildPass* m_clusterBuildPass = nullptr;
+        PointLightShadowPass* m_pointShadowPass = nullptr;
+        DirectionalShadowPass* m_sunShadowPass = nullptr;
         std::vector<std::variant<RenderContext, GroupRenderContext, IndirectRenderContext>>
             m_renderQueue;
         std::unique_ptr<Window> m_window;

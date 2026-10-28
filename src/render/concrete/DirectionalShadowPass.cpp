@@ -17,21 +17,14 @@
 
 using namespace engine;
 
-DirectionalShadowPass::DirectionalShadowPass(
-    glm::ivec2 resolution,
-    const Camera* camera,
-    const DirectionalLight* light,
-    const glm::ivec2& shadowRes
-)
+DirectionalShadowPass::DirectionalShadowPass(glm::ivec2 resolution, const glm::ivec2& shadowRes)
     : RenderPass(resolution, RenderPass::DirectionalShadow),
       m_depthShader(
           "resources/shaders/light/SunVert.glsl",
           "resources/shaders/light/SunGeom.glsl",
           "resources/shaders/light/SunFrag.glsl",
           "SunDepthShader"
-      ),
-      m_light(light),
-      m_target(camera) {
+      ) {
     m_depthShader.mvpSupport(false);
     Material::setGlobalConstant("CascadeCount", static_cast<int>(m_cascadeSplits.size()));
     this->material = &m_depthShader;
@@ -109,8 +102,13 @@ void DirectionalShadowPass::afterRender(Engine& engine, uint8_t pass) {
     // );
 }
 
+void DirectionalShadowPass::setSource(const DirectionalLight* light, const Camera* camera) {
+    m_light = light;
+    m_target = camera;
+}
+
 bool DirectionalShadowPass::shouldRun() const {
-    return m_light->castShadows();
+    return m_light && m_target && m_light->castShadows();
 }
 
 

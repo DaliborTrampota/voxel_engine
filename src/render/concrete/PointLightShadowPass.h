@@ -13,9 +13,13 @@ namespace engine {
 
     class PointLightShadowPass : public RenderPass {
       public:
-        explicit PointLightShadowPass(
-            glm::ivec2 resolution, PointLightManager* pointLightManager, const glm::ivec2& shadowRes
+        /// @param maxShadowLights Cube maps allocated, and the shadow budget given to the attached manager.
+        PointLightShadowPass(
+            glm::ivec2 resolution, const glm::ivec2& shadowRes, uint8_t maxShadowLights
         );
+
+        /// @brief Pass nullptr to stop drawing shadows; the cube maps stay allocated.
+        void setManager(PointLightManager* pointLightManager);
 
         void beforeRender(Engine& engine, uint8_t pass) override;
         void afterRender(Engine& engine, uint8_t pass) override;
@@ -29,6 +33,7 @@ namespace engine {
         gl::CubeMapArray m_shadowMaps;
         gl::FBO m_shadowFBO;
         Material m_material;
-        PointLightManager* m_pointLightManager;
+        PointLightManager* m_pointLightManager = nullptr;
+        uint8_t m_maxShadowLights;
     };
 }  // namespace engine

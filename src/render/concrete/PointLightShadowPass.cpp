@@ -13,10 +13,10 @@
 using namespace engine;
 
 PointLightShadowPass::PointLightShadowPass(
-    glm::ivec2 resolution, PointLightManager* pointLightManager, const glm::ivec2& shadowRes
+    glm::ivec2 resolution, const glm::ivec2& shadowRes, uint8_t maxShadowLights
 )
-    : RenderPass(resolution, RenderPass::PointLightShadow, pointLightManager->maxShadowLights()),
-      m_pointLightManager(pointLightManager),
+    : RenderPass(resolution, RenderPass::PointLightShadow),
+      m_maxShadowLights(maxShadowLights),
       m_material(
           "resources/shaders/light/Omni.vert",
           "resources/shaders/light/Omni.geom",
@@ -32,7 +32,7 @@ PointLightShadowPass::PointLightShadowPass(
     m_shadowMaps.create(gl::TextureParams::Depth());
     m_shadowMaps.allocate(
         gl::TextureStorage::FBODepth(
-            shadowRes.x, shadowRes.y, m_pointLightManager->maxShadowLights()
+            shadowRes.x, shadowRes.y, m_maxShadowLights
         )
     );
     // m_shadowFBO.setDrawBuffers({});
@@ -90,10 +90,18 @@ void PointLightShadowPass::afterRender(Engine& engine, uint8_t pass) {
     }
 }
 
+void PointLightShadowPass::setManager(PointLightManager* pointLightManager) {
+    m_pointLightManager = pointLightManager;
+    if (m_pointLightManager)
+        m_pointLightManager->setMaxShadowLights(m_maxShadowLights);
+}
+
 uint8_t PointLightShadowPass::passes() const {
-    return m_pointLightManager->shadowLightCount();
+    if (!m_pointLightManager)
+        return 0;
+    return static_cast<uint8_t>(m_pointLightManager->shadowLightCount());
 }
 
 bool PointLightShadowPass::shouldRun() const {
-    return m_pointLightManager->shadowLightCount() > 0;
+    return passes() > 0;
 }

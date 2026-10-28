@@ -30,16 +30,19 @@ namespace engine {
         PointLight* light(PointLight::ID id);
         const std::vector<PointLight>& lights() const;
 
+        /// @brief Shadow budget, set by PointLightShadowPass when the manager is attached; 0 until then.
         uint8_t maxShadowLights() const;
-        void setMaxShadowLights(uint8_t count);
 
         void setMaxLights(uint32_t maxLights);
         uint32_t maxLights() const;
 
       private:
+        friend class PointLightShadowPass;
+        void setMaxShadowLights(uint8_t count);
+
         gl::SSBO<PointLight> m_lights;
         uint32_t m_shadowLightCount = 0;
-        uint8_t m_maxShadowLights = 8;
+        uint8_t m_maxShadowLights = 0;
         uint32_t m_maxLights;
 
         PointLight::ID m_nextID = 0;
