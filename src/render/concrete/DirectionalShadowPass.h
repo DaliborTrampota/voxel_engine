@@ -17,12 +17,10 @@ namespace engine {
 
     class DirectionalShadowPass : public RenderPass {
       public:
-        explicit DirectionalShadowPass(
-            glm::ivec2 resolution,
-            const Camera* camera,
-            const DirectionalLight* light,
-            const glm::ivec2& shadowRes
-        );
+        DirectionalShadowPass(glm::ivec2 resolution, const glm::ivec2& shadowRes);
+
+        /// @brief Pass nullptr to stop drawing the cascades; the shadow maps stay allocated.
+        void setSource(const DirectionalLight* light, const Camera* camera);
 
         void beforeRender(Engine& engine, uint8_t pass) override;
         void afterRender(Engine& engine, uint8_t pass) override;
@@ -36,6 +34,8 @@ namespace engine {
 
         const std::vector<Cascade>& cascadeSplits() const { return m_cascadeSplits; }
         gl::TextureArray& cascadeShadowMaps() { return m_cascadeShadowMaps; }
+        /// @brief Cascade light-space matrices, refreshed in beforeRender; bind it to draw into the cascades.
+        gl::UBO& lightSpaceUBO() { return m_lightSpaceUBO; }
 
       private:
         gl::TextureArray m_cascadeShadowMaps;
@@ -43,8 +43,8 @@ namespace engine {
         Material m_depthShader;
         gl::UBO m_lightSpaceUBO;
 
-        const DirectionalLight* m_light;
-        const Camera* m_target;
+        const DirectionalLight* m_light = nullptr;
+        const Camera* m_target = nullptr;
 
         std::vector<Cascade> m_cascadeSplits = {
             Cascade{16.0f, glm::mat4(1)},

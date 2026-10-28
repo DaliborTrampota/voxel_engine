@@ -45,9 +45,20 @@ World::World(std::unique_ptr<ITerrainGenerator> gen, glm::ivec3 chunkDims, uint3
     m_material.use();
     m_material.setShadowSupport(true);
     m_material.setTexture(0, TextureManager::Get().blockTextures(), "blockTextures");
+    registerRenderLayer(Layers::Opaque, RenderPass::Scene | RenderPass::DirectionalShadow);
+    registerRenderLayer(Layers::Transparent, RenderPass::SceneTransparent | RenderPass::DirectionalShadow);
     printf("World created\n");
 
     m_generator->setWorld(this);
+}
+
+void World::registerRenderLayer(Layer layer, RenderPass::ID passMask, uint32_t capacity) {
+    assert(layer < Layers::Max && !m_renderLayers[layer].pool && "layer out of range or already registered");
+    RenderLayer& renderLayer = m_renderLayers[layer];
+    renderLayer.pool = std::make_unique<gl::VertexPool<Vertex>>(capacity);
+    renderLayer.batch = std::make_unique<gl::IndirectBuffer>();
+    renderLayer.passMask = passMask;
+    m_layerPools[layer] = renderLayer.pool.get();
 }
 
 World::~World() {
@@ -195,13 +206,18 @@ void World::unloadAllChunks(const std::vector<ChunkID>& except) {
     }
 }
 
+std::vector<ChunkID> World::loadedChunks() const {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    return {m_loadedChunks.begin(), m_loadedChunks.end()};
+}
+
 void World::unloadChunksFromMemory(const std::vector<ChunkID>& ids) {
     m_genPool.pause();
     std::lock_guard<std::mutex> lock(m_mutex);
     for (const ChunkID& id : ids) {
         auto it = m_chunks.find(id);
         if (it != m_chunks.end()) {
-            it->second->releaseVertices(m_opaquePool, m_transparentPool);
+            it->second->releaseVertices(m_layerPools);
             m_chunks.erase(it);
         }
     }
@@ -324,11 +340,12 @@ void World::render(Engine& engine, const Camera* camera, int pass) {
 
     std::array<Plane, 6> frustum = camera->getFrustum();
 
-    m_opaqueBuffer.begin();
-    m_transparentBuffer.begin();
+    for (RenderLayer& layer : m_renderLayers)
+        if (layer.batch)
+            layer.batch->begin();
     m_omniShadowBuffer.begin();
     for (const auto& chunk : chunksToRender) {
-        if (!chunk->opaqueAlloc().isValid())
+        if (!chunk->alloc(Layers::Opaque).isValid())
             continue;
         AABB chunkAABB{
             .min = glm::vec3(chunk->id() * m_chunkDims),
@@ -338,7 +355,7 @@ void World::render(Engine& engine, const Camera* camera, int pass) {
             const PointLight& light = m_pointLightManager.lights()[i];
             Sphere lightSphere(light.position, light.radius);
             if (chunkAABB.intersects(lightSphere)) {
-                m_omniShadowBuffer.add(chunk->opaqueAlloc(), chunk->modelMatrix());
+                m_omniShadowBuffer.add(chunk->alloc(Layers::Opaque), chunk->modelMatrix());
                 break;
             }
         }
@@ -358,47 +375,41 @@ void World::render(Engine& engine, const Camera* camera, int pass) {
             }
         }
         if (visible) {
-            chunk->uploadVertices(m_opaquePool, m_transparentPool);
+            chunk->uploadVertices(m_layerPools);
 
             glm::mat4 model = chunk->modelMatrix();
-            if (chunk->opaqueAlloc().isValid())
-                m_opaqueBuffer.add(chunk->opaqueAlloc(), model);
-            if (chunk->transparentAlloc().isValid())
-                m_transparentBuffer.add(chunk->transparentAlloc(), model);
-            // chunk->render(engine, camera, pass);
+            for (size_t layer = 0; layer < m_renderLayers.size(); ++layer) {
+                const gl::PoolAllocation& alloc = chunk->alloc(static_cast<Layer>(layer));
+                if (m_renderLayers[layer].batch && alloc.isValid())
+                    m_renderLayers[layer].batch->add(alloc, model);
+            }
         }
     }
 
-    m_opaqueBuffer.upload();
-    m_transparentBuffer.upload();
+    for (RenderLayer& layer : m_renderLayers) {
+        if (!layer.batch)
+            continue;
+        layer.batch->upload();
+        engine.submitRender(
+            IndirectRenderContext{
+                .pool = layer.pool.get(),
+                .batch = layer.batch.get(),
+                .material = &m_material,
+                .camera = camera,
+                .passMask = layer.passMask
+            }
+        );
+    }
     m_omniShadowBuffer.upload();
 
-    IndirectRenderContext ctxOpaque{
-        .pool = &m_opaquePool,
-        .batch = &m_opaqueBuffer,
-        .material = &m_material,
-        .camera = camera,
-        .passMask = RenderPass::Scene | RenderPass::DirectionalShadow
-    };
-
-    IndirectRenderContext ctxTransparent{
-        .pool = &m_transparentPool,
-        .batch = &m_transparentBuffer,
-        .material = &m_material,
-        .camera = camera,
-        .passMask = RenderPass::SceneTransparent | RenderPass::DirectionalShadow
-    };
-
     IndirectRenderContext ctxOmniShadows{
-        .pool = &m_opaquePool,
+        .pool = m_layerPools[Layers::Opaque],
         .batch = &m_omniShadowBuffer,
         .material = &m_material,
         .camera = camera,
         .passMask = RenderPass::PointLightShadow
     };
 
-    engine.submitRender(std::move(ctxOpaque));
-    engine.submitRender(std::move(ctxTransparent));
     engine.submitRender(std::move(ctxOmniShadows));
 
     m_skybox.render(engine, camera);
@@ -417,7 +428,8 @@ void World::updateChunk(ChunkID id) {
             return;
 
         lock.unlock();
-        chunk->generateMesh();
+        if (!chunk->generateMesh())
+            chunk->m_dirty = true;
     });
 }
 
@@ -539,7 +551,7 @@ void World::update(float dt) {
         std::lock_guard<std::mutex> lock(m_mutex);
         for (const ChunkID& pos : m_loadedChunks) {
             auto it = m_chunks.find(pos);
-            if (it != m_chunks.end() && it->second->m_dirty) {
+            if (it != m_chunks.end() && it->second->m_dirty.exchange(false)) {
                 dirtyChunks.push_back(pos);
             }
         }

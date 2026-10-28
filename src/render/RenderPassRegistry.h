@@ -3,7 +3,7 @@
 #include "RenderPass.h"
 #include "events/EngineEventSite.h"
 
-#include <algorithm>
+#include <vector>
 
 namespace engine {
     class RenderPassRegistry : public EngineEventSite {
@@ -14,21 +14,22 @@ namespace engine {
         void windowResizeEvent(ResizeEvent* pEvent) override;
 
 
-        /// @brief Registers a custom render pass at the specified position.
-        /// @param pass The concrete RenderPass instance.
-        /// @param position Where to insert the pass (default: after scene)
-        void registerPass(std::unique_ptr<RenderPass> pass, uint8_t position = 0);
-
+        /// @brief Appends `pass` after every registered pass.
         template <typename PassT>
-        void deletePass() {
-            m_renderPasses.erase(
-                std::remove_if(
-                    m_renderPasses.begin(),
-                    m_renderPasses.end(),
-                    [](const auto& pass) { return dynamic_cast<PassT*>(pass.get()) != nullptr; }
-                ),
-                m_renderPasses.end()
-            );
+        PassT* registerPass(std::unique_ptr<PassT> pass) {
+            return static_cast<PassT*>(insert(m_renderPasses.end(), std::move(pass)));
+        }
+
+        /// @brief Registers `pass` right before the pass with id `anchor`, which must be registered.
+        template <typename PassT>
+        PassT* registerPassBefore(RenderPass::ID anchor, std::unique_ptr<PassT> pass) {
+            return static_cast<PassT*>(insert(find(anchor), std::move(pass)));
+        }
+
+        /// @brief Registers `pass` right after the pass with id `anchor`, which must be registered.
+        template <typename PassT>
+        PassT* registerPassAfter(RenderPass::ID anchor, std::unique_ptr<PassT> pass) {
+            return static_cast<PassT*>(insert(find(anchor) + 1, std::move(pass)));
         }
 
         std::vector<std::unique_ptr<RenderPass>>& passes() { return m_renderPasses; }
@@ -47,5 +48,11 @@ namespace engine {
         RenderPassRegistry() { m_renderPasses.reserve(std::numeric_limits<RenderPass::ID>::max()); }
 
         std::vector<std::unique_ptr<RenderPass>> m_renderPasses;
+
+      private:
+        using Iterator = std::vector<std::unique_ptr<RenderPass>>::iterator;
+
+        Iterator find(RenderPass::ID id);
+        RenderPass* insert(Iterator at, std::unique_ptr<RenderPass> pass);
     };
 }  // namespace engine

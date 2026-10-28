@@ -86,11 +86,6 @@ void TransparentPass::setDirectionalShadowMaps(gl::TextureArray& directionalShad
     m_transparentMat.setShadowSupport(true);
 }
 
-void TransparentPass::clearDirectionalShadowMaps() {
-    m_transparentMat.setTexture(1, nullptr, "shadowMap");
-    m_transparentMat.setShadowSupport(false);
-}
-
 void TransparentPass::resize(glm::ivec2 resolution) {
     if (resolution.x == 0 || resolution.y == 0)
         return;

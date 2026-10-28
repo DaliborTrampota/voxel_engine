@@ -26,7 +26,6 @@ namespace engine {
         gl::Texture2D* revealage() { return &m_revealage; }
 
         void setDirectionalShadowMaps(gl::TextureArray& directionalShadowMaps);
-        void clearDirectionalShadowMaps();
 
         void resize(glm::ivec2 resolution) override;
 

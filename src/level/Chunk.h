@@ -84,12 +84,14 @@ namespace engine {
         /// @return const ChunkData structure containing all the block/terrain data.
         const IChunkData* data() const { return m_data.get(); }
 
-        void uploadVertices(gl::VertexPool<Vertex>& opaque, gl::VertexPool<Vertex>& transparent);
-        void releaseVertices(gl::VertexPool<Vertex>& opaque, gl::VertexPool<Vertex>& transparent);
+        using LayerPools = std::array<gl::VertexPool<Vertex>*, Layers::Max>;
+
+        /// @brief Uploads each layer into its pool; layers without a pool keep their mesh until one is registered.
+        void uploadVertices(const LayerPools& pools);
+        void releaseVertices(const LayerPools& pools);
 
         glm::mat4 modelMatrix() const;
-        const gl::PoolAllocation& transparentAlloc() const;
-        const gl::PoolAllocation& opaqueAlloc() const;
+        const gl::PoolAllocation& alloc(Layer layer) const { return m_renderLayers[layer].allocation; }
 
         Neighbours getNeighbouringBlocks(glm::ivec3 pos) const;
 
@@ -145,7 +147,7 @@ namespace engine {
         );
 
       private:
-        std::array<LayerBuffer, 3> m_renderLayers;
+        std::array<LayerBuffer, Layers::Max> m_renderLayers;
 
         std::atomic_bool m_generated{false};
         std::atomic_bool m_generatingMesh{false};

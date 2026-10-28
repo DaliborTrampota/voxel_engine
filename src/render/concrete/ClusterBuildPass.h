@@ -14,9 +14,10 @@ namespace engine {
     class ClusterBuildPass : public RenderPass {
       public:
         static constexpr glm::ivec3 ClusterGridSize = {16, 9, 24};
-        ClusterBuildPass(
-            glm::ivec2 resolution, Camera* camera, PointLightManager* pointLightManager
-        );
+        explicit ClusterBuildPass(glm::ivec2 resolution);
+
+        /// @brief Pass nullptr to stop building clusters.
+        void setSource(PointLightManager* pointLightManager, Camera* camera);
 
         void beforeRender(Engine& engine, uint8_t pass) override;
         void afterRender(Engine& engine, uint8_t pass) override {}
@@ -34,7 +35,7 @@ namespace engine {
         static constexpr uint32_t MaxLightsPerCluster = 128;
         static constexpr uint32_t LocalSize = 64;
 
-        Camera* m_camera;
+        Camera* m_camera = nullptr;
         PointLightManager* m_pointLightManager = nullptr;
         gl::ComputeProgram m_compute;
 

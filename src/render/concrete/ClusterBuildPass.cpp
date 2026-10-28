@@ -10,12 +10,8 @@
 
 using namespace engine;
 
-ClusterBuildPass::ClusterBuildPass(
-    glm::ivec2 resolution, Camera* camera, PointLightManager* pointLightManager
-)
+ClusterBuildPass::ClusterBuildPass(glm::ivec2 resolution)
     : RenderPass(resolution, RenderPass::ClusterBuildPass),
-      m_camera(camera),
-      m_pointLightManager(pointLightManager),
       m_clusters(GL_STATIC_DRAW),
       m_compute("resources/shaders/light/ClusterBuild.comp", true) {
     m_maxClusters = ClusterGridSize.x * ClusterGridSize.y * ClusterGridSize.z;
@@ -29,7 +25,13 @@ ClusterBuildPass::ClusterBuildPass(
     m_lightIndices.create(m_maxClusters * MaxLightsPerCluster);
     m_clusterGrid.create(m_maxClusters);
     m_atomicCounter.create(1);
-    subdivideFrustum();
+}
+
+void ClusterBuildPass::setSource(PointLightManager* pointLightManager, Camera* camera) {
+    m_pointLightManager = pointLightManager;
+    m_camera = camera;
+    if (m_camera)
+        subdivideFrustum();
 }
 
 
@@ -55,7 +57,8 @@ void ClusterBuildPass::resize(glm::ivec2 resolution) {
     if (resolution.x == 0 || resolution.y == 0)
         return;
     m_resolution = resolution;
-    subdivideFrustum();
+    if (m_camera)
+        subdivideFrustum();
 }
 
 void ClusterBuildPass::subdivideFrustum() {
@@ -125,7 +128,7 @@ void ClusterBuildPass::subdivideFrustum() {
 }
 
 bool ClusterBuildPass::shouldRun() const {
-    return m_pointLightManager != nullptr;
+    return m_pointLightManager && m_camera;
 }
 
 void ClusterBuildPass::bindForShading(

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cassert>
 #include <cstdint>
 #include <glm/glm.hpp>
 #include <memory>
@@ -52,13 +53,13 @@ namespace engine {
       protected:
         glm::ivec2 m_resolution;
 
-        /// @brief Constructs pass with next available ID, use only for custom passes.
-        explicit RenderPass(glm::ivec2 resolution, uint8_t passes = 1)
-            : m_id(1 << s_nextPassIndex++),
-              m_passes(passes),
-              m_resolution(resolution) {}
+        /// @brief Reserves a free ID bit; call once per custom pass class, e.g. `inline static const ID Id = allocateId();`.
+        static ID allocateId() {
+            assert(s_nextPassIndex < 16 && "out of render pass ids");
+            return static_cast<ID>(1u << s_nextPassIndex++);
+        }
 
-        /// @brief Constructs pass with specific ID, use only for built-in passes.
+        /// @brief `id` is a built-in ID or one from allocateId(), shared by every instance of the class.
         explicit RenderPass(glm::ivec2 resolution, ID id, uint8_t passes = 1)
             : m_id(id),
               m_passes(passes),
