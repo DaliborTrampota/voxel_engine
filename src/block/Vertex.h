@@ -14,7 +14,7 @@ namespace engine {
 
         glm::vec3 pos, normal;
         glm::vec2 uv;
-        /// Holds TextureID (0-15bits) and AO (16-17)
+        /// Holds TextureID (0-15bits) and AO (16-17); bits 18-31 belong to the game and pass through untouched.
         unsigned int m_data;
 
         static gl::VertexLayout layout() {

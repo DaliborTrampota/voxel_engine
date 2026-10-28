@@ -19,6 +19,11 @@ namespace engine {
         /// @param position Where to insert the pass (default: after scene)
         void registerPass(std::unique_ptr<RenderPass> pass, uint8_t position = 0);
 
+        /// @brief Registers a custom render pass
+        /// @param anchor The ID of the pass after which to insert the new pass
+        /// @param pass The concrete RenderPass instance.
+        void registerPassAfter(RenderPass::ID anchor, std::unique_ptr<RenderPass> pass);
+
         template <typename PassT>
         void deletePass() {
             m_renderPasses.erase(

@@ -58,7 +58,7 @@ bool Chunk::generateMesh() {
         m_meshReady = false;
     }
     for (auto& layer : m_renderLayers)
-        layer.back.reserve(m_data->dims.x * m_data->dims.y * 8 * 6);
+        layer.back.reserve(layer.front.size());
 
     glm::ivec3 chunkBlockCoords = m_coords * m_data->dims;
 
@@ -167,7 +167,7 @@ void Chunk::setBlock(const glm::ivec3& pos, MultiBlock&& multiBlock) {
     m_dirty = true;
 }
 
-void Chunk::uploadVertices(gl::VertexPool<Vertex>& opaque, gl::VertexPool<Vertex>& transparent) {
+void Chunk::uploadVertices(const LayerPools& pools) {
     if (m_meshReady) {
         std::lock_guard lock(m_backMutex);
         if (m_meshReady) {
@@ -180,25 +180,19 @@ void Chunk::uploadVertices(gl::VertexPool<Vertex>& opaque, gl::VertexPool<Vertex
     if (!m_generated)
         return;
 
-    m_renderLayers[Layers::Transparent].uploadToPool(transparent);
-    m_renderLayers[Layers::Opaque].uploadToPool(opaque);
+    for (size_t layer = 0; layer < pools.size(); ++layer)
+        if (pools[layer])
+            m_renderLayers[layer].uploadToPool(*pools[layer]);
 }
 
-void Chunk::releaseVertices(gl::VertexPool<Vertex>& opaque, gl::VertexPool<Vertex>& transparent) {
-    m_renderLayers[Layers::Opaque].releaseFromPool(opaque);
-    m_renderLayers[Layers::Transparent].releaseFromPool(transparent);
+void Chunk::releaseVertices(const LayerPools& pools) {
+    for (size_t layer = 0; layer < pools.size(); ++layer)
+        if (pools[layer])
+            m_renderLayers[layer].releaseFromPool(*pools[layer]);
 }
 
 glm::mat4 Chunk::modelMatrix() const {
     return glm::translate(glm::mat4(1.0f), static_cast<glm::vec3>(m_coords * m_data->dims));
-}
-
-const gl::PoolAllocation& Chunk::transparentAlloc() const {
-    return m_renderLayers[Layers::Transparent].allocation;
-}
-
-const gl::PoolAllocation& Chunk::opaqueAlloc() const {
-    return m_renderLayers[Layers::Opaque].allocation;
 }
 
 

@@ -29,6 +29,9 @@ namespace engine {
         constexpr Layer Any = 0;
         constexpr Layer Opaque = 1;
         constexpr Layer Transparent = 2;
+        /// @brief First layer id a game may register with World::registerRenderLayer.
+        constexpr Layer FirstCustom = 3;
+        constexpr Layer Max = 8;
     }  // namespace Layers
 
 

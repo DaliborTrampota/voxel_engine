@@ -15,6 +15,7 @@
 #include "ITerrainGenerator.h"
 #include "block/Vertex.h"
 #include "render/Material.h"
+#include "render/RenderPass.h"
 #include "render/Renderable.h"
 #include "scene/AmbientLight.h"
 #include "scene/DirectionalLight.h"
@@ -160,6 +161,10 @@ namespace engine {
         DirectionalLight& getDirectionalLight() { return m_directionalLight; }
         PointLightManager& getPointLightManager() { return m_pointLightManager; }
 
+        /// @brief Gives blocks of `layer` their own vertex pool, drawn each frame by the passes in `passMask`.
+        /// Call on the render thread; Opaque and Transparent are registered by the constructor.
+        void registerRenderLayer(Layer layer, RenderPass::ID passMask, uint32_t capacity = m_poolCapacity);
+
         virtual void render(Engine& engine, const Camera* camera, int pass = 0) override;
         virtual void update(float dt) override;
 
@@ -180,8 +185,14 @@ namespace engine {
 
         // TODO size dynamically? based on ViewDistance?
         static constexpr uint32_t m_poolCapacity = 4'000'000;
-        gl::VertexPool<Vertex> m_opaquePool{m_poolCapacity}, m_transparentPool{m_poolCapacity};
-        gl::IndirectBuffer m_opaqueBuffer, m_transparentBuffer, m_omniShadowBuffer;
+        struct RenderLayer {
+            std::unique_ptr<gl::VertexPool<Vertex>> pool;
+            std::unique_ptr<gl::IndirectBuffer> batch;
+            RenderPass::ID passMask = 0;
+        };
+        std::array<RenderLayer, Layers::Max> m_renderLayers;
+        Chunk::LayerPools m_layerPools{};
+        gl::IndirectBuffer m_omniShadowBuffer;
 
 
         Material m_material;

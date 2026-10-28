@@ -36,6 +36,8 @@ namespace engine {
 
         const std::vector<Cascade>& cascadeSplits() const { return m_cascadeSplits; }
         gl::TextureArray& cascadeShadowMaps() { return m_cascadeShadowMaps; }
+        /// @brief Cascade light-space matrices, refreshed in beforeRender; bind it to draw into the cascades.
+        gl::UBO& lightSpaceUBO() { return m_lightSpaceUBO; }
 
       private:
         gl::TextureArray m_cascadeShadowMaps;
